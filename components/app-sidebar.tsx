@@ -1,16 +1,20 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { User } from "next-auth";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
-import { PlusIcon, TrashIcon } from "@/components/icons";
-import { SidebarHistory, getChatHistoryPaginationKey } from "@/components/sidebar-history";
-import { SidebarUserNav } from "@/components/sidebar-user-nav";
-import { Button } from "@/components/ui/button";
+import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import type { User } from 'next-auth';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useSWRConfig } from 'swr';
+import { unstable_serialize } from 'swr/infinite';
+import { PlusIcon, TrashIcon } from '@/components/icons';
+import {
+  SidebarHistory,
+  getChatHistoryPaginationKey,
+} from '@/components/sidebar-history';
+import { SidebarUserNav } from '@/components/sidebar-user-nav';
+import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
@@ -18,8 +22,12 @@ import {
   SidebarHeader,
   SidebarMenu,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+} from '@/components/ui/sidebar';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,30 +37,34 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "./ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
+import { useBranding } from '@/hooks/use-branding';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
-
+  const branding = useBranding();
+  console.log({ branding });
   const handleDeleteAll = () => {
-    const deletePromise = fetch("/api/history", {
-      method: "DELETE",
+    const deletePromise = fetch('/api/history', {
+      method: 'DELETE',
     });
 
     toast.promise(deletePromise, {
-      loading: "Deleting all chats...",
+      loading: 'Deleting all chats...',
       success: () => {
         mutate(unstable_serialize(getChatHistoryPaginationKey));
-        router.push("/");
+        router.push('/');
         setShowDeleteAllDialog(false);
-        return "All chats deleted successfully";
+        return 'All chats deleted successfully';
       },
-      error: "Failed to delete all chats",
+      error: 'Failed to delete all chats',
     });
   };
+
+  const appTitle = branding.assistant.name;
 
   return (
     <>
@@ -67,9 +79,24 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   setOpenMobile(false);
                 }}
               >
-                <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
-                  Chatbot
-                </span>
+                {branding.logo ? (
+                  <>
+                    <Image
+                      src={branding.logo}
+                      alt={branding.organization?.name || 'Logo'}
+                      width={32}
+                      height={32}
+                      className="rounded-md"
+                    />
+                    <span className="cursor-pointer font-semibold text-lg hover:opacity-80">
+                      {appTitle}
+                    </span>
+                  </>
+                ) : (
+                  <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
+                    {appTitle}
+                  </span>
+                )}
               </Link>
               <div className="flex flex-row gap-1">
                 {user && (
@@ -95,7 +122,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                       className="h-8 p-1 md:h-fit md:p-2"
                       onClick={() => {
                         setOpenMobile(false);
-                        router.push("/");
+                        router.push('/');
                         router.refresh();
                       }}
                       type="button"
@@ -118,13 +145,16 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
       </Sidebar>
 
-      <AlertDialog onOpenChange={setShowDeleteAllDialog} open={showDeleteAllDialog}>
+      <AlertDialog
+        onOpenChange={setShowDeleteAllDialog}
+        open={showDeleteAllDialog}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete all chats?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete all your
-              chats and remove them from our servers.
+              This action cannot be undone. This will permanently delete all
+              your chats and remove them from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
