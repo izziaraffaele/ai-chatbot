@@ -1,29 +1,18 @@
-"use client";
+'use client';
 
-import { useLanguage } from "@/lib/i18n/use-translations";
-import { LANGUAGE_NAMES } from "@/lib/i18n/utils";
-import { CpuIcon } from "./icons";
-import { Button } from "./ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+import { useLanguage } from '@/lib/i18n/use-translations';
+import { LANGUAGE_NAMES } from '@/lib/i18n/utils';
+import { CpuIcon } from './icons';
+import { Button } from './ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger } from './ui/select';
 
 export function LanguageSwitcher() {
   const { locale, setLocale } = useLanguage();
 
   return (
     <Select onValueChange={setLocale} value={locale}>
-      <SelectTrigger asChild>
-        <Button className="h-8 px-2" size="sm" variant="ghost">
-          <CpuIcon size={16} />
-          <span className="hidden font-medium text-xs sm:block">
-            {LANGUAGE_NAMES[locale]}
-          </span>
-        </Button>
+      <SelectTrigger className="border-0">
+        {LANGUAGE_NAMES[locale]}
       </SelectTrigger>
       <SelectContent className="min-w-[120px]">
         <SelectItem value="en">

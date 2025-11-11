@@ -5,6 +5,7 @@ import { memo } from "react";
 import { useWindowSize } from "usehooks-ts";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { PlusIcon } from "./icons";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
@@ -18,6 +19,7 @@ function PureChatHeader({
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
 }) {
+  const t = useTranslations();
   const router = useRouter();
   const { open } = useSidebar();
 
@@ -37,7 +39,9 @@ function PureChatHeader({
           variant="outline"
         >
           <PlusIcon />
-          <span className="md:sr-only">New Chat</span>
+          <span className="md:sr-only">
+            {t("sidebar.buttonNewChat", "New Chat")}
+          </span>
         </Button>
       )}
 

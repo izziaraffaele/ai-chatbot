@@ -89,9 +89,14 @@ export default function Page() {
               {appName}
             </h2>
           )}
-          <h3 className="font-semibold text-xl dark:text-zinc-50">Sign Up</h3>
+          <h3 className="font-semibold text-xl dark:text-zinc-50">
+            {t("auth.register.title", "Create Account")}
+          </h3>
           <p className="text-gray-500 text-sm dark:text-zinc-400">
-            Create an account with your email and password
+            {t(
+              "auth.register.description",
+              "Create an account with your email and password"
+            )}
           </p>
         </div>
         <AuthForm action={handleSubmit} defaultEmail={email} type="register">

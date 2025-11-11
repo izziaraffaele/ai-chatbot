@@ -3,6 +3,7 @@
 import { useFormStatus } from "react-dom";
 
 import { LoaderIcon } from "@/components/icons";
+import { useTranslations } from "@/lib/i18n/use-translations";
 
 import { Button } from "./ui/button";
 
@@ -13,6 +14,7 @@ export function SubmitButton({
   children: React.ReactNode;
   isSuccessful: boolean;
 }) {
+  const t = useTranslations();
   const { pending } = useFormStatus();
 
   return (
@@ -31,7 +33,9 @@ export function SubmitButton({
       )}
 
       <output aria-live="polite" className="sr-only">
-        {pending || isSuccessful ? "Loading" : "Submit form"}
+        {pending || isSuccessful
+          ? t("common.loading", "Loading")
+          : t("common.submit", "Submit form")}
       </output>
     </Button>
   );

@@ -44,6 +44,12 @@ export const en = {
   "chat.input.tooltipSend": "Send message",
   "chat.input.tooltipStop": "Stop generating",
 
+  // AI Gateway
+  "chat.gateway.title": "Activate AI Gateway",
+  "chat.gateway.description":
+    "This application requires the owner to activate Vercel AI Gateway.",
+  "chat.gateway.buttonActivate": "Activate",
+
   // Greeting
   "chat.greeting.title": "Hello there!",
   "chat.greeting.subtitle": "How can I help you today?",
@@ -79,10 +85,25 @@ export const en = {
   "sidebar.history.last7Days": "Last 7 days",
   "sidebar.history.last30Days": "Last 30 days",
   "sidebar.history.older": "Older",
+  "sidebar.history.loginPrompt": "Login to save and revisit previous chats!",
+  "sidebar.history.emptyState":
+    "Your conversations will appear here once you start chatting!",
+  "sidebar.history.endReached":
+    "You have reached the end of your chat history.",
+  "sidebar.history.loadingChats": "Loading Chats...",
+  "sidebar.history.deletingChat": "Deleting chat...",
+  "sidebar.history.chatDeleted": "Chat deleted successfully",
+  "sidebar.history.deleteFailed": "Failed to delete chat",
+  "sidebar.history.confirmDeleteTitle": "Are you absolutely sure?",
+  "sidebar.history.confirmDeleteDescription":
+    "This action cannot be undone. This will permanently delete your chat and remove it from our servers.",
 
   // User Menu
   "sidebar.user.signOut": "Sign out",
   "sidebar.user.profile": "Profile",
+
+  // Sidebar Toggle
+  "sidebar.toggleSidebar": "Toggle Sidebar",
 
   // ============================================================================
   // Settings
@@ -116,6 +137,12 @@ export const en = {
   "artifact.actions.copiedToClipboard": "Copied to clipboard!",
   "artifact.actions.copiedImageToClipboard": "Copied image to clipboard!",
   "artifact.actions.copiedCsvToClipboard": "Copied csv to clipboard!",
+
+  // Artifact Version
+  "artifact.version.viewingPrevious": "You are viewing a previous version",
+  "artifact.version.restoreToEdit": "Restore this version to make edits",
+  "artifact.version.restoreButton": "Restore this version",
+  "artifact.version.backToLatest": "Back to latest version",
 
   // Code Artifacts
   "artifact.code.tooltipCopy": "Copy code",
@@ -166,6 +193,18 @@ export const en = {
     "Useful for code generation; Code execution is only available for python code.",
   "artifact.type.image.description": "Useful for image generation",
   "artifact.type.sheet.description": "Useful for working with spreadsheets",
+
+  // ============================================================================
+  // Tools
+  // ============================================================================
+
+  "tool.status.pending": "Pending",
+  "tool.status.running": "Running",
+  "tool.status.completed": "Completed",
+  "tool.status.error": "Error",
+  "tool.parameters": "Parameters",
+  "tool.result": "Result",
+  "tool.error": "Error",
 
   // ============================================================================
   // Messages & Actions
@@ -263,6 +302,7 @@ export const en = {
   "common.less": "Less",
   "common.yes": "Yes",
   "common.no": "No",
+  "common.submit": "Submit form",
   "message.copyError": "There's no text to copy!",
   "message.copySuccess": "Copied to clipboard!",
 } as const;

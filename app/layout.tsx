@@ -1,26 +1,29 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
-import { LanguageProvider } from "@/lib/i18n/context";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/components/theme-provider';
+import { LanguageProvider } from '@/lib/i18n/context';
 
-import "./globals.css";
-import { SessionProvider } from "next-auth/react";
-import { BrandingProvider } from "@/components/branding-provider";
-import { DemoConfig } from "@/components/demo-config";
+import './globals.css';
+import { SessionProvider } from 'next-auth/react';
+import { BrandingProvider } from '@/components/branding-provider';
+import { DemoConfig } from '@/components/demo-config';
+import { cookies } from 'next/headers';
+import { Locale } from '@/lib/i18n/types';
+import { isSupportedLocale, loadTranslations } from '@/lib/i18n/utils';
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://chat.vercel.ai"
+    process.env.NEXT_PUBLIC_APP_URL || 'https://chat.vercel.ai'
   ),
   title:
     process.env.NEXT_PUBLIC_METADATA_TITLE ||
     process.env.NEXT_PUBLIC_APP_NAME ||
-    "Next.js Chatbot Template",
+    'Next.js Chatbot Template',
   description:
     process.env.NEXT_PUBLIC_METADATA_DESCRIPTION ||
     process.env.NEXT_PUBLIC_APP_DESCRIPTION ||
-    "Next.js chatbot template using the AI SDK.",
+    'Next.js chatbot template using the AI SDK.',
 };
 
 export const viewport = {
@@ -28,19 +31,19 @@ export const viewport = {
 };
 
 const geist = Geist({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist",
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-geist',
 });
 
 const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist-mono",
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-geist-mono',
 });
 
-const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
-const DARK_THEME_COLOR = "hsl(240deg 10% 3.92%)";
+const LIGHT_THEME_COLOR = 'hsl(0 0% 100%)';
+const DARK_THEME_COLOR = 'hsl(240deg 10% 3.92%)';
 const THEME_COLOR_SCRIPT = `\
 (function() {
   var html = document.documentElement;
@@ -59,11 +62,17 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await cookies().then((v) => v.get('locale')?.value || 'en');
+
+  const translations = isSupportedLocale(locale)
+    ? await loadTranslations(locale)
+    : undefined;
+
   return (
     <html
       className={`${geist.variable} ${geistMono.variable}`}
@@ -71,7 +80,7 @@ export default function RootLayout({
       // visual flicker before hydration. Hence the `suppressHydrationWarning`
       // prop is necessary to avoid the React hydration mismatch warning.
       // https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
     >
       <head>
@@ -89,7 +98,10 @@ export default function RootLayout({
           disableTransitionOnChange
           enableSystem
         >
-          <LanguageProvider>
+          <LanguageProvider
+            initialLocale={locale as Locale}
+            initialTranslations={translations}
+          >
             <BrandingProvider>
               <Toaster position="top-center" />
               <SessionProvider>

@@ -237,7 +237,7 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1(react@19.0.0-rc-45804af1-20241021)
       usehooks-ts:
-        specifier: ^3.1.0
+        specifier: ^3.1.1
         version: 3.1.1(react@19.0.0-rc-45804af1-20241021)
       zod:
         specifier: ^3.25.76

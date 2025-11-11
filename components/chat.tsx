@@ -20,6 +20,7 @@ import {
 import { useArtifactSelector } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import type { Vote } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
 import type { Attachment, ChatMessage } from "@/lib/types";
@@ -50,6 +51,7 @@ export function Chat({
   autoResume: boolean;
   initialLastContext?: AppUsage;
 }) {
+  const t = useTranslations();
   const { visibilityType } = useChatVisibility({
     chatId: id,
     initialVisibilityType,
@@ -221,15 +223,20 @@ export function Chat({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Activate AI Gateway</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("chat.gateway.title", "Activate AI Gateway")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This application requires{" "}
-              {process.env.NODE_ENV === "production" ? "the owner" : "you"} to
-              activate Vercel AI Gateway.
+              {t(
+                "chat.gateway.description",
+                `This application requires ${process.env.NODE_ENV === "production" ? "the owner" : "you"} to activate Vercel AI Gateway.`
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("common.cancel", "Cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 window.open(
@@ -239,7 +246,7 @@ export function Chat({
                 window.location.href = "/";
               }}
             >
-              Activate
+              {t("chat.gateway.buttonActivate", "Activate")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

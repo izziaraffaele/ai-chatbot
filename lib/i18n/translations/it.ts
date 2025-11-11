@@ -45,6 +45,12 @@ export const it: TranslationDict = {
   "chat.input.tooltipSend": "Invia messaggio",
   "chat.input.tooltipStop": "Ferma generazione",
 
+  // AI Gateway
+  "chat.gateway.title": "Attiva AI Gateway",
+  "chat.gateway.description":
+    "Questa applicazione richiede che il proprietario attivi Vercel AI Gateway.",
+  "chat.gateway.buttonActivate": "Attiva",
+
   // Greeting
   "chat.greeting.title": "Ciao!",
   "chat.greeting.subtitle": "Come posso aiutarti oggi?",
@@ -82,10 +88,26 @@ export const it: TranslationDict = {
   "sidebar.history.last7Days": "Ultimi 7 giorni",
   "sidebar.history.last30Days": "Ultimi 30 giorni",
   "sidebar.history.older": "Più vecchi",
+  "sidebar.history.loginPrompt":
+    "Accedi per salvare e rivedere le chat precedenti!",
+  "sidebar.history.emptyState":
+    "Le tue conversazioni appariranno qui una volta che inizierai a chattare!",
+  "sidebar.history.endReached":
+    "Hai raggiunto la fine della cronologia delle chat.",
+  "sidebar.history.loadingChats": "Caricamento chat...",
+  "sidebar.history.deletingChat": "Eliminazione chat...",
+  "sidebar.history.chatDeleted": "Chat eliminata con successo",
+  "sidebar.history.deleteFailed": "Impossibile eliminare la chat",
+  "sidebar.history.confirmDeleteTitle": "Sei assolutamente sicuro?",
+  "sidebar.history.confirmDeleteDescription":
+    "Questa azione non può essere annullata. Questo eliminerà permanentemente la tua chat e la rimuoverà dai nostri server.",
 
   // User Menu
   "sidebar.user.signOut": "Esci",
   "sidebar.user.profile": "Profilo",
+
+  // Sidebar Toggle
+  "sidebar.toggleSidebar": "Mostra/Nascondi Barra Laterale",
 
   // ============================================================================
   // Settings
@@ -119,6 +141,13 @@ export const it: TranslationDict = {
   "artifact.actions.copiedToClipboard": "Copiato negli appunti!",
   "artifact.actions.copiedImageToClipboard": "Immagine copiata negli appunti!",
   "artifact.actions.copiedCsvToClipboard": "CSV copiato negli appunti!",
+
+  // Artifact Version
+  "artifact.version.viewingPrevious": "Stai visualizzando una versione precedente",
+  "artifact.version.restoreToEdit":
+    "Ripristina questa versione per apportare modifiche",
+  "artifact.version.restoreButton": "Ripristina questa versione",
+  "artifact.version.backToLatest": "Torna all'ultima versione",
 
   // Code Artifacts
   "artifact.code.tooltipCopy": "Copia codice",
@@ -169,6 +198,18 @@ export const it: TranslationDict = {
     "Utile per la generazione di codice; L'esecuzione del codice è disponibile solo per Python.",
   "artifact.type.image.description": "Utile per la generazione di immagini",
   "artifact.type.sheet.description": "Utile per lavorare con fogli di calcolo",
+
+  // ============================================================================
+  // Tools
+  // ============================================================================
+
+  "tool.status.pending": "In attesa",
+  "tool.status.running": "In esecuzione",
+  "tool.status.completed": "Completato",
+  "tool.status.error": "Errore",
+  "tool.parameters": "Parametri",
+  "tool.result": "Risultato",
+  "tool.error": "Errore",
 
   // ============================================================================
   // Messages & Actions
@@ -259,6 +300,7 @@ export const it: TranslationDict = {
   "common.less": "Meno",
   "common.yes": "Sì",
   "common.no": "No",
+  "common.submit": "Invia modulo",
 
   "message.actions.upvote": "Vota Positivamente",
   "message.actions.upvoting": "Votazione in corso...",

@@ -16,6 +16,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { cn } from "@/lib/utils";
 import { CodeBlock } from "./code-block";
 
@@ -34,12 +35,14 @@ export type ToolHeaderProps = {
   className?: string;
 };
 
-const getStatusBadge = (status: ToolUIPart["state"]) => {
+const StatusBadge = ({ status }: { status: ToolUIPart["state"] }) => {
+  const t = useTranslations();
+
   const labels = {
-    "input-streaming": "Pending",
-    "input-available": "Running",
-    "output-available": "Completed",
-    "output-error": "Error",
+    "input-streaming": t("tool.status.pending", "Pending"),
+    "input-available": t("tool.status.running", "Running"),
+    "output-available": t("tool.status.completed", "Completed"),
+    "output-error": t("tool.status.error", "Error"),
   } as const;
 
   const icons = {
@@ -78,7 +81,7 @@ export const ToolHeader = ({
       <span className="truncate font-medium text-sm">{type}</span>
     </div>
     <div className="flex shrink-0 items-center gap-2">
-      {getStatusBadge(state)}
+      <StatusBadge status={state} />
       <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
@@ -100,16 +103,20 @@ export type ToolInputProps = ComponentProps<"div"> & {
   input: ToolUIPart["input"];
 };
 
-export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
-  <div className={cn("space-y-2 overflow-hidden p-4", className)} {...props}>
-    <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-      Parameters
-    </h4>
-    <div className="rounded-md bg-muted/50">
-      <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
+export const ToolInput = ({ className, input, ...props }: ToolInputProps) => {
+  const t = useTranslations();
+
+  return (
+    <div className={cn("space-y-2 overflow-hidden p-4", className)} {...props}>
+      <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+        {t("tool.parameters", "Parameters")}
+      </h4>
+      <div className="rounded-md bg-muted/50">
+        <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export type ToolOutputProps = ComponentProps<"div"> & {
   output: ReactNode;
@@ -122,6 +129,8 @@ export const ToolOutput = ({
   errorText,
   ...props
 }: ToolOutputProps) => {
+  const t = useTranslations();
+
   if (!(output || errorText)) {
     return null;
   }
@@ -129,7 +138,7 @@ export const ToolOutput = ({
   return (
     <div className={cn("space-y-2 p-4", className)} {...props}>
       <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {errorText ? "Error" : "Result"}
+        {errorText ? t("tool.error", "Error") : t("tool.result", "Result")}
       </h4>
       <div
         className={cn(

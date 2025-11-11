@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useSWRConfig } from "swr";
 import { useWindowSize } from "usehooks-ts";
 import { useArtifact } from "@/hooks/use-artifact";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import type { Document } from "@/lib/db/schema";
 import { getDocumentTimestampByIndex } from "@/lib/utils";
 import { LoaderIcon } from "./icons";
@@ -22,6 +23,7 @@ export const VersionFooter = ({
   documents,
   currentVersionIndex,
 }: VersionFooterProps) => {
+  const t = useTranslations();
   const { artifact } = useArtifact();
 
   const { width } = useWindowSize();
@@ -43,9 +45,17 @@ export const VersionFooter = ({
       transition={{ type: "spring", stiffness: 140, damping: 20 }}
     >
       <div>
-        <div>You are viewing a previous version</div>
+        <div>
+          {t(
+            "artifact.version.viewingPrevious",
+            "You are viewing a previous version"
+          )}
+        </div>
         <div className="text-muted-foreground text-sm">
-          Restore this version to make edits
+          {t(
+            "artifact.version.restoreToEdit",
+            "Restore this version to make edits"
+          )}
         </div>
       </div>
 
@@ -86,7 +96,9 @@ export const VersionFooter = ({
             );
           }}
         >
-          <div>Restore this version</div>
+          <div>
+            {t("artifact.version.restoreButton", "Restore this version")}
+          </div>
           {isMutating && (
             <div className="animate-spin">
               <LoaderIcon />
@@ -99,7 +111,7 @@ export const VersionFooter = ({
           }}
           variant="outline"
         >
-          Back to latest version
+          {t("artifact.version.backToLatest", "Back to latest version")}
         </Button>
       </div>
     </motion.div>
