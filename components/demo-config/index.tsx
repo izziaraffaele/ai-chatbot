@@ -1,15 +1,20 @@
-'use client';
-import React from 'react';
+"use client";
 import {
-  DemoConfigPanel,
-  DemoConfigPanelContent,
-  DemoConfigPanelTrigger,
-} from './panel';
-import { useFormContext } from 'react-hook-form';
-import { DemoConfigFieldGroup, DemoConfigForm } from './form';
-import { DemoConfig as DemoConfigType } from '@/config/demo.schema';
-import { FormInput } from '@/components/ui/form-input';
-import { Textarea } from '@/components/ui/textarea';
+  AppWindow,
+  Building2,
+  Database,
+  Image as ImageIcon,
+  Layers,
+  Lightbulb,
+  MessageSquare,
+  Palette,
+  Sparkles,
+  Target,
+  User,
+} from "lucide-react";
+import type React from "react";
+import { useFormContext } from "react-hook-form";
+import { FormInput } from "@/components/ui/form-input";
 import {
   Select,
   SelectContent,
@@ -17,36 +22,35 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { DemoThemePicker } from './theme-picker';
-import { SuggestionListControl } from './suggestion-list';
-import { SwitchListControl } from './switch-list';
-import { ExperienceConfig, ExperiencesListControl } from './experiences-list';
-import { IntentsListControl } from './intents-list';
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import type { DemoConfig as DemoConfigType } from "@/config/demo.schema";
 import {
-  User,
-  MessageSquare,
-  Palette,
-  Image as ImageIcon,
-  Lightbulb,
-  Sparkles,
-  Building2,
-  AppWindow,
-  Database,
-  Target,
-  Layers,
-} from 'lucide-react';
+  type ExperienceConfig,
+  ExperiencesListControl,
+} from "./experiences-list";
+import { DemoConfigFieldGroup, DemoConfigForm } from "./form";
+import { ImageUpload } from "./image-upload";
+import { IntentsListControl } from "./intents-list";
+import {
+  DemoConfigPanel,
+  DemoConfigPanelContent,
+  DemoConfigPanelTrigger,
+} from "./panel";
+import { SuggestionListControl } from "./suggestion-list";
+import { SwitchListControl } from "./switch-list";
+import { DemoThemePicker } from "./theme-picker";
 
 const THEME_PRESETS = [
   {
-    id: 'playful',
-    name: 'Playful',
-    description: 'Vibrant, friendly theme',
+    id: "playful",
+    name: "Playful",
+    description: "Vibrant, friendly theme",
     previewColors: {
-      primary: 'hsl(346 77% 50%)',
-      secondary: 'hsl(340 82% 52%)',
-      background: 'hsl(0 0% 100%)',
-      foreground: 'hsl(340 82% 52%)',
+      primary: "hsl(346 77% 50%)",
+      secondary: "hsl(340 82% 52%)",
+      background: "hsl(0 0% 100%)",
+      foreground: "hsl(340 82% 52%)",
     },
     css: `:root {
   --background: 0 0% 100%;
@@ -94,14 +98,14 @@ const THEME_PRESETS = [
 }`,
   },
   {
-    id: 'tech',
-    name: 'Tech',
-    description: 'Dark, professional theme',
+    id: "tech",
+    name: "Tech",
+    description: "Dark, professional theme",
     previewColors: {
-      primary: 'hsl(217 91% 60%)',
-      secondary: 'hsl(217 33% 17%)',
-      background: 'hsl(222 84% 5%)',
-      foreground: 'hsl(210 40% 98%)',
+      primary: "hsl(217 91% 60%)",
+      secondary: "hsl(217 33% 17%)",
+      background: "hsl(222 84% 5%)",
+      foreground: "hsl(210 40% 98%)",
     },
     css: `:root {
   --background: 222 84% 5%;
@@ -151,7 +155,7 @@ const THEME_PRESETS = [
 ];
 
 const DemoConfigSection = (
-  props: React.ComponentProps<'section'> & {
+  props: React.ComponentProps<"section"> & {
     title: string;
     description?: string;
   }
@@ -160,7 +164,7 @@ const DemoConfigSection = (
   return (
     <section className="space-y-4" {...others}>
       <div className="grid flex-1 gap-1">
-        <div className="leading-none font-semibold">{title}</div>
+        <div className="font-semibold leading-none">{title}</div>
         {description && (
           <div className="text-muted-foreground text-sm">{description}</div>
         )}
@@ -174,35 +178,45 @@ const AssistantProfileFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="Profile"
       description="Define your assistant's identity and personality"
       icon={User}
+      title="Profile"
     >
       <FormInput
-        name="assistant.avatar"
+        control={form.control}
+        helperText="Upload an image or provide a URL for the assistant's avatar"
         label="Avatar"
-        control={form.control}
+        name="assistant.avatar"
+        render={({ field }) => (
+          <ImageUpload
+            onBlur={field.onBlur}
+            onChange={(v) => {
+              field.onChange({ target: { value: v } } as any);
+            }}
+            value={field.value as string}
+          />
+        )}
       />
-      <FormInput name="assistant.name" label="Name" control={form.control} />
+      <FormInput control={form.control} label="Name" name="assistant.name" />
       <FormInput
-        name="assistant.description"
-        label="Description"
-        control={form.control}
         asChild
+        control={form.control}
+        label="Description"
+        name="assistant.description"
       >
         <Textarea rows={3} />
       </FormInput>
       <FormInput
-        name="assistant.tone"
         control={form.control}
         label="Tone"
+        name="assistant.tone"
         render={({ field }) => (
           <Select
-            value={String(field.value)}
             onValueChange={(v) => {
               field.onChange({ target: { value: v } } as any);
               field.onBlur();
             }}
+            value={String(field.value)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select the tone" />
@@ -225,24 +239,24 @@ const AssistantBehaviourFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="Behavior"
       description="Set instructions and guidelines for responses"
       icon={MessageSquare}
+      title="Behavior"
     >
       <FormInput
-        name="assistant.instructions"
-        label="Instructions"
-        control={form.control}
         asChild
+        control={form.control}
+        label="Instructions"
+        name="assistant.instructions"
       >
         <Textarea rows={3} />
       </FormInput>
 
       <FormInput
-        name="assistant.guidelines"
-        label="Guidelines"
-        control={form.control}
         asChild
+        control={form.control}
+        label="Guidelines"
+        name="assistant.guidelines"
       >
         <Textarea rows={3} />
       </FormInput>
@@ -254,21 +268,21 @@ const AppearanceThemeFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="Theme"
       description="Customize colors, presets, and display mode"
       icon={Palette}
+      title="Theme"
     >
       <FormInput
-        name="appearance.preset"
-        label="Preset"
         control={form.control}
+        label="Preset"
+        name="appearance.preset"
         render={({ field }) => (
           <Select
-            value={String(field.value)}
             onValueChange={(v) => {
               field.onChange({ target: { value: v } } as any);
               field.onBlur();
             }}
+            value={String(field.value)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select the preset" />
@@ -285,10 +299,10 @@ const AppearanceThemeFieldset = () => {
       />
 
       <FormInput
-        name="appearance.customCss"
-        label="Custom theme"
-        control={form.control}
         asChild
+        control={form.control}
+        label="Custom theme"
+        name="appearance.customCss"
       >
         <DemoThemePicker
           options={THEME_PRESETS.map((v) => ({
@@ -300,16 +314,16 @@ const AppearanceThemeFieldset = () => {
       </FormInput>
 
       <FormInput
-        name="appearance.defaultMode"
-        label="Default mode"
         control={form.control}
+        label="Default mode"
+        name="appearance.defaultMode"
         render={({ field }) => (
           <Select
-            value={String(field.value)}
             onValueChange={(v) => {
               field.onChange({ target: { value: v } } as any);
               field.onBlur();
             }}
+            value={String(field.value)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select the default mode" />
@@ -332,21 +346,40 @@ const AppearanceAssetsFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="Assets"
       description="Upload your logo and favicon"
       icon={ImageIcon}
+      title="Assets"
     >
       <FormInput
-        name="appearance.favicon"
-        label="Favicon URL"
-        type="url"
         control={form.control}
+        helperText="Upload a small icon (max 1MB) for browser tabs and bookmarks"
+        label="Favicon"
+        name="appearance.favicon"
+        render={({ field }) => (
+          <ImageUpload
+            maxSizeMB={1}
+            onBlur={field.onBlur}
+            onChange={(v) => {
+              field.onChange({ target: { value: v } } as any);
+            }}
+            value={field.value as string}
+          />
+        )}
       />
       <FormInput
-        name="appearance.logo"
-        label="Logo URL"
-        type="url"
         control={form.control}
+        helperText="Upload your brand logo to display in the application header"
+        label="Logo"
+        name="appearance.logo"
+        render={({ field }) => (
+          <ImageUpload
+            onBlur={field.onBlur}
+            onChange={(v) => {
+              field.onChange({ target: { value: v } } as any);
+            }}
+            value={field.value as string}
+          />
+        )}
       />
     </DemoConfigFieldGroup>
   );
@@ -356,21 +389,21 @@ const ChatSuggestionsFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="Suggestions"
       description="Add quick-start prompts for users"
       icon={Lightbulb}
+      title="Suggestions"
     >
       <FormInput
-        name="chat.suggestions"
-        label="Suggestions"
         control={form.control}
+        label="Suggestions"
+        name="chat.suggestions"
         render={({ field }) => (
           <SuggestionListControl
-            value={(Array.isArray(field.value) ? field.value : []) as string[]}
             onValueChange={(v) => {
               field.onChange({ target: { value: v } } as any);
               field.onBlur();
             }}
+            value={(Array.isArray(field.value) ? field.value : []) as string[]}
           />
         )}
       />
@@ -382,31 +415,31 @@ const ChatFeaturesFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="Features"
       description="Enable or disable chat capabilities"
       icon={Sparkles}
+      title="Features"
     >
       <FormInput
-        name="chat.features"
-        label="Active Features"
         control={form.control}
+        label="Active Features"
+        name="chat.features"
         render={({ field }) => (
           <SwitchListControl
-            value={field.value as Record<string, boolean>}
-            options={[
-              { label: 'Memory', value: 'memory', disabled: true },
-              { label: 'Artifacts', value: 'artifacts', disabled: true },
-              {
-                label: 'Multimodal Input',
-                value: 'multimodalInput',
-                disabled: true,
-              },
-              { label: 'Web Search', value: 'webSearch' },
-            ]}
             onValueChange={(v) => {
               field.onChange({ target: { value: v } } as any);
               field.onBlur();
             }}
+            options={[
+              { label: "Memory", value: "memory", disabled: true },
+              { label: "Artifacts", value: "artifacts", disabled: true },
+              {
+                label: "Multimodal Input",
+                value: "multimodalInput",
+                disabled: true,
+              },
+              { label: "Web Search", value: "webSearch" },
+            ]}
+            value={field.value as Record<string, boolean>}
           />
         )}
       />
@@ -418,28 +451,28 @@ const ContextOrganizationFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="Organization"
       description="Provide details about your company"
       icon={Building2}
+      title="Organization"
     >
       <FormInput
-        name="context.organization.name"
-        label="Name"
         control={form.control}
+        label="Name"
+        name="context.organization.name"
       />
       <FormInput
-        name="context.organization.description"
-        label="Description"
-        control={form.control}
         asChild
+        control={form.control}
+        label="Description"
+        name="context.organization.description"
       >
         <Textarea rows={3} />
       </FormInput>
       <FormInput
-        name="context.organization.websiteUrl"
-        label="Website URL"
-        type="url"
         control={form.control}
+        label="Website URL"
+        name="context.organization.websiteUrl"
+        type="url"
       />
     </DemoConfigFieldGroup>
   );
@@ -449,16 +482,16 @@ const ContextAppFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="App"
       description="Define your application context"
       icon={AppWindow}
+      title="App"
     >
-      <FormInput name="context.app.name" label="Name" control={form.control} />
+      <FormInput control={form.control} label="Name" name="context.app.name" />
       <FormInput
-        name="context.app.description"
-        label="Description"
-        control={form.control}
         asChild
+        control={form.control}
+        label="Description"
+        name="context.app.description"
       >
         <Textarea rows={3} />
       </FormInput>
@@ -470,29 +503,18 @@ const ContextIndexesFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="Indexes"
       description="Connect knowledge bases and data sources"
       icon={Database}
+      title="Indexes"
     >
       <FormInput
-        name="context.indexes"
-        label="Connected Indexes"
         control={form.control}
+        label="Connected Indexes"
+        name="context.indexes"
         render={({ field }) => {
           const currentValue = (field.value || []) as string[];
           return (
             <SwitchListControl
-              value={currentValue.reduce(
-                (carry, v) => ({
-                  ...carry,
-                  [v]: true,
-                }),
-                {} as Record<string, boolean>
-              )}
-              options={[
-                { label: 'MemorAIz', value: 'memoraiz', disabled: true },
-                { label: 'Demo Courses', value: 'demo-courses' },
-              ]}
               onValueChange={(v) => {
                 const newValue = Object.entries(v).reduce((carry, [k, v]) => {
                   if (v) {
@@ -501,13 +523,24 @@ const ContextIndexesFieldset = () => {
                   return carry;
                 }, [] as string[]);
 
-                if (!newValue.includes('memoraiz')) {
-                  newValue.push('memoraiz');
+                if (!newValue.includes("memoraiz")) {
+                  newValue.push("memoraiz");
                 }
 
                 field.onChange({ target: { value: newValue } } as any);
                 field.onBlur();
               }}
+              options={[
+                { label: "MemorAIz", value: "memoraiz", disabled: true },
+                { label: "Demo Courses", value: "demo-courses" },
+              ]}
+              value={currentValue.reduce(
+                (carry, v) => ({
+                  ...carry,
+                  [v]: true,
+                }),
+                {} as Record<string, boolean>
+              )}
             />
           );
         }}
@@ -519,19 +552,18 @@ const RuntimeIntentsFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="Intents"
       description="Define user goals and trigger actions"
       icon={Target}
+      title="Intents"
     >
       <FormInput
-        name="runtime.intents"
         control={form.control}
+        name="runtime.intents"
         render={({ field }) => {
           const currentValue = (field.value as ExperienceConfig[]) || [];
 
           return (
             <IntentsListControl
-              value={field.value as any}
               onAdd={(newIntent) => {
                 field.onChange({
                   target: { value: [newIntent, ...currentValue] },
@@ -544,6 +576,7 @@ const RuntimeIntentsFieldset = () => {
                 });
                 field.onBlur();
               }}
+              value={field.value as any}
             />
           );
         }}
@@ -556,19 +589,18 @@ const RuntimeExperiencesFieldset = () => {
   const form = useFormContext<DemoConfigType>();
   return (
     <DemoConfigFieldGroup
-      title="Experiences"
       description="Create custom interaction flows"
       icon={Layers}
+      title="Experiences"
     >
       <FormInput
-        name="runtime.experiences"
         control={form.control}
+        name="runtime.experiences"
         render={({ field }) => {
           const currentValue = (field.value as ExperienceConfig[]) || [];
 
           return (
             <ExperiencesListControl
-              value={field.value as any}
               onAdd={(exp) => {
                 field.onChange({ target: { value: [exp, ...currentValue] } });
                 field.onBlur();
@@ -579,6 +611,7 @@ const RuntimeExperiencesFieldset = () => {
                 });
                 field.onBlur();
               }}
+              value={field.value as any}
             />
           );
         }}
@@ -594,37 +627,37 @@ export const DemoConfig = () => (
       <DemoConfigForm>
         <div className="space-y-6 p-4">
           <DemoConfigSection
-            title="Assistant"
             description="Configure your AI assistant's identity and behavior"
+            title="Assistant"
           >
             <AssistantProfileFieldset />
             <AssistantBehaviourFieldset />
           </DemoConfigSection>
           <DemoConfigSection
-            title="Appearance"
             description="Customize visual design and branding"
+            title="Appearance"
           >
             <AppearanceThemeFieldset />
             <AppearanceAssetsFieldset />
           </DemoConfigSection>
           <DemoConfigSection
-            title="Chat"
             description="Manage conversation features and user experience"
+            title="Chat"
           >
             <ChatSuggestionsFieldset />
             <ChatFeaturesFieldset />
           </DemoConfigSection>
           <DemoConfigSection
-            title="Context"
             description="Provide background information for better responses"
+            title="Context"
           >
             <ContextOrganizationFieldset />
             <ContextAppFieldset />
             <ContextIndexesFieldset />
           </DemoConfigSection>
           <DemoConfigSection
-            title="Runtime"
             description="Build dynamic experiences and intelligent routing"
+            title="Runtime"
           >
             <RuntimeIntentsFieldset />
             <RuntimeExperiencesFieldset />

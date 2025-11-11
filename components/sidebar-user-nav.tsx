@@ -29,6 +29,12 @@ export function SidebarUserNav({ user }: { user: User }) {
 
   const isGuest = guestRegex.test(data?.user?.email ?? "");
 
+  // Get avatar service URL from environment or use default
+  const avatarServiceUrl =
+    process.env.NEXT_PUBLIC_AVATAR_SERVICE_URL ||
+    "https://avatar.vercel.sh/{email}";
+  const avatarUrl = avatarServiceUrl.replace("{email}", user.email || "user");
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -55,7 +61,7 @@ export function SidebarUserNav({ user }: { user: User }) {
                   alt={user.email ?? "User Avatar"}
                   className="rounded-full"
                   height={24}
-                  src={`https://avatar.vercel.sh/${user.email}`}
+                  src={avatarUrl}
                   width={24}
                 />
                 <span className="truncate" data-testid="user-email">

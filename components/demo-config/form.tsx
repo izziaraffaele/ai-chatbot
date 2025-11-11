@@ -1,29 +1,27 @@
-import { Resolver, useForm, UseFormReturn } from 'react-hook-form';
-import { Form } from '../ui/form';
-import React, { useEffect } from 'react';
-import { useDemoConfig } from '@/hooks/use-demo-config';
-import { DemoConfig, DemoConfigSchema } from '@/config/demo.schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ChevronLeftIcon } from "lucide-react";
+import type React from "react";
+import { useEffect } from "react";
+import { type Resolver, type UseFormReturn, useForm } from "react-hook-form";
 import {
   Item,
   ItemContent,
   ItemDescription,
-  ItemTitle,
   ItemMedia,
-} from '@/components/ui/item';
-
+  ItemTitle,
+} from "@/components/ui/item";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetClose,
   SheetContent,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet';
-
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '../ui/button';
-import { ChevronLeftIcon } from 'lucide-react';
+} from "@/components/ui/sheet";
+import { type DemoConfig, DemoConfigSchema } from "@/config/demo.schema";
+import { useDemoConfig } from "@/hooks/use-demo-config";
+import { Button } from "../ui/button";
+import { Form } from "../ui/form";
 
 export const demoConfigFormResolver = zodResolver(
   DemoConfigSchema
@@ -62,15 +60,15 @@ export const DemoConfigFieldGroup = ({
   className,
   children,
   ...others
-}: React.ComponentProps<'button'> & {
+}: React.ComponentProps<"button"> & {
   title?: string;
   description?: string;
   icon?: React.FC<{ className?: string }>;
 }) => (
   <Sheet>
     <SheetTrigger asChild>
-      <Item size="sm" variant="muted" asChild className={className}>
-        <button className="text-left w-full block hover:bg-accent" {...others}>
+      <Item asChild className={className} size="sm" variant="muted">
+        <button className="block w-full text-left hover:bg-accent" {...others}>
           {Icon && (
             <ItemMedia variant="icon">
               <Icon className="size-4" />
@@ -87,12 +85,12 @@ export const DemoConfigFieldGroup = ({
         </button>
       </Item>
     </SheetTrigger>
-    <SheetContent hideClose className="p-0 h-full flex flex-col gap-0">
-      <div className="flex items-center gap-2 p-4 border-b">
+    <SheetContent className="flex h-full flex-col gap-0 p-0" hideClose>
+      <div className="flex items-center gap-2 border-b p-4">
         <SheetClose asChild>
           <Button
+            className="group h-8 w-8 rounded-full border-border/20 backdrop-blur-sm"
             variant="ghost"
-            className="w-8 h-8 rounded-full border-border/20 backdrop-blur-sm group"
           >
             <ChevronLeftIcon size={20} />
           </Button>
@@ -100,7 +98,7 @@ export const DemoConfigFieldGroup = ({
         <SheetTitle>{title}</SheetTitle>
       </div>
       <ScrollArea className="flex-1">
-        <div className="p-4 space-y-4">{children}</div>
+        <div className="space-y-4 p-4">{children}</div>
       </ScrollArea>
     </SheetContent>
   </Sheet>

@@ -1,6 +1,26 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
+import { guestRegex, isDevelopmentEnvironment, isProductionEnvironment } from "./lib/constants";
+
+/**
+ * Determines if secure cookies should be used based on environment and request origin.
+ * Secure cookies require HTTPS, but localhost connections are inherently secure.
+ */
+function shouldUseSecureCookie(request: NextRequest): boolean {
+  // Never use secure cookies in development
+  if (isDevelopmentEnvironment) {
+    return false;
+  }
+
+  // Check if request is from localhost or 127.0.0.1
+  const hostname = request.nextUrl.hostname.toLowerCase();
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+    return false;
+  }
+
+  // Use secure cookies for production with real domains
+  return isProductionEnvironment;
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -13,6 +33,7 @@ export async function middleware(request: NextRequest) {
     return new Response("pong", { status: 200 });
   }
 
+  // Allow all auth routes (NextAuth internal + custom guest route)
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
@@ -20,7 +41,7 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
-    secureCookie: !isDevelopmentEnvironment,
+    secureCookie: shouldUseSecureCookie(request),
   });
 
   if (!token) {

@@ -1,19 +1,114 @@
-import { DemoConfig, DemoConfigSchema } from './demo.schema';
+import { type DemoConfig, DemoConfigSchema } from './demo.schema';
 
 /**
- * Default branding configuration
- * Maintains current "Chat SDK" branding for backwards compatibility
+ * Deep merge utility for combining configuration objects
  */
-const defaultDemoConfig: DemoConfig = {
+function deepMerge<T extends Record<string, unknown>>(
+  target: T,
+  ...sources: Partial<T>[]
+): T {
+  const result = { ...target };
+
+  for (const source of sources) {
+    for (const key in source) {
+      const sourceValue = source[key];
+      const targetValue = result[key];
+
+      if (
+        sourceValue &&
+        typeof sourceValue === 'object' &&
+        !Array.isArray(sourceValue) &&
+        targetValue &&
+        typeof targetValue === 'object' &&
+        !Array.isArray(targetValue)
+      ) {
+        result[key] = deepMerge(
+          targetValue as Record<string, unknown>,
+          sourceValue as Record<string, unknown>
+        ) as T[Extract<keyof T, string>];
+      } else if (sourceValue !== undefined) {
+        result[key] = sourceValue as T[Extract<keyof T, string>];
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Get environment variable defaults for branding configuration
+ * These serve as fallbacks when demo config values are not explicitly set
+ * Returns a partial config that will be deep merged with schema defaults
+ */
+function getEnvironmentDefaults(): Record<string, unknown> {
+  const envConfig: Record<string, unknown> = {};
+
+  // Assistant configuration
+  const assistant: Record<string, unknown> = {};
+  if (process.env.NEXT_PUBLIC_ASSISTANT_NAME)
+    assistant.name = process.env.NEXT_PUBLIC_ASSISTANT_NAME;
+  if (process.env.NEXT_PUBLIC_ASSISTANT_AVATAR_URL)
+    assistant.avatar = process.env.NEXT_PUBLIC_ASSISTANT_AVATAR_URL;
+  if (process.env.NEXT_PUBLIC_ASSISTANT_DESCRIPTION)
+    assistant.description = process.env.NEXT_PUBLIC_ASSISTANT_DESCRIPTION;
+  if (Object.keys(assistant).length > 0) envConfig.assistant = assistant;
+
+  // Appearance configuration
+  const appearance: Record<string, unknown> = {};
+  if (process.env.NEXT_PUBLIC_THEME_PRESET)
+    appearance.preset = process.env.NEXT_PUBLIC_THEME_PRESET;
+  if (process.env.NEXT_PUBLIC_DEFAULT_THEME_MODE)
+    appearance.defaultMode = process.env.NEXT_PUBLIC_DEFAULT_THEME_MODE;
+  if (process.env.NEXT_PUBLIC_FAVICON_URL)
+    appearance.favicon = process.env.NEXT_PUBLIC_FAVICON_URL;
+  if (process.env.NEXT_PUBLIC_LOGO_URL)
+    appearance.logo = process.env.NEXT_PUBLIC_LOGO_URL;
+  if (process.env.NEXT_PUBLIC_AUTH_LOGO_URL)
+    appearance.authLogo = process.env.NEXT_PUBLIC_AUTH_LOGO_URL;
+  if (process.env.NEXT_PUBLIC_OG_IMAGE_URL)
+    appearance.ogImage = process.env.NEXT_PUBLIC_OG_IMAGE_URL;
+  if (process.env.NEXT_PUBLIC_CUSTOM_CSS)
+    appearance.customCss = process.env.NEXT_PUBLIC_CUSTOM_CSS;
+  if (Object.keys(appearance).length > 0) envConfig.appearance = appearance;
+
+  // Context configuration
+  const context: Record<string, unknown> = {};
+
+  const organization: Record<string, unknown> = {};
+  if (process.env.NEXT_PUBLIC_ORGANIZATION_NAME)
+    organization.name = process.env.NEXT_PUBLIC_ORGANIZATION_NAME;
+  if (process.env.NEXT_PUBLIC_ORGANIZATION_DESCRIPTION)
+    organization.description = process.env.NEXT_PUBLIC_ORGANIZATION_DESCRIPTION;
+  if (process.env.NEXT_PUBLIC_ORGANIZATION_URL)
+    organization.websiteUrl = process.env.NEXT_PUBLIC_ORGANIZATION_URL;
+  if (Object.keys(organization).length > 0) context.organization = organization;
+
+  const app: Record<string, unknown> = {};
+  if (process.env.NEXT_PUBLIC_APP_NAME)
+    app.name = process.env.NEXT_PUBLIC_APP_NAME;
+  if (process.env.NEXT_PUBLIC_APP_DESCRIPTION)
+    app.description = process.env.NEXT_PUBLIC_APP_DESCRIPTION;
+  if (Object.keys(app).length > 0) context.app = app;
+
+  if (Object.keys(context).length > 0) envConfig.context = context;
+
+  return envConfig;
+}
+
+/**
+ * Default branding configuration (schema defaults)
+ * Serves as the base layer before environment variables and demo config
+ */
+const schemaDefaults: DemoConfig = {
   assistant: {
     name: 'Assistant',
-    description: 'MemorAIz demo assistant',
+    description: 'AI assistant',
     roles: [],
-    tone: 'friendly'
+    tone: 'friendly',
   },
   appearance: {
     preset: 'default',
-    defaultMode: 'auto'
+    defaultMode: 'auto',
   },
   chat: {
     suggestions: [],
@@ -22,32 +117,34 @@ const defaultDemoConfig: DemoConfig = {
       multimodalInput: true,
       memory: true,
       artifacts: true,
-    }
+    },
   },
   context: {
-    indexes: ['memoraiz', 'demo-courses']
+    indexes: ['memoraiz', 'demo-courses'],
   },
   runtime: {
     experiences: [],
-    intents: []
-  }
+    intents: [],
+  },
 };
-
 
 /**
  * Get the validated branding configuration
- * Merges default config with environment variable overrides
+ * Merges in this order: schema defaults < environment variables < demo config overrides
  */
 export function getDemoConfig(): DemoConfig {
-	try {
-		// Validate and return the configuration
-		return DemoConfigSchema.parse(defaultDemoConfig);
-	} catch (error) {
-		console.error('Branding configuration validation failed:', error);
-		throw new Error(
-			'Invalid branding configuration. Please check your environment variables and config/branding.ts',
-		);
-	}
+  try {
+    const envDefaults = getEnvironmentDefaults();
+    const merged = deepMerge(schemaDefaults, envDefaults);
+
+    // Validate and return the configuration
+    return DemoConfigSchema.parse(merged);
+  } catch (error) {
+    console.error('Branding configuration validation failed:', error);
+    throw new Error(
+      'Invalid branding configuration. Please check your environment variables and config/demo.ts'
+    );
+  }
 }
 
 /**

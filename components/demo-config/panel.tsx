@@ -1,23 +1,23 @@
-import { SettingsIcon } from 'lucide-react';
-import { Button } from '../ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../ui/tooltip';
+import { SettingsIcon } from "lucide-react";
+import type React from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '../ui/sheet';
-import { ScrollArea } from '../ui/scroll-area';
-import { cn } from '@/lib/utils';
-import React from 'react';
+} from "../ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
-const DEFAULT_TITLE = 'Demo Settings';
+const DEFAULT_TITLE = "Demo Settings";
 
 export const DemoConfigPanelTrigger = ({
   onClick,
@@ -30,16 +30,16 @@ export const DemoConfigPanelTrigger = ({
       <TooltipTrigger asChild>
         <SheetTrigger asChild>
           <Button
-            variant="secondary"
-            className="w-10 h-10 fixed bottom-6 right-6 z-50 rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out border border-border/20 backdrop-blur-sm group"
+            className="group fixed right-6 bottom-6 z-50 h-10 w-10 rounded-full border border-border/20 shadow-lg backdrop-blur-sm transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-xl active:scale-95"
             onClick={onClick}
+            variant="secondary"
             {...others}
           >
             {children || <SettingsIcon size={20} />}
           </Button>
         </SheetTrigger>
       </TooltipTrigger>
-      <TooltipContent side="left" align="center">
+      <TooltipContent align="center" side="left">
         <p>{tooltip}</p>
       </TooltipContent>
     </Tooltip>
@@ -51,12 +51,12 @@ export const DemoConfigPanelContent = ({
   className,
   title = DEFAULT_TITLE,
   ...others
-}: React.ComponentProps<'div'> & { title?: React.ReactNode }) => (
+}: React.ComponentProps<"div"> & { title?: React.ReactNode }) => (
   <SheetContent
     {...others}
-    className={cn('h-full gap-0 p-0 flex flex-col', className)}
+    className={cn("flex h-full flex-col gap-0 p-0", className)}
   >
-    <SheetHeader className="p-4 border-b">
+    <SheetHeader className="border-b p-4">
       <SheetTitle>{title}</SheetTitle>
     </SheetHeader>
     <ScrollArea className="flex-1">{children}</ScrollArea>

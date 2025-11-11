@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { demoConfig } from '@/config/demo';
-import { DemoConfig } from '@/config/demo.schema';
-import useSWR from 'swr';
+import useSWR from "swr";
+import { demoConfig } from "@/config/demo";
+import type { DemoConfig } from "@/config/demo.schema";
 
 export const useDemoConfig = () => {
   const { data: value, mutate: setValue } = useSWR<DemoConfig>(
-    ['demo-config'],
+    ["demo-config"],
     {
       fallbackData: demoConfig,
     }

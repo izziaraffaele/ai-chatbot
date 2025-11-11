@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -8,10 +9,12 @@ import { useActionState, useEffect, useState } from "react";
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
+import { useBranding } from "@/hooks/use-branding";
 import { type LoginActionState, login } from "../actions";
 
 export default function Page() {
   const router = useRouter();
+  const branding = useBranding();
 
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
@@ -49,10 +52,26 @@ export default function Page() {
     formAction(formData);
   };
 
+  const logoUrl = branding.authLogo || branding.logo;
+  const appName = branding.appName || branding.organizationName || "App";
+
   return (
     <div className="flex h-dvh w-screen items-start justify-center bg-background pt-12 md:items-center md:pt-0">
       <div className="flex w-full max-w-md flex-col gap-12 overflow-hidden rounded-2xl">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
+          {logoUrl ? (
+            <Image
+              alt={appName}
+              className="mb-4"
+              height={48}
+              src={logoUrl}
+              width={192}
+            />
+          ) : (
+            <h2 className="mb-4 font-semibold text-2xl dark:text-zinc-50">
+              {appName}
+            </h2>
+          )}
           <h3 className="font-semibold text-xl dark:text-zinc-50">Sign In</h3>
           <p className="text-gray-500 text-sm dark:text-zinc-400">
             Use your email and password to sign in

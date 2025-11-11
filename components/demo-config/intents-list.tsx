@@ -1,6 +1,15 @@
-import { DemoConfig } from '@/config/demo.schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { TrashIcon } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import type { DemoConfig } from '@/config/demo.schema';
 import { cn } from '@/lib/utils';
-import React, { useState } from 'react';
+import { PlusIcon } from '../icons';
+import { Button } from '../ui/button';
+import { Form } from '../ui/form';
+import { FormInput } from '../ui/form-input';
 import {
   Item,
   ItemActions,
@@ -8,14 +17,6 @@ import {
   ItemDescription,
   ItemTitle,
 } from '../ui/item';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod/v4';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form } from '../ui/form';
-import { FormInput } from '../ui/form-input';
-import { Button } from '../ui/button';
-import { PlusIcon } from '../icons';
-import { TrashIcon } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 
 type IntentConfig = DemoConfig['runtime']['intents'][number];
@@ -76,10 +77,10 @@ export const IntentsListControl = (
             </ItemContent>
             <ItemActions>
               <Button
-                size="icon"
-                variant="ghost"
                 className="rounded-full"
                 onClick={() => onRemove(i)}
+                size="icon"
+                variant="ghost"
               >
                 <TrashIcon />
               </Button>
@@ -87,9 +88,9 @@ export const IntentsListControl = (
           </Item>
         ))}
         <Button
-          variant="outline"
           className="w-full items-center gap-2"
           onClick={() => setIsEditing(true)}
+          variant="outline"
         >
           <PlusIcon />
           <span>Add</span>
@@ -104,18 +105,18 @@ export const IntentsListControl = (
         <form className="space-y-4" onSubmit={handleSubmitAdd}>
           <FormInput
             control={experienceForm.control}
-            name="name"
             label="Name"
+            name="name"
           />
           <FormInput
-            control={experienceForm.control}
-            name="description"
-            label="Description"
             asChild
+            control={experienceForm.control}
+            label="Description"
+            name="description"
           >
             <Textarea rows={3} />
           </FormInput>
-          <Button type="submit" className="w-full">
+          <Button className="w-full" type="submit">
             Save
           </Button>
         </form>

@@ -28,7 +28,7 @@ export const fetcher = async (url: string) => {
 
 export async function fetchWithErrorHandlers(
   input: RequestInfo | URL,
-  init?: RequestInit,
+  init?: RequestInit
 ) {
   try {
     const response = await fetch(input, init);
@@ -73,10 +73,14 @@ export function getMostRecentUserMessage(messages: UIMessage[]) {
 
 export function getDocumentTimestampByIndex(
   documents: Document[],
-  index: number,
+  index: number
 ) {
-  if (!documents) { return new Date(); }
-  if (index > documents.length) { return new Date(); }
+  if (!documents) {
+    return new Date();
+  }
+  if (index > documents.length) {
+    return new Date();
+  }
 
   return documents[index].createdAt;
 }
@@ -88,7 +92,9 @@ export function getTrailingMessageId({
 }): string | null {
   const trailingMessage = messages.at(-1);
 
-  if (!trailingMessage) { return null; }
+  if (!trailingMessage) {
+    return null;
+  }
 
   return trailingMessage.id;
 }
@@ -111,6 +117,45 @@ export function convertToUIMessages(messages: DBMessage[]): ChatMessage[] {
 export function getTextFromMessage(message: ChatMessage | UIMessage): string {
   return message.parts
     .filter((part) => part.type === 'text')
-    .map((part) => (part as { type: 'text'; text: string}).text)
+    .map((part) => (part as { type: 'text'; text: string }).text)
     .join('');
+}
+
+/**
+ * Update the browser favicon dynamically
+ * Creates or updates the favicon link element in the document head
+ */
+export function updateFavicon(url: string) {
+  if (typeof document === 'undefined') return;
+
+  let link = document.querySelector<HTMLLinkElement>("link[rel*='icon']");
+
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'shortcut icon';
+    document.head.appendChild(link);
+  }
+
+  link.type = 'image/x-icon';
+  link.href = url;
+}
+
+/**
+ * Inject custom CSS variables into the document
+ * Creates or updates a style element with custom CSS properties
+ */
+export function injectCustomCss(css: string) {
+  if (typeof document === 'undefined') return;
+
+  const styleId = 'branding-custom-css';
+  let style = document.getElementById(styleId);
+
+  if (!style) {
+    style = document.createElement('style');
+    style.id = styleId;
+    document.head.appendChild(style);
+  }
+
+  // Wrap in :root selector to ensure global scope
+  style.textContent = `${css}`;
 }

@@ -1,5 +1,9 @@
-'use client';
-import React, { createContext, useContext, useState } from 'react';
+"use client";
+import type React from "react";
+import { createContext, useContext, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
+import { ScrollArea } from "./ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -7,16 +11,13 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from './ui/sheet';
-import { cn } from '@/lib/utils';
-import { ScrollArea } from './ui/scroll-area';
-import { Button } from './ui/button';
+} from "./ui/sheet";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from './ui/tooltip';
+} from "./ui/tooltip";
 
 export type PanelContextValue = {
   view: string;
@@ -24,7 +25,7 @@ export type PanelContextValue = {
 };
 
 export const PanelContext = createContext<PanelContextValue>({
-  view: 'root',
+  view: "root",
   setView: () => {},
 });
 
@@ -40,15 +41,15 @@ export const Panel = ({
   onOpenChange,
   ...others
 }: React.ComponentProps<typeof Sheet> & PanelProps) => {
-  const [view, setView] = useState(initialView || 'root');
+  const [view, setView] = useState(initialView || "root");
 
   const handleOpenChange = (v: boolean) => {
-    if (view === 'root') {
+    if (view === "root") {
       onOpenChange?.(v);
     }
 
     if (!v) {
-      setView('root');
+      setView("root");
     }
   };
   return (
@@ -70,10 +71,10 @@ export const PanelTrigger = ({
 export const PanelContent = ({
   className,
   ...others
-}: React.ComponentProps<'div'>) => (
+}: React.ComponentProps<"div">) => (
   <SheetContent
+    className={cn("h-full overflow-y-scroll p-0", className)}
     data-slot="panel-content"
-    className={cn('p-0 h-full overflow-y-scroll', className)}
     {...others}
   />
 );
@@ -82,14 +83,14 @@ export const PanelView = ({
   className,
   value,
   ...others
-}: React.ComponentProps<'div'> & { value?: string }) => {
+}: React.ComponentProps<"div"> & { value?: string }) => {
   const { view } = usePanelContext();
   return (
     <div
-      data-slot="panel-view"
-      className={cn('flex flex-col h-full', className, {
+      className={cn("flex h-full flex-col", className, {
         hidden: view !== value,
       })}
+      data-slot="panel-view"
       {...others}
     />
   );
@@ -101,13 +102,13 @@ export const PanelViewHeader = ({
   title,
   description,
   ...others
-}: React.ComponentProps<'div'> & {
+}: React.ComponentProps<"div"> & {
   title: React.ReactNode;
   description?: React.ReactNode;
 }) => (
   <SheetHeader
+    className={cn("border-b p-4", className)}
     data-slot="panel-view-header"
-    className={cn('p-4 border-b', className)}
     {...others}
   >
     <SheetTitle>{title}</SheetTitle>
@@ -119,7 +120,7 @@ export const PanelViewContent = ({
   className,
   ...others
 }: React.ComponentProps<typeof ScrollArea>) => (
-  <ScrollArea className={cn('flex-1 ', className)} {...others} />
+  <ScrollArea className={cn("flex-1", className)} {...others} />
 );
 
 export const PanelViewLink = ({

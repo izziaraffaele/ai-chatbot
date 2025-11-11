@@ -1,4 +1,14 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import type React from "react";
+import { createContext, useContext, useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "./ui/item";
 import {
   Sheet,
   SheetContent,
@@ -6,17 +16,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from './ui/sheet';
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from './ui/item';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { Button } from './ui/button';
-import { cn } from '@/lib/utils';
+} from "./ui/sheet";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export type SettingPanelConfigItem = {
   id: string;
@@ -29,9 +30,9 @@ export type SettingPanelConfigItem = {
 export const SettingPanel = Sheet;
 
 export const SettingPanelTrigger = ({
-  tooltip = 'Settings',
+  tooltip = "Settings",
   ...others
-}: React.ComponentProps<'button'> & { tooltip?: string }) => {
+}: React.ComponentProps<"button"> & { tooltip?: string }) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -49,7 +50,7 @@ export const SettingPanelTrigger = ({
 export const SettingPanelContent = SheetContent;
 
 export const SettingPanelHeader = (
-  props: React.ComponentProps<'div'> & {
+  props: React.ComponentProps<"div"> & {
     title?: React.ReactNode;
     description?: React.ReactNode;
   }
@@ -63,8 +64,8 @@ export const SettingPanelHeader = (
 export const SettingPanelItems = ({
   className,
   ...props
-}: React.ComponentProps<'div'>) => (
-  <div {...props} className={cn('space-y-4', className)} />
+}: React.ComponentProps<"div">) => (
+  <div {...props} className={cn("space-y-4", className)} />
 );
 
 export const SettingPanelItem = ({

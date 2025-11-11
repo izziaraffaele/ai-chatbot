@@ -1,6 +1,15 @@
-import { DemoConfig, DemoConfigSchema } from '@/config/demo.schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { TrashIcon } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { type DemoConfig, DemoConfigSchema } from '@/config/demo.schema';
 import { cn } from '@/lib/utils';
-import React, { useState } from 'react';
+import { PlusIcon } from '../icons';
+import { Button } from '../ui/button';
+import { Form } from '../ui/form';
+import { FormInput } from '../ui/form-input';
 import {
   Item,
   ItemActions,
@@ -8,11 +17,6 @@ import {
   ItemDescription,
   ItemTitle,
 } from '../ui/item';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod/v4';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form } from '../ui/form';
-import { FormInput } from '../ui/form-input';
 import {
   Select,
   SelectContent,
@@ -21,9 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import { Button } from '../ui/button';
-import { PlusIcon } from '../icons';
-import { TrashIcon } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 
 export type ExperienceConfig = DemoConfig['runtime']['experiences'][number];
@@ -87,10 +88,10 @@ export const ExperiencesListControl = (
             </ItemContent>
             <ItemActions>
               <Button
-                size="icon"
-                variant="ghost"
                 className="rounded-full"
                 onClick={() => onRemove(i)}
+                size="icon"
+                variant="ghost"
               >
                 <TrashIcon />
               </Button>
@@ -98,9 +99,9 @@ export const ExperiencesListControl = (
           </Item>
         ))}
         <Button
-          variant="outline"
           className="w-full items-center gap-2"
           onClick={() => setIsEditing(true)}
+          variant="outline"
         >
           <PlusIcon />
           <span>Add</span>
@@ -115,28 +116,28 @@ export const ExperiencesListControl = (
         <form className="space-y-4" onSubmit={handleSubmitAdd}>
           <FormInput
             control={experienceForm.control}
-            name="name"
             label="Name"
+            name="name"
           />
           <FormInput
-            control={experienceForm.control}
-            name="description"
-            label="Description"
             asChild
+            control={experienceForm.control}
+            label="Description"
+            name="description"
           >
             <Textarea rows={3} />
           </FormInput>
           <FormInput
             control={experienceForm.control}
-            name="triggeredBy"
             label="Triggered By"
+            name="triggeredBy"
             render={({ field }) => (
               <Select
-                value={String(field.value)}
                 onValueChange={(v) => {
                   field.onChange({ target: { value: v } } as any);
                   field.onBlur();
                 }}
+                value={String(field.value)}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select an intent" />
@@ -153,7 +154,7 @@ export const ExperiencesListControl = (
               </Select>
             )}
           />
-          <Button type="submit" className="w-full">
+          <Button className="w-full" type="submit">
             Save
           </Button>
         </form>

@@ -124,7 +124,7 @@ export const suggestion = pgTable(
   (table) => ({
     pk: primaryKey({ columns: [table.id] }),
     documentRef: foreignKey({
-      name: 'Suggestion_documentRef',
+      name: "Suggestion_documentRef",
       columns: [table.documentId, table.documentCreatedAt],
       foreignColumns: [document.id, document.createdAt],
     }),

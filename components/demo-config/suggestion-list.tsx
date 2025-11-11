@@ -1,16 +1,17 @@
-import { PlusIcon, X } from 'lucide-react';
+import { PlusIcon, X } from "lucide-react";
+import type React from "react";
+import { useRef } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from '../ui/input-group';
-import { Button } from '../ui/button';
-import React, { useRef } from 'react';
-import { cn } from '@/lib/utils';
+} from "../ui/input-group";
 
 export function SuggestionListControl(
-  props: React.ComponentProps<'div'> & {
+  props: React.ComponentProps<"div"> & {
     placeholder?: string;
     value?: string[];
     defaultValue?: string[];
@@ -34,7 +35,7 @@ export function SuggestionListControl(
     onValueChange(value?.filter((_, i) => i !== index));
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       const inputValue = inputRef.current?.value;
 
@@ -45,7 +46,7 @@ export function SuggestionListControl(
 
       // clear the input
       if (inputRef.current) {
-        inputRef.current.value = '';
+        inputRef.current.value = "";
       }
     }
   };
@@ -60,23 +61,23 @@ export function SuggestionListControl(
 
     // clear the input
     if (inputRef.current) {
-      inputRef.current.value = '';
+      inputRef.current.value = "";
     }
   };
 
   return (
-    <div {...others} className={cn('space-y-2', className)}>
+    <div {...others} className={cn("space-y-2", className)}>
       <InputGroup>
         <InputGroupInput
-          ref={inputRef}
-          placeholder={placeholder || 'Enter a new suggestion'}
           onKeyDown={handleKeyDown}
+          placeholder={placeholder || "Enter a new suggestion"}
+          ref={inputRef}
         />
         <InputGroupAddon align="inline-end">
           <InputGroupButton
             className="rounded-full"
-            size="icon-xs"
             onClick={handleAdd}
+            size="icon-xs"
           >
             <PlusIcon className="size-3" />
           </InputGroupButton>
@@ -85,16 +86,16 @@ export function SuggestionListControl(
       {value?.map((item: string, i) => {
         return (
           <div
-            key={item}
             className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2"
+            key={item}
           >
-            <span className="text-sm flex-1 truncate">{item}</span>
+            <span className="flex-1 truncate text-sm">{item}</span>
             <Button
-              type="button"
-              variant="ghost"
-              size="icon"
               className="h-8 w-8"
               onClick={() => remove(i)}
+              size="icon"
+              type="button"
+              variant="ghost"
             >
               <X className="h-4 w-4" />
             </Button>

@@ -1,33 +1,19 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import type { User } from 'next-auth';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { useSWRConfig } from 'swr';
-import { unstable_serialize } from 'swr/infinite';
-import { PlusIcon, TrashIcon } from '@/components/icons';
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { User } from "next-auth";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useSWRConfig } from "swr";
+import { unstable_serialize } from "swr/infinite";
+import { PlusIcon, TrashIcon } from "@/components/icons";
 import {
-  SidebarHistory,
   getChatHistoryPaginationKey,
-} from '@/components/sidebar-history';
-import { SidebarUserNav } from '@/components/sidebar-user-nav';
-import { Button } from '@/components/ui/button';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  useSidebar,
-} from '@/components/ui/sidebar';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  SidebarHistory,
+} from "@/components/sidebar-history";
+import { SidebarUserNav } from "@/components/sidebar-user-nav";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,8 +23,22 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useBranding } from '@/hooks/use-branding';
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useBranding } from "@/hooks/use-branding";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -46,25 +46,25 @@ export function AppSidebar({ user }: { user: User | undefined }) {
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const branding = useBranding();
-  console.log({ branding });
+
   const handleDeleteAll = () => {
-    const deletePromise = fetch('/api/history', {
-      method: 'DELETE',
+    const deletePromise = fetch("/api/history", {
+      method: "DELETE",
     });
 
     toast.promise(deletePromise, {
-      loading: 'Deleting all chats...',
+      loading: "Deleting all chats...",
       success: () => {
         mutate(unstable_serialize(getChatHistoryPaginationKey));
-        router.push('/');
+        router.push("/");
         setShowDeleteAllDialog(false);
-        return 'All chats deleted successfully';
+        return "All chats deleted successfully";
       },
-      error: 'Failed to delete all chats',
+      error: "Failed to delete all chats",
     });
   };
 
-  const appTitle = branding.assistant.name;
+  const appTitle = branding.assistantName || "Assistant";
 
   return (
     <>
@@ -82,11 +82,11 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 {branding.logo ? (
                   <>
                     <Image
-                      src={branding.logo}
-                      alt={branding.organization?.name || 'Logo'}
-                      width={32}
-                      height={32}
+                      alt={branding.organizationName || "Logo"}
                       className="rounded-md"
+                      height={32}
+                      src={branding.logo}
+                      width={32}
                     />
                     <span className="cursor-pointer font-semibold text-lg hover:opacity-80">
                       {appTitle}
@@ -122,7 +122,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                       className="h-8 p-1 md:h-fit md:p-2"
                       onClick={() => {
                         setOpenMobile(false);
-                        router.push('/');
+                        router.push("/");
                         router.refresh();
                       }}
                       type="button"
