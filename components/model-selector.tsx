@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import { chatModels } from "@/lib/ai/models";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { cn } from "@/lib/utils";
 import { CheckCircleFillIcon, ChevronDownIcon } from "./icons";
 
@@ -23,6 +24,7 @@ export function ModelSelector({
   session: Session;
   selectedModelId: string;
 } & React.ComponentProps<typeof Button>) {
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const [optimisticModelId, setOptimisticModelId] =
     useOptimistic(selectedModelId);
@@ -30,9 +32,36 @@ export function ModelSelector({
   const userType = session.user.type;
   const { availableChatModelIds } = entitlementsByUserType[userType];
 
-  const availableChatModels = chatModels.filter((chatModel) =>
-    availableChatModelIds.includes(chatModel.id)
-  );
+  // Helper function to get translated model info
+  const getTranslatedModel = (chatModel: {
+    id: string;
+    name: string;
+    description: string;
+  }) => {
+    switch (chatModel.id) {
+      case "chat-model":
+        return {
+          ...chatModel,
+          name: t("model.grokVision.name", chatModel.name),
+          description: t("model.grokVision.description", chatModel.description),
+        };
+      case "chat-model-reasoning":
+        return {
+          ...chatModel,
+          name: t("model.grokReasoning.name", chatModel.name),
+          description: t(
+            "model.grokReasoning.description",
+            chatModel.description
+          ),
+        };
+      default:
+        return chatModel;
+    }
+  };
+
+  const availableChatModels = chatModels
+    .filter((chatModel) => availableChatModelIds.includes(chatModel.id))
+    .map(getTranslatedModel);
 
   const selectedChatModel = useMemo(
     () =>

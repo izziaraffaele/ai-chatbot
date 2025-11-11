@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { cn } from "@/lib/utils";
 import {
   CheckCircleFillIcon,
@@ -19,26 +20,6 @@ import {
 
 export type VisibilityType = "private" | "public";
 
-const visibilities: Array<{
-  id: VisibilityType;
-  label: string;
-  description: string;
-  icon: ReactNode;
-}> = [
-  {
-    id: "private",
-    label: "Private",
-    description: "Only you can access this chat",
-    icon: <LockIcon />,
-  },
-  {
-    id: "public",
-    label: "Public",
-    description: "Anyone with the link can access this chat",
-    icon: <GlobeIcon />,
-  },
-];
-
 export function VisibilitySelector({
   chatId,
   className,
@@ -47,6 +28,7 @@ export function VisibilitySelector({
   chatId: string;
   selectedVisibilityType: VisibilityType;
 } & React.ComponentProps<typeof Button>) {
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
 
   const { visibilityType, setVisibilityType } = useChatVisibility({
@@ -54,9 +36,31 @@ export function VisibilitySelector({
     initialVisibilityType: selectedVisibilityType,
   });
 
+  // Dynamic visibilities array with translations
+  const visibilities = [
+    {
+      id: "private" as VisibilityType,
+      label: t("visibility.private", "Private"),
+      description: t(
+        "visibility.private.description",
+        "Only you can access this chat"
+      ),
+      icon: <LockIcon />,
+    },
+    {
+      id: "public" as VisibilityType,
+      label: t("visibility.public", "Public"),
+      description: t(
+        "visibility.public.description",
+        "Anyone with the link can access this chat"
+      ),
+      icon: <GlobeIcon />,
+    },
+  ];
+
   const selectedVisibility = useMemo(
     () => visibilities.find((visibility) => visibility.id === visibilityType),
-    [visibilityType]
+    [visibilityType, visibilities]
   );
 
   return (

@@ -39,6 +39,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useBranding } from "@/hooks/use-branding";
+import { useTranslations } from "@/lib/i18n/use-translations";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -46,6 +47,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const branding = useBranding();
+  const t = useTranslations();
 
   const handleDeleteAll = () => {
     const deletePromise = fetch("/api/history", {
@@ -53,14 +55,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     });
 
     toast.promise(deletePromise, {
-      loading: "Deleting all chats...",
+      loading: t("common.loading", "Deleting all chats..."),
       success: () => {
         mutate(unstable_serialize(getChatHistoryPaginationKey));
         router.push("/");
         setShowDeleteAllDialog(false);
-        return "All chats deleted successfully";
+        return t("sidebar.success.deleteAll", "All chats deleted successfully");
       },
-      error: "Failed to delete all chats",
+      error: t("sidebar.error.deleteAll", "Failed to delete all chats"),
     });
   };
 

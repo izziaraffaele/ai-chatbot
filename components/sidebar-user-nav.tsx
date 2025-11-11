@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { guestRegex } from "@/lib/constants";
 import { LoaderIcon } from "./icons";
+import { LanguageSwitcher } from "./language-switcher";
 import { toast } from "./toast";
 
 export function SidebarUserNav({ user }: { user: User }) {
@@ -84,6 +85,9 @@ export function SidebarUserNav({ user }: { user: User }) {
               }
             >
               {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="p-2">
+              <LanguageSwitcher />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">

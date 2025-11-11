@@ -1,4 +1,4 @@
-import { type DemoConfig, DemoConfigSchema } from './demo.schema';
+import { type DemoConfig, DemoConfigSchema } from "./demo.schema";
 
 /**
  * Deep merge utility for combining configuration objects
@@ -16,10 +16,10 @@ function deepMerge<T extends Record<string, unknown>>(
 
       if (
         sourceValue &&
-        typeof sourceValue === 'object' &&
+        typeof sourceValue === "object" &&
         !Array.isArray(sourceValue) &&
         targetValue &&
-        typeof targetValue === 'object' &&
+        typeof targetValue === "object" &&
         !Array.isArray(targetValue)
       ) {
         result[key] = deepMerge(
@@ -101,14 +101,14 @@ function getEnvironmentDefaults(): Record<string, unknown> {
  */
 const schemaDefaults: DemoConfig = {
   assistant: {
-    name: 'Assistant',
-    description: 'AI assistant',
+    name: "Assistant",
+    description: "AI assistant",
     roles: [],
-    tone: 'friendly',
+    tone: "friendly",
   },
   appearance: {
-    preset: 'default',
-    defaultMode: 'auto',
+    preset: "default",
+    defaultMode: "auto",
   },
   chat: {
     suggestions: [],
@@ -120,7 +120,7 @@ const schemaDefaults: DemoConfig = {
     },
   },
   context: {
-    indexes: ['memoraiz', 'demo-courses'],
+    indexes: ["memoraiz", "demo-courses"],
   },
   runtime: {
     experiences: [],
@@ -140,9 +140,9 @@ export function getDemoConfig(): DemoConfig {
     // Validate and return the configuration
     return DemoConfigSchema.parse(merged);
   } catch (error) {
-    console.error('Branding configuration validation failed:', error);
+    console.error("Branding configuration validation failed:", error);
     throw new Error(
-      'Invalid branding configuration. Please check your environment variables and config/demo.ts'
+      "Invalid branding configuration. Please check your environment variables and config/demo.ts"
     );
   }
 }

@@ -22,6 +22,7 @@ import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SelectItem } from "@/components/ui/select";
 import { chatModels } from "@/lib/ai/models";
 import { myProvider } from "@/lib/ai/providers";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { cn } from "@/lib/utils";
@@ -82,6 +83,7 @@ function PureMultimodalInput({
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
+  const t = useTranslations();
 
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
@@ -191,7 +193,9 @@ function PureMultimodalInput({
       const { error } = await response.json();
       toast.error(error);
     } catch (_error) {
-      toast.error("Failed to upload file, please try again!");
+      toast.error(
+        t("errors.fileUploadFailed", "Failed to upload file, please try again!")
+      );
     }
   }, []);
 
@@ -269,7 +273,9 @@ function PureMultimodalInput({
         ]);
       } catch (error) {
         console.error("Error uploading pasted images:", error);
-        toast.error("Failed to upload pasted image(s)");
+        toast.error(
+          t("errors.fileUploadFailed", "Failed to upload pasted image(s)")
+        );
       } finally {
         setUploadQueue([]);
       }
@@ -312,7 +318,12 @@ function PureMultimodalInput({
         onSubmit={(event) => {
           event.preventDefault();
           if (status !== "ready") {
-            toast.error("Please wait for the model to finish its response!");
+            toast.error(
+              t(
+                "errors.modelWait",
+                "Please wait for the model to finish its response!"
+              )
+            );
           } else {
             submitForm();
           }
@@ -360,7 +371,7 @@ function PureMultimodalInput({
             maxHeight={200}
             minHeight={44}
             onChange={handleInput}
-            placeholder="Send a message..."
+            placeholder={t("chat.input.placeholder", "Send a message...")}
             ref={textareaRef}
             rows={1}
             value={input}

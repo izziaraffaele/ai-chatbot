@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Enhanced URL validation that supports both absolute URLs, relative paths, and base64 data URLs
@@ -11,20 +11,20 @@ const urlSchema = z
       if (!value) return true;
 
       // Allow base64 data URLs
-      if (value.startsWith('data:')) {
+      if (value.startsWith("data:")) {
         return /^data:image\/[a-zA-Z]+;base64,/.test(value);
       }
 
       // Allow HTTP(S) URLs
       try {
         const url = new URL(value);
-        return url.protocol === 'http:' || url.protocol === 'https:';
+        return url.protocol === "http:" || url.protocol === "https:";
       } catch {
         return false;
       }
     },
     {
-      message: 'Must be a valid URL or base64 data URL',
+      message: "Must be a valid URL or base64 data URL",
     }
   )
   .optional();
@@ -40,8 +40,8 @@ export const DemoConfigSchema = z.object({
     avatar: urlSchema,
     description: z.string().optional(),
     tone: z
-      .enum(['friendly', 'supportive', 'excited', 'informative'])
-      .default('friendly'),
+      .enum(["friendly", "supportive", "excited", "informative"])
+      .default("friendly"),
     // behaviour
     instructions: z.string().optional(),
     guidelines: z.string().optional(),
@@ -49,9 +49,9 @@ export const DemoConfigSchema = z.object({
   }),
   appearance: z.object({
     // theme
-    preset: z.enum(['default', 'playful', 'tech']).default('default'),
+    preset: z.enum(["default", "playful", "tech"]).default("default"),
     customCss: z.string().optional(),
-    defaultMode: z.enum(['dark', 'light', 'auto']).default('auto'),
+    defaultMode: z.enum(["dark", "light", "auto"]).default("auto"),
     // assets
     favicon: urlSchema,
     logo: urlSchema,
@@ -85,7 +85,7 @@ export const DemoConfigSchema = z.object({
       })
       .optional(),
     // knowledgebase
-    indexes: z.array(z.string()).default(['memoraiz']),
+    indexes: z.array(z.string()).default(["memoraiz"]),
   }),
   runtime: z.object({
     intents: z

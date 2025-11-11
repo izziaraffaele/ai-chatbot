@@ -1,5 +1,7 @@
-import Form from "next/form";
+"use client";
 
+import Form from "next/form";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
@@ -7,13 +9,26 @@ export function AuthForm({
   action,
   children,
   defaultEmail = "",
+  type = "login",
 }: {
   action: NonNullable<
     string | ((formData: FormData) => void | Promise<void>) | undefined
   >;
   children: React.ReactNode;
   defaultEmail?: string;
+  type?: "login" | "register";
 }) {
+  const t = useTranslations();
+  const emailLabelKey =
+    type === "register" ? "auth.register.emailLabel" : "auth.login.emailLabel";
+  const emailPlaceholderKey =
+    type === "register"
+      ? "auth.register.emailPlaceholder"
+      : "auth.login.emailPlaceholder";
+  const passwordLabelKey =
+    type === "register"
+      ? "auth.register.passwordLabel"
+      : "auth.login.passwordLabel";
   return (
     <Form action={action} className="flex flex-col gap-4 px-4 sm:px-16">
       <div className="flex flex-col gap-2">
@@ -21,7 +36,7 @@ export function AuthForm({
           className="font-normal text-zinc-600 dark:text-zinc-400"
           htmlFor="email"
         >
-          Email Address
+          {t(emailLabelKey, "Email Address")}
         </Label>
 
         <Input
@@ -31,7 +46,7 @@ export function AuthForm({
           defaultValue={defaultEmail}
           id="email"
           name="email"
-          placeholder="user@acme.com"
+          placeholder={t(emailPlaceholderKey, "user@example.com")}
           required
           type="email"
         />
@@ -42,7 +57,7 @@ export function AuthForm({
           className="font-normal text-zinc-600 dark:text-zinc-400"
           htmlFor="password"
         >
-          Password
+          {t(passwordLabelKey, "Password")}
         </Label>
 
         <Input

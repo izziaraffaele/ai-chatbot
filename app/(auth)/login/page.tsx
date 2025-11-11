@@ -10,11 +10,13 @@ import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
 import { useBranding } from "@/hooks/use-branding";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { type LoginActionState, login } from "../actions";
 
 export default function Page() {
   const router = useRouter();
   const branding = useBranding();
+  const t = useTranslations();
 
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
@@ -32,12 +34,15 @@ export default function Page() {
     if (state.status === "failed") {
       toast({
         type: "error",
-        description: "Invalid credentials!",
+        description: t("errors.authInvalid", "Invalid credentials!"),
       });
     } else if (state.status === "invalid_data") {
       toast({
         type: "error",
-        description: "Failed validating your submission!",
+        description: t(
+          "errors.authValidation",
+          "Failed validating your submission!"
+        ),
       });
     } else if (state.status === "success") {
       setIsSuccessful(true);
@@ -45,7 +50,7 @@ export default function Page() {
       router.refresh();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.status]);
+  }, [state.status, t]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
@@ -72,22 +77,29 @@ export default function Page() {
               {appName}
             </h2>
           )}
-          <h3 className="font-semibold text-xl dark:text-zinc-50">Sign In</h3>
+          <h3 className="font-semibold text-xl dark:text-zinc-50">
+            {t("auth.login.title", "Sign In")}
+          </h3>
           <p className="text-gray-500 text-sm dark:text-zinc-400">
-            Use your email and password to sign in
+            {t(
+              "auth.login.description",
+              "Use your email and password to sign in"
+            )}
           </p>
         </div>
-        <AuthForm action={handleSubmit} defaultEmail={email}>
-          <SubmitButton isSuccessful={isSuccessful}>Sign in</SubmitButton>
+        <AuthForm action={handleSubmit} defaultEmail={email} type="login">
+          <SubmitButton isSuccessful={isSuccessful}>
+            {t("auth.login.buttonSubmit", "Sign in")}
+          </SubmitButton>
           <p className="mt-4 text-center text-gray-600 text-sm dark:text-zinc-400">
-            {"Don't have an account? "}
+            {t("auth.login.noAccount", "Don't have an account? ")}
             <Link
               className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
               href="/register"
             >
-              Sign up
+              {t("auth.login.linkSignUp", "Sign up")}
             </Link>
-            {" for free."}
+            {t("auth.login.linkSignUpSuffix", " for free.")}
           </p>
         </AuthForm>
       </div>

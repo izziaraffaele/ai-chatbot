@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { guestRegex, isDevelopmentEnvironment, isProductionEnvironment } from "./lib/constants";
+import {
+  guestRegex,
+  isDevelopmentEnvironment,
+  isProductionEnvironment,
+} from "./lib/constants";
 
 /**
  * Determines if secure cookies should be used based on environment and request origin.
@@ -14,7 +18,11 @@ function shouldUseSecureCookie(request: NextRequest): boolean {
 
   // Check if request is from localhost or 127.0.0.1
   const hostname = request.nextUrl.hostname.toLowerCase();
-  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+  if (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1"
+  ) {
     return false;
   }
 

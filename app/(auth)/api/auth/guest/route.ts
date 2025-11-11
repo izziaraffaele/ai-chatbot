@@ -1,7 +1,10 @@
-import { NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
-import { signIn } from '@/app/(auth)/auth';
-import { isDevelopmentEnvironment, isProductionEnvironment } from '@/lib/constants';
+import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { signIn } from "@/app/(auth)/auth";
+import {
+  isDevelopmentEnvironment,
+  isProductionEnvironment,
+} from "@/lib/constants";
 
 /**
  * Determines if secure cookies should be used based on environment and request origin.
@@ -17,7 +20,11 @@ function shouldUseSecureCookie(request: Request): boolean {
   try {
     const url = new URL(request.url);
     const hostname = url.hostname.toLowerCase();
-    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "::1"
+    ) {
       return false;
     }
   } catch {
@@ -30,7 +37,7 @@ function shouldUseSecureCookie(request: Request): boolean {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const redirectUrl = searchParams.get('redirectUrl') || '/';
+  const redirectUrl = searchParams.get("redirectUrl") || "/";
 
   const token = await getToken({
     req: request,
@@ -39,8 +46,8 @@ export async function GET(request: Request) {
   });
 
   if (token) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return signIn('guest', { redirect: true, redirectTo: redirectUrl });
+  return signIn("guest", { redirect: true, redirectTo: redirectUrl });
 }

@@ -3,6 +3,7 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { motion } from "framer-motion";
 import { memo } from "react";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import type { ChatMessage } from "@/lib/types";
 import { Suggestion } from "./elements/suggestion";
 import type { VisibilityType } from "./visibility-selector";
@@ -14,11 +15,19 @@ type SuggestedActionsProps = {
 };
 
 function PureSuggestedActions({ chatId, sendMessage }: SuggestedActionsProps) {
+  const t = useTranslations();
+
   const suggestedActions = [
-    "What are the advantages of using Next.js?",
-    "Write code to demonstrate Dijkstra's algorithm",
-    "Help me write an essay about Silicon Valley",
-    "What is the weather in San Francisco?",
+    t("chat.suggestions.prompt1", "What are the advantages of using Next.js?"),
+    t(
+      "chat.suggestions.prompt2",
+      "Write code to demonstrate Dijkstra's algorithm"
+    ),
+    t(
+      "chat.suggestions.prompt3",
+      "Help me write an essay about Silicon Valley"
+    ),
+    t("chat.suggestions.prompt4", "What is the weather in San Francisco?"),
   ];
 
   return (

@@ -136,6 +136,46 @@ The app uses Next.js App Router with two main route groups:
 - `app/(chat)/api/suggestions/route.ts` - Suggestion management
 - `app/(auth)/api/auth/` - NextAuth endpoints
 
+### Internationalization (i18n)
+
+**7. Client-Side Translation System (`lib/i18n/`)**
+
+The application supports multiple languages through a client-side translation system:
+
+- **Translation files:** JSON/TypeScript files in `lib/i18n/translations/`
+  - `en.ts` - English translations (source of truth)
+  - `it.ts` - Italian translations (must match en.ts structure)
+- **Translation hook:** `useTranslations()` provides access to translations in components
+- **Language persistence:** Cookie-based (`locale` cookie) with 1-year expiration
+- **Dynamic loading:** Translation files loaded on-demand based on user preference
+
+**Usage in Components:**
+```typescript
+import { useTranslations } from "@/lib/i18n/use-translations";
+
+function MyComponent() {
+  const t = useTranslations();
+
+  return (
+    <button>
+      {t("common.save", "Save")} {/* Key with fallback */}
+    </button>
+  );
+}
+```
+
+**Language Configuration:**
+- `NEXT_PUBLIC_DEFAULT_LOCALE` - Default language (defaults to "en")
+- `NEXT_PUBLIC_SUPPORTED_LOCALES` - Comma-separated supported languages (defaults to "en,it")
+- Language switcher available in settings/user navigation menu
+
+**Adding New Languages:**
+1. Create new translation file: `lib/i18n/translations/[locale].ts`
+2. Add locale to `NEXT_PUBLIC_SUPPORTED_LOCALES` environment variable
+3. Update `Locale` type in `lib/i18n/types.ts`
+4. Add language name to `LANGUAGE_NAMES` in `lib/i18n/utils.ts`
+5. Update `loadTranslations()` function in `lib/i18n/utils.ts`
+
 ## Code Quality Standards
 
 This project uses **Ultracite** (Biome-based) for linting and formatting. Key rules from `.cursor/rules/ultracite.mdc`:
@@ -178,6 +218,7 @@ This project uses **Ultracite** (Biome-based) for linting and formatting. Key ru
 3. Optional:
    - `REDIS_URL` - Enables resumable streams
    - Branding variables (`NEXT_PUBLIC_*`) - Configure app identity
+   - Internationalization variables (`NEXT_PUBLIC_*_LOCALE`) - Configure language settings
 
 ## Common Patterns
 

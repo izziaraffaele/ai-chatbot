@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { useArtifactSelector } from "@/hooks/use-artifact";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { cn } from "@/lib/utils";
 import { Loader } from "./elements/loader";
 import { CrossSmallIcon, TerminalWindowIcon } from "./icons";
@@ -32,6 +33,7 @@ export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
   const [height, setHeight] = useState<number>(300);
   const [isResizing, setIsResizing] = useState(false);
   const consoleEndRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations();
 
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
 
@@ -113,7 +115,7 @@ export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
             <div className="text-muted-foreground">
               <TerminalWindowIcon />
             </div>
-            <div>Console</div>
+            <div>{t("console.title", "Console")}</div>
           </div>
           <Button
             className="size-fit p-1 hover:bg-zinc-200 dark:hover:bg-zinc-700"
@@ -152,7 +154,7 @@ export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
                   </div>
                   <div className="text-muted-foreground">
                     {consoleOutput.status === "in_progress"
-                      ? "Initializing..."
+                      ? t("console.initializing", "Initializing...")
                       : consoleOutput.status === "loading_packages"
                         ? consoleOutput.contents.map((content) =>
                             content.type === "text" ? content.value : null

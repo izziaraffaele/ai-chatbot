@@ -137,15 +137,11 @@ export const ImageUpload = (props: ImageUploadProps) => {
     <div className={cn("space-y-2", className)}>
       {value ? (
         <div className="relative inline-block">
-          <div className="border-border overflow-hidden rounded-lg border">
-            <img
-              alt="Preview"
-              className="h-32 w-32 object-cover"
-              src={value}
-            />
+          <div className="overflow-hidden rounded-lg border border-border">
+            <img alt="Preview" className="h-32 w-32 object-cover" src={value} />
           </div>
           <Button
-            className="absolute -right-2 -top-2 h-6 w-6 rounded-full"
+            className="-right-2 -top-2 absolute h-6 w-6 rounded-full"
             onClick={handleRemove}
             size="icon"
             type="button"
@@ -185,7 +181,7 @@ export const ImageUpload = (props: ImageUploadProps) => {
         <>
           <div
             className={cn(
-              "border-border hover:border-primary flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors",
+              "flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-border border-dashed transition-colors hover:border-primary",
               isDragging && "border-primary bg-primary/5",
               error && "border-destructive"
             )}
@@ -201,11 +197,11 @@ export const ImageUpload = (props: ImageUploadProps) => {
             role="button"
             tabIndex={0}
           >
-            <Upload className="text-muted-foreground mb-2 h-8 w-8" />
+            <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
             <p className="text-muted-foreground text-sm">
               Click or drag image to upload
             </p>
-            <p className="text-muted-foreground mt-1 text-xs">
+            <p className="mt-1 text-muted-foreground text-xs">
               Max size: {maxSizeMB}MB
             </p>
           </div>
@@ -222,10 +218,10 @@ export const ImageUpload = (props: ImageUploadProps) => {
       )}
 
       <input
-        ref={fileInputRef}
         accept={accept}
         className="hidden"
         onChange={handleInputChange}
+        ref={fileInputRef}
         type="file"
       />
 

@@ -9,11 +9,13 @@ import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
 import { useBranding } from "@/hooks/use-branding";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { type RegisterActionState, register } from "../actions";
 
 export default function Page() {
   const router = useRouter();
   const branding = useBranding();
+  const t = useTranslations();
 
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
@@ -29,23 +31,38 @@ export default function Page() {
 
   useEffect(() => {
     if (state.status === "user_exists") {
-      toast({ type: "error", description: "Account already exists!" });
+      toast({
+        type: "error",
+        description: t("errors.accountExists", "Account already exists!"),
+      });
     } else if (state.status === "failed") {
-      toast({ type: "error", description: "Failed to create account!" });
+      toast({
+        type: "error",
+        description: t("errors.createAccount", "Failed to create account!"),
+      });
     } else if (state.status === "invalid_data") {
       toast({
         type: "error",
-        description: "Failed validating your submission!",
+        description: t(
+          "errors.authValidation",
+          "Failed validating your submission!"
+        ),
       });
     } else if (state.status === "success") {
-      toast({ type: "success", description: "Account created successfully!" });
+      toast({
+        type: "success",
+        description: t(
+          "success.accountCreated",
+          "Account created successfully!"
+        ),
+      });
 
       setIsSuccessful(true);
       updateSession();
       router.refresh();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.status]);
+  }, [state.status, t]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
@@ -77,17 +94,19 @@ export default function Page() {
             Create an account with your email and password
           </p>
         </div>
-        <AuthForm action={handleSubmit} defaultEmail={email}>
-          <SubmitButton isSuccessful={isSuccessful}>Sign Up</SubmitButton>
+        <AuthForm action={handleSubmit} defaultEmail={email} type="register">
+          <SubmitButton isSuccessful={isSuccessful}>
+            {t("auth.register.buttonSubmit", "Create account")}
+          </SubmitButton>
           <p className="mt-4 text-center text-gray-600 text-sm dark:text-zinc-400">
-            {"Already have an account? "}
+            {t("auth.register.hasAccount", "Already have an account? ")}
             <Link
               className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
               href="/login"
             >
-              Sign in
+              {t("auth.register.linkSignIn", "Sign in")}
             </Link>
-            {" instead."}
+            {t("auth.register.linkSignInSuffix", " instead.")}
           </p>
         </AuthForm>
       </div>

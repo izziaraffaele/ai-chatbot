@@ -1,22 +1,22 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { TrashIcon } from 'lucide-react';
-import type React from 'react';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { type DemoConfig, DemoConfigSchema } from '@/config/demo.schema';
-import { cn } from '@/lib/utils';
-import { PlusIcon } from '../icons';
-import { Button } from '../ui/button';
-import { Form } from '../ui/form';
-import { FormInput } from '../ui/form-input';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { TrashIcon } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { type DemoConfig, DemoConfigSchema } from "@/config/demo.schema";
+import { cn } from "@/lib/utils";
+import { PlusIcon } from "../icons";
+import { Button } from "../ui/button";
+import { Form } from "../ui/form";
+import { FormInput } from "../ui/form-input";
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemTitle,
-} from '../ui/item';
+} from "../ui/item";
 import {
   Select,
   SelectContent,
@@ -24,11 +24,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Textarea } from '../ui/textarea';
+} from "../ui/select";
+import { Textarea } from "../ui/textarea";
 
-export type ExperienceConfig = DemoConfig['runtime']['experiences'][number];
-export type IntentConfig = DemoConfig['runtime']['intents'][number];
+export type ExperienceConfig = DemoConfig["runtime"]["experiences"][number];
+export type IntentConfig = DemoConfig["runtime"]["intents"][number];
 
 const ExperienceInputSchema = z.object({
   name: z.string(),
@@ -38,7 +38,7 @@ const ExperienceInputSchema = z.object({
 });
 
 export const ExperiencesListControl = (
-  props: React.ComponentProps<'div'> & {
+  props: React.ComponentProps<"div"> & {
     value?: ExperienceConfig[];
     intents?: IntentConfig[];
     onAdd?: (value: ExperienceConfig) => void;
@@ -58,8 +58,8 @@ export const ExperiencesListControl = (
 
   const experienceForm = useForm({
     defaultValues: {
-      name: '',
-      description: '',
+      name: "",
+      description: "",
       triggeredBy: null,
       triggerThreshold: 0.8,
     },
@@ -74,7 +74,7 @@ export const ExperiencesListControl = (
 
   if (!isEditing) {
     return (
-      <div className={cn('space-y-4', className)} {...others}>
+      <div className={cn("space-y-4", className)} {...others}>
         {value.length === 0 && (
           <div className="text-muted-foreground">
             No experiences have been added yet

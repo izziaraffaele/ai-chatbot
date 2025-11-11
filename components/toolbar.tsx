@@ -24,6 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import type { ChatMessage } from "@/lib/types";
 import { type ArtifactKind, artifactDefinitions } from "./artifact";
 import type { ArtifactToolbarItem } from "./create-artifact";
@@ -142,13 +143,15 @@ const ReadingLevelSelector = ({
   isAnimating: boolean;
   sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
 }) => {
+  const t = useTranslations();
+
   const LEVELS = [
-    "Elementary",
-    "Middle School",
-    "Keep current level",
-    "High School",
-    "College",
-    "Graduate",
+    t("toolbar.readingLevel.elementary", "Elementary"),
+    t("toolbar.readingLevel.middleSchool", "Middle School"),
+    t("toolbar.readingLevel.keepCurrent", "Keep current level"),
+    t("toolbar.readingLevel.highSchool", "High School"),
+    t("toolbar.readingLevel.college", "College"),
+    t("toolbar.readingLevel.graduate", "Graduate"),
   ];
 
   const y = useMotionValue(-40 * 2);
@@ -205,7 +208,10 @@ const ReadingLevelSelector = ({
                     parts: [
                       {
                         type: "text",
-                        text: `Please adjust the reading level to ${LEVELS[currentLevel]} level.`,
+                        text: t(
+                          "toolbar.adjustReadingLevel",
+                          "Please adjust the reading level to {level} level."
+                        ).replace("{level}", LEVELS[currentLevel]),
                       },
                     ],
                   });
