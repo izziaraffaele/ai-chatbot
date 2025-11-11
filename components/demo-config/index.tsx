@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import {
   AppWindow,
   Building2,
@@ -11,10 +11,10 @@ import {
   Sparkles,
   Target,
   User,
-} from 'lucide-react';
-import type React from 'react';
-import { useFormContext } from 'react-hook-form';
-import { FormInput } from '@/components/ui/form-input';
+} from "lucide-react";
+import type React from "react";
+import { useFormContext } from "react-hook-form";
+import { FormInput } from "@/components/ui/form-input";
 import {
   Select,
   SelectContent,
@@ -22,141 +22,31 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import type { DemoConfig as DemoConfigType } from '@/config/demo.schema';
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import type { DemoConfig as DemoConfigType } from "@/config/demo.schema";
+import {
+  THEME_COLOR_PRESETS,
+  THEME_PRESETS,
+} from "@/lib/branding/theme-presets";
 import {
   type ExperienceConfig,
   ExperiencesListControl,
-} from './experiences-list';
-import { DemoConfigFieldGroup, DemoConfigForm } from './form';
-import { ImageUpload } from './image-upload';
-import { IntentsListControl } from './intents-list';
+} from "./experiences-list";
+import { DemoConfigFieldGroup, DemoConfigForm } from "./form";
+import { ImageUpload } from "./image-upload";
+import { IntentsListControl } from "./intents-list";
 import {
   DemoConfigPanel,
   DemoConfigPanelContent,
   DemoConfigPanelTrigger,
-} from './panel';
-import { SuggestionListControl } from './suggestion-list';
-import { SwitchListControl } from './switch-list';
-import { DemoThemePicker } from './theme-picker';
-import { Button } from '../ui/button';
-
-const THEME_PRESETS = [
-  {
-    id: 'playful',
-    name: 'Playful',
-    description: 'Vibrant, friendly theme',
-    previewColors: {
-      primary: 'hsl(346 77% 50%)',
-      secondary: 'hsl(340 82% 52%)',
-      background: 'hsl(0 0% 100%)',
-      foreground: 'hsl(340 82% 52%)',
-    },
-    css: `:root {
-  --background: 0 0% 100%;
-  --foreground: 340 82% 52%;
-  --card: 0 0% 100%;
-  --card-foreground: 340 82% 52%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 340 82% 52%;
-  --primary: 346 77% 50%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 340 82% 52%;
-  --secondary-foreground: 0 0% 100%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 340 82% 52%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 346 77% 50%;
-  --radius: 0.75rem;
-}
-
-.dark {
-  --background: 340 50% 5%;
-  --foreground: 340 20% 95%;
-  --card: 340 50% 8%;
-  --card-foreground: 340 20% 95%;
-  --popover: 340 50% 8%;
-  --popover-foreground: 340 20% 95%;
-  --primary: 346 77% 60%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 340 82% 30%;
-  --secondary-foreground: 340 20% 95%;
-  --muted: 340 50% 15%;
-  --muted-foreground: 340 15% 65%;
-  --accent: 346 77% 50%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 340 20% 95%;
-  --border: 340 50% 20%;
-  --input: 340 50% 20%;
-  --ring: 346 77% 60%;
-}`,
-  },
-  {
-    id: 'tech',
-    name: 'Tech',
-    description: 'Dark, professional theme',
-    previewColors: {
-      primary: 'hsl(217 91% 60%)',
-      secondary: 'hsl(217 33% 17%)',
-      background: 'hsl(222 84% 5%)',
-      foreground: 'hsl(210 40% 98%)',
-    },
-    css: `:root {
-  --background: 222 84% 5%;
-  --foreground: 210 40% 98%;
-  --card: 222 84% 7%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 84% 7%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 84% 5%;
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 215 28% 17%;
-  --muted-foreground: 217 10% 64%;
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 63% 31%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 215 28% 17%;
-  --input: 215 28% 17%;
-  --ring: 217 91% 60%;
-  --radius: 0.5rem;
-}
-
-.dark {
-  --background: 222 84% 5%;
-  --foreground: 210 40% 98%;
-  --card: 222 84% 7%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 84% 7%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 84% 5%;
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 215 28% 17%;
-  --muted-foreground: 217 10% 64%;
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 63% 31%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 215 28% 17%;
-  --input: 215 28% 17%;
-  --ring: 217 91% 60%;
-}`,
-  },
-];
+} from "./panel";
+import { SuggestionListControl } from "./suggestion-list";
+import { SwitchListControl } from "./switch-list";
+import { DemoThemePicker } from "./theme-picker";
 
 const DemoConfigSection = (
-  props: React.ComponentProps<'section'> & {
+  props: React.ComponentProps<"section"> & {
     title: string;
     description?: string;
   }
@@ -306,7 +196,7 @@ const AppearanceThemeFieldset = () => {
         name="appearance.customCss"
       >
         <DemoThemePicker
-          options={THEME_PRESETS.map((v) => ({
+          options={THEME_COLOR_PRESETS.map((v) => ({
             label: v.name,
             primaryColor: v.previewColors.primary,
             value: v.css,
@@ -431,14 +321,14 @@ const ChatFeaturesFieldset = () => {
               field.onBlur();
             }}
             options={[
-              { label: 'Memory', value: 'memory', disabled: true },
-              { label: 'Artifacts', value: 'artifacts', disabled: true },
+              { label: "Memory", value: "memory", disabled: true },
+              { label: "Artifacts", value: "artifacts", disabled: true },
               {
-                label: 'Multimodal Input',
-                value: 'multimodalInput',
+                label: "Multimodal Input",
+                value: "multimodalInput",
                 disabled: true,
               },
-              { label: 'Web Search', value: 'webSearch' },
+              { label: "Web Search", value: "webSearch" },
             ]}
             value={field.value as Record<string, boolean>}
           />
@@ -524,16 +414,16 @@ const ContextIndexesFieldset = () => {
                   return carry;
                 }, [] as string[]);
 
-                if (!newValue.includes('memoraiz')) {
-                  newValue.push('memoraiz');
+                if (!newValue.includes("memoraiz")) {
+                  newValue.push("memoraiz");
                 }
 
                 field.onChange({ target: { value: newValue } } as any);
                 field.onBlur();
               }}
               options={[
-                { label: 'MemorAIz', value: 'memoraiz', disabled: true },
-                { label: 'Demo Courses', value: 'demo-courses' },
+                { label: "MemorAIz", value: "memoraiz", disabled: true },
+                { label: "Demo Courses", value: "demo-courses" },
               ]}
               value={currentValue.reduce(
                 (carry, v) => ({

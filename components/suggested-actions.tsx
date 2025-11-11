@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import type { UseChatHelpers } from '@ai-sdk/react';
-import { motion } from 'framer-motion';
-import { memo } from 'react';
-import type { ChatMessage } from '@/lib/types';
-import { usePromptSuggestions } from '@/hooks/use-prompt-suggestions';
-import { Suggestion } from './elements/suggestion';
-import type { VisibilityType } from './visibility-selector';
+import type { UseChatHelpers } from "@ai-sdk/react";
+import { motion } from "framer-motion";
+import { memo } from "react";
+import { usePromptSuggestions } from "@/hooks/use-prompt-suggestions";
+import type { ChatMessage } from "@/lib/types";
+import { Suggestion } from "./elements/suggestion";
+import type { VisibilityType } from "./visibility-selector";
 
 type SuggestedActionsProps = {
   chatId: string;
-  sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
+  sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
   selectedVisibilityType: VisibilityType;
 };
 
@@ -32,10 +32,10 @@ function PureSuggestedActions({ chatId, sendMessage }: SuggestedActionsProps) {
           <Suggestion
             className="h-auto w-full whitespace-normal p-3 text-left"
             onClick={(suggestion) => {
-              window.history.replaceState({}, '', `/chat/${chatId}`);
+              window.history.replaceState({}, "", `/chat/${chatId}`);
               sendMessage({
-                role: 'user',
-                parts: [{ type: 'text', text: suggestion }],
+                role: "user",
+                parts: [{ type: "text", text: suggestion }],
               });
             }}
             suggestion={suggestedAction}

@@ -1,9 +1,11 @@
-import { SettingsIcon } from 'lucide-react';
-import type React from 'react';
-import equal from 'fast-deep-equal';
-import { cn } from '@/lib/utils';
-import { Button } from '../ui/button';
-import { ScrollArea } from '../ui/scroll-area';
+import equal from "fast-deep-equal";
+import { SettingsIcon } from "lucide-react";
+import type React from "react";
+import { demoConfig } from "@/config/demo";
+import { useDemoConfig } from "@/hooks/use-demo-config";
+import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -11,17 +13,15 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '../ui/sheet';
+} from "../ui/sheet";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../ui/tooltip';
-import { useDemoConfig } from '@/hooks/use-demo-config';
-import { demoConfig } from '@/config/demo';
+} from "../ui/tooltip";
 
-const DEFAULT_TITLE = 'Demo Settings';
+const DEFAULT_TITLE = "Demo Settings";
 
 export const DemoConfigPanelTrigger = ({
   onClick,
@@ -55,13 +55,13 @@ export const DemoConfigPanelContent = ({
   className,
   title = DEFAULT_TITLE,
   ...others
-}: React.ComponentProps<'div'> & { title?: React.ReactNode }) => {
+}: React.ComponentProps<"div"> & { title?: React.ReactNode }) => {
   const { value, setValue } = useDemoConfig();
   console.log(value, demoConfig);
   return (
     <SheetContent
       {...others}
-      className={cn('flex h-full flex-col gap-0 p-0', className)}
+      className={cn("flex h-full flex-col gap-0 p-0", className)}
     >
       <SheetHeader className="border-b p-4">
         <SheetTitle>{title}</SheetTitle>

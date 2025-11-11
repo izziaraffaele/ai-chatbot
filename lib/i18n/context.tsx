@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   createContext,
@@ -6,9 +6,9 @@ import {
   useContext,
   useMemo,
   useState,
-} from 'react';
-import type { LanguageContextValue, Locale, TranslationDict } from './types';
-import { getCurrentLocale, loadTranslations, setLocaleToCookie } from './utils';
+} from "react";
+import type { LanguageContextValue, Locale, TranslationDict } from "./types";
+import { getCurrentLocale, loadTranslations, setLocaleToCookie } from "./utils";
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
@@ -49,7 +49,7 @@ export function LanguageProvider({
         setTranslations(newTranslations);
         setLocaleToCookie(newLocale);
       } catch (error) {
-        console.error('Failed to switch locale:', error);
+        console.error("Failed to switch locale:", error);
       }
     },
     [locale]
@@ -77,7 +77,7 @@ export function useLanguageContext(): LanguageContextValue {
   const context = useContext(LanguageContext);
   if (context === null) {
     throw new Error(
-      'useLanguageContext must be used within a LanguageProvider'
+      "useLanguageContext must be used within a LanguageProvider"
     );
   }
   return context;

@@ -143,12 +143,21 @@ export function updateFavicon(url: string) {
 /**
  * Inject custom CSS variables into the document
  * Creates or updates a style element with custom CSS properties
+ * Removes the style element if CSS is empty
  */
-export function injectCustomCss(css: string) {
+export function injectCustomCss(css: string | undefined) {
   if (typeof document === 'undefined') return;
 
   const styleId = 'branding-custom-css';
   let style = document.getElementById(styleId);
+
+  // Remove style element if no CSS provided
+  if (!css) {
+    if (style) {
+      style.remove();
+    }
+    return;
+  }
 
   if (!style) {
     style = document.createElement('style');
@@ -156,6 +165,5 @@ export function injectCustomCss(css: string) {
     document.head.appendChild(style);
   }
 
-  // Wrap in :root selector to ensure global scope
   style.textContent = `${css}`;
 }

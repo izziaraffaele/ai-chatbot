@@ -143,7 +143,8 @@ export const it: TranslationDict = {
   "artifact.actions.copiedCsvToClipboard": "CSV copiato negli appunti!",
 
   // Artifact Version
-  "artifact.version.viewingPrevious": "Stai visualizzando una versione precedente",
+  "artifact.version.viewingPrevious":
+    "Stai visualizzando una versione precedente",
   "artifact.version.restoreToEdit":
     "Ripristina questa versione per apportare modifiche",
   "artifact.version.restoreButton": "Ripristina questa versione",

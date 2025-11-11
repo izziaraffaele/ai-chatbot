@@ -20,11 +20,28 @@ export function BrandingProvider({ children }: { children: React.ReactNode }) {
   }, [branding.favicon]);
 
   useEffect(() => {
-    // Inject custom CSS variables if configured
-    if (branding.customCss) {
-      injectCustomCss(branding.customCss);
+    // Inject custom CSS variables if configured (or remove if empty)
+    injectCustomCss(branding.customCss);
+
+    // Also remove the initial branding CSS injected in <head> on first hydration
+    // This ensures we don't have duplicate style tags
+    const initStyle = document.getElementById("branding-css-init");
+    if (initStyle) {
+      initStyle.remove();
     }
   }, [branding.customCss]);
+
+  useEffect(() => {
+    // Set theme preset data attribute for custom Tailwind variants
+    if (branding.preset && branding.preset !== "default") {
+      document.documentElement.setAttribute(
+        "data-theme-preset",
+        branding.preset
+      );
+    } else {
+      document.documentElement.removeAttribute("data-theme-preset");
+    }
+  }, [branding.preset]);
 
   return <>{children}</>;
 }

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { demoConfig } from '@/config/demo';
-import { useLocalStorage } from 'usehooks-ts';
+import { useLocalStorage } from "usehooks-ts";
+import { demoConfig } from "@/config/demo";
 
 export const useDemoConfig = () => {
-  const [value, setValue] = useLocalStorage('mm-demo-config', demoConfig);
+  const [value, setValue] = useLocalStorage("mm-demo-config", demoConfig);
   return { value: value || demoConfig, setValue };
 };

@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useLanguage } from '@/lib/i18n/use-translations';
-import { LANGUAGE_NAMES } from '@/lib/i18n/utils';
-import { CpuIcon } from './icons';
-import { Button } from './ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from './ui/select';
+import { useLanguage } from "@/lib/i18n/use-translations";
+import { LANGUAGE_NAMES } from "@/lib/i18n/utils";
+import { CpuIcon } from "./icons";
+import { Button } from "./ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
 
 export function LanguageSwitcher() {
   const { locale, setLocale } = useLanguage();

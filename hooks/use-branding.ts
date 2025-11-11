@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import { useDemoConfig } from './use-demo-config';
+import { THEME_PRESETS } from "@/lib/branding/theme-presets";
+import { useDemoConfig } from "./use-demo-config";
 
 /**
  * Branding hook that provides flattened access to branding configuration
@@ -9,10 +10,22 @@ import { useDemoConfig } from './use-demo-config';
 export function useBranding() {
   const { value } = useDemoConfig();
 
+  // Combine preset CSS with custom CSS
+  const presetCss =
+    value.appearance.preset !== "default"
+      ? Object.values(THEME_PRESETS).find(
+          (v) => v.id === value.appearance.preset
+        )?.css || ""
+      : "";
+
+  const combinedCss = [presetCss, value.appearance.customCss]
+    .filter(Boolean)
+    .join("\n\n");
+
   return {
     // Appearance properties (theme, logos, assets)
     preset: value.appearance.preset,
-    customCss: value.appearance.customCss,
+    customCss: combinedCss || undefined,
     defaultMode: value.appearance.defaultMode,
     favicon: value.appearance.favicon,
     logo: value.appearance.logo,

@@ -9,6 +9,10 @@
 /* custom variant for setting dark mode programmatically */
 @custom-variant dark (&:is(.dark, .dark *));
 
+/* custom variants for theme presets */
+@custom-variant playful (&:is([data-theme-preset="playful"], [data-theme-preset="playful"] *));
+@custom-variant tech (&:is([data-theme-preset="tech"], [data-theme-preset="tech"] *));
+
 /* include plugins */
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";

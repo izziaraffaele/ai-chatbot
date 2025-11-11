@@ -23,8 +23,8 @@ import {
   SidebarMenu,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useTranslations } from "@/lib/i18n/use-translations";
 import type { Chat } from "@/lib/db/schema";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { fetcher } from "@/lib/utils";
 import { LoaderIcon } from "./icons";
 import { ChatItem } from "./sidebar-history-item";

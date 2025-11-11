@@ -1,9 +1,9 @@
 import { memo } from "react";
 import { toast } from "sonner";
 import { useArtifact } from "@/hooks/use-artifact";
+import type { TranslateFn } from "@/lib/i18n/types";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import type { ArtifactKind } from "./artifact";
-import type { TranslateFn } from "@/lib/i18n/types";
 import { FileIcon, LoaderIcon, MessageIcon, PencilEditIcon } from "./icons";
 
 const getActionText = (
