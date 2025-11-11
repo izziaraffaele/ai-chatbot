@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useDemoConfig } from "./use-demo-config";
+import { useDemoConfig } from './use-demo-config';
 
 /**
  * Branding hook that provides flattened access to branding configuration

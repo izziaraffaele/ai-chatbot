@@ -11,6 +11,7 @@ import { DemoConfig } from '@/components/demo-config';
 import { cookies } from 'next/headers';
 import { Locale } from '@/lib/i18n/types';
 import { isSupportedLocale, loadTranslations } from '@/lib/i18n/utils';
+import { getBrandingInjectScript } from '@/lib/branding/inject-script';
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -88,6 +89,12 @@ export default async function RootLayout({
           // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
           dangerouslySetInnerHTML={{
             __html: THEME_COLOR_SCRIPT,
+          }}
+        />
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required for flicker prevention"
+          dangerouslySetInnerHTML={{
+            __html: getBrandingInjectScript(),
           }}
         />
       </head>

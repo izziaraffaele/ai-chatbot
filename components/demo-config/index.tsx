@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   AppWindow,
   Building2,
@@ -11,10 +11,10 @@ import {
   Sparkles,
   Target,
   User,
-} from "lucide-react";
-import type React from "react";
-import { useFormContext } from "react-hook-form";
-import { FormInput } from "@/components/ui/form-input";
+} from 'lucide-react';
+import type React from 'react';
+import { useFormContext } from 'react-hook-form';
+import { FormInput } from '@/components/ui/form-input';
 import {
   Select,
   SelectContent,
@@ -22,35 +22,36 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import type { DemoConfig as DemoConfigType } from "@/config/demo.schema";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import type { DemoConfig as DemoConfigType } from '@/config/demo.schema';
 import {
   type ExperienceConfig,
   ExperiencesListControl,
-} from "./experiences-list";
-import { DemoConfigFieldGroup, DemoConfigForm } from "./form";
-import { ImageUpload } from "./image-upload";
-import { IntentsListControl } from "./intents-list";
+} from './experiences-list';
+import { DemoConfigFieldGroup, DemoConfigForm } from './form';
+import { ImageUpload } from './image-upload';
+import { IntentsListControl } from './intents-list';
 import {
   DemoConfigPanel,
   DemoConfigPanelContent,
   DemoConfigPanelTrigger,
-} from "./panel";
-import { SuggestionListControl } from "./suggestion-list";
-import { SwitchListControl } from "./switch-list";
-import { DemoThemePicker } from "./theme-picker";
+} from './panel';
+import { SuggestionListControl } from './suggestion-list';
+import { SwitchListControl } from './switch-list';
+import { DemoThemePicker } from './theme-picker';
+import { Button } from '../ui/button';
 
 const THEME_PRESETS = [
   {
-    id: "playful",
-    name: "Playful",
-    description: "Vibrant, friendly theme",
+    id: 'playful',
+    name: 'Playful',
+    description: 'Vibrant, friendly theme',
     previewColors: {
-      primary: "hsl(346 77% 50%)",
-      secondary: "hsl(340 82% 52%)",
-      background: "hsl(0 0% 100%)",
-      foreground: "hsl(340 82% 52%)",
+      primary: 'hsl(346 77% 50%)',
+      secondary: 'hsl(340 82% 52%)',
+      background: 'hsl(0 0% 100%)',
+      foreground: 'hsl(340 82% 52%)',
     },
     css: `:root {
   --background: 0 0% 100%;
@@ -98,14 +99,14 @@ const THEME_PRESETS = [
 }`,
   },
   {
-    id: "tech",
-    name: "Tech",
-    description: "Dark, professional theme",
+    id: 'tech',
+    name: 'Tech',
+    description: 'Dark, professional theme',
     previewColors: {
-      primary: "hsl(217 91% 60%)",
-      secondary: "hsl(217 33% 17%)",
-      background: "hsl(222 84% 5%)",
-      foreground: "hsl(210 40% 98%)",
+      primary: 'hsl(217 91% 60%)',
+      secondary: 'hsl(217 33% 17%)',
+      background: 'hsl(222 84% 5%)',
+      foreground: 'hsl(210 40% 98%)',
     },
     css: `:root {
   --background: 222 84% 5%;
@@ -155,7 +156,7 @@ const THEME_PRESETS = [
 ];
 
 const DemoConfigSection = (
-  props: React.ComponentProps<"section"> & {
+  props: React.ComponentProps<'section'> & {
     title: string;
     description?: string;
   }
@@ -430,14 +431,14 @@ const ChatFeaturesFieldset = () => {
               field.onBlur();
             }}
             options={[
-              { label: "Memory", value: "memory", disabled: true },
-              { label: "Artifacts", value: "artifacts", disabled: true },
+              { label: 'Memory', value: 'memory', disabled: true },
+              { label: 'Artifacts', value: 'artifacts', disabled: true },
               {
-                label: "Multimodal Input",
-                value: "multimodalInput",
+                label: 'Multimodal Input',
+                value: 'multimodalInput',
                 disabled: true,
               },
-              { label: "Web Search", value: "webSearch" },
+              { label: 'Web Search', value: 'webSearch' },
             ]}
             value={field.value as Record<string, boolean>}
           />
@@ -523,16 +524,16 @@ const ContextIndexesFieldset = () => {
                   return carry;
                 }, [] as string[]);
 
-                if (!newValue.includes("memoraiz")) {
-                  newValue.push("memoraiz");
+                if (!newValue.includes('memoraiz')) {
+                  newValue.push('memoraiz');
                 }
 
                 field.onChange({ target: { value: newValue } } as any);
                 field.onBlur();
               }}
               options={[
-                { label: "MemorAIz", value: "memoraiz", disabled: true },
-                { label: "Demo Courses", value: "demo-courses" },
+                { label: 'MemorAIz', value: 'memoraiz', disabled: true },
+                { label: 'Demo Courses', value: 'demo-courses' },
               ]}
               value={currentValue.reduce(
                 (carry, v) => ({

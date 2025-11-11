@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { User } from "next-auth";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
-import { PlusIcon, TrashIcon } from "@/components/icons";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import type { User } from 'next-auth';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { useSWRConfig } from 'swr';
+import { unstable_serialize } from 'swr/infinite';
+import { PlusIcon, TrashIcon } from '@/components/icons';
 import {
   getChatHistoryPaginationKey,
   SidebarHistory,
-} from "@/components/sidebar-history";
-import { SidebarUserNav } from "@/components/sidebar-user-nav";
+} from '@/components/sidebar-history';
+import { SidebarUserNav } from '@/components/sidebar-user-nav';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,8 +23,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
@@ -32,14 +32,15 @@ import {
   SidebarHeader,
   SidebarMenu,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useBranding } from "@/hooks/use-branding";
-import { useTranslations } from "@/lib/i18n/use-translations";
+} from '@/components/ui/tooltip';
+import { useBranding } from '@/hooks/use-branding';
+import { useTranslations } from '@/lib/i18n/use-translations';
+import { Skeleton } from './ui/skeleton';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -48,25 +49,30 @@ export function AppSidebar({ user }: { user: User | undefined }) {
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const branding = useBranding();
   const t = useTranslations();
+  const [renderRef, setRenderRef] = useState(false);
 
   const handleDeleteAll = () => {
-    const deletePromise = fetch("/api/history", {
-      method: "DELETE",
+    const deletePromise = fetch('/api/history', {
+      method: 'DELETE',
     });
 
     toast.promise(deletePromise, {
-      loading: t("common.loading", "Deleting all chats..."),
+      loading: t('common.loading', 'Deleting all chats...'),
       success: () => {
         mutate(unstable_serialize(getChatHistoryPaginationKey));
-        router.push("/");
+        router.push('/');
         setShowDeleteAllDialog(false);
-        return t("sidebar.success.deleteAll", "All chats deleted successfully");
+        return t('sidebar.success.deleteAll', 'All chats deleted successfully');
       },
-      error: t("sidebar.error.deleteAll", "Failed to delete all chats"),
+      error: t('sidebar.error.deleteAll', 'Failed to delete all chats'),
     });
   };
 
-  const appTitle = branding.assistantName || "Assistant";
+  const appTitle = branding.assistantName || 'Assistant';
+
+  useEffect(() => {
+    setRenderRef(true);
+  }, []);
 
   return (
     <>
@@ -74,32 +80,36 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         <SidebarHeader>
           <SidebarMenu>
             <div className="flex flex-row items-center justify-between">
-              <Link
-                className="flex flex-row items-center gap-3"
-                href="/"
-                onClick={() => {
-                  setOpenMobile(false);
-                }}
-              >
-                {branding.logo ? (
-                  <>
-                    <Image
-                      alt={branding.organizationName || "Logo"}
-                      className="rounded-md"
-                      height={32}
-                      src={branding.logo}
-                      width={32}
-                    />
-                    <span className="cursor-pointer font-semibold text-lg hover:opacity-80">
+              {renderRef ? (
+                <Link
+                  className="flex flex-row items-center gap-3"
+                  href="/"
+                  onClick={() => {
+                    setOpenMobile(false);
+                  }}
+                >
+                  {branding.logo ? (
+                    <>
+                      <Image
+                        alt={branding.organizationName || 'Logo'}
+                        className="rounded-md"
+                        height={32}
+                        src={branding.logo}
+                        width={32}
+                      />
+                      <span className="cursor-pointer font-semibold text-lg hover:opacity-80">
+                        {appTitle}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
                       {appTitle}
                     </span>
-                  </>
-                ) : (
-                  <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
-                    {appTitle}
-                  </span>
-                )}
-              </Link>
+                  )}
+                </Link>
+              ) : (
+                <Skeleton className="flex-1 h-8 rounded-md" />
+              )}
               <div className="flex flex-row gap-1">
                 {user && (
                   <Tooltip>
@@ -124,7 +134,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                       className="h-8 p-1 md:h-fit md:p-2"
                       onClick={() => {
                         setOpenMobile(false);
-                        router.push("/");
+                        router.push('/');
                         router.refresh();
                       }}
                       type="button"
