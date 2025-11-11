@@ -72,6 +72,10 @@ export const it: TranslationDict = {
   "sidebar.buttonConfirmDelete": "Elimina",
   "sidebar.buttonCancel": "Annulla",
 
+  // Success and Error Messages
+  "sidebar.success.deleteAll": "Tutte le chat eliminate con successo",
+  "sidebar.error.deleteAll": "Impossibile eliminare tutte le chat",
+
   // History Grouping
   "sidebar.history.today": "Oggi",
   "sidebar.history.yesterday": "Ieri",
@@ -178,6 +182,8 @@ export const it: TranslationDict = {
   "message.actions.tooltipRetry": "Riprova generazione",
   "message.actions.tooltipEdit": "Modifica messaggio",
   "message.actions.tooltipDelete": "Elimina messaggio",
+  "message.actions.tooltipUpvote": "Vota positivamente",
+  "message.actions.tooltipDownvote": "Vota negativamente",
 
   // ============================================================================
   // Model & Visibility Selectors
@@ -253,13 +259,12 @@ export const it: TranslationDict = {
   "common.less": "Meno",
   "common.yes": "Sì",
   "common.no": "No",
-  "message.copy": "Copia",
-  "message.edit": "Modifica",
+
   "message.actions.upvote": "Vota Positivamente",
-  "message.actions.downvote": "Vota Negativamente",
   "message.actions.upvoting": "Votazione in corso...",
   "message.actions.upvoted": "Votato positivamente!",
   "message.actions.upvoteError": "Impossibile votare positivamente.",
+  "message.actions.downvote": "Vota Negativamente",
   "message.actions.downvoting": "Votazione negativa in corso...",
   "message.actions.downvoted": "Votato negativamente!",
   "message.actions.downvoteError": "Impossibile votare negativamente.",

@@ -87,18 +87,18 @@
 
 ## 12. Testing and Validation
 
-- [ ] 12.1 Create Playwright test for language switching
-- [ ] 12.2 Test cookie persistence across browser sessions
-- [ ] 12.3 Verify all UI text is translated in both languages
-- [ ] 12.4 Test with long Italian text to check for UI overflow issues
-- [ ] 12.5 Verify no TypeScript errors for missing translation keys
-- [ ] 12.6 Test fallback behavior when locale cookie is invalid
-- [ ] 12.7 Verify dynamic import performance and bundle size
+- [x] 12.1 Create Playwright test for language switching
+- [x] 12.2 Test cookie persistence across browser sessions
+- [x] 12.3 Verify all UI text is translated in both languages
+- [x] 12.4 Test with long Italian text to check for UI overflow issues
+- [x] 12.5 Verify no TypeScript errors for missing translation keys
+- [x] 12.6 Test fallback behavior when locale cookie is invalid
+- [x] 12.7 Verify dynamic import performance and bundle size
 
 ## 13. Documentation
 
-- [ ] 13.1 Update `CLAUDE.md` with i18n architecture section
-- [ ] 13.2 Document translation file structure and conventions
-- [ ] 13.3 Document how to add new languages
-- [ ] 13.4 Add comments to translation files for translator guidance
-- [ ] 13.5 Document language switcher usage
+- [x] 13.1 Update `CLAUDE.md` with i18n architecture section
+- [x] 13.2 Document translation file structure and conventions
+- [x] 13.3 Document how to add new languages
+- [x] 13.4 Add comments to translation files for translator guidance
+- [x] 13.5 Document language switcher usage

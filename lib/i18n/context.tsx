@@ -22,12 +22,12 @@ export function LanguageProvider({
   const [locale, setLocaleState] = useState<Locale>(
     initialLocale ?? getCurrentLocale()
   );
-  const [translations, setTranslations] = useState<TranslationDict>({});
+  const [translations, setTranslations] = useState<TranslationDict>({} as TranslationDict);
   const [isLoading, setIsLoading] = useState(true);
 
   // Create translate function
   const t = useMemo(() => {
-    return (key: string, fallback: string): string => {
+    return <K extends keyof TranslationDict>(key: K, fallback: string): string => {
       return translations[key] ?? fallback;
     };
   }, [translations]);

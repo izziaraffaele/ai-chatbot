@@ -3,12 +3,13 @@ import { toast } from "sonner";
 import { useArtifact } from "@/hooks/use-artifact";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import type { ArtifactKind } from "./artifact";
+import type { TranslateFn } from "@/lib/i18n/types";
 import { FileIcon, LoaderIcon, MessageIcon, PencilEditIcon } from "./icons";
 
 const getActionText = (
   type: "create" | "update" | "request-suggestions",
   tense: "present" | "past",
-  t: (key: string, fallback: string) => string
+  t: TranslateFn
 ) => {
   switch (type) {
     case "create":

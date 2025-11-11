@@ -69,6 +69,10 @@ export const en = {
   "sidebar.buttonConfirmDelete": "Delete",
   "sidebar.buttonCancel": "Cancel",
 
+  // Success and Error Messages
+  "sidebar.success.deleteAll": "All chats deleted successfully",
+  "sidebar.error.deleteAll": "Failed to delete all chats",
+
   // History Grouping
   "sidebar.history.today": "Today",
   "sidebar.history.yesterday": "Yesterday",
@@ -175,6 +179,16 @@ export const en = {
   "message.actions.tooltipRetry": "Retry generation",
   "message.actions.tooltipEdit": "Edit message",
   "message.actions.tooltipDelete": "Delete message",
+  "message.actions.tooltipUpvote": "Upvote response",
+  "message.actions.tooltipDownvote": "Downvote response",
+  "message.actions.upvote": "Upvote Response",
+  "message.actions.upvoting": "Upvoting Response...",
+  "message.actions.upvoted": "Upvoted Response!",
+  "message.actions.upvoteError": "Failed to upvote response.",
+  "message.actions.downvote": "Downvote Response",
+  "message.actions.downvoting": "Downvoting Response...",
+  "message.actions.downvoted": "Downvoted Response!",
+  "message.actions.downvoteError": "Failed to downvote response.",
 
   // ============================================================================
   // Model & Visibility Selectors
@@ -249,18 +263,8 @@ export const en = {
   "common.less": "Less",
   "common.yes": "Yes",
   "common.no": "No",
-  "message.copy": "Copy",
-  "message.edit": "Edit",
-  "message.upvote": "Upvote Response",
-  "message.downvote": "Downvote Response",
   "message.copyError": "There's no text to copy!",
   "message.copySuccess": "Copied to clipboard!",
-  "message.upvoting": "Upvoting Response...",
-  "message.upvoteSuccess": "Upvoted Response!",
-  "message.upvoteError": "Failed to upvote response.",
-  "message.downvoting": "Downvoting Response...",
-  "message.downvoteSuccess": "Downvoted Response!",
-  "message.downvoteError": "Failed to downvote response.",
 } as const;
 
 export type TranslationKey = keyof typeof en;
