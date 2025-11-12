@@ -26,7 +26,11 @@ export const chatAgent = new Agent({
     const geoHints = getGeoHints(runtimeContext);
 
     // Build comprehensive system prompt from configuration
-    return chatAgentSystemPrompt(config, geoHints);
+    const prompt = chatAgentSystemPrompt(config, geoHints);
+
+    console.log(prompt);
+
+    return prompt;
   },
   model: 'google/gemini-2.5-flash-lite', // Default, overridden at runtime
   tools: {

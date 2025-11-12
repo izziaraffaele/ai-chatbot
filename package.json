@@ -31,6 +31,7 @@
     "@codemirror/view": "^6.35.3",
     "@hookform/resolvers": "^5.2.2",
     "@icons-pack/react-simple-icons": "^13.7.0",
+    "@mastra/ai-sdk": "^0.2.6",
     "@mastra/core": "^0.24.0",
     "@mastra/libsql": "^0.16.2",
     "@mastra/loggers": "^0.10.19",
