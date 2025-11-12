@@ -1,39 +1,5 @@
-import { type DemoConfig, DemoConfigSchema } from "./demo.schema";
-
-/**
- * Deep merge utility for combining configuration objects
- */
-function deepMerge<T extends Record<string, unknown>>(
-  target: T,
-  ...sources: Partial<T>[]
-): T {
-  const result = { ...target };
-
-  for (const source of sources) {
-    for (const key in source) {
-      const sourceValue = source[key];
-      const targetValue = result[key];
-
-      if (
-        sourceValue &&
-        typeof sourceValue === "object" &&
-        !Array.isArray(sourceValue) &&
-        targetValue &&
-        typeof targetValue === "object" &&
-        !Array.isArray(targetValue)
-      ) {
-        result[key] = deepMerge(
-          targetValue as Record<string, unknown>,
-          sourceValue as Record<string, unknown>
-        ) as T[Extract<keyof T, string>];
-      } else if (sourceValue !== undefined) {
-        result[key] = sourceValue as T[Extract<keyof T, string>];
-      }
-    }
-  }
-
-  return result;
-}
+import { deepMerge } from '@/lib/utils';
+import { type DemoConfig, DemoConfigSchema } from './demo.schema';
 
 /**
  * Get environment variable defaults for branding configuration
@@ -101,14 +67,14 @@ function getEnvironmentDefaults(): Record<string, unknown> {
  */
 const schemaDefaults: DemoConfig = {
   assistant: {
-    name: "Assistant",
-    description: "AI assistant",
+    name: 'Assistant',
+    description: 'AI assistant',
     roles: [],
-    tone: "friendly",
+    tone: 'friendly',
   },
   appearance: {
-    preset: "default",
-    defaultMode: "auto",
+    preset: 'default',
+    defaultMode: 'auto',
   },
   chat: {
     suggestions: [],
@@ -120,7 +86,7 @@ const schemaDefaults: DemoConfig = {
     },
   },
   context: {
-    indexes: ["memoraiz", "demo-courses"],
+    indexes: ['memoraiz', 'demo-courses'],
   },
   runtime: {
     experiences: [],
@@ -140,9 +106,9 @@ export function getDemoConfig(): DemoConfig {
     // Validate and return the configuration
     return DemoConfigSchema.parse(merged);
   } catch (error) {
-    console.error("Branding configuration validation failed:", error);
+    console.error('Branding configuration validation failed:', error);
     throw new Error(
-      "Invalid branding configuration. Please check your environment variables and config/demo.ts"
+      'Invalid branding configuration. Please check your environment variables and config/demo.ts'
     );
   }
 }

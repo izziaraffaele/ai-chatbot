@@ -167,3 +167,38 @@ export function injectCustomCss(css: string | undefined) {
 
   style.textContent = `${css}`;
 }
+
+/**
+ * Deep merge utility for combining configuration objects
+ */
+export function deepMerge<T extends Record<string, unknown>>(
+  target: T,
+  ...sources: Partial<T>[]
+): T {
+  const result = { ...target };
+
+  for (const source of sources) {
+    for (const key in source) {
+      const sourceValue = source[key];
+      const targetValue = result[key];
+
+      if (
+        sourceValue &&
+        typeof sourceValue === 'object' &&
+        !Array.isArray(sourceValue) &&
+        targetValue &&
+        typeof targetValue === 'object' &&
+        !Array.isArray(targetValue)
+      ) {
+        result[key] = deepMerge(
+          targetValue as Record<string, unknown>,
+          sourceValue as Record<string, unknown>
+        ) as T[Extract<keyof T, string>];
+      } else if (sourceValue !== undefined) {
+        result[key] = sourceValue as T[Extract<keyof T, string>];
+      }
+    }
+  }
+
+  return result;
+}
