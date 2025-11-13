@@ -1,19 +1,27 @@
 'use client';
 
-import { getClientTools, type ClientToolsRegistry } from '@/lib/ai/client-tools';
+import { getAssistantActionsRegistry, type AssistantActionsRegistry } from '@/lib/ai/client-tools';
 
 /**
- * React hook for accessing registered client tools in components.
- * Returns an object containing all available client-side tools.
+ * React hook for accessing the assistant actions registry.
+ * Returns a registry object with methods to register, deregister, and get actions.
  *
  * Usage:
  * ```tsx
  * function MyComponent() {
- *   const clientTools = useClientTools();
- *   // Pass clientTools to the Mastra agent
+ *   const registry = useClientTools();
+ *   const tools = registry.getTools();
+ *   // Pass tools to the Mastra agent
+ * }
+ * ```
+ *
+ * For simplified registration in components, use `useAssistantAction()` instead:
+ * ```tsx
+ * function MyComponent() {
+ *   useAssistantAction(myCustomAction);
  * }
  * ```
  */
-export function useClientTools(): ClientToolsRegistry {
-  return getClientTools();
+export function useClientTools(): AssistantActionsRegistry {
+  return getAssistantActionsRegistry();
 }

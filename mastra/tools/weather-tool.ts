@@ -1,11 +1,10 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 
-
 export const getWeatherTool = createTool({
   id: 'getWeather',
   description:
-    "Get the current weather at a location. You can provide either coordinates or a city name.",
+    'Get the current weather at a location. You can provide either coordinates or a city name.',
   inputSchema: z.object({
     latitude: z.number().optional(),
     longitude: z.number().optional(),
@@ -14,8 +13,13 @@ export const getWeatherTool = createTool({
       .describe("City name (e.g., 'San Francisco', 'New York', 'London')")
       .optional(),
   }),
+  outputSchema: z.record(z.string(), z.any()),
   execute: async ({ context }) => {
-    const { city, latitude: lat, longitude: lon } = context as {
+    const {
+      city,
+      latitude: lat,
+      longitude: lon,
+    } = context as {
       city?: string;
       latitude?: number;
       longitude?: number;
@@ -39,7 +43,7 @@ export const getWeatherTool = createTool({
     } else {
       return {
         error:
-          "Please provide either a city name or both latitude and longitude coordinates.",
+          'Please provide either a city name or both latitude and longitude coordinates.',
       };
     }
 
@@ -82,4 +86,3 @@ async function geocodeCity(
     return null;
   }
 }
-

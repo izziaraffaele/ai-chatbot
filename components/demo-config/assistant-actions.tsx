@@ -1,0 +1,49 @@
+'use client';
+import * as z from 'zod';
+import { DemoConfigMemorySchema, DemoConfigSchema } from '@/config/demo.schema';
+import { useAssistantAction } from '@/hooks/use-assistant-action';
+import { useDemoConfig } from '@/hooks/use-demo-config';
+import { deepMerge } from '@/lib/utils';
+import { THEME_COLOR_PRESETS } from '@/lib/branding/theme-presets';
+
+export const DemoConfigActions = () => {
+  const { value: currentConfig, setValue } = useDemoConfig();
+
+  useAssistantAction({
+    id: 'updateDemoConfig',
+    description:
+      'Update the demo configuration with partial changes. Merges the provided configuration with the existing configuration. Useful for dynamically updating assistant identity, appearance, chat features, and runtime settings.',
+    inputSchema: DemoConfigMemorySchema,
+    execute: async ({ context }) => {
+      const themeColor = context.appearance?.themeColor;
+      const themeColorPreset = THEME_COLOR_PRESETS.find(
+        (colorPreset) => colorPreset.id === themeColor
+      );
+
+      const contextConfig = {
+        ...context,
+        appearance: context.appearance && {
+          preset: context.appearance.preset,
+          customCss: themeColorPreset && themeColorPreset.css,
+        },
+      };
+
+      // Deep merge: merge context (partial updates) with current config
+      const mergedConfig = deepMerge(currentConfig, contextConfig);
+
+      // Validate merged config
+      const validatedConfig = DemoConfigSchema.parse(mergedConfig);
+
+      // Update value
+      setValue(validatedConfig);
+
+      return {
+        success: true,
+        message: 'Demo configuration updated successfully',
+        config: validatedConfig,
+      };
+    },
+  });
+
+  return null;
+};

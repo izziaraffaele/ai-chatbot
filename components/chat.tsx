@@ -26,12 +26,7 @@ import { ChatSDKError } from '@/lib/errors';
 import { useTranslations } from '@/lib/i18n/use-translations';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
-import {
-  fetcher,
-  fetchWithErrorHandlers,
-  generateUUID,
-  processClientTools,
-} from '@/lib/utils';
+import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { Artifact } from './artifact';
 import { useDataStream } from './data-stream-provider';
 import { Messages } from './messages';
@@ -40,6 +35,10 @@ import { getChatHistoryPaginationKey } from './sidebar-history';
 import { toast } from './toast';
 import type { VisibilityType } from './visibility-selector';
 import { useRuntimeConfig } from '@/hooks/use-runtime-config';
+import {
+  processClientToolCall,
+  serializeClientTools,
+} from '@/lib/ai/client-tools';
 
 export function Chat({
   id,
@@ -65,7 +64,7 @@ export function Chat({
   });
 
   const runtimeConfig = useRuntimeConfig();
-  const clientTools = useClientTools();
+  const registry = useClientTools();
 
   const { mutate } = useSWRConfig();
   const { setDataStream } = useDataStream();
@@ -88,6 +87,7 @@ export function Chat({
     stop,
     regenerate,
     resumeStream,
+    addToolResult,
   } = useChat<ChatMessage>({
     id,
     messages: initialMessages,
@@ -104,7 +104,7 @@ export function Chat({
             selectedChatModel: currentModelIdRef.current,
             selectedVisibilityType: visibilityType,
             runtimeConfig,
-            tools: processClientTools(clientTools),
+            tools: serializeClientTools(registry.getTools()),
             ...request.body,
           },
         };
@@ -133,6 +133,23 @@ export function Chat({
           });
         }
       }
+    },
+    onToolCall: async ({ toolCall }) => {
+      // Check if it's a dynamic tool first (for proper type narrowing)
+      if (toolCall.dynamic) {
+        return;
+      }
+
+      // Execute the client tool and capture the result
+      const result = await processClientToolCall(toolCall);
+
+      // Exit early if no client tool call happened
+      if (result === null) {
+        return;
+      }
+
+      // Send the result back to the stream (no await to avoid deadlocks)
+      addToolResult(result);
     },
   });
 

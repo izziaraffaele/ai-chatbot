@@ -15,6 +15,12 @@ export const createDocumentTool = createTool({
     title: z.string(),
     kind: z.enum(artifactKinds),
   }),
+  outputSchema: z.object({
+    id: z.string(),
+    title: z.string(),
+    kind: z.enum(artifactKinds),
+    content: z.string(),
+  }),
   execute: async ({ context, runtimeContext, writer }) => {
     const { title, kind } = context;
     const session = getSession(runtimeContext);

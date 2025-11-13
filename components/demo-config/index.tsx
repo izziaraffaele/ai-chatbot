@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   AppWindow,
   Building2,
@@ -11,10 +11,10 @@ import {
   Sparkles,
   Target,
   User,
-} from "lucide-react";
-import type React from "react";
-import { useFormContext } from "react-hook-form";
-import { FormInput } from "@/components/ui/form-input";
+} from 'lucide-react';
+import type React from 'react';
+import { useFormContext } from 'react-hook-form';
+import { FormInput } from '@/components/ui/form-input';
 import {
   Select,
   SelectContent,
@@ -22,31 +22,29 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import type { DemoConfig as DemoConfigType } from "@/config/demo.schema";
-import {
-  THEME_COLOR_PRESETS,
-  THEME_PRESETS,
-} from "@/lib/branding/theme-presets";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { type DemoConfig as DemoConfigType } from '@/config/demo.schema';
+import { THEME_COLOR_PRESETS } from '@/lib/branding/theme-presets';
 import {
   type ExperienceConfig,
   ExperiencesListControl,
-} from "./experiences-list";
-import { DemoConfigFieldGroup, DemoConfigForm } from "./form";
-import { ImageUpload } from "./image-upload";
-import { IntentsListControl } from "./intents-list";
+} from './experiences-list';
+import { DemoConfigFieldGroup, DemoConfigForm } from './form';
+import { ImageUpload } from './image-upload';
+import { IntentsListControl } from './intents-list';
 import {
   DemoConfigPanel,
   DemoConfigPanelContent,
   DemoConfigPanelTrigger,
-} from "./panel";
-import { SuggestionListControl } from "./suggestion-list";
-import { SwitchListControl } from "./switch-list";
-import { DemoThemePicker } from "./theme-picker";
+} from './panel';
+import { SuggestionListControl } from './suggestion-list';
+import { SwitchListControl } from './switch-list';
+import { DemoThemePicker } from './theme-picker';
+import { DemoConfigActions } from './assistant-actions';
 
 const DemoConfigSection = (
-  props: React.ComponentProps<"section"> & {
+  props: React.ComponentProps<'section'> & {
     title: string;
     description?: string;
   }
@@ -321,14 +319,14 @@ const ChatFeaturesFieldset = () => {
               field.onBlur();
             }}
             options={[
-              { label: "Memory", value: "memory", disabled: true },
-              { label: "Artifacts", value: "artifacts", disabled: true },
+              { label: 'Memory', value: 'memory', disabled: true },
+              { label: 'Artifacts', value: 'artifacts', disabled: true },
               {
-                label: "Multimodal Input",
-                value: "multimodalInput",
+                label: 'Multimodal Input',
+                value: 'multimodalInput',
                 disabled: true,
               },
-              { label: "Web Search", value: "webSearch" },
+              { label: 'Web Search', value: 'webSearch' },
             ]}
             value={field.value as Record<string, boolean>}
           />
@@ -414,16 +412,16 @@ const ContextIndexesFieldset = () => {
                   return carry;
                 }, [] as string[]);
 
-                if (!newValue.includes("memoraiz")) {
-                  newValue.push("memoraiz");
+                if (!newValue.includes('memoraiz')) {
+                  newValue.push('memoraiz');
                 }
 
                 field.onChange({ target: { value: newValue } } as any);
                 field.onBlur();
               }}
               options={[
-                { label: "MemorAIz", value: "memoraiz", disabled: true },
-                { label: "Demo Courses", value: "demo-courses" },
+                { label: 'MemorAIz', value: 'memoraiz', disabled: true },
+                { label: 'Demo Courses', value: 'demo-courses' },
               ]}
               value={currentValue.reduce(
                 (carry, v) => ({
@@ -511,50 +509,55 @@ const RuntimeExperiencesFieldset = () => {
   );
 };
 
-export const DemoConfig = () => (
-  <DemoConfigPanel>
-    <DemoConfigPanelTrigger />
-    <DemoConfigPanelContent>
-      <DemoConfigForm>
-        <div className="space-y-6 p-4">
-          <DemoConfigSection
-            description="Configure your AI assistant's identity and behavior"
-            title="Assistant"
-          >
-            <AssistantProfileFieldset />
-            <AssistantBehaviourFieldset />
-          </DemoConfigSection>
-          <DemoConfigSection
-            description="Customize visual design and branding"
-            title="Appearance"
-          >
-            <AppearanceThemeFieldset />
-            <AppearanceAssetsFieldset />
-          </DemoConfigSection>
-          <DemoConfigSection
-            description="Manage conversation features and user experience"
-            title="Chat"
-          >
-            <ChatSuggestionsFieldset />
-            <ChatFeaturesFieldset />
-          </DemoConfigSection>
-          <DemoConfigSection
-            description="Provide background information for better responses"
-            title="Context"
-          >
-            <ContextOrganizationFieldset />
-            <ContextAppFieldset />
-            <ContextIndexesFieldset />
-          </DemoConfigSection>
-          <DemoConfigSection
-            description="Build dynamic experiences and intelligent routing"
-            title="Runtime"
-          >
-            <RuntimeIntentsFieldset />
-            <RuntimeExperiencesFieldset />
-          </DemoConfigSection>
-        </div>
-      </DemoConfigForm>
-    </DemoConfigPanelContent>
-  </DemoConfigPanel>
-);
+export const DemoConfig = () => {
+  return (
+    <>
+      <DemoConfigPanel>
+        <DemoConfigPanelTrigger />
+        <DemoConfigPanelContent>
+          <DemoConfigForm>
+            <div className="space-y-6 p-4">
+              <DemoConfigSection
+                description="Configure your AI assistant's identity and behavior"
+                title="Assistant"
+              >
+                <AssistantProfileFieldset />
+                <AssistantBehaviourFieldset />
+              </DemoConfigSection>
+              <DemoConfigSection
+                description="Customize visual design and branding"
+                title="Appearance"
+              >
+                <AppearanceThemeFieldset />
+                <AppearanceAssetsFieldset />
+              </DemoConfigSection>
+              <DemoConfigSection
+                description="Manage conversation features and user experience"
+                title="Chat"
+              >
+                <ChatSuggestionsFieldset />
+                <ChatFeaturesFieldset />
+              </DemoConfigSection>
+              <DemoConfigSection
+                description="Provide background information for better responses"
+                title="Context"
+              >
+                <ContextOrganizationFieldset />
+                <ContextAppFieldset />
+                <ContextIndexesFieldset />
+              </DemoConfigSection>
+              <DemoConfigSection
+                description="Build dynamic experiences and intelligent routing"
+                title="Runtime"
+              >
+                <RuntimeIntentsFieldset />
+                <RuntimeExperiencesFieldset />
+              </DemoConfigSection>
+            </div>
+          </DemoConfigForm>
+        </DemoConfigPanelContent>
+      </DemoConfigPanel>
+      <DemoConfigActions />
+    </>
+  );
+};

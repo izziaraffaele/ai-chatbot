@@ -1,10 +1,12 @@
 import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
-import { getWeatherTool } from '../../tools/weather-tool';
-import { createDocumentTool } from '../../tools/create-document-tool';
-import { updateDocumentTool } from '../../tools/update-document-tool';
-import { requestSuggestionsTool } from '../../tools/request-suggestions-tool';
+import {
+  getWeatherTool,
+  createDocumentTool,
+  updateDocumentTool,
+  requestSuggestionsTool,
+} from '../../tools';
 import { getRuntimeConfig, getGeoHints } from '../../utils/runtime-utils';
 import { chatAgentSystemPrompt } from './system-prompt';
 

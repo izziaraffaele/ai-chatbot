@@ -1,20 +1,4 @@
-# client-tools Specification
-
-## Purpose
-TBD - created by archiving change add-client-tools. Update Purpose after archive.
-## Requirements
-### Requirement: Client Tool Registry
-The system SHALL provide a registry for defining and managing client-side tools that execute in the browser environment.
-
-#### Scenario: Define a simple client tool
-- **WHEN** a client tool is defined with id, description, inputSchema, and execute handler
-- **THEN** the tool SHALL be registered and available for use by agents
-- **AND** the tool definition SHALL be type-safe via TypeScript and Zod
-
-#### Scenario: Access tool from registry
-- **WHEN** the chat component initializes
-- **THEN** it SHALL retrieve all registered client tools from the registry
-- **AND** pass them to the Mastra agent for client-side execution
+## MODIFIED Requirements
 
 ### Requirement: useClientTools Hook
 The system SHALL provide a React hook that returns a registry object for managing assistant actions in components.
@@ -43,42 +27,7 @@ The system SHALL execute client actions when the Mastra agent calls them during 
 - **THEN** it SHALL have access to browser APIs (DOM, localStorage, clipboard, etc.)
 - **AND** it SHALL be able to modify page state if needed
 
-### Requirement: Example Client Tool
-The system SHALL provide a simple example client tool demonstrating basic functionality.
-
-#### Scenario: Example tool performs browser operation
-- **WHEN** the example client tool is invoked by the agent
-- **THEN** it SHALL execute a simple browser operation
-- **AND** return success confirmation to the agent
-- **AND** serve as a template for creating additional client tools
-
-### Requirement: Stream Processing for Client Tools
-The system SHALL handle streaming client tool results back to the chat interface.
-
-#### Scenario: Client tool events are processed during stream
-- **WHEN** the Mastra agent processes a response containing client tool calls
-- **THEN** the stream consumer SHALL detect tool invocations
-- **AND** pass them to the appropriate client tool
-- **AND** continue streaming the response after tool execution
-
-#### Scenario: Client tool result is sent to agent
-- **WHEN** a client tool completes execution
-- **THEN** the result SHALL be captured and sent back to the agent
-- **AND** the agent SHALL incorporate the result in its response
-
-### Requirement: Type Safety for Client Tools
-The system SHALL ensure all client tools are type-safe and properly validated.
-
-#### Scenario: Tool input is validated against schema
-- **WHEN** an agent calls a client tool with parameters
-- **THEN** the parameters SHALL be validated against the tool's Zod schema
-- **AND** invalid parameters SHALL cause a validation error
-- **AND** the tool SHALL not execute with invalid input
-
-#### Scenario: Client tools have proper TypeScript types
-- **WHEN** a developer registers a new client tool
-- **THEN** TypeScript SHALL enforce correct schema and handler types
-- **AND** IDE autocompletion SHALL work for tool parameters
+## ADDED Requirements
 
 ### Requirement: Dynamic Assistant Action Registration
 The system SHALL support registering assistant actions from React components at runtime via the `useAssistantAction()` hook.
@@ -147,4 +96,3 @@ The system SHALL maintain type safety for dynamically registered actions.
 - **WHEN** code receives the result of `registry.getTools()`
 - **THEN** TypeScript SHALL provide autocomplete for registered action IDs
 - **AND** the types SHALL match the action definitions
-

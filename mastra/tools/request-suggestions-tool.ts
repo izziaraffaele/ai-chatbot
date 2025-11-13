@@ -6,6 +6,7 @@ import type { Suggestion } from '@/lib/db/schema';
 import { generateUUID } from '@/lib/utils';
 import { myProvider } from '@/lib/ai/providers';
 import { getSession } from '../utils/runtime-utils';
+import { artifactKinds } from '@/lib/artifacts/server';
 
 export const requestSuggestionsTool = createTool({
   id: 'requestSuggestions',
@@ -13,6 +14,15 @@ export const requestSuggestionsTool = createTool({
   inputSchema: z.object({
     documentId: z.string().describe('The ID of the document to request edits'),
   }),
+  outputSchema: z.union([
+    z.object({ error: z.string() }),
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      kind: z.enum(['text', 'code', 'sheet', 'image']),
+      message: z.string().optional(),
+    }),
+  ]),
   execute: async ({ context, runtimeContext, writer }) => {
     const { documentId } = context;
     const session = getSession(runtimeContext);

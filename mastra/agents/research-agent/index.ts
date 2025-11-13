@@ -41,4 +41,12 @@ export const researchAgent = new Agent({
       url: 'file:../mastra.db',
     }),
   }),
+  defaultGenerateOptions: {
+    maxSteps: 1,
+    maxRetries: 1,
+  },
+  defaultStreamOptions: {
+    maxSteps: 1,
+    maxRetries: 1,
+  },
 });

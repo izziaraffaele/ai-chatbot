@@ -1,5 +1,6 @@
 import type {
   AssistantModelMessage,
+  DeepPartial,
   ToolModelMessage,
   UIMessage,
   UIMessagePart,
@@ -8,13 +9,8 @@ import { type ClassValue, clsx } from 'clsx';
 import { formatISO } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
 import type { DBMessage, Document } from '@/lib/db/schema';
-import { ChatSDKError, type ErrorCode } from './errors';
 import type { ChatMessage, ChatTools, CustomUIDataTypes } from './types';
-import { ToolsInput } from '@mastra/core/agent';
-import { isVercelTool } from '@mastra/core/tools';
-import zodToJsonSchema from 'zod-to-json-schema';
-import { isZodType } from '@mastra/core';
-import { toJSONSchema } from 'zod/v4';
+import { ChatSDKError, type ErrorCode } from './errors';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -178,9 +174,9 @@ export function injectCustomCss(css: string | undefined) {
  */
 export function deepMerge<T extends Record<string, unknown>>(
   target: T,
-  ...sources: Partial<T>[]
+  ...sources: DeepPartial<T>[]
 ): T {
-  const result = { ...target };
+  const result: Record<string, unknown> = { ...target };
 
   for (const source of sources) {
     for (const key in source) {
@@ -195,48 +191,15 @@ export function deepMerge<T extends Record<string, unknown>>(
         typeof targetValue === 'object' &&
         !Array.isArray(targetValue)
       ) {
-        result[key] = deepMerge(
+        result[key] = deepMerge<Record<string, unknown>>(
           targetValue as Record<string, unknown>,
-          sourceValue as Record<string, unknown>
-        ) as T[Extract<keyof T, string>];
+          sourceValue
+        );
       } else if (sourceValue !== undefined) {
-        result[key] = sourceValue as T[Extract<keyof T, string>];
+        result[key] = sourceValue;
       }
     }
   }
 
-  return result;
-}
-
-export function processClientTools(clientTools: ToolsInput): ToolsInput {
-  return Object.fromEntries(
-    Object.entries(clientTools).map(([key, value]) => {
-      if (isVercelTool(value)) {
-        return [
-          key,
-          {
-            ...value,
-            parameters: value.parameters
-              ? isZodType(value.parameters)
-                ? toJSONSchema(value.parameters)
-                : value.parameters
-              : undefined,
-          },
-        ];
-      } else {
-        return [
-          key,
-          {
-            ...value,
-            inputSchema: value.inputSchema
-              ? zodToJsonSchema(value.inputSchema)
-              : undefined,
-            outputSchema: value.outputSchema
-              ? zodToJsonSchema(value.outputSchema)
-              : undefined,
-          },
-        ];
-      }
-    })
-  );
+  return result as T;
 }

@@ -12,9 +12,12 @@ An AI chatbot application template built with Next.js 15 and the Vercel AI SDK. 
 - **pnpm 9.12** - Fast, efficient package manager
 
 ### AI & ML
-- **Vercel AI SDK 5.0** - Core AI streaming and tool integration
-- **AI Gateway** - Unified AI provider routing (via `@ai-sdk/gateway`)
-- **xAI Grok Models** - Primary model provider via `@ai-sdk/xai`
+- **Mastra** - Agent orchestration framework with tool integration
+  - `@mastra/core` - Agent and tool definitions
+  - `@mastra/client-js` - Client-side tool creation
+  - `@mastra/ai-sdk` - AI SDK integration and stream transformation
+  - Model resolution via Mastra (OpenAI, Google models, etc.)
+- **Vercel AI SDK 5.0** - Streaming infrastructure and client-side chat
 - **tokenlens** - Token usage tracking and enrichment
 
 ### Database & Storage
@@ -92,41 +95,56 @@ Enforced by **Ultracite** (Biome-based) with strict rules:
 
 ### Architecture Patterns
 
-**1. AI Provider Abstraction** (`lib/ai/providers.ts`)
-- Custom provider switches between real models and mocks based on environment
-- Test mode: uses mock models from `lib/ai/models.mock.ts`
-- Production: routes through Vercel AI Gateway to xAI models
-- Model IDs: `chat-model`, `chat-model-reasoning`, `title-model`, `artifact-model`
-
-**2. Parts-Based Message Storage**
+**1. Parts-Based Message Storage**
 - Messages use "parts" structure (not simple content strings)
 - Schema: `Message_v2` table with `parts` and `attachments` JSON fields
 - Legacy `Message` table deprecated (see migration guide at chat-sdk.dev)
 - Conversion: `convertToUIMessages()` transforms DB messages to UI format
 
-**3. Artifacts System**
+**2. Artifacts System**
 - Collaborative documents (text, code, sheets, images) shown in side panel
 - Created/updated via AI tools: `createDocument`, `updateDocument`, `requestSuggestions`
 - Documents versioned with composite primary key: `(id, createdAt)`
 - Suggestions use diff-based editing stored separately
 
-**4. Streaming Architecture**
+**3. Streaming Architecture**
 - Uses `createUIMessageStream` for real-time AI responses
 - Optional resumable streams via Redis for reliability
 - Streaming context initialized in route handler, stored globally
 - Usage tracking via tokenlens library
+- Mastra agent streams transformed to AI SDK/SSE format via `convertMastraChunkToAISDKv5`
 
-**5. Tools System**
+**3a. Agent Orchestration (Mastra)**
+- Mastra agents (chatAgent, researchAgent) handle conversation orchestration
+- Server-side tools registered with Mastra via `createTool()` from `@mastra/core`
+- Client-side tools registered separately, serialized via `processClientTools()`
+- Tools can access session context and dataStream for real-time updates
+
+**3b. Client-Side Tools**
+- Browser-executed tools via `useClientTools()` hook
+- Tools passed to agents via serialized request body (schemas only, no execute functions)
+- Access to Web APIs: clipboard, DOM, localStorage, etc.
+- Type-safe via Zod schemas and TypeScript
+
+**4. Tools System**
+- Server tools: `getWeather`, `createDocument`, `updateDocument`, `requestSuggestions`
+- Client tools: `copyToClipboard` (example template for browser operations)
 - Tools only active for non-reasoning models
-- Available: `getWeather`, `createDocument`, `updateDocument`, `requestSuggestions`
 - Tools receive session and dataStream for real-time updates
 - Reasoning model uses `<think>` tags extracted by middleware
 
-**6. Authentication Flow**
+**5. Authentication Flow**
 - NextAuth v5 with custom credentials provider
 - User types: "registered" (email/password) or "guest" (anonymous)
 - Rate limiting: checks message count per 24 hours against entitlements
 - Session managed via `auth()` helper from `app/(auth)/auth.ts`
+
+**6. Internationalization (i18n)**
+- Flat TypeScript translation files: `lib/i18n/translations/en.ts`, `it.ts`
+- Dot-notation keys: `auth.login.title`, `chat.sidebar.title`
+- Type-safe language switching via `useTranslations()` hook
+- Language persistence via locale cookie (1-year expiration)
+- Environment: `NEXT_PUBLIC_DEFAULT_LOCALE`, `NEXT_PUBLIC_SUPPORTED_LOCALES`
 
 **7. Database Layer** (`lib/db/`)
 - All queries centralized in `lib/db/queries.ts`
@@ -137,10 +155,13 @@ Enforced by **Ultracite** (Biome-based) with strict rules:
 **8. File Organization**
 - `components/elements/` - Core message and conversation UI
 - `components/ui/` - shadcn/ui primitives
-- `lib/ai/` - AI provider config, prompts, tools
+- `lib/ai/` - AI provider config, prompts, server tools, client tools
 - `lib/db/` - Database schema, queries, migrations
 - `lib/editor/` - ProseMirror document editing
 - `lib/artifacts/` - Server-side artifact processing
+- `lib/i18n/` - Translation files and i18n utilities
+- `hooks/` - Custom React hooks (useClientTools, useTranslations, etc.)
+- `mastra/` - Mastra agent definitions, server tools, specialized agents
 - `app/(auth)/` - Authentication routes and API endpoints
 - `app/(chat)/` - Main chat interface and chat API routes
 
@@ -192,7 +213,9 @@ Enforced by **Ultracite** (Biome-based) with strict rules:
 **Conversational AI Application:**
 - Multi-turn chat conversations with AI models
 - Support for streaming responses with real-time updates
-- Tool calling for dynamic actions (weather, document creation, etc.)
+- Server-side tool calling for dynamic actions (weather, document creation, etc.)
+- Client-side tool calling for browser operations (clipboard, DOM manipulation, etc.)
+- Research agent for web search and synthesis of findings
 
 **Document Artifacts:**
 - Collaborative editing of various document types
@@ -214,6 +237,12 @@ Enforced by **Ultracite** (Biome-based) with strict rules:
 - Configurable branding via environment variables
 - Development-only branding panel for real-time preview
 - Customizable app name, description, URLs, analytics
+
+**Multilingual Support:**
+- English and Italian language support
+- TypeScript-based translation system with automatic type checking
+- Language preference stored via cookie (1-year expiration)
+- Extensible architecture for adding new languages
 
 ## Important Constraints
 
@@ -244,13 +273,11 @@ Enforced by **Ultracite** (Biome-based) with strict rules:
 
 **Deployment:**
 - Designed for Vercel deployment (OIDC auto-configuration)
-- Non-Vercel deployments require manual AI Gateway API key
-- Environment variables required for core functionality
+- Environment variables required for core functionality (provider specific model keys)
 
 ## External Dependencies
 
 **Vercel Services:**
-- **Vercel AI Gateway** - AI model routing and management (requires API key for non-Vercel)
 - **Vercel Blob** - File upload storage (requires `BLOB_READ_WRITE_TOKEN`)
 - **Vercel Analytics** - Usage analytics and monitoring
 - **Vercel OpenTelemetry** - Distributed tracing
@@ -258,8 +285,15 @@ Enforced by **Ultracite** (Biome-based) with strict rules:
 **Database:**
 - **Neon PostgreSQL** - Serverless Postgres (requires `POSTGRES_URL`)
 
+**Agent Framework:**
+- **Mastra** - Agent orchestration, tool registration, memory management
+- `@mastra/core` - Agent and tool definitions
+- `@mastra/client-js` - Client-side tool creation
+- `@mastra/ai-sdk` - Integration with Vercel AI SDK and stream transformation
+
 **AI Providers:**
 - **xAI Grok** - Primary chat models via AI Gateway
+- **Google Search** - Web search for research agent
 - Extensible to other providers via AI SDK provider abstraction
 
 **Optional Services:**

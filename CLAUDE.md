@@ -97,6 +97,15 @@ The app uses Next.js App Router with two main route groups:
 - Tools receive session and dataStream for real-time updates
 - Reasoning model (`chat-model-reasoning`) uses `<think>` tags extracted by middleware
 
+**5a. Assistant Actions Registry (Client-Side Tools)**
+
+- Client-side tools are called "assistant actions" from developer perspective
+- Dynamic registry in `lib/ai/client-tools.ts` maintains all registered actions
+- Registry starts empty; actions are registered from React components via `useAssistantAction()` hook
+- Actions are deregistered when their component unmounts (lifecycle-aware)
+- `useClientTools()` hook provides access to registry with `register()`, `deregister()`, `getTools()` methods
+- `clearAssistantActionsRegistry()` available for testing (clears all registered actions)
+
 **6. Authentication Flow**
 
 - NextAuth v5 with custom credentials provider
@@ -230,6 +239,42 @@ This project uses **Ultracite** (Biome-based) for linting and formatting. Key ru
 4. Add to tools object in `app/(chat)/api/chat/route.ts`
 5. Add tool name to `experimental_activeTools` array
 6. Update system prompt in `lib/ai/prompts.ts` if needed
+
+### Registering Assistant Actions from Components
+
+Assistant actions (client-side tools) can be dynamically registered from React components using the `useAssistantAction()` hook:
+
+```typescript
+import { useAssistantAction } from '@/hooks/use-assistant-action';
+import { createTool } from '@mastra/client-js';
+import { z } from 'zod';
+
+function MyComponent() {
+  // Define the action
+  const myAction = createTool({
+    id: 'myAction',
+    description: 'My custom assistant action',
+    inputSchema: z.object({
+      input: z.string().describe('Some input'),
+    }),
+    execute: async ({ context }) => {
+      return { result: `Processed: ${context.input}` };
+    },
+  });
+
+  // Register the action - automatically deregisters on unmount
+  useAssistantAction(myAction);
+
+  return <div>Component with custom action</div>;
+}
+```
+
+**Key Points:**
+- Actions are registered when the component mounts and deregistered when it unmounts
+- The hook handles lifecycle automatically via `useEffect`
+- Multiple components can each register their own actions
+- Actions won't be available until after component mount (available in next chat message)
+- For manual registry access, use `useClientTools()` to get the registry object with `register()`, `deregister()`, and `getTools()` methods
 
 ### Database Schema Changes
 

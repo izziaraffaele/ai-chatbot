@@ -1,55 +1,247 @@
 'use client';
 
-import { createTool, type ClientTool } from '@mastra/client-js';
-import { InferUITools } from 'ai';
-import { z } from 'zod';
+import { type ClientTool } from '@mastra/client-js';
+import { ToolsInput } from '@mastra/core/agent';
+import { isVercelTool } from '@mastra/core/tools';
+import z from 'zod';
+import zodToJsonSchema from 'zod-to-json-schema';
 
+export type AnyClientTool = ClientTool<any, any>;
 export { ClientTool };
 
 /**
- * Example client tool: Copy text to clipboard.
- * This demonstrates basic client tool functionality that runs in the browser.
+ * Dynamic registry for assistant actions (client-side tools).
+ * Supports runtime registration and deregistration of actions from React components.
  */
-export const copyToClipboardTool = createTool({
-  id: 'copyToClipboard',
-  description: "Copies text to the user's clipboard",
-  inputSchema: z.object({
-    text: z.string().describe('The text to copy to clipboard'),
-  }),
-  execute: async ({ context }) => {
-    try {
-      await navigator.clipboard.writeText(context.text);
-      return {
-        success: true,
-        message: 'Text copied to clipboard',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: `Failed to copy to clipboard: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      };
-    }
-  },
-});
+export interface AssistantActionsRegistry {
+  /**
+   * Register an assistant action to make it available to the agent.
+   * If an action with the same ID exists, it will be replaced.
+   */
+  register(action: AnyClientTool): void;
 
-/**
- * Client tools registry containing all available client-side tools.
- * Tools are registered here and made available to the Mastra agent via useChat.
- */
-export const clientToolsRegistry = {
-  copyToClipboard: copyToClipboardTool,
-} as const;
+  /**
+   * Deregister an assistant action by ID.
+   * Safe to call multiple times for the same ID (idempotent).
+   */
+  deregister(id: string): void;
 
-/**
- * Get all registered client tools as an object.
- * This is used to pass tools to the Mastra agent.
- */
-export function getClientTools() {
-  return clientToolsRegistry;
+  /**
+   * Get all currently registered assistant actions as an object.
+   * Returns an object keyed by action ID, suitable for passing to the Mastra agent.
+   */
+  getTools(): Record<string, AnyClientTool>;
 }
 
 /**
- * Type helper to get the client tools object type.
- * Useful for typing components that use client tools.
+ * Create a new assistant actions registry instance.
+ * Maintains an in-memory Map of registered actions.
  */
-export type ClientToolsRegistry = typeof clientToolsRegistry;
+function createAssistantActionsRegistry(): AssistantActionsRegistry {
+  const actions = new Map<string, AnyClientTool>();
+
+  return {
+    register(action: AnyClientTool): void {
+      actions.set(action.id, action);
+    },
+
+    deregister(id: string): void {
+      // Idempotent: safe to call multiple times
+      actions.delete(id);
+    },
+
+    getTools(): Record<string, AnyClientTool> {
+      const tools: Record<string, AnyClientTool> = {};
+      actions.forEach((action, id) => {
+        tools[id] = action;
+      });
+      return tools;
+    },
+  };
+}
+
+/**
+ * Global singleton instance of the assistant actions registry.
+ * Maintains all registered actions throughout the application lifecycle.
+ */
+const assistantActionsRegistry = createAssistantActionsRegistry();
+
+/**
+ * Get the assistant actions registry.
+ * Used by hooks and components to register/deregister actions.
+ *
+ * @returns The global assistant actions registry
+ */
+export function getAssistantActionsRegistry(): AssistantActionsRegistry {
+  return assistantActionsRegistry;
+}
+
+/**
+ * Clear all registered assistant actions.
+ * Useful for testing; resets to clean state.
+ *
+ * @internal For testing only
+ */
+export function clearAssistantActionsRegistry(): void {
+  const tools = assistantActionsRegistry.getTools();
+  for (const id of Object.keys(tools)) {
+    assistantActionsRegistry.deregister(id);
+  }
+}
+
+/**
+ * Serialize client tools to JSON schema format for API transmission.
+ * Converts Zod schemas to JSON schema and prepares tools for the Mastra agent.
+ *
+ * @param clientTools - Registry of client tools to serialize
+ * @returns Serialized tools with JSON schemas for API transmission
+ */
+export function serializeClientTools(clientTools: ToolsInput): ToolsInput {
+  return Object.fromEntries(
+    Object.entries(clientTools).map(([key, value]) => {
+      if (isVercelTool(value)) {
+        return [
+          key,
+          {
+            ...value,
+            parameters: value.parameters
+              ? zodToClientToolInput(value.parameters)
+              : undefined,
+          },
+        ];
+      } else {
+        return [
+          key,
+          {
+            ...value,
+            inputSchema: value.inputSchema
+              ? zodToClientToolInput(value.inputSchema)
+              : undefined,
+            outputSchema: value.outputSchema
+              ? zodToClientToolInput(value.outputSchema)
+              : undefined,
+          },
+        ];
+      }
+    })
+  );
+}
+
+export function zodToClientToolInput(schema: z.ZodType) {
+  const jsonSchema = z.toJSONSchema(schema);
+  return jsonSchema;
+}
+
+/**
+ * Tool call object received from useChat hook's onToolCall callback.
+ */
+export interface ClientToolCall<T extends string, INPUT = unknown> {
+  /** Name of the tool being called */
+  toolName: T;
+  /** Unique identifier for this tool invocation */
+  toolCallId: string;
+  /** Input parameters for the tool */
+  input: INPUT;
+  /** Whether this is a dynamic tool (should not be processed by us) */
+  dynamic?: boolean;
+}
+
+/**
+ * Result object returned by tool execution, compatible with useChat's addToolOutput().
+ */
+export interface ClientToolCallResult<T extends string, OUTPUT = unknown> {
+  /** The tool call ID */
+  toolCallId: string;
+  /** Name of the tool that was called */
+  tool: T;
+  /** Output/result from the tool execution */
+  output: OUTPUT | { error?: string };
+}
+
+/**
+ * Process a client tool call from the useChat hook.
+ * Executes the registered client tool and returns the result.
+ *
+ * Per Vercel AI SDK guidance:
+ * - Always check toolCall.dynamic first (for type narrowing)
+ * - Don't await addToolResult() (can cause deadlocks)
+ *
+ * @param toolCall - Tool invocation from useChat onToolCall callback
+ * @returns Tool execution result, or error result if execution fails
+ *
+ * @example
+ * ```typescript
+ * const { onToolCall } = useChat({
+ *   onToolCall: async ({ toolCall }) => {
+ *     if (toolCall.dynamic) return;
+ *     const result = await processClientToolCall(toolCall);
+ *     addToolResult({
+ *       toolCallId: result.toolCallId,
+ *       result: result.output,
+ *     }); // no await
+ *   },
+ * });
+ * ```
+ */
+export async function processClientToolCall(
+  toolCall: ClientToolCall<any, any>
+): Promise<ClientToolCallResult<any, any> | null> {
+  const { toolName, toolCallId, input, dynamic } = toolCall;
+
+  // Skip dynamic tools - let Vercel AI SDK handle them
+  if (dynamic) {
+    return null;
+  }
+
+  try {
+    // Look up the tool in the registry
+    const registry = getAssistantActionsRegistry();
+    const tools = registry.getTools();
+    const tool = tools[toolName];
+
+    // Skip unregistered tools - Might be a backed tool call
+    if (!tool) {
+      return null;
+    }
+
+    if (!tool.execute) {
+      return {
+        toolCallId,
+        tool: toolName,
+        output: null,
+      };
+    }
+
+    console.info(`[${toolName}][${toolCallId}] Executing tool call...`);
+    console.log(`[${toolName}][${toolCallId}] Tool call input:`);
+    console.log(input);
+
+    // Execute the tool with the provided input
+    // Mastra tools expect { context: input } shape for the execute function
+    const output = await tool.execute({ context: input } as any);
+
+    console.info(`[${toolName}][${toolCallId}] Tool call complete.`);
+    console.log(`[${toolName}][${toolCallId}] Result:`);
+    console.log(output);
+
+    return {
+      toolCallId,
+      tool: toolName,
+      output,
+    };
+  } catch (error) {
+    // Capture execution errors and return them as tool results
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    console.info(`[${toolName}][${toolCallId}] Tool call error:`);
+    console.error(error);
+
+    return {
+      toolCallId,
+      tool: toolName,
+      output: {
+        error: `Tool execution failed: ${errorMessage}`,
+      },
+    };
+  }
+}

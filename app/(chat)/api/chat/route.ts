@@ -1,7 +1,5 @@
-import { ReadableStream } from 'stream/web';
 import { geolocation } from '@vercel/functions';
 import { after } from 'next/server';
-import { toAISdkFormat } from '@mastra/ai-sdk';
 import {
   createResumableStreamContext,
   type ResumableStreamContext,
@@ -68,6 +66,7 @@ export async function POST(request: Request) {
 
   try {
     const json = await request.json();
+    console.log(json);
     requestBody = postRequestBodySchema.parse(json);
   } catch (_) {
     return new ChatSDKError('bad_request:api').toResponse();
@@ -108,7 +107,6 @@ export async function POST(request: Request) {
     }
 
     const { longitude, latitude, city, country } = geolocation(request);
-
     const chatAgent = mastra.getAgent(AGENT_NAMES.CHAT_AGENT);
 
     // Create runtime context with session and geolocation hints
@@ -165,6 +163,7 @@ export async function POST(request: Request) {
       // Call Mastra agent with runtime context
       const stream = await chatAgent.stream<undefined, 'mastra'>(uiMessages, {
         runtimeContext,
+        clientTools: tools,
         telemetry: {
           functionId: 'chatAgent-stream',
           isEnabled: isProductionEnvironment,

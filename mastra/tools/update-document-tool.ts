@@ -1,6 +1,9 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { documentHandlersByArtifactKind } from '@/lib/artifacts/server';
+import {
+  artifactKinds,
+  documentHandlersByArtifactKind,
+} from '@/lib/artifacts/server';
 import { getDocumentById } from '@/lib/db/queries';
 import { getSession } from '../utils/runtime-utils';
 
@@ -13,6 +16,12 @@ export const updateDocumentTool = createTool({
       .string()
       .describe('The description of changes that need to be made'),
   }),
+  outputSchema: z.object({
+    id: z.string(),
+    title: z.string(),
+    kind: z.enum(['text', 'code', 'sheet', 'image']),
+    content: z.string(),
+  }),
   execute: async ({ context, runtimeContext, writer }) => {
     const { id, description } = context;
 
@@ -21,9 +30,7 @@ export const updateDocumentTool = createTool({
     const document = await getDocumentById({ id });
 
     if (!document) {
-      return {
-        error: 'Document not found',
-      };
+      throw new Error('Document not found');
     }
 
     await writer?.write({
