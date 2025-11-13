@@ -60,8 +60,6 @@ export function Chat({
 
   const runtimeConfig = useRuntimeConfig();
 
-  console.log(runtimeConfig);
-
   const { mutate } = useSWRConfig();
   const { setDataStream } = useDataStream();
 

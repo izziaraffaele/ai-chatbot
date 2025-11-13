@@ -1,4 +1,3 @@
-import { runtimeConfig } from '@/config/runtime';
 import { RuntimeConfigSchema } from '@/config/runtime.schema';
 import { z } from 'zod';
 

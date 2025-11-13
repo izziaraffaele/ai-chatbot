@@ -30,13 +30,14 @@ import { type PostRequestBody, postRequestBodySchema } from './schema';
 import { mastra } from '@/mastra';
 import { createToolContext } from '@/mastra/utils/runtime-utils';
 import { isProductionEnvironment } from '@/lib/constants';
-import {
-  createUIMessageStream,
-  createUIMessageStreamResponse,
-  InferUIMessageChunk,
-} from 'ai';
+import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 import { RuntimeConfig } from '@/config/runtime.schema';
 import { AGENT_NAMES } from '@/mastra/agents';
+import { titlePrompt } from '@/lib/ai/prompts';
+import {
+  convertFullStreamChunkToUIMessageStream,
+  convertMastraChunkToAISDKv5,
+} from '@mastra/core/stream';
 
 export const maxDuration = 60;
 
@@ -128,7 +129,7 @@ export async function POST(request: Request) {
         message,
         tracingContext: {},
         instructions:
-          'Given a chat message, generate a short title for the conversation in the language of the given message.',
+          'Given a chat message, generate a short title.' + titlePrompt,
       });
 
       await saveChat({
@@ -188,24 +189,44 @@ export async function POST(request: Request) {
         },
       });
 
+      let lastMessageId: string | undefined;
+      if (
+        uiMessages.length > 0 &&
+        uiMessages[uiMessages.length - 1].role === 'assistant'
+      ) {
+        lastMessageId = uiMessages[uiMessages.length - 1].id;
+      }
+
       // Transform stream into AI SDK format and create UI messages stream
       const uiMessageStream = createUIMessageStream({
         originalMessages: uiMessages,
         generateId: generateUUID,
         execute: async ({ writer }) => {
-          const aiSdkStream = toAISdkFormat(stream, {
-            from: 'agent',
-          })! as ReadableStream<InferUIMessageChunk<ChatMessage>>;
+          // Manually convert chunks to preserve custom data streams
+          // REASON: toAISdkFormat for some reason removes some chunks from the stream
+          for await (const part of stream.fullStream) {
+            const aiSDKPart = convertMastraChunkToAISDKv5({
+              chunk: part,
+              mode: 'stream',
+            });
 
-          const messageParts: unknown[] = [];
+            const transformedChunk =
+              convertFullStreamChunkToUIMessageStream<any>({
+                part: aiSDKPart as any,
+                sendReasoning: false,
+                sendSources: false,
+                sendStart: true,
+                sendFinish: true,
+                responseMessageId: lastMessageId,
+                onError(error) {
+                  return String(error);
+                },
+              });
 
-          for await (const part of aiSdkStream) {
-            writer.write(part);
-            messageParts.push(part);
+            if (transformedChunk) writer.write(transformedChunk as any);
           }
         },
         onFinish: async ({ responseMessage }) => {
-          console.log(responseMessage);
           await saveMessages({
             messages: [
               {

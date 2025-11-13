@@ -1,71 +1,61 @@
-import { smoothStream, streamText } from 'ai';
 import { updateDocumentPrompt } from '@/lib/ai/prompts';
-import { myProvider } from '@/lib/ai/providers';
 import { createDocumentHandler } from '@/lib/artifacts/server';
 
+/**
+ * Text document handler using Mastra agents for streaming content generation.
+ * Uses agent.stream() to generate content in real-time, emitting data-textDelta
+ * events for each chunk received from the AI model.
+ */
 export const textDocumentHandler = createDocumentHandler<'text'>({
   kind: 'text',
-  onCreateDocument: async ({ title, dataStream }) => {
+  onCreateDocument: async ({ title, dataStream, agent }) => {
     let draftContent = '';
 
-    const { fullStream } = streamText({
-      model: myProvider.languageModel('artifact-model'),
+    if (!agent) {
+      throw new Error('Agent is required for text document generation');
+    }
+
+    // Stream text generation from agent
+    const stream = await agent.stream(title, {
       system:
         'Write about the given topic. Markdown is supported. Use headings wherever appropriate.',
-      experimental_transform: smoothStream({ chunking: 'word' }),
-      prompt: title,
     });
 
-    for await (const delta of fullStream) {
-      const { type } = delta;
+    // Consume stream chunks and emit to client in real-time
+    for await (const chunk of stream.textStream) {
+      draftContent += chunk;
 
-      if (type === 'text-delta') {
-        const { text } = delta;
-
-        draftContent += text;
-
-        await dataStream.write({
-          type: 'data-textDelta',
-          data: text,
-          transient: true,
-        });
-      }
+      await dataStream.write({
+        type: 'data-textDelta',
+        data: chunk,
+        transient: true,
+      });
     }
 
     return draftContent;
   },
-  onUpdateDocument: async ({ document, description, dataStream }) => {
+  onUpdateDocument: async ({ document, description, dataStream, agent }) => {
     let draftContent = '';
 
-    const { fullStream } = streamText({
-      model: myProvider.languageModel('artifact-model'),
-      system: updateDocumentPrompt(document.content, 'text'),
-      experimental_transform: smoothStream({ chunking: 'word' }),
-      prompt: description,
-      providerOptions: {
-        openai: {
-          prediction: {
-            type: 'content',
-            content: document.content,
-          },
-        },
-      },
+    if (!agent) {
+      throw new Error('Agent is required for text document update');
+    }
+
+    // Stream text updates from agent
+    const systemPrompt = updateDocumentPrompt(document.content, 'text');
+    const stream = await agent.stream(description, {
+      system: systemPrompt,
     });
 
-    for await (const delta of fullStream) {
-      const { type } = delta;
+    // Consume stream chunks and emit to client in real-time
+    for await (const chunk of stream.textStream) {
+      draftContent += chunk;
 
-      if (type === 'text-delta') {
-        const { text } = delta;
-
-        draftContent += text;
-
-        await dataStream.write({
-          type: 'data-textDelta',
-          data: text,
-          transient: true,
-        });
-      }
+      await dataStream.write({
+        type: 'data-textDelta',
+        data: chunk,
+        transient: true,
+      });
     }
 
     return draftContent;

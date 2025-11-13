@@ -1,79 +1,58 @@
-import { streamObject } from 'ai';
-import { z } from 'zod';
-import { sheetPrompt, updateDocumentPrompt } from '@/lib/ai/prompts';
-import { myProvider } from '@/lib/ai/providers';
+import { updateDocumentPrompt, sheetPrompt } from '@/lib/ai/prompts';
 import { createDocumentHandler } from '@/lib/artifacts/server';
 
+/**
+ * Sheet document handler using Mastra agents for streaming CSV/table generation.
+ * Uses agent.stream() to generate spreadsheet data in real-time, emitting data-sheetDelta
+ * events for each chunk received from the AI model.
+ */
 export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
   kind: 'sheet',
-  onCreateDocument: async ({ title, dataStream }) => {
+  onCreateDocument: async ({ title, dataStream, agent }) => {
     let draftContent = '';
 
-    const { fullStream } = streamObject({
-      model: myProvider.languageModel('artifact-model'),
-      system: sheetPrompt,
-      prompt: title,
-      schema: z.object({
-        csv: z.string().describe('CSV data'),
-      }),
-    });
-
-    for await (const delta of fullStream) {
-      const { type } = delta;
-
-      if (type === 'object') {
-        const { object } = delta;
-        const { csv } = object;
-
-        if (csv) {
-          await dataStream.write({
-            type: 'data-sheetDelta',
-            data: csv,
-            transient: true,
-          });
-
-          draftContent = csv;
-        }
-      }
+    if (!agent) {
+      throw new Error('Agent is required for sheet document generation');
     }
 
-    await dataStream.write({
-      type: 'data-sheetDelta',
-      data: draftContent,
-      transient: true,
-    });
+    // Stream sheet generation from agent
+    const stream = await agent.stream(title, { system: sheetPrompt });
+
+    // Consume stream chunks and emit to client in real-time
+    for await (const chunk of stream.textStream) {
+      draftContent += chunk;
+
+      await dataStream.write({
+        type: 'data-sheetDelta',
+        data: chunk,
+        transient: true,
+      });
+    }
 
     return draftContent;
   },
-  onUpdateDocument: async ({ document, description, dataStream }) => {
+  onUpdateDocument: async ({ document, description, dataStream, agent }) => {
     let draftContent = '';
 
-    const { fullStream } = streamObject({
-      model: myProvider.languageModel('artifact-model'),
-      system: updateDocumentPrompt(document.content, 'sheet'),
-      prompt: description,
-      schema: z.object({
-        csv: z.string(),
-      }),
+    if (!agent) {
+      throw new Error('Agent is required for sheet document update');
+    }
+
+    // Stream sheet updates from agent
+    const systemPrompt = updateDocumentPrompt(document.content, 'sheet');
+    const stream = await agent.stream(description, {
+      system: systemPrompt,
     });
 
-    for await (const delta of fullStream) {
-      const { type } = delta;
+    // Consume stream chunks and emit to client in real-time
+    for await (const chunk of stream.textStream) {
+      draftContent += chunk;
 
-      if (type === 'object') {
-        const { object } = delta;
-        const { csv } = object;
-
-        if (csv) {
-          await dataStream.write({
-            type: 'data-sheetDelta',
-            data: csv,
-            transient: true,
-          });
-
-          draftContent = csv;
-        }
-      }
+      await dataStream.write({
+        type: 'data-sheetDelta',
+        data: chunk,
+        transient: true,
+      });
     }
 
     return draftContent;

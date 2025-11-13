@@ -1,5 +1,5 @@
-import type { Geo } from "@vercel/functions";
-import type { ArtifactKind } from "@/components/artifact";
+import type { Geo } from '@vercel/functions';
+import type { ArtifactKind } from '@/components/artifact';
 
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
@@ -33,13 +33,13 @@ Do not update document right after creating it. Wait for user feedback or reques
 `;
 
 export const regularPrompt =
-  "You are a friendly assistant! Keep your responses concise and helpful.";
+  'You are a friendly assistant! Keep your responses concise and helpful.';
 
 export type RequestHints = {
-  latitude: Geo["latitude"];
-  longitude: Geo["longitude"];
-  city: Geo["city"];
-  country: Geo["country"];
+  latitude: Geo['latitude'];
+  longitude: Geo['longitude'];
+  city: Geo['city'];
+  country: Geo['country'];
 };
 
 export const getRequestPromptFromHints = (requestHints: RequestHints) => `\
@@ -59,7 +59,7 @@ export const systemPrompt = ({
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
 
-  if (selectedChatModel === "chat-model-reasoning") {
+  if (selectedChatModel === 'chat-model-reasoning') {
     return `${regularPrompt}\n\n${requestPrompt}`;
   }
 
@@ -100,12 +100,12 @@ export const updateDocumentPrompt = (
   currentContent: string | null,
   type: ArtifactKind
 ) => {
-  let mediaType = "document";
+  let mediaType = 'document';
 
-  if (type === "code") {
-    mediaType = "code snippet";
-  } else if (type === "sheet") {
-    mediaType = "spreadsheet";
+  if (type === 'code') {
+    mediaType = 'code snippet';
+  } else if (type === 'sheet') {
+    mediaType = 'spreadsheet';
   }
 
   return `Improve the following contents of the ${mediaType} based on the given prompt.
@@ -118,3 +118,12 @@ export const titlePrompt = `\n
     - ensure it is not more than 80 characters long
     - the title should be a summary of the user's message
     - do not use quotes or colons`;
+
+export const artifactSystemPrompt = `You are an expert content creator. Generate high-quality, well-structured content based on the user's request.
+
+Guidelines:
+- Ensure the output is complete and self-contained
+- Use clear formatting and logical organization
+- Include helpful details and examples where appropriate
+- Make the content immediately useful without requiring further edits
+- Maintain consistent style and professional quality throughout`;

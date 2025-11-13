@@ -1,73 +1,58 @@
-import { streamObject } from 'ai';
-import { z } from 'zod';
 import { codePrompt, updateDocumentPrompt } from '@/lib/ai/prompts';
-import { myProvider } from '@/lib/ai/providers';
 import { createDocumentHandler } from '@/lib/artifacts/server';
 
+/**
+ * Code document handler using Mastra agents for streaming code generation.
+ * Uses agent.stream() to generate code in real-time, emitting data-codeDelta
+ * events for each chunk received from the AI model.
+ */
 export const codeDocumentHandler = createDocumentHandler<'code'>({
   kind: 'code',
-  onCreateDocument: async ({ title, dataStream }) => {
+  onCreateDocument: async ({ title, dataStream, agent }) => {
     let draftContent = '';
 
-    const { fullStream } = streamObject({
-      model: myProvider.languageModel('artifact-model'),
-      system: codePrompt,
-      prompt: title,
-      schema: z.object({
-        code: z.string(),
-      }),
-    });
+    if (!agent) {
+      throw new Error('Agent is required for code document generation');
+    }
 
-    for await (const delta of fullStream) {
-      const { type } = delta;
+    // Stream code generation from agent
+    const stream = await agent.stream(title, { system: codePrompt });
 
-      if (type === 'object') {
-        const { object } = delta;
-        const { code } = object;
+    // Consume stream chunks and emit to client in real-time
+    for await (const chunk of stream.textStream) {
+      draftContent += chunk;
 
-        if (code) {
-          await dataStream.write({
-            type: 'data-codeDelta',
-            data: code ?? '',
-            transient: true,
-          });
-
-          draftContent = code;
-        }
-      }
+      await dataStream.write({
+        type: 'data-codeDelta',
+        data: chunk,
+        transient: true,
+      });
     }
 
     return draftContent;
   },
-  onUpdateDocument: async ({ document, description, dataStream }) => {
+  onUpdateDocument: async ({ document, description, dataStream, agent }) => {
     let draftContent = '';
 
-    const { fullStream } = streamObject({
-      model: myProvider.languageModel('artifact-model'),
-      system: updateDocumentPrompt(document.content, 'code'),
-      prompt: description,
-      schema: z.object({
-        code: z.string(),
-      }),
+    if (!agent) {
+      throw new Error('Agent is required for code document update');
+    }
+
+    // Stream code updates from agent
+    const systemPrompt = updateDocumentPrompt(document.content, 'code');
+    const stream = await agent.stream(description, {
+      system: systemPrompt,
     });
 
-    for await (const delta of fullStream) {
-      const { type } = delta;
+    // Consume stream chunks and emit to client in real-time
+    for await (const chunk of stream.textStream) {
+      draftContent += chunk;
 
-      if (type === 'object') {
-        const { object } = delta;
-        const { code } = object;
-
-        if (code) {
-          await dataStream.write({
-            type: 'data-codeDelta',
-            data: code ?? '',
-            transient: true,
-          });
-
-          draftContent = code;
-        }
-      }
+      await dataStream.write({
+        type: 'data-codeDelta',
+        data: chunk,
+        transient: true,
+      });
     }
 
     return draftContent;

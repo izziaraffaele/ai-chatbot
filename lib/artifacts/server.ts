@@ -1,13 +1,16 @@
 import type { UIMessageStreamWriter } from 'ai';
 import type { Session } from 'next-auth';
-import { codeDocumentHandler } from '@/artifacts/code/server';
-import { sheetDocumentHandler } from '@/artifacts/sheet/server';
-import { textDocumentHandler } from '@/artifacts/text/server';
-import type { ArtifactKind } from '@/components/artifact';
+import { Agent } from '@mastra/core/agent';
+import { ToolStream } from '@mastra/core/tools';
+import { mastra } from '@/mastra';
+import { artifactSystemPrompt } from '../ai/prompts';
 import { saveDocument } from '../db/queries';
 import type { Document } from '../db/schema';
 import type { ChatMessage } from '../types';
-import { ToolStream } from '@mastra/core/tools';
+import type { ArtifactKind } from '@/components/artifact';
+import { codeDocumentHandler } from '@/artifacts/code/server';
+import { sheetDocumentHandler } from '@/artifacts/sheet/server';
+import { textDocumentHandler } from '@/artifacts/text/server';
 
 type StreamWriter = UIMessageStreamWriter<ChatMessage> | ToolStream<any>;
 
@@ -19,18 +22,24 @@ export type SaveDocumentProps = {
   userId: string;
 };
 
+/** Props passed to document creation and update handlers */
 export type CreateDocumentCallbackProps = {
   id: string;
   title: string;
   dataStream: StreamWriter;
   session: Session;
+  /** Mastra agent for generating document content */
+  agent?: Agent;
 };
 
+/** Props passed to document update handlers */
 export type UpdateDocumentCallbackProps = {
   document: Document;
   description: string;
   dataStream: StreamWriter;
   session: Session;
+  /** Mastra agent for updating document content */
+  agent?: Agent;
 };
 
 export type DocumentHandler<T = ArtifactKind> = {
@@ -39,11 +48,37 @@ export type DocumentHandler<T = ArtifactKind> = {
   onUpdateDocument: (args: UpdateDocumentCallbackProps) => Promise<void>;
 };
 
+/**
+ * Factory for creating document handlers with Mastra agent integration.
+ * Lazily initializes agents to avoid startup overhead.
+ *
+ * @param config Handler configuration including artifact kind and optional model
+ * @returns Document handler with create/update callbacks
+ */
 export function createDocumentHandler<T extends ArtifactKind>(config: {
   kind: T;
+  model?: string;
   onCreateDocument: (params: CreateDocumentCallbackProps) => Promise<string>;
   onUpdateDocument: (params: UpdateDocumentCallbackProps) => Promise<string>;
 }): DocumentHandler<T> {
+  // Lazy initialization - create agent only when needed, not at module load time
+  let documentExpert: Agent | null = null;
+
+  const getDocumentExpert = (): Agent => {
+    if (!documentExpert) {
+      const artifactModel =
+        config.model || process.env.ARTIFACT_MODEL || 'google/gemini-2.5-flash';
+
+      documentExpert = new Agent({
+        name: `${config.kind}-document-expert`,
+        instructions: artifactSystemPrompt,
+        model: artifactModel,
+        mastra: mastra,
+      });
+    }
+    return documentExpert;
+  };
+
   return {
     kind: config.kind,
     onCreateDocument: async (args: CreateDocumentCallbackProps) => {
@@ -52,6 +87,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
         title: args.title,
         dataStream: args.dataStream,
         session: args.session,
+        agent: getDocumentExpert(),
       });
 
       if (args.session?.user?.id) {
@@ -72,6 +108,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
         description: args.description,
         dataStream: args.dataStream,
         session: args.session,
+        agent: getDocumentExpert(),
       });
 
       if (args.session?.user?.id) {
