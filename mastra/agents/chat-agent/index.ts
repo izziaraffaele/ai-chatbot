@@ -9,6 +9,7 @@ import {
 } from '../../tools';
 import { getRuntimeConfig, getGeoHints } from '../../utils/runtime-utils';
 import { chatAgentSystemPrompt } from './system-prompt';
+import { researchAgent } from '../research-agent';
 
 /**
  * Mastra Chat Agent
@@ -38,6 +39,9 @@ export const chatAgent = new Agent({
     createDocument: createDocumentTool,
     updateDocument: updateDocumentTool,
     requestSuggestions: requestSuggestionsTool,
+  },
+  agents: {
+    researchAgent,
   },
   memory: new Memory({
     storage: new LibSQLStore({

@@ -32,10 +32,7 @@ import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 import { RuntimeConfig } from '@/config/runtime.schema';
 import { AGENT_NAMES } from '@/mastra/agents';
 import { titlePrompt } from '@/lib/ai/prompts';
-import {
-  convertFullStreamChunkToUIMessageStream,
-  convertMastraChunkToAISDKv5,
-} from '@mastra/core/stream';
+import { toAISdkFormat } from '@mastra/ai-sdk';
 
 export const maxDuration = 60;
 
@@ -66,7 +63,6 @@ export async function POST(request: Request) {
 
   try {
     const json = await request.json();
-    console.log(json);
     requestBody = postRequestBodySchema.parse(json);
   } catch (_) {
     return new ChatSDKError('bad_request:api').toResponse();
@@ -161,7 +157,7 @@ export async function POST(request: Request) {
 
     try {
       // Call Mastra agent with runtime context
-      const stream = await chatAgent.stream<undefined, 'mastra'>(uiMessages, {
+      const stream = await chatAgent.stream(uiMessages, {
         runtimeContext,
         clientTools: tools,
         telemetry: {
@@ -200,50 +196,16 @@ export async function POST(request: Request) {
 
       // Transform stream into AI SDK format and create UI messages stream
       const uiMessageStream = createUIMessageStream({
-        originalMessages: uiMessages,
-        generateId: generateUUID,
         execute: async ({ writer }) => {
-          // Manually convert chunks to preserve custom data streams
-          // REASON: toAISdkFormat for some reason removes some chunks from the stream
-          for await (const part of stream.fullStream) {
-            const aiSDKPart = convertMastraChunkToAISDKv5({
-              chunk: part,
-              mode: 'stream',
-            });
-
-            const transformedChunk =
-              convertFullStreamChunkToUIMessageStream<any>({
-                part: aiSDKPart as any,
-                sendReasoning: false,
-                sendSources: false,
-                sendStart: true,
-                sendFinish: true,
-                responseMessageId: lastMessageId,
-                onError(error) {
-                  return String(error);
-                },
-              });
-
-            if (transformedChunk) writer.write(transformedChunk as any);
+          for await (const part of toAISdkFormat(stream, {
+            from: 'agent',
+          }) as any) {
+            writer.write(part);
           }
-        },
-        onFinish: async ({ responseMessage }) => {
-          await saveMessages({
-            messages: [
-              {
-                id: responseMessage.id,
-                role: responseMessage.role,
-                parts: responseMessage.parts,
-                createdAt: new Date(),
-                chatId: id,
-                attachments: [],
-              },
-            ],
-          });
         },
       });
 
-      // Create a Response that streams the UI message stream to the client
+      // // Create a Response that streams the UI message stream to the client
       return createUIMessageStreamResponse({
         stream: uiMessageStream,
       });

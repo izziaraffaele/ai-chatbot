@@ -26,29 +26,29 @@ export const createDocumentTool = createTool({
     const session = getSession(runtimeContext);
     const id = generateUUID();
 
-    await writer?.write({
+    await writer?.custom({
       type: 'data-kind',
       data: kind,
       transient: true,
-    });
+    } as any);
 
-    await writer?.write({
+    await writer?.custom({
       type: 'data-id',
       data: id,
       transient: true,
-    });
+    } as any);
 
-    await writer?.write({
+    await writer?.custom({
       type: 'data-title',
       data: title,
       transient: true,
-    });
+    } as any);
 
     await writer?.write({
       type: 'data-clear',
       data: null,
       transient: true,
-    });
+    } as any);
 
     const documentHandler = documentHandlersByArtifactKind.find(
       (documentHandlerByArtifactKind) =>
@@ -68,7 +68,11 @@ export const createDocumentTool = createTool({
       });
     }
 
-    await writer?.write({ type: 'data-finish', data: null, transient: true });
+    await writer?.custom({
+      type: 'data-finish',
+      data: null,
+      transient: true,
+    } as any);
 
     return {
       id,

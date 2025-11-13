@@ -30,7 +30,7 @@ import { researchAgentSystemPrompt } from './system-prompt';
  * ```
  */
 export const researchAgent = new Agent({
-  name: 'Research Agent',
+  name: 'Researcher',
   instructions: researchAgentSystemPrompt(),
   model: 'google/gemini-2.5-flash', // Default, can be overridden at runtime
   tools: {

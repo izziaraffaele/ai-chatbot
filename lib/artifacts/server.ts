@@ -1,4 +1,3 @@
-import type { UIMessageStreamWriter } from 'ai';
 import type { Session } from 'next-auth';
 import { Agent } from '@mastra/core/agent';
 import { ToolStream } from '@mastra/core/tools';
@@ -6,13 +5,12 @@ import { mastra } from '@/mastra';
 import { artifactSystemPrompt } from '../ai/prompts';
 import { saveDocument } from '../db/queries';
 import type { Document } from '../db/schema';
-import type { ChatMessage } from '../types';
 import type { ArtifactKind } from '@/components/artifact';
 import { codeDocumentHandler } from '@/artifacts/code/server';
 import { sheetDocumentHandler } from '@/artifacts/sheet/server';
 import { textDocumentHandler } from '@/artifacts/text/server';
 
-type StreamWriter = UIMessageStreamWriter<ChatMessage> | ToolStream<any>;
+type StreamWriter = ToolStream<any>;
 
 export type SaveDocumentProps = {
   id: string;
