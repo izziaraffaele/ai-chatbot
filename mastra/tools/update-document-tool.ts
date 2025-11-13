@@ -26,7 +26,7 @@ export const updateDocumentTool = createTool({
       };
     }
 
-    writer?.write({
+    await writer?.write({
       type: 'data-clear',
       data: null,
       transient: true,
@@ -50,7 +50,7 @@ export const updateDocumentTool = createTool({
       });
     }
 
-    writer?.write({ type: 'data-finish', data: null, transient: true });
+    await writer?.write({ type: 'data-finish', data: null, transient: true });
 
     return {
       id,

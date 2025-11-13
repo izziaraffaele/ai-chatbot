@@ -28,11 +28,9 @@ export const chatAgent = new Agent({
     // Build comprehensive system prompt from configuration
     const prompt = chatAgentSystemPrompt(config, geoHints);
 
-    console.log(prompt);
-
     return prompt;
   },
-  model: 'google/gemini-2.5-flash-lite', // Default, overridden at runtime
+  model: 'google/gemini-2.5-flash', // Default, overridden at runtime
   tools: {
     getWeather: getWeatherTool,
     createDocument: createDocumentTool,

@@ -1,3 +1,4 @@
+import { ReadableStream } from 'stream/web';
 import { geolocation } from '@vercel/functions';
 import { after } from 'next/server';
 import { toAISdkFormat } from '@mastra/ai-sdk';
@@ -25,12 +26,17 @@ import { ChatSDKError } from '@/lib/errors';
 import type { ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
 import { convertToUIMessages, generateUUID } from '@/lib/utils';
-import { generateTitleFromUserMessage } from '../../actions';
 import { type PostRequestBody, postRequestBodySchema } from './schema';
 import { mastra } from '@/mastra';
 import { createToolContext } from '@/mastra/utils/runtime-utils';
 import { isProductionEnvironment } from '@/lib/constants';
-import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
+import {
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  InferUIMessageChunk,
+} from 'ai';
+import { RuntimeConfig } from '@/config/runtime.schema';
+import { AGENT_NAMES } from '@/mastra/agents';
 
 export const maxDuration = 60;
 
@@ -71,12 +77,14 @@ export async function POST(request: Request) {
       id,
       message,
       selectedChatModel,
+      runtimeConfig,
       selectedVisibilityType,
     }: {
       id: string;
       message: ChatMessage;
       selectedChatModel: ChatModel['id'];
       selectedVisibilityType: VisibilityType;
+      runtimeConfig?: Partial<RuntimeConfig>;
     } = requestBody;
 
     const session = await auth();
@@ -96,6 +104,16 @@ export async function POST(request: Request) {
       return new ChatSDKError('rate_limit:chat').toResponse();
     }
 
+    const { longitude, latitude, city, country } = geolocation(request);
+
+    const chatAgent = mastra.getAgent(AGENT_NAMES.CHAT_AGENT);
+
+    // Create runtime context with session and geolocation hints
+    const runtimeContext = createToolContext(session, {
+      geoHints: { longitude, latitude, city, country },
+      config: runtimeConfig,
+    });
+
     const chat = await getChatById({ id });
     let messagesFromDb: DBMessage[] = [];
 
@@ -106,22 +124,23 @@ export async function POST(request: Request) {
       // Only fetch messages if chat already exists
       messagesFromDb = await getMessagesByChatId({ id });
     } else {
-      // const title = await generateTitleFromUserMessage({
-      //   message,
-      // });
+      const title = await chatAgent.generateTitleFromUserMessage({
+        message,
+        tracingContext: {},
+        instructions:
+          'Given a chat message, generate a short title for the conversation in the language of the given message.',
+      });
 
       await saveChat({
         id,
         userId: session.user.id,
-        title: '',
+        title: title,
         visibility: selectedVisibilityType,
       });
       // New chat - no need to fetch messages, it's empty
     }
 
     const uiMessages = [...convertToUIMessages(messagesFromDb), message];
-
-    const { longitude, latitude, city, country } = geolocation(request);
 
     await saveMessages({
       messages: [
@@ -139,14 +158,7 @@ export async function POST(request: Request) {
     const streamId = generateUUID();
     await createStreamId({ streamId, chatId: id });
 
-    // Create runtime context with session and geolocation hints
-    const runtimeContext = createToolContext(session, {
-      geoHints: { longitude, latitude, city, country },
-    });
-
     try {
-      const chatAgent = mastra.getAgent('chatAgent');
-
       // Call Mastra agent with runtime context
       const stream = await chatAgent.stream<undefined, 'mastra'>(uiMessages, {
         runtimeContext,
@@ -154,7 +166,7 @@ export async function POST(request: Request) {
           functionId: 'chatAgent-stream',
           isEnabled: isProductionEnvironment,
         },
-        onFinish: async ({ usage, response }) => {
+        onFinish: async ({ usage }) => {
           let finalMergedUsage: AppUsage | null = null;
 
           try {
@@ -167,30 +179,11 @@ export async function POST(request: Request) {
             console.log('cannot enrich usage');
           }
 
-          if (response.messages) {
-            await saveMessages({
-              messages: response.messages.map((currentMessage) => ({
-                id:
-                  'id' in currentMessage &&
-                  typeof currentMessage.id === 'string'
-                    ? currentMessage.id
-                    : generateUUID(),
-                role: currentMessage.role,
-                parts: Array.isArray(currentMessage.content)
-                  ? currentMessage.content
-                  : [{ type: 'text', text: currentMessage.content }],
-                createdAt: new Date(),
-                attachments: [],
-                chatId: id,
-              })),
+          if (finalMergedUsage) {
+            await updateChatLastContextById({
+              chatId: id,
+              context: finalMergedUsage,
             });
-
-            if (finalMergedUsage) {
-              await updateChatLastContextById({
-                chatId: id,
-                context: finalMergedUsage,
-              });
-            }
           }
         },
       });
@@ -198,14 +191,33 @@ export async function POST(request: Request) {
       // Transform stream into AI SDK format and create UI messages stream
       const uiMessageStream = createUIMessageStream({
         originalMessages: uiMessages,
+        generateId: generateUUID,
         execute: async ({ writer }) => {
           const aiSdkStream = toAISdkFormat(stream, {
             from: 'agent',
-          })!;
+          })! as ReadableStream<InferUIMessageChunk<ChatMessage>>;
 
-          for await (const part of aiSdkStream as any) {
+          const messageParts: unknown[] = [];
+
+          for await (const part of aiSdkStream) {
             writer.write(part);
+            messageParts.push(part);
           }
+        },
+        onFinish: async ({ responseMessage }) => {
+          console.log(responseMessage);
+          await saveMessages({
+            messages: [
+              {
+                id: responseMessage.id,
+                role: responseMessage.role,
+                parts: responseMessage.parts,
+                createdAt: new Date(),
+                chatId: id,
+                attachments: [],
+              },
+            ],
+          });
         },
       });
 

@@ -20,25 +20,25 @@ export const createDocumentTool = createTool({
     const session = getSession(runtimeContext);
     const id = generateUUID();
 
-    writer?.write({
+    await writer?.write({
       type: 'data-kind',
       data: kind,
       transient: true,
     });
 
-    writer?.write({
+    await writer?.write({
       type: 'data-id',
       data: id,
       transient: true,
     });
 
-    writer?.write({
+    await writer?.write({
       type: 'data-title',
       data: title,
       transient: true,
     });
 
-    writer?.write({
+    await writer?.write({
       type: 'data-clear',
       data: null,
       transient: true,
@@ -62,7 +62,7 @@ export const createDocumentTool = createTool({
       });
     }
 
-    writer?.write({ type: 'data-finish', data: null, transient: true });
+    await writer?.write({ type: 'data-finish', data: null, transient: true });
 
     return {
       id,

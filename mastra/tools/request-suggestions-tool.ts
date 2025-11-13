@@ -56,7 +56,7 @@ export const requestSuggestionsTool = createTool({
         documentCreatedAt: document.createdAt,
       };
 
-      writer?.write({
+      await writer?.write({
         type: 'data-suggestion',
         data: suggestion,
         transient: true,

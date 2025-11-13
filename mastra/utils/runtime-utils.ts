@@ -1,4 +1,7 @@
-import { runtimeConfig as defaultRuntimeConfig } from '@/config/runtime';
+import {
+  runtimeConfig as defaultRuntimeConfig,
+  runtimeConfig,
+} from '@/config/runtime';
 import { RuntimeConfig, RuntimeConfigSchema } from '@/config/runtime.schema';
 import { deepMerge } from '@/lib/utils';
 import { RuntimeContext } from '@mastra/core/runtime-context';
@@ -64,11 +67,11 @@ export function createToolContext(
   session: Session | null | undefined,
   args: {
     geoHints?: Partial<Geo>;
-    config?: RuntimeConfig;
+    config?: Partial<RuntimeConfig>;
   } = {}
 ): RuntimeContext {
   const context = new RuntimeContext();
-  const { geoHints, config } = args;
+  const { geoHints, config = {} } = args;
 
   // Inject session for tool authentication and user context
   if (session) {
@@ -81,9 +84,7 @@ export function createToolContext(
   }
 
   // Inject runtime config
-  if (geoHints) {
-    context.set('config', config);
-  }
+  context.set('config', deepMerge(runtimeConfig, config));
 
   return context;
 }

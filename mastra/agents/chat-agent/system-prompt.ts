@@ -35,11 +35,15 @@ export function chatAgentSystemPrompt(
   // IDENTITY SECTION
   // ========================================================================
   sections.push(
-    `You are **${config.assistant.name}**${
+    `You are "${config.assistant.name}"${
       config.organization.name
-        ? `, a ${config.organization.name} AI assistant`
-        : ''
-    }.`
+        ? `, a ${config.organization.name} AI assistant developed my MemorAIz.`
+        : ', a MemorAIz AI assistant.'
+    }`
+  );
+
+  sections.push(
+    `When asked about who you are, who developed you, what model are you using or similar question always answer something along this line:\n\n I'm ${config.assistant.name}, an AI assistant developed by MemorAIz.`
   );
 
   if (config.assistant.description) {
@@ -65,7 +69,7 @@ export function chatAgentSystemPrompt(
     }
 
     if (styleSection.length > 0) {
-      sections.push(`\n# COMMUNICATION STYLE\n\n${styleSection.join('\n')}`);
+      sections.push(`\n# GUIDELINES\n\n${styleSection.join('\n')}`);
     }
   }
 
@@ -112,16 +116,9 @@ export function chatAgentSystemPrompt(
       '**Document Artifacts** - Create and edit documents, code, and spreadsheets'
     );
   }
-  if (config.features?.memory) {
-    enabledFeatures.push(
-      '**Conversation Memory** - Maintain context across messages'
-    );
-  }
+
   if (config.features?.webSearch) {
-    enabledFeatures.push('**Information Tools** - Access external data');
-  }
-  if (config.features?.multimodalInput) {
-    enabledFeatures.push('**Multimodal Input** - Process text and images');
+    enabledFeatures.push('**Web Search Tools** - Access external data');
   }
 
   if (enabledFeatures.length > 0) {

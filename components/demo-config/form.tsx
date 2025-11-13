@@ -1,27 +1,27 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeftIcon } from "lucide-react";
-import type React from "react";
-import { useEffect } from "react";
-import { type Resolver, type UseFormReturn, useForm } from "react-hook-form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ChevronLeftIcon } from 'lucide-react';
+import type React from 'react';
+import { useEffect } from 'react';
+import { type Resolver, type UseFormReturn, useForm } from 'react-hook-form';
 import {
   Item,
   ItemContent,
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "@/components/ui/item";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/item';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sheet,
   SheetClose,
   SheetContent,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { type DemoConfig, DemoConfigSchema } from "@/config/demo.schema";
-import { useDemoConfig } from "@/hooks/use-demo-config";
-import { Button } from "../ui/button";
-import { Form } from "../ui/form";
+} from '@/components/ui/sheet';
+import { type DemoConfig, DemoConfigSchema } from '@/config/demo.schema';
+import { useDemoConfig } from '@/hooks/use-demo-config';
+import { Button } from '../ui/button';
+import { Form } from '../ui/form';
 
 export const demoConfigFormResolver = zodResolver(
   DemoConfigSchema
@@ -40,7 +40,6 @@ export const DemoConfigForm = (props: React.PropsWithChildren) => {
   // submit on change
   useEffect(() => {
     const onSubmit = (v: DemoConfig) => {
-      console.log({ submit: v });
       setDemoConfig(v);
     };
 
@@ -60,7 +59,7 @@ export const DemoConfigFieldGroup = ({
   className,
   children,
   ...others
-}: React.ComponentProps<"button"> & {
+}: React.ComponentProps<'button'> & {
   title?: string;
   description?: string;
   icon?: React.FC<{ className?: string }>;
