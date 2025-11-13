@@ -7,6 +7,8 @@ import { updateDocumentTool } from '../../tools/update-document-tool';
 import { requestSuggestionsTool } from '../../tools/request-suggestions-tool';
 import { getRuntimeConfig, getGeoHints } from '../../utils/runtime-utils';
 import { chatAgentSystemPrompt } from './system-prompt';
+import { plannerAgent } from '../planner-agent';
+import { researcherAgent } from '../researcher-agent';
 
 /**
  * Mastra Chat Agent
@@ -30,7 +32,11 @@ export const chatAgent = new Agent({
 
     return prompt;
   },
-  model: 'google/gemini-2.5-flash', // Default, overridden at runtime
+  model: 'openai/gpt-4.1', // Default, overridden at runtime
+  agents: {
+    plannerAgent,
+    researcherAgent,
+  },
   tools: {
     getWeather: getWeatherTool,
     createDocument: createDocumentTool,

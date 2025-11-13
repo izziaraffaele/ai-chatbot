@@ -8,14 +8,20 @@
  * - writer: DataStream writer for real-time UI updates
  */
 
-import type { InferUITool } from '@mastra/core/tools';
-import { getWeatherTool } from './weather-tool';
-import { createDocumentTool } from './create-document-tool';
-import { updateDocumentTool } from './update-document-tool';
-import { requestSuggestionsTool } from './request-suggestions-tool';
-
+import type { InferUITool } from "@mastra/core/tools";
+import { createDocumentTool } from "./create-document-tool";
+import { requestSuggestionsTool } from "./request-suggestions-tool";
+import { updateDocumentTool } from "./update-document-tool";
+import { getWeatherTool } from "./weather-tool";
+import { webSearchTool } from "./web-search-tool";
 // Export all tool instances
-export { getWeatherTool, createDocumentTool, updateDocumentTool, requestSuggestionsTool };
+export {
+  getWeatherTool,
+  createDocumentTool,
+  updateDocumentTool,
+  requestSuggestionsTool,
+  webSearchTool,
+};
 
 /**
  * Inferred Tool Types
@@ -25,7 +31,7 @@ export type GetWeatherTool = InferUITool<typeof getWeatherTool>;
 export type CreateDocumentTool = InferUITool<typeof createDocumentTool>;
 export type UpdateDocumentTool = InferUITool<typeof updateDocumentTool>;
 export type RequestSuggestionsTool = InferUITool<typeof requestSuggestionsTool>;
-
+export type WebSearchTool = InferUITool<typeof webSearchTool>;
 /**
  * All Mastra Tools Union Type
  */
@@ -33,7 +39,8 @@ export type MastraToolTypes =
   | GetWeatherTool
   | CreateDocumentTool
   | UpdateDocumentTool
-  | RequestSuggestionsTool;
+  | RequestSuggestionsTool
+  | WebSearchTool;
 
 /**
  * Tools Map
@@ -44,14 +51,16 @@ export const mastraTools = {
   createDocument: createDocumentTool,
   updateDocument: updateDocumentTool,
   requestSuggestions: requestSuggestionsTool,
+  webSearch: webSearchTool,
 };
 
 /**
  * Tool names for easy reference
  */
 export const TOOL_NAMES = {
-  GET_WEATHER: 'getWeather',
-  CREATE_DOCUMENT: 'createDocument',
-  UPDATE_DOCUMENT: 'updateDocument',
-  REQUEST_SUGGESTIONS: 'requestSuggestions',
+  GET_WEATHER: "getWeather",
+  CREATE_DOCUMENT: "createDocument",
+  UPDATE_DOCUMENT: "updateDocument",
+  REQUEST_SUGGESTIONS: "requestSuggestions",
+  WEB_SEARCH: "webSearch",
 } as const;
