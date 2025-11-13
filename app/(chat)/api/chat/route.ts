@@ -80,12 +80,14 @@ export async function POST(request: Request) {
       selectedChatModel,
       runtimeConfig,
       selectedVisibilityType,
+      tools,
     }: {
       id: string;
       message: ChatMessage;
       selectedChatModel: ChatModel['id'];
       selectedVisibilityType: VisibilityType;
       runtimeConfig?: Partial<RuntimeConfig>;
+      tools?: Record<string, unknown>;
     } = requestBody;
 
     const session = await auth();

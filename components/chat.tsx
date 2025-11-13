@@ -20,12 +20,18 @@ import {
 import { useArtifactSelector } from '@/hooks/use-artifact';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
+import { useClientTools } from '@/hooks/use-client-tools';
 import type { Vote } from '@/lib/db/schema';
 import { ChatSDKError } from '@/lib/errors';
 import { useTranslations } from '@/lib/i18n/use-translations';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
-import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
+import {
+  fetcher,
+  fetchWithErrorHandlers,
+  generateUUID,
+  processClientTools,
+} from '@/lib/utils';
 import { Artifact } from './artifact';
 import { useDataStream } from './data-stream-provider';
 import { Messages } from './messages';
@@ -59,6 +65,7 @@ export function Chat({
   });
 
   const runtimeConfig = useRuntimeConfig();
+  const clientTools = useClientTools();
 
   const { mutate } = useSWRConfig();
   const { setDataStream } = useDataStream();
@@ -97,6 +104,7 @@ export function Chat({
             selectedChatModel: currentModelIdRef.current,
             selectedVisibilityType: visibilityType,
             runtimeConfig,
+            tools: processClientTools(clientTools),
             ...request.body,
           },
         };

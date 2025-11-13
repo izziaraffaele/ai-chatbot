@@ -1,6 +1,6 @@
 import type {
-  CoreAssistantMessage,
-  CoreToolMessage,
+  AssistantModelMessage,
+  ToolModelMessage,
   UIMessage,
   UIMessagePart,
 } from 'ai';
@@ -10,6 +10,11 @@ import { twMerge } from 'tailwind-merge';
 import type { DBMessage, Document } from '@/lib/db/schema';
 import { ChatSDKError, type ErrorCode } from './errors';
 import type { ChatMessage, ChatTools, CustomUIDataTypes } from './types';
+import { ToolsInput } from '@mastra/core/agent';
+import { isVercelTool } from '@mastra/core/tools';
+import zodToJsonSchema from 'zod-to-json-schema';
+import { isZodType } from '@mastra/core';
+import { toJSONSchema } from 'zod/v4';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -63,7 +68,7 @@ export function generateUUID(): string {
   });
 }
 
-type ResponseMessageWithoutId = CoreToolMessage | CoreAssistantMessage;
+type ResponseMessageWithoutId = ToolModelMessage | AssistantModelMessage;
 type ResponseMessage = ResponseMessageWithoutId & { id: string };
 
 export function getMostRecentUserMessage(messages: UIMessage[]) {
@@ -201,4 +206,37 @@ export function deepMerge<T extends Record<string, unknown>>(
   }
 
   return result;
+}
+
+export function processClientTools(clientTools: ToolsInput): ToolsInput {
+  return Object.fromEntries(
+    Object.entries(clientTools).map(([key, value]) => {
+      if (isVercelTool(value)) {
+        return [
+          key,
+          {
+            ...value,
+            parameters: value.parameters
+              ? isZodType(value.parameters)
+                ? toJSONSchema(value.parameters)
+                : value.parameters
+              : undefined,
+          },
+        ];
+      } else {
+        return [
+          key,
+          {
+            ...value,
+            inputSchema: value.inputSchema
+              ? zodToJsonSchema(value.inputSchema)
+              : undefined,
+            outputSchema: value.outputSchema
+              ? zodToJsonSchema(value.outputSchema)
+              : undefined,
+          },
+        ];
+      }
+    })
+  );
 }
