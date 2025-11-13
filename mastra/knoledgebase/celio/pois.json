@@ -1,0 +1,1068 @@
+{
+    "collection": "pois",
+    "documents": [
+        {
+            "id": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+            "name": "Piazza Celimontana",
+            "slug": "piazza-celimontana",
+            "alias": [
+                "Slargo Celimontana"
+            ],
+            "primaryType": "LANDMARK",
+            "subTypes": [
+                "PUBLIC_SPACE"
+            ],
+            "description": "Slargo panoramico in cima alla piazza, punto di partenza del percorso archeologico sul Celio. La piazza offre una vista privilegiata sui principali monumenti archeologici circostanti e rappresenta il cuore di questo colle silenzioso ricco di storia.",
+            "keyHighlights": [
+                "Punto di partenza del percorso archeologico del Celio",
+                "Vista panoramica sui monumenti circostanti",
+                "Accesso alle principali attrazioni del colle",
+                "Collegamento con Via della Navicella e Basilica Santa Maria in Domnica",
+                "Centro del 'colle del silenzio' romano"
+            ],
+            "coordinates": [
+                12.495852,
+                41.8868262
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 50,
+                "center": [
+                    12.495852,
+                    41.8868262
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un punto di osservazione privilegiato per iniziare la scoperta delle meraviglie archeologiche del Celio, dove la storia millenaria si svela passo dopo passo.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Tranquillo, Contemplativo, Storico"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Educativo, Panoramico, Archeologico"
+                    },
+                    {
+                        "timeOfDay": "Evening",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Silenzioso, Mistico, Dorato"
+                    }
+                ]
+            },
+            "tags": [
+                "Celio",
+                "Punto Panoramico",
+                "Archeologico",
+                "Piazza",
+                "Partenza Percorso"
+            ],
+            "anecdotes": [],
+            "relatedTo": [
+                "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb"
+            ]
+        },
+        {
+            "id": "0ce2db46-27ca-4258-bead-11d652250daa",
+            "name": "S. Tommaso in Formis",
+            "slug": "s-tommaso-in-formis",
+            "alias": [
+                "San Tommaso in Formis",
+                "Chiesa di San Tommaso",
+                "Complesso Trinitario"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "PLACE_OF_WORSHIP",
+                "HISTORIC_SITE"
+            ],
+            "description": "Complesso medievale del XIII secolo con chiesa, monastero e ospedale dei Padri Trinitari. Fondato su un monastero benedettino preesistente, divenne nel 1209 la sede principale dell'Ordine dei Trinitari fondato da San Giovanni de Matha per la redenzione degli schiavi cristiani.",
+            "keyHighlights": [
+                "Primo insediamento dei Padri Trinitari a Roma (1209)",
+                "Incorpora l'Arco di Dolabella e tre piloni dell'acquedotto",
+                "Famoso mosaico cosmatesco del 1218 di Cristo tra due schiavi",
+                "Cella di San Giovanni de Matha sopra l'Arco di Dolabella",
+                "Portale ogivale gotico in peperino del XIII secolo",
+                "Origine dal nome 'in Formis' (Forma Claudia - acquedotto)"
+            ],
+            "coordinates": [
+                12.494637832306733,
+                41.88547508009689
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 30,
+                "center": [
+                    12.494637832306733,
+                    41.88547508009689
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un luogo di profonda spiritualità dove architettura romana e missione cristiana si fondono nella storia dell'Ordine dei Trinitari e della redenzione degli schiavi.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Spirituale, Contemplativo, Storico"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Educativo, Religioso, Artistico"
+                    },
+                    {
+                        "timeOfDay": "Evening",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Empty",
+                        "vibe": "Mistico, Silenzioso, Sacro"
+                    }
+                ]
+            },
+            "tags": [
+                "Trinitari",
+                "San Giovanni de Matha",
+                "Medioevo",
+                "Mosaico Cosmatesco",
+                "Monastero",
+                "Redenzione Schiavi"
+            ],
+            "anecdotes": [
+                "fd4112f3-77c8-452b-83df-5328d2b47f55",
+                "d2a803af-d293-4485-a9b9-1722050b7773",
+                "8f631c49-8466-4f50-94ba-36dd00811eba",
+                "8f6e86ac-f69f-4ab7-9d74-cd48a191a48a"
+            ],
+            "relatedTo": [
+                "bbea95de-2727-410b-b140-629907dedb55",
+                "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                "046819ae-862c-443d-a05c-adace03f75ef"
+            ]
+        },
+        {
+            "id": "bbea95de-2727-410b-b140-629907dedb55",
+            "name": "Acquedotto Claudio Neroniano",
+            "slug": "acquedotto-claudio-neroniano",
+            "alias": [
+                "Via di Santo Stefano Rotondo",
+                "Strada degli Archi",
+                "Via dell'Acquedotto"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "HISTORIC_SITE",
+                "ARCHITECTURAL"
+            ],
+            "description": "Via fiancheggiata dalle arcate dell'acquedotto claudio neroniano. Questa strada suggestiva attraversa il Celio costeggiata da imponenti arcate dell'acquedotto, con 30 piloni visibili che testimoniano la grandezza dell'ingegneria idraulica romana.",
+            "keyHighlights": [
+                "Costruzione iniziata da Claudio nel 38 d.C., completata nel 52 d.C.",
+                "Ampliamento neroniano verso il Celio e la Domus Aurea",
+                "68,7 km di lunghezza totale con 16 km di viadotti",
+                "Arcate alte 19-22 metri con restauri di Adriano e Settimio Severo",
+                "Attraversa via S. Stefano Rotondo e Piazza della Navicella",
+                "Sorgenti Curzia e Cerulea nella valle dell'Aniene"
+            ],
+            "coordinates": [
+                12.4967354,
+                41.8846607
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 40,
+                "center": [
+                    12.4967354,
+                    41.8846607
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un'opera di ingegneria romana che sfida i secoli, dove le imponenti arcate raccontano la grandezza dell'Impero e la genialità tecnica degli antichi costruttori.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Maestoso, Ingegneristico, Contemplativo"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Imponente, Educativo, Fotografico"
+                    },
+                    {
+                        "timeOfDay": "Sunset",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Dorato, Monumentale, Suggestivo"
+                    }
+                ]
+            },
+            "tags": [
+                "Ingegneria Romana",
+                "Claudio",
+                "Nerone",
+                "Acquedotti",
+                "Arcate",
+                "Idraulica Antica"
+            ],
+            "anecdotes": [
+                "143efe1f-1479-41a2-b052-1086ef02c325"
+            ],
+            "relatedTo": [
+                "0ce2db46-27ca-4258-bead-11d652250daa",
+                "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                "e61a7dbd-d073-42ba-9a74-054601999f95",
+                "97d6dbbc-7d8d-4949-acd8-fa3cc2bb7104",
+                "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                "685f2b32-1835-4d5c-886d-9d2f6d84459f"
+            ]
+        },
+        {
+            "id": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+            "name": "Arco di Dolabella e Silano",
+            "slug": "arco-di-dolabella-e-silano",
+            "alias": [
+                "Arco di Dolabella",
+                "Porta Celimontana"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "HISTORIC_SITE",
+                "ARCHITECTURAL"
+            ],
+            "description": "Porta monumentale in travertino del 10 d.C., originaria Porta Caelemontana delle Mura Serviane. Costruita dai consoli Cornelio Dolabella e Gaio Giunio Silano, l'arco testimonia l'evoluzione urbana di Roma e fu successivamente incorporato nell'acquedotto neroniano.",
+            "keyHighlights": [
+                "Costruito nel 10 d.C. dai consoli Dolabella e Silano",
+                "Originaria Porta Caelemontana delle Mura Serviane",
+                "Unico varco superstite delle antiche mura con l'Arco di Gallieno",
+                "Incorporato successivamente nell'acquedotto neroniano",
+                "Iscrizione consolare ancora visibile: P. CORNELIS P. F. DOLABELLA C. IUNIUS C. F.",
+                "Costruzione completamente in travertino"
+            ],
+            "coordinates": [
+                12.4951927,
+                41.8856165
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 25,
+                "center": [
+                    12.4951927,
+                    41.8856165
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un viaggio attraverso duemila anni di storia romana, dove un antico varco nelle mura racconta l'evoluzione della città eterna attraverso stratificazioni architettoniche uniche.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Storico, Contemplativo, Autentico"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Archeologico, Educativo, Fotografico"
+                    },
+                    {
+                        "timeOfDay": "Evening",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Suggestivo, Monumentale, Silenzioso"
+                    }
+                ]
+            },
+            "tags": [
+                "Roma Antica",
+                "Mura Serviane",
+                "Architettura",
+                "Travertino",
+                "Consoli Romani",
+                "Acquedotto"
+            ],
+            "anecdotes": [],
+            "relatedTo": [
+                "0ce2db46-27ca-4258-bead-11d652250daa",
+                "bbea95de-2727-410b-b140-629907dedb55",
+                "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                "69966a09-cd36-4ffc-82a9-bf4631c0d3c6"
+            ]
+        },
+        {
+            "id": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+            "name": "Villa Celimontana",
+            "slug": "villa-celimontana",
+            "alias": [
+                "Villa Mattei",
+                "Parco Celimontana",
+                "Giardini Mattei"
+            ],
+            "primaryType": "OUTDOORS_RECREATION",
+            "subTypes": [
+                "PARK_AND_NATURAL"
+            ],
+            "description": "Villa con giardini, già Villa Mattei dal XVII secolo. Questo parco storico sulla sommità del Celio ospita un obelisco egizio di Ramses II, resti archeologici della Basilica Hilariana e rappresenta un'oasi verde nel cuore della Roma archeologica.",
+            "keyHighlights": [
+                "Acquisita dalla famiglia Mattei nel 1553",
+                "Trasformata in villa da Ciriaco Mattei nel 1580",
+                "Obelisco Matteiano di Ramses II da Heliopolis",
+                "Fontane del Bernini (ora in Piazza SS. Giovanni e Paolo)",
+                "Resti della Basilica Hilariana del 89 d.C.",
+                "Parco pubblico dal 1926, sede Società Geografica Italiana"
+            ],
+            "coordinates": [
+                12.4952118,
+                41.883861
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 100,
+                "center": [
+                    12.4952118,
+                    41.883861
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un'oasi di pace nel cuore di Roma dove arte, natura e archeologia si fondono in un parco storico che ha incantato nobili e visitatori per secoli.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Tranquillo, Verde, Rilassante"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "High",
+                        "vibe": "Vivace, Familiare, Ricreativo"
+                    },
+                    {
+                        "timeOfDay": "Sunset",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Romantico, Dorato, Panoramico"
+                    }
+                ]
+            },
+            "tags": [
+                "Famiglia Mattei",
+                "Obelisco Egizio",
+                "Parco Storico",
+                "Bernini",
+                "Verde Urbano",
+                "XVII Secolo"
+            ],
+            "anecdotes": [
+                "7e279884-47f9-4b6e-9436-74e8423d25bc",
+                "81d117a3-f51c-4fe6-b1f2-fa73938bf211"
+            ],
+            "relatedTo": [
+                "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                "b5e070cb-d683-4dce-9824-cdfc0ea20244"
+            ]
+        },
+        {
+            "id": "e61a7dbd-d073-42ba-9a74-054601999f95",
+            "name": "Tempio di Claudio",
+            "slug": "tempio-di-claudio",
+            "alias": [
+                "Tempio del Divo Claudio",
+                "Templum Claudii",
+                "Terrazzamento Claudiano"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "HISTORIC_SITE",
+                "ARCHITECTURAL"
+            ],
+            "description": "Tempio pubblico sul Celio dedicato all'imperatore Claudio divinizzato, costruito nel 54 d.C. Edificato su un imponente terrazzamento di 180x200 metri, il tempio fu trasformato da Nerone in ninfeo e successivamente ricostruito da Vespasiano.",
+            "keyHighlights": [
+                "Dedicato all'imperatore Claudio divinizzato nel 54 d.C.",
+                "Piattaforma monumentale di 180x200 metri",
+                "Muri di contenimento alti oltre 15 metri ancora visibili",
+                "Trasformato da Nerone in ninfeo per la Domus Aurea",
+                "Ricostruito da Vespasiano dopo la morte di Nerone",
+                "Laghi sotterranei nelle antiche cave di tufo"
+            ],
+            "coordinates": [
+                12.4928702,
+                41.8872296
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 60,
+                "center": [
+                    12.4928702,
+                    41.8872296
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Le vestigia di un tempio imperiale dove la divinizzazione dell'imperatore Claudio si materializza in un'architettura grandiosa che ha sfidato i millenni.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Imperiale, Solenne, Archeologico"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Storico, Educativo, Imponente"
+                    },
+                    {
+                        "timeOfDay": "Evening",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Mistico, Monumentale, Silenzioso"
+                    }
+                ]
+            },
+            "tags": [
+                "Imperatori Romani",
+                "Claudio",
+                "Divinizzazione",
+                "Nerone",
+                "Vespasiano",
+                "Terrazzamento"
+            ],
+            "anecdotes": [
+                "2e19a05e-177c-4c00-a8df-5ca35591c21c",
+                "635b76ef-4941-4ecf-be1e-6b8627ad6a52"
+            ],
+            "relatedTo": [
+                "046819ae-862c-443d-a05c-adace03f75ef",
+                "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                "bbea95de-2727-410b-b140-629907dedb55",
+                "685f2b32-1835-4d5c-886d-9d2f6d84459f"
+            ]
+        },
+        {
+            "id": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+            "name": "Casa Generalizia dei PP. Passionisti",
+            "slug": "casa-generalizia-pp-passionisti",
+            "alias": [
+                "Curia Passionisti",
+                "Sede Generale Passionisti",
+                "Casa Madre Passionisti"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "PLACE_OF_WORSHIP",
+                "HISTORIC_SITE"
+            ],
+            "description": "Sede dei Padri Passionisti, fondata da Paolo della Croce nel XVIII secolo. Occupa l'area del terrazzamento del Tempio di Claudio e custodisce la stanza dove morì San Paolo della Croce nel 1775, fondatore della Congregazione della Passione di Nostro Signore Gesù Cristo.",
+            "keyHighlights": [
+                "Sede principale della Congregazione Passionista dal XVIII secolo",
+                "Stanza di San Paolo della Croce conservata come reliquia",
+                "Morte del santo fondatore il 18 ottobre 1775",
+                "Biblioteca storica con collezione del fondatore",
+                "Edificata sul terrazzamento del Tempio di Claudio",
+                "Centro spirituale per 176 religiosi in 12 case al momento della morte del fondatore"
+            ],
+            "coordinates": [
+                12.4928652,
+                41.8863401
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 40,
+                "center": [
+                    12.4928652,
+                    41.8863401
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un luogo di profonda spiritualità passionista dove la memoria di San Paolo della Croce vive nella quotidianità di una comunità religiosa centenaria dedita alla Passione di Cristo.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Spirituale, Contemplativo, Devozionale"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Religioso, Storico, Educativo"
+                    },
+                    {
+                        "timeOfDay": "Evening",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Empty",
+                        "vibe": "Mistico, Silenzioso, Sacro"
+                    }
+                ]
+            },
+            "tags": [
+                "Passionisti",
+                "San Paolo della Croce",
+                "XVIII Secolo",
+                "Congregazione",
+                "Spiritualità",
+                "Curia"
+            ],
+            "anecdotes": [
+                "b0de2d5e-368e-45f2-9073-b03ed1878db0"
+            ],
+            "relatedTo": [
+                "e61a7dbd-d073-42ba-9a74-054601999f95",
+                "bbea95de-2727-410b-b140-629907dedb55",
+                "046819ae-862c-443d-a05c-adace03f75ef"
+            ]
+        },
+        {
+            "id": "046819ae-862c-443d-a05c-adace03f75ef",
+            "name": "Basilica dei SS. Giovanni e Paolo",
+            "slug": "basilica-ss-giovanni-e-paolo",
+            "alias": [
+                "SS. Giovanni e Paolo al Celio",
+                "Basilica dei Santi Giovanni e Paolo",
+                "Chiesa dei Lampadari"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "PLACE_OF_WORSHIP",
+                "HISTORIC_SITE",
+                "ARCHITECTURAL"
+            ],
+            "description": "Basilica del V secolo d.C., primo caposaldo cristiano sulla sommità del Celio. Costruita dal senatore Pammachio nel 398 d.C. sopra le case dei martiri Giovanni e Paolo, rappresenta una delle più antiche e meglio conservate basiliche paleocristiane di Roma.",
+            "keyHighlights": [
+                "Costruita nel 398 d.C. dal senatore Pammachio",
+                "Eretta sopra le case dei martiri Giovanni e Paolo",
+                "Campanile romanico considerato il più bello di Roma",
+                "Famosa per i lampadari di cristallo nella navata centrale",
+                "Archi medievali di sostegno del XIII secolo",
+                "Case Romane del Celio sotterranee visitabili"
+            ],
+            "coordinates": [
+                12.4922732,
+                41.8865284
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 50,
+                "center": [
+                    12.4922732,
+                    41.8865284
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Una basilica paleocristiana dove fede e martirio si intrecciano in un'architettura millenaria che custodisce tesori d'arte e memoria cristiana.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Spirituale, Paleocristiano, Silenzioso"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Devozionale, Artistico, Storico"
+                    },
+                    {
+                        "timeOfDay": "Evening",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Mistico, Contemplativo, Sacro"
+                    }
+                ]
+            },
+            "tags": [
+                "Paleocristiano",
+                "Martiri",
+                "Pammachio",
+                "Campanile",
+                "Lampadari",
+                "V Secolo"
+            ],
+            "anecdotes": [
+                "8c8b1130-ad1f-47e5-a7f0-78a4f4b02d2b"
+            ],
+            "relatedTo": [
+                "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                "e61a7dbd-d073-42ba-9a74-054601999f95",
+                "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                "0ce2db46-27ca-4258-bead-11d652250daa",
+                "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2"
+            ]
+        },
+        {
+            "id": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+            "name": "Clivus Scauri",
+            "slug": "clivus-scauri",
+            "alias": [
+                "Clivo di Scauro",
+                "Via Antica Romana",
+                "Strada del Celio"
+            ],
+            "primaryType": "LANDMARK",
+            "subTypes": [
+                "PUBLIC_SPACE",
+                "HISTORIC_SITE"
+            ],
+            "description": "Asse viario romano che attraversava la dorsale occidentale del Celio. Questa antica strada conserva tratti originali dell'Impero Romano, collegando la zona di San Gregorio alla Basilica dei SS. Giovanni e Paolo attraverso sette archi di sostegno medievali.",
+            "keyHighlights": [
+                "Tracciato originale romano dell'Impero",
+                "Sette archi di sostegno, quello occidentale del III secolo",
+                "Collegamento tra San Gregorio e SS. Giovanni e Paolo",
+                "Traccia preistorica dell'Età della Pietra riutilizzata",
+                "Nome dalla famiglia Aemilia Scauri",
+                "Facciate romane conservate con tabernae"
+            ],
+            "coordinates": [
+                12.4915235,
+                41.8863736
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 80,
+                "center": [
+                    12.4915235,
+                    41.8863736
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Una passeggiata attraverso i millenni su una strada che ha visto passare imperatori e pellegrini, dove ogni pietra racconta la continuità della vita urbana romana.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Storico, Tranquillo, Autentico"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Archeologico, Fotografico, Suggestivo"
+                    },
+                    {
+                        "timeOfDay": "Evening",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Romantico, Antico, Evocativo"
+                    }
+                ]
+            },
+            "tags": [
+                "Strada Romana",
+                "Aemilia Scauri",
+                "Archi Medievali",
+                "Tracciato Antico",
+                "Tabernae",
+                "Urbanistica"
+            ],
+            "anecdotes": [
+                "af515b5f-0d0d-418a-8ee7-7f4f3ddb6fa0"
+            ],
+            "relatedTo": [
+                "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                "046819ae-862c-443d-a05c-adace03f75ef",
+                "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                "2e986678-12b6-4b66-8a43-839a6485b82f",
+                "b3889b9c-9a1c-4480-b84c-f27a50ada911"
+            ]
+        },
+        {
+            "id": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+            "name": "Case Romane",
+            "slug": "case-romane",
+            "alias": [
+                "Case Romane del Celio",
+                "Domus Sotterranea",
+                "Case Sotterranee SS. Giovanni e Paolo"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "HISTORIC_SITE",
+                "MUSEUM_AND_GALLERY"
+            ],
+            "description": "Complesso archeologico sotto la Basilica con domus e insula di età imperiale. Oltre 20 ambienti sotterranei su vari livelli, alcuni affrescati, che mostrano l'evoluzione dell'architettura domestica romana dal II al IV secolo d.C.",
+            "keyHighlights": [
+                "Oltre 20 ambienti sotterranei su vari livelli",
+                "Evoluzione dal II al IV secolo: domus, insula, domus aristocratica",
+                "Affreschi dal III secolo d.C. al Medioevo",
+                "Oratorio del Salvatore con ciclo cristologico del IX secolo",
+                "Scoperte nel 1887 da Padre Germano di San Stanislao",
+                "Luogo del martirio dei santi Giovanni e Paolo secondo la tradizione"
+            ],
+            "coordinates": [
+                12.4918484,
+                41.886351
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 35,
+                "center": [
+                    12.4918484,
+                    41.886351
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un viaggio nel tempo attraverso le case dell'antica Roma, dove affreschi millenari raccontano la vita quotidiana e la trasformazione dal paganesimo al cristianesimo.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Archeologico, Contemplativo, Sotterraneo"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Educativo, Museale, Affascinante"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Mistico, Storico, Immersivo"
+                    }
+                ]
+            },
+            "tags": [
+                "Roma Sotterranea",
+                "Domus",
+                "Affreschi Antichi",
+                "Architettura Domestica",
+                "Paleocristiano",
+                "Martirio"
+            ],
+            "anecdotes": [
+                "8c8b1130-ad1f-47e5-a7f0-78a4f4b02d2b"
+            ],
+            "relatedTo": [
+                "046819ae-862c-443d-a05c-adace03f75ef",
+                "69966a09-cd36-4ffc-82a9-bf4631c0d3c6"
+            ]
+        },
+        {
+            "id": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+            "name": "Biblioteca di Agapito",
+            "slug": "biblioteca-di-agapito",
+            "alias": [
+                "Aula Absidata",
+                "Domus Anicii",
+                "Biblioteca di Agapito I"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "LIBRARY_AND_EDUCATIONAL"
+            ],
+            "description": "Aula absidata del IV secolo d.C., parte di una domus aristocratica degli Anicii. Trasformata in biblioteca dal Papa Agapito I (535-536), rappresenta un esempio unico di riuso di architetture aristocratiche tardoantiche per finalità culturali cristiane.",
+            "keyHighlights": [
+                "Aula absidata di una domus aristocratica del IV secolo",
+                "Possibile appartenenza alla famiglia degli Anicii",
+                "Trasformata in biblioteca da Papa Agapito I (535-536)",
+                "Dimensioni: 16x22 metri con struttura basilicale",
+                "Esempio di trasformazione da privato a pubblico-religioso",
+                "Sede della prima raccolta di testi sacri organizzata papale"
+            ],
+            "coordinates": [
+                12.4914987,
+                41.8863464
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 25,
+                "center": [
+                    12.4914987,
+                    41.8863464
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un luogo dove l'aristocrazia tardoantica si trasforma in cultura cristiana, testimoniando il passaggio dall'impero pagano alla Roma papale attraverso l'architettura e il sapere.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Culturale, Contemplativo, Accademico"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Low",
+                        "vibe": "Storico, Educativo, Silenzioso"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Empty",
+                        "vibe": "Erudito, Antico, Suggestivo"
+                    }
+                ]
+            },
+            "tags": [
+                "Papa Agapito",
+                "Famiglia Anicii",
+                "Biblioteca Antica",
+                "IV Secolo",
+                "Domus Aristocratica",
+                "Cultura Cristiana"
+            ],
+            "anecdotes": [
+                "af515b5f-0d0d-418a-8ee7-7f4f3ddb6fa0"
+            ],
+            "relatedTo": [
+                "2e986678-12b6-4b66-8a43-839a6485b82f",
+                "69966a09-cd36-4ffc-82a9-bf4631c0d3c6"
+            ]
+        },
+        {
+            "id": "2e986678-12b6-4b66-8a43-839a6485b82f",
+            "name": "Complesso di S. Gregorio",
+            "slug": "complesso-s-gregorio",
+            "alias": [
+                "San Gregorio Magno al Celio",
+                "Monastero Camaldolese",
+                "Chiesa di Sant'Andrea"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "PLACE_OF_WORSHIP",
+                "HISTORIC_SITE"
+            ],
+            "description": "Chiesa, oratori e monastero fondati da Gregorio Magno nel VI secolo. Trasformazione della casa familiare di Gregorio in monastero benedettino verso il 575-580, prima della sua elezione papale nel 590, punto di partenza della missione di Agostino in Inghilterra.",
+            "keyHighlights": [
+                "Fondato da San Gregorio Magno c. 575-580",
+                "Trasformazione da villa familiare a monastero",
+                "Punto di partenza della missione di Agostino di Canterbury",
+                "Ricostruzione barocca di Giovanni Battista Soria (1629-1633)",
+                "Passaggio ai Camaldolesi nel 1573",
+                "Missione di Madre Teresa per i poveri dal 1970"
+            ],
+            "coordinates": [
+                12.490431327477038,
+                41.88595959989323
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 50,
+                "center": [
+                    12.490431327477038,
+                    41.88595959989323
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un complesso millenario dove la santità di Gregorio Magno si perpetua attraverso secoli di vita monastica e opere di carità che continuano ancora oggi.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Spirituale, Monastico, Contemplativo"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Devozionale, Storico, Caritatevole"
+                    },
+                    {
+                        "timeOfDay": "Evening",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Mistico, Gregoriano, Silenzioso"
+                    }
+                ]
+            },
+            "tags": [
+                "San Gregorio Magno",
+                "Benedettini",
+                "Camaldolesi",
+                "VI Secolo",
+                "Missione Inglese",
+                "Madre Teresa"
+            ],
+            "anecdotes": [
+                "ee05936c-0d6d-438c-807a-24acb2fcd6e6",
+                "6d3e2af3-3e02-4043-83c1-6dafdbda4c78"
+            ],
+            "relatedTo": [
+                "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                "69966a09-cd36-4ffc-82a9-bf4631c0d3c6"
+            ]
+        },
+        {
+            "id": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+            "name": "Parco Archeologico del Celio",
+            "slug": "parco-archeologico-del-celio",
+            "alias": [
+                "Antiquarium del Celio",
+                "Lapidario all'Aperto",
+                "Giardino Archeologico"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "MUSEUM_AND_GALLERY",
+                "PARK_AND_NATURAL"
+            ],
+            "description": "Area verde con allestimento museale di reperti marmorei organizzati per nuclei tematici. Ex Antiquarium Comunale, questo parco ospita una ricca collezione di materiali architettonici e decorativi romani disposti come museo all'aperto tra il Colosseo e il Circo Massimo.",
+            "keyHighlights": [
+                "Ex Antiquarium Comunale riaperto nel 2024",
+                "Collezione eterogenea di reperti degli scavi ottocenteschi",
+                "Lapidi sepolcrali, sarcofagi, are funerarie",
+                "Frammenti architettonici di edifici pubblici e privati",
+                "Organizzazione per nuclei tematici in giardino ortogonale",
+                "Accesso gratuito al parco, biglietto per il museo"
+            ],
+            "coordinates": [
+                12.4915034,
+                41.8872721
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 75,
+                "center": [
+                    12.4915034,
+                    41.8872721
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un museo all'aperto dove passeggiare tra i frammenti di marmo dell'antica Roma, immersi nel verde di un parco che racconta duemila anni di storia attraverso pietre e iscrizioni.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Archeologico, Verde, Educativo"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Museale, Familiare, Ricreativo"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Contemplativo, Storico, Tranquillo"
+                    }
+                ]
+            },
+            "tags": [
+                "Antiquarium",
+                "Museo all'Aperto",
+                "Lapidario",
+                "Reperti Marmorei",
+                "Verde Archeologico",
+                "Scavi Ottocenteschi"
+            ],
+            "anecdotes": [
+                "2776a4a4-e411-42c2-9827-c6a3ce939a27",
+                "d135c6b4-d40f-4dde-9ca0-adfa500c971f"
+            ],
+            "relatedTo": [
+                "e61a7dbd-d073-42ba-9a74-054601999f95",
+                "bbea95de-2727-410b-b140-629907dedb55",
+                "7077f40f-4df4-43f1-91d8-cdaea5959f45"
+            ]
+        },
+        {
+            "id": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+            "name": "Museo della Forma Urbis",
+            "slug": "museo-della-forma-urbis",
+            "alias": [
+                "Forma Urbis Romae",
+                "Pianta Marmorea di Roma",
+                "Pianta Severiana"
+            ],
+            "primaryType": "CULTURE_HISTORY",
+            "subTypes": [
+                "MUSEUM_AND_GALLERY",
+                "HISTORIC_SITE"
+            ],
+            "description": "Museo dedicato alla pianta marmorea di Roma del III secolo d.C. Inaugurato nel 2024, espone i frammenti superstiti della monumentale mappa di Roma incisa su 150 lastre di marmo tra il 203 e 211 d.C. sotto Settimio Severo.",
+            "keyHighlights": [
+                "Pianta marmorea monumentale di 18x13 metri (234 mq totali)",
+                "Incisa tra 203-211 d.C. sotto l'imperatore Settimio Severo",
+                "Scala 1:240, dettagli di templi, terme, insulae",
+                "200 frammenti identificati su circa 1500 originali",
+                "Frammenti esposti sotto pavimento di vetro",
+                "Sovrapposizione con Pianta del Nolli del 1748"
+            ],
+            "coordinates": [
+                12.490885,
+                41.8867446
+            ],
+            "geofence": {
+                "shape": "circle",
+                "radius": 30,
+                "center": [
+                    12.490885,
+                    41.8867446
+                ],
+                "isActive": true
+            },
+            "experience": {
+                "summary": "Un viaggio cartografico nell'antica Roma attraverso la più grande mappa di marmo mai realizzata, dove ogni frammento rivela i segreti urbanistici della capitale dell'Impero.",
+                "conditions": [
+                    {
+                        "timeOfDay": "Morning",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Low",
+                        "vibe": "Museale, Tecnologico, Educativo"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekend",
+                        "crowdLevel": "High",
+                        "vibe": "Interattivo, Affascinante, Moderno"
+                    },
+                    {
+                        "timeOfDay": "Afternoon",
+                        "dayType": "Weekday",
+                        "crowdLevel": "Moderate",
+                        "vibe": "Scientifico, Archeologico, Immersivo"
+                    }
+                ]
+            },
+            "tags": [
+                "Settimio Severo",
+                "Cartografia Antica",
+                "Marmo",
+                "Urbanistica Romana",
+                "III Secolo",
+                "Museo Moderno"
+            ],
+            "anecdotes": [
+                "3998ac3c-6ee8-4af9-b904-21ff5ade76aa"
+            ],
+            "relatedTo": [
+                "685f2b32-1835-4d5c-886d-9d2f6d84459f"
+            ]
+        }
+    ]
+}
