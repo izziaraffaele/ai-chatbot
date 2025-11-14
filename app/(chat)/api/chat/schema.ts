@@ -1,4 +1,5 @@
 import { RuntimeConfigSchema } from '@/config/runtime.schema';
+import { messageMetadataSchema } from '@/lib/types';
 import { z } from 'zod';
 
 const textPartSchema = z.object({
@@ -21,8 +22,8 @@ export const postRequestBodySchema = z.object({
     id: z.uuid(),
     role: z.enum(['user']),
     parts: z.array(partSchema),
+    metadata: messageMetadataSchema.optional(),
   }),
-  selectedChatModel: z.enum(['chat-model', 'chat-model-reasoning']),
   selectedVisibilityType: z.enum(['public', 'private']),
   runtimeConfig: RuntimeConfigSchema.partial(),
   tools: z.record(z.string(), z.any()).optional(),

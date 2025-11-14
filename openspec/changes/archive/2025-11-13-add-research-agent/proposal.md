@@ -14,7 +14,6 @@ The application lacks a dedicated research capability for information gathering 
 
 - **Agent Registration:** Export research agent from `mastra/agents/index.ts`
   - Add to `mastraAgents` object
-  - Add to `AGENT_NAMES` enum for easy reference
 
 - **Specification Update:** Extend `mastra-agent-integration` capability
   - Add new requirement documenting research agent configuration

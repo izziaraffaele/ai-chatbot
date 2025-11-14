@@ -9,6 +9,10 @@ export type DataPart = { type: 'append-message'; message: string };
 
 export const messageMetadataSchema = z.object({
   createdAt: z.string(),
+  // if present, the message is supposed to be forwarded to a specific sub-agent
+  forwardTo: z.string().optional(),
+  // if present, in contains id of sub-agents mentioned in the message
+  mentions: z.array(z.string()).optional(),
 });
 
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>;

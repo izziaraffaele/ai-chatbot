@@ -30,7 +30,6 @@ import { createToolContext } from '@/mastra/utils/runtime-utils';
 import { isProductionEnvironment } from '@/lib/constants';
 import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 import { RuntimeConfig } from '@/config/runtime.schema';
-import { AGENT_NAMES } from '@/mastra/agents';
 import { titlePrompt } from '@/lib/ai/prompts';
 import { toAISdkFormat } from '@mastra/ai-sdk';
 
@@ -72,14 +71,12 @@ export async function POST(request: Request) {
     const {
       id,
       message,
-      selectedChatModel,
       runtimeConfig,
       selectedVisibilityType,
       tools,
     }: {
       id: string;
       message: ChatMessage;
-      selectedChatModel: ChatModel['id'];
       selectedVisibilityType: VisibilityType;
       runtimeConfig?: Partial<RuntimeConfig>;
       tools?: Record<string, unknown>;
@@ -103,7 +100,7 @@ export async function POST(request: Request) {
     }
 
     const { longitude, latitude, city, country } = geolocation(request);
-    const chatAgent = mastra.getAgent(AGENT_NAMES.CHAT_AGENT);
+    const chatAgent = mastra.getAgent('chatAgent');
 
     // Create runtime context with session and geolocation hints
     const runtimeContext = createToolContext(session, {

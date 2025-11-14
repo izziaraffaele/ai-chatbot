@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import type { UseChatHelpers } from "@ai-sdk/react";
-import type { UIMessage } from "ai";
-import equal from "fast-deep-equal";
+import type { UseChatHelpers } from '@ai-sdk/react';
+import type { UIMessage } from 'ai';
+import equal from 'fast-deep-equal';
 import {
   type ChangeEvent,
   type Dispatch,
@@ -13,32 +13,29 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react";
-import { toast } from "sonner";
-import { useLocalStorage, useWindowSize } from "usehooks-ts";
-import { AgentSelector } from "@/components/agent-selector";
-import { useTranslations } from "@/lib/i18n/use-translations";
-import type { Attachment, ChatMessage } from "@/lib/types";
-import type { AppUsage } from "@/lib/usage";
-import { cn } from "@/lib/utils";
-import { useSelectedAgent } from "@/hooks/use-selected-agent";
-import { Context } from "./elements/context";
+} from 'react';
+import { toast } from 'sonner';
+import { useLocalStorage, useWindowSize } from 'usehooks-ts';
+import { AgentSelector } from '@/components/agent-selector';
+import { useTranslations } from '@/lib/i18n/use-translations';
+import type { Attachment, ChatMessage } from '@/lib/types';
+import type { AppUsage } from '@/lib/usage';
+import { cn } from '@/lib/utils';
+import { useSelectedAgent } from '@/hooks/use-selected-agent';
+import { Context } from './elements/context';
 import {
   PromptInput,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputToolbar,
   PromptInputTools,
-} from "./elements/prompt-input";
-import {
-  ArrowUpIcon,
-  PaperclipIcon,
-  StopIcon,
-} from "./icons";
-import { PreviewAttachment } from "./preview-attachment";
-import { SuggestedActions } from "./suggested-actions";
-import { Button } from "./ui/button";
-import type { VisibilityType } from "./visibility-selector";
+} from './elements/prompt-input';
+import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
+import { PreviewAttachment } from './preview-attachment';
+import { SuggestedActions } from './suggested-actions';
+import { Button } from './ui/button';
+import type { VisibilityType } from './visibility-selector';
+import z from 'zod';
 
 function PureMultimodalInput({
   chatId,
@@ -58,13 +55,13 @@ function PureMultimodalInput({
   chatId: string;
   input: string;
   setInput: Dispatch<SetStateAction<string>>;
-  status: UseChatHelpers<ChatMessage>["status"];
+  status: UseChatHelpers<ChatMessage>['status'];
   stop: () => void;
   attachments: Attachment[];
   setAttachments: Dispatch<SetStateAction<Attachment[]>>;
   messages: UIMessage[];
-  setMessages: UseChatHelpers<ChatMessage>["setMessages"];
-  sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
+  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
+  sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
   className?: string;
   selectedVisibilityType: VisibilityType;
   usage?: AppUsage;
@@ -76,7 +73,7 @@ function PureMultimodalInput({
 
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "44px";
+      textareaRef.current.style.height = '44px';
     }
   }, []);
 
@@ -88,20 +85,20 @@ function PureMultimodalInput({
 
   const resetHeight = useCallback(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "44px";
+      textareaRef.current.style.height = '44px';
     }
   }, []);
 
   const [localStorageInput, setLocalStorageInput] = useLocalStorage(
-    "input",
-    ""
+    'input',
+    ''
   );
 
   useEffect(() => {
     if (textareaRef.current) {
       const domValue = textareaRef.current.value;
       // Prefer DOM value over localStorage to handle hydration
-      const finalValue = domValue || localStorageInput || "";
+      const finalValue = domValue || localStorageInput || '';
       setInput(finalValue);
       adjustHeight();
     }
@@ -121,28 +118,28 @@ function PureMultimodalInput({
   const [uploadQueue, setUploadQueue] = useState<string[]>([]);
 
   const submitForm = useCallback(() => {
-    window.history.pushState({}, "", `/chat/${chatId}`);
+    window.history.pushState({}, '', `/chat/${chatId}`);
 
     sendMessage({
-      role: "user",
+      role: 'user',
       parts: [
         ...attachments.map((attachment) => ({
-          type: "file" as const,
+          type: 'file' as const,
           url: attachment.url,
           name: attachment.name,
           mediaType: attachment.contentType,
         })),
         {
-          type: "text",
+          type: 'text',
           text: input,
         },
       ],
     });
 
     setAttachments([]);
-    setLocalStorageInput("");
+    setLocalStorageInput('');
     resetHeight();
-    setInput("");
+    setInput('');
 
     if (width && width > 768) {
       textareaRef.current?.focus();
@@ -161,11 +158,11 @@ function PureMultimodalInput({
 
   const uploadFile = useCallback(async (file: File) => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
 
     try {
-      const response = await fetch("/api/files/upload", {
-        method: "POST",
+      const response = await fetch('/api/files/upload', {
+        method: 'POST',
         body: formData,
       });
 
@@ -183,7 +180,7 @@ function PureMultimodalInput({
       toast.error(error);
     } catch (_error) {
       toast.error(
-        t("errors.fileUploadFailed", "Failed to upload file, please try again!")
+        t('errors.fileUploadFailed', 'Failed to upload file, please try again!')
       );
     }
   }, []);
@@ -213,7 +210,7 @@ function PureMultimodalInput({
           ...successfullyUploadedAttachments,
         ]);
       } catch (error) {
-        console.error("Error uploading files!", error);
+        console.error('Error uploading files!', error);
       } finally {
         setUploadQueue([]);
       }
@@ -227,7 +224,7 @@ function PureMultimodalInput({
       if (!items) return;
 
       const imageItems = Array.from(items).filter((item) =>
-        item.type.startsWith("image/")
+        item.type.startsWith('image/')
       );
 
       if (imageItems.length === 0) return;
@@ -235,7 +232,7 @@ function PureMultimodalInput({
       // Prevent default paste behavior for images
       event.preventDefault();
 
-      setUploadQueue((prev) => [...prev, "Pasted image"]);
+      setUploadQueue((prev) => [...prev, 'Pasted image']);
 
       try {
         const uploadPromises = imageItems.map(async (item) => {
@@ -257,9 +254,9 @@ function PureMultimodalInput({
           ...(successfullyUploadedAttachments as Attachment[]),
         ]);
       } catch (error) {
-        console.error("Error uploading pasted images:", error);
+        console.error('Error uploading pasted images:', error);
         toast.error(
-          t("errors.fileUploadFailed", "Failed to upload pasted image(s)")
+          t('errors.fileUploadFailed', 'Failed to upload pasted image(s)')
         );
       } finally {
         setUploadQueue([]);
@@ -273,12 +270,12 @@ function PureMultimodalInput({
     const textarea = textareaRef.current;
     if (!textarea) return;
 
-    textarea.addEventListener("paste", handlePaste);
-    return () => textarea.removeEventListener("paste", handlePaste);
+    textarea.addEventListener('paste', handlePaste);
+    return () => textarea.removeEventListener('paste', handlePaste);
   }, [handlePaste]);
 
   return (
-    <div className={cn("relative flex w-full flex-col gap-4", className)}>
+    <div className={cn('relative flex w-full flex-col gap-4', className)}>
       {messages.length === 0 &&
         attachments.length === 0 &&
         uploadQueue.length === 0 && (
@@ -302,11 +299,11 @@ function PureMultimodalInput({
         className="rounded-xl border border-border bg-background p-3 shadow-xs transition-all duration-200 focus-within:border-border hover:border-muted-foreground/50"
         onSubmit={(event) => {
           event.preventDefault();
-          if (status !== "ready") {
+          if (status !== 'ready') {
             toast.error(
               t(
-                "errors.modelWait",
-                "Please wait for the model to finish its response!"
+                'errors.modelWait',
+                'Please wait for the model to finish its response!'
               )
             );
           } else {
@@ -328,7 +325,7 @@ function PureMultimodalInput({
                     currentAttachments.filter((a) => a.url !== attachment.url)
                   );
                   if (fileInputRef.current) {
-                    fileInputRef.current.value = "";
+                    fileInputRef.current.value = '';
                   }
                 }}
               />
@@ -337,9 +334,9 @@ function PureMultimodalInput({
             {uploadQueue.map((filename) => (
               <PreviewAttachment
                 attachment={{
-                  url: "",
+                  url: '',
                   name: filename,
-                  contentType: "",
+                  contentType: '',
                 }}
                 isUploading={true}
                 key={filename}
@@ -356,19 +353,16 @@ function PureMultimodalInput({
             maxHeight={200}
             minHeight={44}
             onChange={handleInput}
-            placeholder={t("chat.input.placeholder", "Send a message...")}
+            placeholder={t('chat.input.placeholder', 'Send a message...')}
             ref={textareaRef}
             rows={1}
             value={input}
-          />{" "}
+          />{' '}
           <Context {...contextProps} />
         </div>
         <PromptInputToolbar className="!border-top-0 border-t-0! p-0 shadow-none dark:border-0 dark:border-transparent!">
           <PromptInputTools className="gap-0 sm:gap-0.5">
-            <AttachmentsButton
-              fileInputRef={fileInputRef}
-              status={status}
-            />
+            <AttachmentsButton fileInputRef={fileInputRef} status={status} />
             <AgentSelector
               onAgentChange={setSelectedAgent}
               selectedAgent={selectedAgent}
@@ -376,7 +370,7 @@ function PureMultimodalInput({
             />
           </PromptInputTools>
 
-          {status === "submitted" ? (
+          {status === 'submitted' ? (
             <StopButton setMessages={setMessages} stop={stop} />
           ) : (
             <PromptInputSubmit
@@ -419,13 +413,13 @@ function PureAttachmentsButton({
   status,
 }: {
   fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
-  status: UseChatHelpers<ChatMessage>["status"];
+  status: UseChatHelpers<ChatMessage>['status'];
 }) {
   return (
     <Button
       className="aspect-square h-8 rounded-lg p-1 transition-colors hover:bg-accent"
       data-testid="attachments-button"
-      disabled={status !== "ready"}
+      disabled={status !== 'ready'}
       onClick={(event) => {
         event.preventDefault();
         fileInputRef.current?.click();
@@ -444,7 +438,7 @@ function PureStopButton({
   setMessages,
 }: {
   stop: () => void;
-  setMessages: UseChatHelpers<ChatMessage>["setMessages"];
+  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
 }) {
   return (
     <Button

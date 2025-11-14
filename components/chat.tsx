@@ -6,7 +6,7 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
 } from 'ai';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { unstable_serialize } from 'swr/infinite';
 import { ChatHeader } from '@/components/chat-header';
@@ -64,11 +64,10 @@ export function Chat({
     chatId: id,
     initialVisibilityType,
   });
-  const { selectedAgent, selectedAgentId } = useSelectedAgent();
 
   const runtimeConfig = useRuntimeConfig();
   const registry = useClientTools();
-
+  const { selectedAgent } = useSelectedAgent();
   const { mutate } = useSWRConfig();
   const { setDataStream } = useDataStream();
 
@@ -79,7 +78,7 @@ export function Chat({
   const {
     messages,
     setMessages,
-    sendMessage,
+    sendMessage: _sendMessage,
     status,
     stop,
     regenerate,
@@ -99,7 +98,6 @@ export function Chat({
             id: request.id,
             message: request.messages.at(-1),
             selectedVisibilityType: visibilityType,
-            selectedAgent: selectedAgentId,
             runtimeConfig,
             tools: serializeClientTools(registry.getTools()),
             ...request.body,
@@ -147,6 +145,22 @@ export function Chat({
       // addToolResult(result);
     },
   });
+
+  const sendMessage = useCallback<typeof _sendMessage>(
+    (message, opts) =>
+      _sendMessage(
+        {
+          ...message,
+          metadata: {
+            createdAt: new Date().toISOString(),
+            forwardTo: selectedAgent?.id,
+            ...message?.metadata,
+          },
+        } as any,
+        opts
+      ),
+    [_sendMessage]
+  );
 
   const searchParams = useSearchParams();
   const query = searchParams.get('query');

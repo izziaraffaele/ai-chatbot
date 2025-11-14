@@ -11,13 +11,3 @@ export type ResearchAgentTools = InferUITools<
 >;
 
 export const mastraAgents = { chatAgent, researchAgent };
-
-/**
- * Agent names for easy reference
- */
-export const AGENT_NAMES = {
-  CHAT_AGENT: 'chatAgent',
-  RESEARCH_AGENT: 'researchAgent',
-} as const;
-
-export type AgentName = (typeof AGENT_NAMES)[keyof typeof AGENT_NAMES];

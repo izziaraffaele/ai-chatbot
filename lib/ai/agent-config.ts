@@ -17,8 +17,8 @@ export interface AgentConfig {
  * Currently supports the Research agent for web search and synthesis
  */
 export const AGENT_CONFIGS: Record<string, AgentConfig> = {
-  research: {
-    id: 'research',
+  researchAgent: {
+    id: 'researchAgent',
     name: 'Researcher',
     description: 'Specializes in web research and synthesis',
     avatar: '🔍',

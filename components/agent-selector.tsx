@@ -12,6 +12,7 @@ import {
 import { getAvailableAgents } from '@/lib/ai/agent-config';
 import type { ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/lib/i18n/use-translations';
 import { CheckCircleFillIcon, ChevronDownIcon } from './icons';
 
 export function AgentSelector({
@@ -20,17 +21,22 @@ export function AgentSelector({
   status,
   className,
 }: {
-  selectedAgent: { id: string; name: string; description: string; avatar?: string } | undefined;
+  selectedAgent:
+    | { id: string; name: string; description: string; avatar?: string }
+    | undefined;
   onAgentChange: (agentId: string) => void;
   status: UseChatHelpers<ChatMessage>['status'];
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations();
   const availableAgents = useMemo(() => getAvailableAgents(), []);
 
   const displayAgent = useMemo(() => {
-    return selectedAgent ? selectedAgent.name : 'Select agent';
-  }, [selectedAgent]);
+    return selectedAgent
+      ? selectedAgent.name
+      : t('agent.selector.placeholder', 'Assistant');
+  }, [selectedAgent, t]);
 
   return (
     <DropdownMenu onOpenChange={setOpen} open={open}>
@@ -47,7 +53,9 @@ export function AgentSelector({
           variant="outline"
           disabled={status === 'streaming'}
         >
-          {selectedAgent?.avatar && <span className="mr-2">{selectedAgent.avatar}</span>}
+          {selectedAgent?.avatar && (
+            <span className="mr-2">{selectedAgent.avatar}</span>
+          )}
           {displayAgent}
           <ChevronDownIcon />
         </Button>
@@ -75,7 +83,9 @@ export function AgentSelector({
                 type="button"
               >
                 <div className="flex flex-row items-center gap-2">
-                  {agent.avatar && <span className="text-lg">{agent.avatar}</span>}
+                  {agent.avatar && (
+                    <span className="text-lg">{agent.avatar}</span>
+                  )}
                   <div className="flex flex-col items-start gap-1">
                     <div className="text-sm sm:text-base">{agent.name}</div>
                     <div className="line-clamp-2 text-muted-foreground text-xs">
