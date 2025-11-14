@@ -5,6 +5,7 @@ This directory contains React components for rendering tool call results in mess
 ## Overview
 
 The tool UI system is responsible for:
+
 - Rendering tool invocations (input parameters and results)
 - Managing visual state (expanded/collapsed, loading, errors)
 - Respecting read-only mode for archived messages
@@ -100,7 +101,7 @@ All tool UI components receive:
 ```typescript
 type ToolUIComponentProps = {
   /** The tool part containing input, output, and state information */
-  part: ChatAgentToolUIPart;
+  part: ChatToolUIPart;
 
   /** Whether the message/tool is in read-only mode.
       Disables interactive elements when true. */
@@ -114,6 +115,7 @@ type ToolUIComponentProps = {
 ### `part` Structure
 
 The `part` object contains:
+
 - **`part.type`** - Tool identifier (e.g., `'tool-getWeather'`)
 - **`part.toolCallId`** - Unique call ID for keying
 - **`part.state`** - Current state: `'input-streaming'` | `'input-available'` | `'output-available'` | `'output-error'`
@@ -123,6 +125,7 @@ The `part` object contains:
 ### `isReadonly` Behavior
 
 When `isReadonly === true`:
+
 - Disable buttons and interactive elements
 - Still render read-only display of results
 - Used for archived messages or non-editable contexts
@@ -146,6 +149,7 @@ This prevents re-renders when `part` and `isReadonly` haven't changed, improving
 ## Common State Transitions
 
 ### Loading State
+
 ```typescript
 if (part.state === 'input-streaming') {
   return <LoadingBadge />;
@@ -153,6 +157,7 @@ if (part.state === 'input-streaming') {
 ```
 
 ### Showing Input
+
 ```typescript
 if (part.state === 'input-available') {
   return <ToolInput input={part.input} />;
@@ -160,6 +165,7 @@ if (part.state === 'input-available') {
 ```
 
 ### Showing Output
+
 ```typescript
 if (part.state === 'output-available') {
   return <ToolOutput output={part.output} />;
@@ -167,6 +173,7 @@ if (part.state === 'output-available') {
 ```
 
 ### Error Handling
+
 ```typescript
 if (part.output && 'error' in part.output) {
   return <ErrorDisplay error={part.output.error} />;
@@ -184,6 +191,7 @@ The codebase provides tool-agnostic UI components in `components/elements/tool.t
 - **`<ToolContent>`** - Content wrapper inside Tool
 
 Example:
+
 ```typescript
 <Tool defaultOpen={true}>
   <ToolHeader state={part.state} type="tool-myTool" />
@@ -199,6 +207,7 @@ Example:
 ## Testing
 
 Tool components are tested via:
+
 - **E2E Tests** - Full message rendering flow with real/mock tool calls
 - **React DevTools Profiler** - Verify memoization prevents unnecessary re-renders
 - **Type Checking** - TypeScript catches prop mismatches and missing cases
@@ -206,6 +215,7 @@ Tool components are tested via:
 ## Best Practices
 
 ✅ **Do:**
+
 - Use `memo()` with both `part` and `isReadonly` in equality check
 - Set `displayName` for easier debugging in React DevTools
 - Handle all `part.state` values appropriately
@@ -213,6 +223,7 @@ Tool components are tested via:
 - Add JSDoc comments explaining the component's purpose
 
 ❌ **Don't:**
+
 - Forget to include `isReadonly` in the memoization equality check
 - Call the router directly—use the central `<ToolUIRouter>` in `PreviewMessage`
 - Assume tool output format—check the tool schema or add error handling

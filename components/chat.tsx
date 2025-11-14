@@ -1,7 +1,10 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
+import {
+  DefaultChatTransport,
+  lastAssistantMessageIsCompleteWithToolCalls,
+} from 'ai';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
@@ -93,6 +96,7 @@ export function Chat({
     messages: initialMessages,
     experimental_throttle: 100,
     generateId: generateUUID,
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     transport: new DefaultChatTransport({
       api: '/api/chat',
       fetch: fetchWithErrorHandlers,
@@ -144,12 +148,10 @@ export function Chat({
       const result = await processClientToolCall(toolCall);
 
       // Exit early if no client tool call happened
-      if (result === null) {
-        return;
-      }
-
+      if (!result) return;
+      console.log(result);
       // Send the result back to the stream (no await to avoid deadlocks)
-      addToolResult(result);
+      // addToolResult(result);
     },
   });
 

@@ -196,12 +196,27 @@ export async function POST(request: Request) {
 
       // Transform stream into AI SDK format and create UI messages stream
       const uiMessageStream = createUIMessageStream({
+        generateId: generateUUID,
         execute: async ({ writer }) => {
           for await (const part of toAISdkFormat(stream, {
             from: 'agent',
           }) as any) {
             writer.write(part);
           }
+        },
+        onFinish: async ({ responseMessage }) => {
+          await saveMessages({
+            messages: [
+              {
+                chatId: id,
+                id: responseMessage.id,
+                role: responseMessage.role,
+                parts: responseMessage.parts,
+                attachments: [],
+                createdAt: new Date(),
+              },
+            ],
+          });
         },
       });
 

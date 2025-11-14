@@ -1,9 +1,10 @@
 'use client';
 
-import type { UseChatHelpers } from '@ai-sdk/react';
+import { memo, useState } from 'react';
 import equal from 'fast-deep-equal';
 import { motion } from 'framer-motion';
-import { memo, useState } from 'react';
+import { isToolUIPart } from 'ai';
+import type { UseChatHelpers } from '@ai-sdk/react';
 import type { Vote } from '@/lib/db/schema';
 import type { ChatMessage } from '@/lib/types';
 import { cn, sanitizeText } from '@/lib/utils';
@@ -153,12 +154,7 @@ const PurePreviewMessage = ({
             }
 
             // Tool UI rendering - delegate to ToolUIRouter for consistent handling
-            if (
-              type === 'tool-getWeather' ||
-              type === 'tool-createDocument' ||
-              type === 'tool-updateDocument' ||
-              type === 'tool-requestSuggestions'
-            ) {
+            if (isToolUIPart(part)) {
               return (
                 <ToolUIRouter
                   isReadonly={isReadonly}

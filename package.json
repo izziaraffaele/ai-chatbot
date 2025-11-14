@@ -55,7 +55,7 @@
     "@vercel/functions": "^2.0.0",
     "@vercel/otel": "^1.12.0",
     "ai": "5.0.26",
-    "bcrypt-ts": "^5.0.2",
+    "bcrypt-ts": "^7.1.0",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

@@ -7,4 +7,7 @@ export { WeatherToolUI } from './weather-tool';
 export { CreateDocumentToolUI } from './create-document-tool';
 export { UpdateDocumentToolUI } from './update-document-tool';
 export { RequestSuggestionsToolUI } from './request-suggestions-tool';
-export type { ToolUIComponentProps, ChatAgentToolUIPart, InferToolUIComponentProps } from './types';
+
+export { FallbackToolUI } from './fallback-tool';
+
+export type { ToolUIComponentProps, InferToolUIComponentProps } from './types';

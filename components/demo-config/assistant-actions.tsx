@@ -1,5 +1,4 @@
 'use client';
-import * as z from 'zod';
 import { DemoConfigMemorySchema, DemoConfigSchema } from '@/config/demo.schema';
 import { useAssistantAction } from '@/hooks/use-assistant-action';
 import { useDemoConfig } from '@/hooks/use-demo-config';
@@ -12,7 +11,7 @@ export const DemoConfigActions = () => {
   useAssistantAction({
     id: 'updateDemoConfig',
     description:
-      'Update the demo configuration with partial changes. Merges the provided configuration with the existing configuration. Useful for dynamically updating assistant identity, appearance, chat features, and runtime settings.',
+      'Update the demo configuration with partial changes. Merges the provided configuration with the existing configuration. Useful for dynamically updating assistant identity, appearance, chat features, and runtime settings. Use this tool only if the user explicitely asks to set demo configuration.',
     inputSchema: DemoConfigMemorySchema,
     execute: async ({ context }) => {
       const themeColor = context.appearance?.themeColor;

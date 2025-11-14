@@ -1,13 +1,15 @@
 'use client';
 
+import { ToolUIPart } from 'ai';
+import { FallbackToolUI } from './tools';
 import { CreateDocumentToolUI } from './tools/create-document-tool';
 import { RequestSuggestionsToolUI } from './tools/request-suggestions-tool';
-import type { ChatAgentToolUIPart } from './tools/types';
 import { UpdateDocumentToolUI } from './tools/update-document-tool';
 import { WeatherToolUI } from './tools/weather-tool';
+import { ChatToolUIPart } from '@/lib/types';
 
 type ToolUIRouterProps = {
-  part: ChatAgentToolUIPart;
+  part: ChatToolUIPart;
   isReadonly?: boolean;
 };
 
@@ -51,9 +53,18 @@ export function ToolUIRouter({ part, isReadonly = false }: ToolUIRouterProps) {
         />
       );
     default: {
-      // TypeScript exhaustiveness check - this should never happen
-      const _exhaustiveCheck: never = part;
-      return _exhaustiveCheck;
+      const fallbackPart = part as ToolUIPart;
+      const clientTools = ['tool-updateDemoConfig'];
+
+      if (clientTools.includes(fallbackPart.type)) {
+        console.log(fallbackPart);
+        return (
+          <FallbackToolUI key={fallbackPart.toolCallId} part={fallbackPart} />
+        );
+      }
+
+      // unsupported tool call
+      return null;
     }
   }
 }

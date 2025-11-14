@@ -166,13 +166,11 @@ export interface ClientToolCallResult<T extends string, OUTPUT = unknown> {
  */
 export async function processClientToolCall(
   toolCall: ClientToolCall<any, any>
-): Promise<ClientToolCallResult<any, any> | null> {
+): Promise<ClientToolCallResult<any, any> | undefined> {
   const { toolName, toolCallId, input, dynamic } = toolCall;
 
   // Skip dynamic tools - let Vercel AI SDK handle them
-  if (dynamic) {
-    return null;
-  }
+  if (dynamic) return;
 
   try {
     // Look up the tool in the registry
@@ -181,9 +179,7 @@ export async function processClientToolCall(
     const tool = tools[toolName];
 
     // Skip unregistered tools - Might be a backed tool call
-    if (!tool) {
-      return null;
-    }
+    if (!tool) return;
 
     if (!tool.execute) {
       return {

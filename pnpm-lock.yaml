@@ -114,8 +114,8 @@ importers:
         specifier: 5.0.26
         version: 5.0.26(zod@4.1.12)
       bcrypt-ts:
-        specifier: ^5.0.2
-        version: 5.0.3
+        specifier: ^7.1.0
+        version: 7.1.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -4030,9 +4030,9 @@ packages:
     resolution: {integrity: sha512-73lC1ugzwoaWCLJ1LvOgrR5xsMLTqSKIEoMHVtL9E/HNk0PXtTM76ZIm84856/SF7Nv8mPZxKoBsgpm0tR1u1Q==}
     hasBin: true
 
-  bcrypt-ts@5.0.3:
-    resolution: {integrity: sha512-2FcgD12xPbwCoe5i9/HK0jJ1xA1m+QfC1e6htG9Bl/hNOnLyaFmQSlqLKcfe3QdnoMPKpKEGFCbESBTg+SJNOw==}
-    engines: {node: '>=18'}
+  bcrypt-ts@7.1.0:
+    resolution: {integrity: sha512-t/Dqr9YzYmn/+oPQBgotBPUuezpZD5CPBwapM5Ep1p3zsLmEycMdXOfZpWbztSBWJ41DlB7EluJBUDsAGSiUeQ==}
+    engines: {node: '>=20'}
 
   bignumber.js@9.3.1:
     resolution: {integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==}
@@ -10831,7 +10831,7 @@ snapshots:
 
   baseline-browser-mapping@2.8.26: {}
 
-  bcrypt-ts@5.0.3: {}
+  bcrypt-ts@7.1.0: {}
 
   bignumber.js@9.3.1: {}
 

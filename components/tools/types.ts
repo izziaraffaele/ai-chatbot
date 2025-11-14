@@ -1,11 +1,4 @@
-import type { ToolUIPart } from "ai";
-import type { ChatAgentTools } from "@/mastra/agents";
-
-/**
- * Union type of all tool part types
- * Represents any tool invocation that can be rendered by the tool UI system
- */
-export type ChatAgentToolUIPart = ToolUIPart<ChatAgentTools>;
+import { ChatToolUIPart } from '@/lib/types';
 
 /**
  * Common props for tool UI components
@@ -13,7 +6,7 @@ export type ChatAgentToolUIPart = ToolUIPart<ChatAgentTools>;
  */
 export type ToolUIComponentProps = {
   /** The tool part containing input, output, and state information */
-  part: ChatAgentToolUIPart;
+  part: ChatToolUIPart;
   /** Whether the message/tool is in read-only mode. Disables interactive elements when true. */
   isReadonly?: boolean;
   /** Optional CSS class name for custom styling */
@@ -21,4 +14,4 @@ export type ToolUIComponentProps = {
 };
 
 export type InferToolUIComponentProps<K extends string> =
-  ToolUIComponentProps & { part: Extract<ChatAgentToolUIPart, { type: K }> };
+  ToolUIComponentProps & { part: Extract<ChatToolUIPart, { type: K }> };

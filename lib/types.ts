@@ -1,6 +1,6 @@
-import type { UIMessage } from 'ai';
+import type { ToolUIPart, UIMessage } from 'ai';
 import { z } from 'zod';
-import { ChatAgentTools } from '@/mastra/agents';
+import { ChatAgentUITools } from '@/mastra/agents';
 import type { ArtifactKind } from '@/components/artifact';
 import type { Suggestion } from './db/schema';
 import type { AppUsage } from './usage';
@@ -13,7 +13,8 @@ export const messageMetadataSchema = z.object({
 
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>;
 
-export type ChatTools = ChatAgentTools;
+export type ChatUITools = ChatAgentUITools;
+export type ChatToolUIPart = ToolUIPart<ChatUITools>;
 
 export type CustomUIDataTypes = {
   textDelta: string;
@@ -33,7 +34,7 @@ export type CustomUIDataTypes = {
 export type ChatMessage = UIMessage<
   MessageMetadata,
   CustomUIDataTypes,
-  ChatTools
+  ChatUITools
 >;
 
 export type Attachment = {
