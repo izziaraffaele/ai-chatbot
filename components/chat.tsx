@@ -24,6 +24,7 @@ import { useArtifactSelector } from '@/hooks/use-artifact';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useClientTools } from '@/hooks/use-client-tools';
+import { useSelectedAgent } from '@/hooks/use-selected-agent';
 import type { Vote } from '@/lib/db/schema';
 import { ChatSDKError } from '@/lib/errors';
 import { useTranslations } from '@/lib/i18n/use-translations';
@@ -46,7 +47,6 @@ import {
 export function Chat({
   id,
   initialMessages,
-  initialChatModel,
   initialVisibilityType,
   isReadonly,
   autoResume,
@@ -54,7 +54,6 @@ export function Chat({
 }: {
   id: string;
   initialMessages: ChatMessage[];
-  initialChatModel: string;
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
   autoResume: boolean;
@@ -65,6 +64,7 @@ export function Chat({
     chatId: id,
     initialVisibilityType,
   });
+  const { selectedAgent, selectedAgentId } = useSelectedAgent();
 
   const runtimeConfig = useRuntimeConfig();
   const registry = useClientTools();
@@ -75,12 +75,6 @@ export function Chat({
   const [input, setInput] = useState<string>('');
   const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
   const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
-  const [currentModelId, setCurrentModelId] = useState(initialChatModel);
-  const currentModelIdRef = useRef(currentModelId);
-
-  useEffect(() => {
-    currentModelIdRef.current = currentModelId;
-  }, [currentModelId]);
 
   const {
     messages,
@@ -90,7 +84,6 @@ export function Chat({
     stop,
     regenerate,
     resumeStream,
-    addToolResult,
   } = useChat<ChatMessage>({
     id,
     messages: initialMessages,
@@ -105,8 +98,8 @@ export function Chat({
           body: {
             id: request.id,
             message: request.messages.at(-1),
-            selectedChatModel: currentModelIdRef.current,
             selectedVisibilityType: visibilityType,
+            selectedAgent: selectedAgentId,
             runtimeConfig,
             tools: serializeClientTools(registry.getTools()),
             ...request.body,
@@ -202,7 +195,6 @@ export function Chat({
           isReadonly={isReadonly}
           messages={messages}
           regenerate={regenerate}
-          selectedModelId={initialChatModel}
           setMessages={setMessages}
           status={status}
           votes={votes}
@@ -215,8 +207,6 @@ export function Chat({
               chatId={id}
               input={input}
               messages={messages}
-              onModelChange={setCurrentModelId}
-              selectedModelId={currentModelId}
               selectedVisibilityType={visibilityType}
               sendMessage={sendMessage}
               setAttachments={setAttachments}
@@ -237,7 +227,6 @@ export function Chat({
         isReadonly={isReadonly}
         messages={messages}
         regenerate={regenerate}
-        selectedModelId={currentModelId}
         selectedVisibilityType={visibilityType}
         sendMessage={sendMessage}
         setAttachments={setAttachments}
