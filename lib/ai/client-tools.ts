@@ -1,10 +1,8 @@
 'use client';
 
 import { type ClientTool } from '@mastra/client-js';
-import { ToolsInput } from '@mastra/core/agent';
-import { isVercelTool } from '@mastra/core/tools';
+import type { ToolsInput } from '@mastra/core/agent';
 import z from 'zod';
-import zodToJsonSchema from 'zod-to-json-schema';
 
 export type AnyClientTool = ClientTool<any, any>;
 export { ClientTool };
@@ -99,37 +97,20 @@ export function clearAssistantActionsRegistry(): void {
 export function serializeClientTools(clientTools: ToolsInput): ToolsInput {
   return Object.fromEntries(
     Object.entries(clientTools).map(([key, value]) => {
-      if (isVercelTool(value)) {
-        return [
-          key,
-          {
-            ...value,
-            parameters: value.parameters
-              ? zodToClientToolInput(value.parameters)
-              : undefined,
-          },
-        ];
-      } else {
-        return [
-          key,
-          {
-            ...value,
-            inputSchema: value.inputSchema
-              ? zodToClientToolInput(value.inputSchema)
-              : undefined,
-            outputSchema: value.outputSchema
-              ? zodToClientToolInput(value.outputSchema)
-              : undefined,
-          },
-        ];
-      }
+      return [
+        key,
+        {
+          ...value,
+          inputSchema: value.inputSchema
+            ? z.toJSONSchema(value.inputSchema)
+            : undefined,
+          outputSchema: value.outputSchema
+            ? z.toJSONSchema(value.outputSchema)
+            : undefined,
+        },
+      ];
     })
   );
-}
-
-export function zodToClientToolInput(schema: z.ZodType) {
-  const jsonSchema = z.toJSONSchema(schema);
-  return jsonSchema;
 }
 
 /**

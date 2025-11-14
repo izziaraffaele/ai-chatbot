@@ -23,14 +23,14 @@ export const RuntimeConfigSchema = z.object({
         .object({
           title: z.string(),
           description: z.string(),
-          url: z.string().url(),
+          url: z.url(),
         })
         .optional(),
       app: z
         .object({
           title: z.string(),
           description: z.string(),
-          url: z.string().url().optional(),
+          url: z.url().optional(),
         })
         .optional(),
     })
@@ -42,7 +42,12 @@ export const RuntimeConfigSchema = z.object({
       artifacts: z.boolean().default(true),
       multimodalInput: z.boolean().default(true),
     })
-    .default({}),
+    .default({
+      memory: true,
+      webSearch: true,
+      artifacts: true,
+      multimodalInput: true,
+    }),
   intents: z
     .array(z.object({ name: z.string(), description: z.string() }))
     .default([]),
