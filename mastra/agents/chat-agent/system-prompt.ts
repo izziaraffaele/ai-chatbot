@@ -5,9 +5,9 @@
  * using runtime configuration for identity, capabilities, and behaviors.
  */
 
-import type { RuntimeConfig } from '@/config/runtime.schema';
-import type { Geo } from '@vercel/functions';
-import { artifactsPrompt } from '@/lib/ai/prompts';
+import type { Geo } from "@vercel/functions";
+import type { RuntimeConfig } from "@/config/runtime.schema";
+import { artifactsPrompt } from "@/lib/ai/prompts";
 
 /**
  * Builds a dynamic system prompt for the Mastra chat agent
@@ -38,7 +38,7 @@ export function chatAgentSystemPrompt(
     `You are "${config.assistant.name}"${
       config.organization.name
         ? `, a ${config.organization.name} AI assistant developed my MemorAIz.`
-        : ', a MemorAIz AI assistant.'
+        : ", a MemorAIz AI assistant."
     }`
   );
 
@@ -54,7 +54,7 @@ export function chatAgentSystemPrompt(
   // COMMUNICATION STYLE
   // ========================================================================
   if (config.assistant.tone || config.assistant.guidelines) {
-    const styleSection = [];
+    const styleSection: string[] = [];
 
     if (config.assistant.tone) {
       styleSection.push(
@@ -69,7 +69,7 @@ export function chatAgentSystemPrompt(
     }
 
     if (styleSection.length > 0) {
-      sections.push(`\n# GUIDELINES\n\n${styleSection.join('\n')}`);
+      sections.push(`\n# GUIDELINES\n\n${styleSection.join("\n")}`);
     }
   }
 
@@ -103,7 +103,7 @@ export function chatAgentSystemPrompt(
 
   if (environmentDetails.length > 0) {
     sections.push(
-      `\n# ENVIRONMENT CONTEXT\n\n${environmentDetails.join('\n')}`
+      `\n# ENVIRONMENT CONTEXT\n\n${environmentDetails.join("\n")}`
     );
   }
 
@@ -113,17 +113,17 @@ export function chatAgentSystemPrompt(
   const enabledFeatures: string[] = [];
   if (config.features?.artifacts) {
     enabledFeatures.push(
-      '**Document Artifacts** - Create and edit documents, code, and spreadsheets'
+      "**Document Artifacts** - Create and edit documents, code, and spreadsheets"
     );
   }
 
   if (config.features?.webSearch) {
-    enabledFeatures.push('**Web Search Tools** - Access external data');
+    enabledFeatures.push("**Web Search Tools** - Access external data");
   }
 
   if (enabledFeatures.length > 0) {
     sections.push(
-      `\n# YOUR CAPABILITIES\n\n${enabledFeatures.map((f) => `- ${f}`).join('\n')}`
+      `\n# YOUR CAPABILITIES\n\n${enabledFeatures.map((f) => `- ${f}`).join("\n")}`
     );
   }
 
@@ -140,7 +140,7 @@ export function chatAgentSystemPrompt(
   if (config.experiences && config.experiences.length > 0) {
     const experiencesList = config.experiences
       .map((exp) => `- **${exp.name}:** ${exp.description}`)
-      .join('\n');
+      .join("\n");
 
     sections.push(
       `\n# AVAILABLE EXPERIENCES\n\nYou can adopt these specialized roles:\n\n${experiencesList}`
@@ -155,20 +155,20 @@ export function chatAgentSystemPrompt(
 
     if (geoHints.latitude && geoHints.longitude) {
       geoDetails.push(
-        `- **Location:** ${geoHints.city || 'Unknown'}, ${geoHints.country || 'Unknown'}`
+        `- **Location:** ${geoHints.city || "Unknown"}, ${geoHints.country || "Unknown"}`
       );
       geoDetails.push(
         `  - Coordinates: (${geoHints.latitude}, ${geoHints.longitude})`
       );
     } else if (geoHints.city) {
       geoDetails.push(
-        `- **Location:** ${geoHints.city}${geoHints.country ? `, ${geoHints.country}` : ''}`
+        `- **Location:** ${geoHints.city}${geoHints.country ? `, ${geoHints.country}` : ""}`
       );
     }
 
     if (geoDetails.length > 0) {
       sections.push(
-        `\n# REQUEST CONTEXT\n\n${geoDetails.join('\n')}\n\nUse this context to provide location-relevant responses when appropriate.`
+        `\n# REQUEST CONTEXT\n\n${geoDetails.join("\n")}\n\nUse this context to provide location-relevant responses when appropriate.`
       );
     }
   }
@@ -185,7 +185,7 @@ export function chatAgentSystemPrompt(
   // ========================================================================
   // FOOTER
   // ========================================================================
-  sections.push('\n---\n\nYou are now ready to assist the user.');
+  sections.push("\n---\n\nYou are now ready to assist the user.");
 
-  return sections.join('\n');
+  return sections.join("\n");
 }

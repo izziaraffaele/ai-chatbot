@@ -41,7 +41,9 @@ export function LanguageProvider({
   // Set locale and update translations
   const setLocale = useCallback(
     async (newLocale: Locale) => {
-      if (newLocale === locale) return;
+      if (newLocale === locale) {
+        return;
+      }
 
       try {
         const newTranslations = await loadTranslations(newLocale);

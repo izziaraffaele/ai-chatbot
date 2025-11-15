@@ -1,8 +1,8 @@
-import { Agent } from '@mastra/core/agent';
-import { google } from '@ai-sdk/google';
-import { Memory } from '@mastra/memory';
-import { LibSQLStore } from '@mastra/libsql';
-import { researchAgentSystemPrompt } from './system-prompt';
+import { google } from "@ai-sdk/google";
+import { Agent } from "@mastra/core/agent";
+import { LibSQLStore } from "@mastra/libsql";
+import { Memory } from "@mastra/memory";
+import { researchAgentSystemPrompt } from "./system-prompt";
 
 /**
  * Mastra Research Agent
@@ -30,15 +30,15 @@ import { researchAgentSystemPrompt } from './system-prompt';
  * ```
  */
 export const researchAgent = new Agent({
-  name: 'Researcher',
+  name: "Researcher",
   instructions: researchAgentSystemPrompt(),
-  model: 'google/gemini-2.5-flash', // Default, can be overridden at runtime
+  model: "google/gemini-2.5-flash", // Default, can be overridden at runtime
   tools: {
     googleSearch: google.tools.googleSearch({}),
   },
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: "file:../mastra.db",
     }),
   }),
   defaultGenerateOptions: {

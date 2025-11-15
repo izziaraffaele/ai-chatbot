@@ -1,18 +1,17 @@
-'use client';
+"use client";
 
-import { useLocalStorage } from 'usehooks-ts';
-import type { AgentConfig } from '@/lib/ai/agent-config';
-import { AGENT_CONFIGS } from '@/lib/ai/agent-config';
+import { useLocalStorage } from "usehooks-ts";
+import type { AgentConfig } from "@/lib/ai/agent-config";
+import { AGENT_CONFIGS } from "@/lib/ai/agent-config";
 
 /**
  * Hook for managing selected sub-agent with local storage persistence
  * Returns the selected agent config and a setter function
  */
 export function useSelectedAgent() {
-  const [selectedAgentId, setSelectedAgentId] = useLocalStorage<string | undefined>(
-    'selectedAgent',
-    undefined
-  );
+  const [selectedAgentId, setSelectedAgentId] = useLocalStorage<
+    string | undefined
+  >("selectedAgent", undefined);
 
   // Get the selected agent config if an agent is selected
   const selectedAgent: AgentConfig | undefined = selectedAgentId
@@ -23,7 +22,7 @@ export function useSelectedAgent() {
     if (agent === undefined) {
       setSelectedAgentId(undefined);
     } else {
-      const agentId = typeof agent === 'string' ? agent : agent.id;
+      const agentId = typeof agent === "string" ? agent : agent.id;
       setSelectedAgentId(agentId);
     }
   };

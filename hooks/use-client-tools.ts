@@ -1,6 +1,9 @@
-'use client';
+"use client";
 
-import { getAssistantActionsRegistry, type AssistantActionsRegistry } from '@/lib/ai/client-tools';
+import {
+  type AssistantActionsRegistry,
+  getAssistantActionsRegistry,
+} from "@/lib/ai/client-tools";
 
 /**
  * React hook for accessing the assistant actions registry.

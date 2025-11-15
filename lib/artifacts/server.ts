@@ -1,14 +1,14 @@
-import type { Session } from 'next-auth';
-import { Agent } from '@mastra/core/agent';
-import { ToolStream } from '@mastra/core/tools';
-import { mastra } from '@/mastra';
-import { artifactSystemPrompt } from '../ai/prompts';
-import { saveDocument } from '../db/queries';
-import type { Document } from '../db/schema';
-import type { ArtifactKind } from '@/components/artifact';
-import { codeDocumentHandler } from '@/artifacts/code/server';
-import { sheetDocumentHandler } from '@/artifacts/sheet/server';
-import { textDocumentHandler } from '@/artifacts/text/server';
+import { Agent } from "@mastra/core/agent";
+import type { ToolStream } from "@mastra/core/tools";
+import type { Session } from "next-auth";
+import { codeDocumentHandler } from "@/artifacts/code/server";
+import { sheetDocumentHandler } from "@/artifacts/sheet/server";
+import { textDocumentHandler } from "@/artifacts/text/server";
+import type { ArtifactKind } from "@/components/artifact";
+import { mastra } from "@/mastra";
+import { artifactSystemPrompt } from "../ai/prompts";
+import { saveDocument } from "../db/queries";
+import type { Document } from "../db/schema";
 
 type StreamWriter = ToolStream<any>;
 
@@ -65,13 +65,13 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
   const getDocumentExpert = (): Agent => {
     if (!documentExpert) {
       const artifactModel =
-        config.model || process.env.ARTIFACT_MODEL || 'google/gemini-2.5-flash';
+        config.model || process.env.ARTIFACT_MODEL || "google/gemini-2.5-flash";
 
       documentExpert = new Agent({
         name: `${config.kind}-document-expert`,
         instructions: artifactSystemPrompt,
         model: artifactModel,
-        mastra: mastra,
+        mastra,
       });
     }
     return documentExpert;
@@ -133,4 +133,4 @@ export const documentHandlersByArtifactKind: DocumentHandler[] = [
   sheetDocumentHandler,
 ];
 
-export const artifactKinds = ['text', 'code', 'sheet'] as const;
+export const artifactKinds = ["text", "code", "sheet"] as const;

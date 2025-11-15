@@ -1,13 +1,13 @@
-import useSWR from 'swr';
-import { Document } from '@/lib/db/schema';
-import { fetcher } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import useSWR from "swr";
+import type { Document } from "@/lib/db/schema";
+import { fetcher } from "@/lib/utils";
 
 export function useChatDocument(documentId: string | null) {
   const [currentIndex, setCurrentIndex] = useState(-1);
 
   const { data, isLoading, mutate } = useSWR<Document[]>(
-    documentId !== null && documentId !== 'init'
+    documentId !== null && documentId !== "init"
       ? `/api/document?id=${documentId}`
       : null,
     fetcher
@@ -17,12 +17,12 @@ export function useChatDocument(documentId: string | null) {
 
   useEffect(() => {
     setCurrentIndex(latestVersion);
-  }, [documentId]);
+  }, [latestVersion]);
 
   return {
     entries: data || [],
     currentIndex,
-    latestVersion: latestVersion,
+    latestVersion,
     isLatest: currentIndex === latestVersion - 1,
     setCurrentIndex,
     isLoading,

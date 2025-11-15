@@ -12,12 +12,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
 
 export type PanelContextValue = {
   view: string;
@@ -26,7 +20,9 @@ export type PanelContextValue = {
 
 export const PanelContext = createContext<PanelContextValue>({
   view: "root",
-  setView: () => {},
+  setView: () => {
+    return;
+  },
 });
 
 export const usePanelContext = () => useContext(PanelContext);

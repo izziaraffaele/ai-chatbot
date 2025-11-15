@@ -1,9 +1,8 @@
-'use client';
-
-import { useEffect } from 'react';
-import { type ClientTool } from '@/lib/ai/client-tools';
-import { useClientTools } from './use-client-tools';
-import { ZodType } from 'zod';
+"use client";
+import type { ClientTool } from "@mastra/client-js";
+import { useEffect } from "react";
+import type { ZodType } from "zod";
+import { useClientTools } from "./use-client-tools";
 
 /**
  * React hook for registering an assistant action in a component.

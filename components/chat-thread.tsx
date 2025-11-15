@@ -1,40 +1,39 @@
-'use client';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useChat } from '@ai-sdk/react';
-import { useChatVisibility } from '@/hooks/use-chat-visibility';
-import type { ChatMessage } from '@/lib/types';
-import { cn } from '@/lib/utils';
-import { MultimodalInput } from './multimodal-input';
-import { VisibilitySelector } from './visibility-selector';
-import { useChatVotes } from '@/hooks/use-chat-votes';
-import { useTranslations } from '@/lib/i18n/use-translations';
-import { useSidebar } from './ui/sidebar';
-import { useWindowSize } from 'usehooks-ts';
-import { SidebarToggle } from './sidebar-toggle';
-import { Button } from './ui/button';
-import Link from 'next/link';
-import { PlusIcon, SparklesIcon } from 'lucide-react';
+"use client";
+import { useChat } from "@ai-sdk/react";
+import { motion } from "framer-motion";
+import { PlusIcon } from "lucide-react";
+import Link from "next/link";
+import { useWindowSize } from "usehooks-ts";
+import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import { useChatVotes } from "@/hooks/use-chat-votes";
+import type { Vote } from "@/lib/db/schema";
+import { useTranslations } from "@/lib/i18n/use-translations";
+import type { ChatMessage } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { useChatRuntime } from "./chat";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from './elements/conversation';
-import { Vote } from '@/lib/db/schema';
-import { useChatRuntime } from './chat';
-import { Message } from './elements/message';
+} from "./elements/conversation";
+import { MultimodalInput } from "./multimodal-input";
+import { SidebarToggle } from "./sidebar-toggle";
+import { Button } from "./ui/button";
+import { useSidebar } from "./ui/sidebar";
+import { VisibilitySelector } from "./visibility-selector";
 
 export const ChatThread = ({
   className,
   isReadonly,
   ...others
-}: React.ComponentProps<'div'> & { isReadonly?: boolean }) => {
+}: React.ComponentProps<"div"> & { isReadonly?: boolean }) => {
   return (
     <div
-      data-slot="chat-thread"
       className={cn(
-        'overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background',
+        "overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background",
         className
       )}
+      data-slot="chat-thread"
       {...others}
     />
   );
@@ -44,7 +43,7 @@ export function ChatThreadHeader({
   isReadonly,
   className,
   ...others
-}: React.ComponentProps<'header'> & { isReadonly?: boolean }) {
+}: React.ComponentProps<"header"> & { isReadonly?: boolean }) {
   const t = useTranslations();
 
   const { open } = useSidebar();
@@ -57,25 +56,25 @@ export function ChatThreadHeader({
 
   return (
     <header
-      data-slot="chat-thread-header"
       className={cn(
-        'sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2',
+        "sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2",
         className
       )}
+      data-slot="chat-thread-header"
       {...others}
     >
       <SidebarToggle />
 
       {(!open || windowWidth < 768) && (
         <Button
+          asChild
           className="order-2 ml-auto h-8 px-2 md:order-1 md:ml-0 md:h-fit md:px-2"
           variant="outline"
-          asChild
         >
           <Link href="/">
             <PlusIcon />
             <span className="md:sr-only">
-              {t('sidebar.buttonNewChat', 'New Chat')}
+              {t("sidebar.buttonNewChat", "New Chat")}
             </span>
           </Link>
         </Button>
@@ -83,9 +82,9 @@ export function ChatThreadHeader({
 
       {!isReadonly && (
         <VisibilitySelector
-          value={visibilityType}
-          onValueChage={setVisibilityType}
           className="order-1 md:order-2"
+          onValueChange={setVisibilityType}
+          value={visibilityType}
         />
       )}
     </header>
@@ -103,7 +102,7 @@ export type ChatThreadMessageProps = {
   isLastMessage: boolean;
   isStreaming: boolean;
   requiresScrollPadding: boolean;
-  onVote: (value: 'up' | 'down', notes?: string) => Promise<void> | void;
+  onVote: (value: "up" | "down", notes?: string) => Promise<void> | void;
 };
 
 export function ChatThreadMessages({
@@ -113,7 +112,7 @@ export function ChatThreadMessages({
   displayUser,
   displayAssistant,
   ...others
-}: Omit<React.ComponentProps<'div'>, 'children'> & {
+}: Omit<React.ComponentProps<"div">, "children"> & {
   empty?: React.ReactNode;
   displayUser?: { displayName?: string; avatar?: React.ReactNode };
   displayAssistant?: { displayName?: string; avatar?: React.ReactNode };
@@ -132,11 +131,11 @@ export function ChatThreadMessages({
   return (
     <div
       className={cn(
-        'overscroll-behavior-contain -webkit-overflow-scrolling-touch flex-1 touch-pan-y overflow-y-scroll',
+        "overscroll-behavior-contain -webkit-overflow-scrolling-touch flex-1 touch-pan-y overflow-y-scroll",
         className
       )}
-      style={{ overflowAnchor: 'none' }}
       data-slot="chat-thread-messages"
+      style={{ overflowAnchor: "none" }}
       {...others}
     >
       <Conversation className="mx-auto flex min-w-0 max-w-4xl flex-col gap-4 md:gap-6">
@@ -153,9 +152,9 @@ export function ChatThreadMessages({
 
             return renderMessage({
               key: message.id,
-              message: message,
-              isLastMessage: isLastMessage,
-              isStreaming: status === 'streaming' && isLastMessage,
+              message,
+              isLastMessage,
+              isStreaming: status === "streaming" && isLastMessage,
               requiresScrollPadding: isLastMessage,
               vote: messageVote,
               onVote: (value, notes) => voteMessage(message.id, value, notes),
@@ -173,17 +172,17 @@ export const ChatThreadComposer = ({
   isReadonly,
   className,
   ...others
-}: React.ComponentProps<'div'> & { isReadonly?: boolean }) => {
+}: React.ComponentProps<"div"> & { isReadonly?: boolean }) => {
   const runtime = useChatRuntime();
   const chat = useChat({ chat: runtime.chat });
 
   return (
     <div
-      data-slot="chat-thread-composer"
       className={cn(
-        'sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4',
+        "sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4",
         className
       )}
+      data-slot="chat-thread-composer"
       {...others}
     >
       {!isReadonly && (
@@ -203,14 +202,14 @@ export const ChatThreadEmpty = ({
   primaryText,
   secondaryText,
   ...others
-}: React.ComponentProps<'div'> & {
+}: React.ComponentProps<"div"> & {
   primaryText?: React.ReactNode;
   secondaryText?: React.ReactNode;
 }) => {
   return (
     <div
-      data-slot="chat-thread-empty"
       className="mx-auto mt-4 flex size-full max-w-3xl flex-col justify-center px-4 md:mt-16 md:px-8"
+      data-slot="chat-thread-empty"
       {...others}
     >
       <motion.div

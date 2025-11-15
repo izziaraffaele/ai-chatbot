@@ -1,12 +1,15 @@
+import { RuntimeContext } from "@mastra/core/runtime-context";
+import type { Geo } from "@vercel/functions";
+import type { Session } from "next-auth";
 import {
   runtimeConfig as defaultRuntimeConfig,
   runtimeConfig,
-} from '@/config/runtime';
-import { RuntimeConfig, RuntimeConfigSchema } from '@/config/runtime.schema';
-import { deepMerge } from '@/lib/utils';
-import { RuntimeContext } from '@mastra/core/runtime-context';
-import { Geo } from '@vercel/functions';
-import { Session } from 'next-auth';
+} from "@/config/runtime";
+import {
+  type RuntimeConfig,
+  RuntimeConfigSchema,
+} from "@/config/runtime.schema";
+import { deepMerge } from "@/lib/utils";
 
 /**
  * Runtime Context Utilities
@@ -20,9 +23,9 @@ import { Session } from 'next-auth';
 // ============================================================================
 
 export const getSession = (ctx: RuntimeContext): Session | null => {
-  const session = ctx.get('session') as any;
+  const session = ctx.get("session") as any;
 
-  if (!session || !('user' in session) || !('id' in session.user)) {
+  if (!session || !("user" in session) || !("id" in session.user)) {
     return null;
   }
 
@@ -30,16 +33,16 @@ export const getSession = (ctx: RuntimeContext): Session | null => {
 };
 
 export const getGeoHints = (ctx: RuntimeContext): Partial<Geo> | undefined => {
-  const geoHints = ctx.get('geoHints') as Partial<Geo> | undefined;
+  const geoHints = ctx.get("geoHints") as Partial<Geo> | undefined;
   return geoHints;
 };
 
 export const getRuntimeConfig = (ctx: RuntimeContext): RuntimeConfig => {
-  const runtimeConfig = deepMerge(
+  const _runtimeConfig = deepMerge(
     defaultRuntimeConfig,
-    ctx.get('config') || {}
+    ctx.get("config") || {}
   );
-  return RuntimeConfigSchema.parse(runtimeConfig);
+  return RuntimeConfigSchema.parse(_runtimeConfig);
 };
 
 // ============================================================================
@@ -75,16 +78,16 @@ export function createToolContext(
 
   // Inject session for tool authentication and user context
   if (session) {
-    context.set('session', session);
+    context.set("session", session);
   }
 
   // Inject geolocation hints for system prompt customization
   if (geoHints) {
-    context.set('geoHints', geoHints);
+    context.set("geoHints", geoHints);
   }
 
   // Inject runtime config
-  context.set('config', deepMerge(runtimeConfig, config));
+  context.set("config", deepMerge(runtimeConfig, config));
 
   return context;
 }
@@ -98,10 +101,7 @@ export function createToolContext(
  * @returns RuntimeContext configured with geo hints only
  */
 export function createGuestToolContext(
-  args: {
-    geoHints?: Partial<Geo>;
-    config?: RuntimeConfig;
-  } = {}
+  args: { geoHints?: Partial<Geo>; config?: RuntimeConfig } = {}
 ): RuntimeContext {
   return createToolContext(null, args);
 }

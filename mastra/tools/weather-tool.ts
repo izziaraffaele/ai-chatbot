@@ -1,10 +1,10 @@
-import { createTool } from '@mastra/core/tools';
-import { z } from 'zod';
+import { createTool } from "@mastra/core/tools";
+import { z } from "zod";
 
 export const getWeatherTool = createTool({
-  id: 'getWeather',
+  id: "getWeather",
   description:
-    'Get the current weather at a location. You can provide either coordinates or a city name.',
+    "Get the current weather at a location. You can provide either coordinates or a city name.",
   inputSchema: z.object({
     latitude: z.number().optional(),
     longitude: z.number().optional(),
@@ -43,7 +43,7 @@ export const getWeatherTool = createTool({
     } else {
       return {
         error:
-          'Please provide either a city name or both latitude and longitude coordinates.',
+          "Please provide either a city name or both latitude and longitude coordinates.",
       };
     }
 
@@ -69,7 +69,9 @@ async function geocodeCity(
       `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`
     );
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      return null;
+    }
 
     const data = await response.json();
 

@@ -1,24 +1,24 @@
-import { updateDocumentPrompt } from '@/lib/ai/prompts';
-import { createDocumentHandler } from '@/lib/artifacts/server';
+import { updateDocumentPrompt } from "@/lib/ai/prompts";
+import { createDocumentHandler } from "@/lib/artifacts/server";
 
 /**
  * Text document handler using Mastra agents for streaming content generation.
  * Uses agent.stream() to generate content in real-time, emitting data-textDelta
  * events for each chunk received from the AI model.
  */
-export const textDocumentHandler = createDocumentHandler<'text'>({
-  kind: 'text',
+export const textDocumentHandler = createDocumentHandler<"text">({
+  kind: "text",
   onCreateDocument: async ({ title, dataStream, agent }) => {
-    let draftContent = '';
+    let draftContent = "";
 
     if (!agent) {
-      throw new Error('Agent is required for text document generation');
+      throw new Error("Agent is required for text document generation");
     }
 
     // Stream text generation from agent
     const stream = await agent.stream(title, {
       system:
-        'Write about the given topic. Markdown is supported. Use headings wherever appropriate.',
+        "Write about the given topic. Markdown is supported. Use headings wherever appropriate.",
     });
 
     // Consume stream chunks and emit to client in real-time
@@ -26,7 +26,7 @@ export const textDocumentHandler = createDocumentHandler<'text'>({
       draftContent += chunk;
 
       await dataStream.custom({
-        type: 'data-textDelta',
+        type: "data-textDelta",
         data: chunk,
         transient: true,
       } as any);
@@ -35,14 +35,14 @@ export const textDocumentHandler = createDocumentHandler<'text'>({
     return draftContent;
   },
   onUpdateDocument: async ({ document, description, dataStream, agent }) => {
-    let draftContent = '';
+    let draftContent = "";
 
     if (!agent) {
-      throw new Error('Agent is required for text document update');
+      throw new Error("Agent is required for text document update");
     }
 
     // Stream text updates from agent
-    const systemPrompt = updateDocumentPrompt(document.content, 'text');
+    const systemPrompt = updateDocumentPrompt(document.content, "text");
     const stream = await agent.stream(description, {
       system: systemPrompt,
     });
@@ -52,7 +52,7 @@ export const textDocumentHandler = createDocumentHandler<'text'>({
       draftContent += chunk;
 
       await dataStream.custom({
-        type: 'data-textDelta',
+        type: "data-textDelta",
         data: chunk,
         transient: true,
       } as any);

@@ -1,15 +1,15 @@
+import type { UIMessageStreamWriter } from "ai";
 import type { ModelCatalog } from "tokenlens/core";
 import { getUsage } from "tokenlens/helpers";
-import type { UIMessageStreamWriter } from "ai";
+import { myProvider } from "@/lib/ai/providers";
 import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
-import { myProvider } from "@/lib/ai/providers";
 
 /**
  * Handle usage tracking from Mastra agent response
  * Enriches usage data with tokenlens information if available
  */
-export async function handleAgentUsage(
+export function handleAgentUsage(
   agentResponse: any,
   dataStream: UIMessageStreamWriter<ChatMessage>,
   selectedChatModel: string,
@@ -51,10 +51,10 @@ export async function handleAgentUsage(
       data: finalUsage,
     });
 
-    return finalUsage;
+    return Promise.resolve(finalUsage);
   } catch (err) {
     console.warn("Error handling agent usage", err);
-    return undefined;
+    return Promise.resolve(undefined);
   }
 }
 

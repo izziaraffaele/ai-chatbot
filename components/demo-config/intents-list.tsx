@@ -3,7 +3,7 @@ import { TrashIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { z } from "zod";
 import type { DemoConfig } from "@/config/demo.schema";
 import { cn } from "@/lib/utils";
 import { PlusIcon } from "../icons";
@@ -35,13 +35,7 @@ export const IntentsListControl = (
     onRemove?: (index: number) => void;
   }
 ) => {
-  const {
-    value = [],
-    className,
-    onAdd = () => {},
-    onRemove = () => {},
-    ...others
-  } = props;
+  const { value = [], className, onAdd, onRemove, ...others } = props;
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -56,7 +50,7 @@ export const IntentsListControl = (
   });
 
   const handleSubmitAdd = experienceForm.handleSubmit((data) => {
-    onAdd(data);
+    onAdd?.(data);
     setIsEditing(false);
     experienceForm.reset();
   });
@@ -78,7 +72,7 @@ export const IntentsListControl = (
             <ItemActions>
               <Button
                 className="rounded-full"
-                onClick={() => onRemove(i)}
+                onClick={() => onRemove?.(i)}
                 size="icon"
                 variant="ghost"
               >

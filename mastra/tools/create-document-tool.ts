@@ -1,16 +1,16 @@
-import { createTool } from '@mastra/core/tools';
-import { z } from 'zod';
+import { createTool } from "@mastra/core/tools";
+import { z } from "zod";
 import {
   artifactKinds,
   documentHandlersByArtifactKind,
-} from '@/lib/artifacts/server';
-import { generateUUID } from '@/lib/utils';
-import { getSession } from '../utils/runtime-utils';
+} from "@/lib/artifacts/server";
+import { generateUUID } from "@/lib/utils";
+import { getSession } from "../utils/runtime-utils";
 
 export const createDocumentTool = createTool({
-  id: 'createDocument',
+  id: "createDocument",
   description:
-    'Create a document for a writing or content creation activities. This tool will call other functions that will generate the contents of the document based on the title and kind.',
+    "Create a document for a writing or content creation activities. This tool will call other functions that will generate the contents of the document based on the title and kind.",
   inputSchema: z.object({
     title: z.string(),
     kind: z.enum(artifactKinds),
@@ -27,25 +27,25 @@ export const createDocumentTool = createTool({
     const id = generateUUID();
 
     await writer?.custom({
-      type: 'data-kind',
+      type: "data-kind",
       data: kind,
       transient: true,
     } as any);
 
     await writer?.custom({
-      type: 'data-id',
+      type: "data-id",
       data: id,
       transient: true,
     } as any);
 
     await writer?.custom({
-      type: 'data-title',
+      type: "data-title",
       data: title,
       transient: true,
     } as any);
 
     await writer?.write({
-      type: 'data-clear',
+      type: "data-clear",
       data: null,
       transient: true,
     } as any);
@@ -69,7 +69,7 @@ export const createDocumentTool = createTool({
     }
 
     await writer?.custom({
-      type: 'data-finish',
+      type: "data-finish",
       data: null,
       transient: true,
     } as any);
@@ -78,7 +78,7 @@ export const createDocumentTool = createTool({
       id,
       title,
       kind,
-      content: 'A document was created and is now visible to the user.',
+      content: "A document was created and is now visible to the user.",
     };
   },
 });

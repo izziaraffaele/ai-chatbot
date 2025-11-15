@@ -1,13 +1,13 @@
-import { CheckIcon, PlusIcon, XIcon } from 'lucide-react';
-import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Button } from '../ui/button';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
+import { CheckIcon, PlusIcon, XIcon } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 
 export function DemoThemePicker(
-  props: React.ComponentProps<'input'> & {
+  props: React.ComponentProps<"input"> & {
     label?: React.ReactNode;
     value?: string;
     defaultValue?: string;
@@ -21,8 +21,8 @@ export function DemoThemePicker(
     options = [],
     defaultValue,
     value = defaultValue,
-    onChange = () => {},
-    onValueChange = () => {},
+    onChange,
+    onValueChange,
     ...others
   } = props;
 
@@ -30,7 +30,7 @@ export function DemoThemePicker(
     value && value.length > 0 && !options.some((v) => v.value === value);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [customValue, setCustomValue] = useState(isCustom ? value || '' : '');
+  const [customValue, setCustomValue] = useState(isCustom ? value || "" : "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-focus textarea when editing starts
@@ -41,8 +41,8 @@ export function DemoThemePicker(
   }, [isEditing]);
 
   const saveValue = (input: string) => {
-    onChange({ target: { value: input } } as any);
-    onValueChange(input);
+    onChange?.({ target: { value: input } } as any);
+    onValueChange?.(input);
   };
 
   const handleSaveCustom = () => {
@@ -54,15 +54,15 @@ export function DemoThemePicker(
   };
 
   const handleCancel = () => {
-    setCustomValue(isCustom ? value || '' : '');
+    setCustomValue(isCustom ? value || "" : "");
     setIsEditing(false);
   };
 
   // Handle keyboard shortcuts
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       handleCancel();
-    } else if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    } else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       handleSaveCustom();
     }
@@ -70,14 +70,14 @@ export function DemoThemePicker(
 
   if (isCustom && !isEditing) {
     return (
-      <div {...others} className={cn('space-y-3', className)}>
+      <div {...others} className={cn("space-y-3", className)}>
         <div className="max-h-32 overflow-y-auto rounded-lg border bg-muted p-3 font-mono text-xs">
           {value}
         </div>
         <div className="flex gap-2">
           <Button
             onClick={() => {
-              setCustomValue(value || '');
+              setCustomValue(value || "");
               setIsEditing(true);
             }}
             size="sm"
@@ -85,7 +85,7 @@ export function DemoThemePicker(
           >
             Edit
           </Button>
-          <Button onClick={() => saveValue('')} size="sm" variant="destructive">
+          <Button onClick={() => saveValue("")} size="sm" variant="destructive">
             Remove
           </Button>
         </div>
@@ -95,7 +95,7 @@ export function DemoThemePicker(
 
   if (isEditing) {
     return (
-      <div {...others} className={cn('space-y-3', className)}>
+      <div {...others} className={cn("space-y-3", className)}>
         <Textarea
           className="min-h-[200px] resize-y font-mono text-xs"
           onChange={(e) => setCustomValue(e.target.value)}
@@ -118,14 +118,14 @@ export function DemoThemePicker(
         />
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground text-xs">
-            Press{' '}
+            Press{" "}
             <kbd className="rounded border bg-muted px-1.5 py-0.5 text-[10px]">
               Esc
-            </kbd>{' '}
-            to cancel,{' '}
+            </kbd>{" "}
+            to cancel,{" "}
             <kbd className="rounded border bg-muted px-1.5 py-0.5 text-[10px]">
               Cmd+Enter
-            </kbd>{' '}
+            </kbd>{" "}
             to save
           </span>
           <div className="flex gap-2">
@@ -148,7 +148,7 @@ export function DemoThemePicker(
   }
 
   return (
-    <div className={cn('flex flex-col px-4 pt-1 pb-3', className)} {...others}>
+    <div className={cn("flex flex-col px-4 pt-1 pb-3", className)} {...others}>
       <Label className="mb-3 flex w-full items-center justify-between">
         {label}
       </Label>
@@ -160,19 +160,20 @@ export function DemoThemePicker(
               aria-label={`Select ${item.label} theme`}
               aria-pressed={isSelected}
               className={cn(
-                'group flex flex-col items-center gap-2 transition-all',
-                '-m-2 rounded-lg p-2 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                isSelected && 'scale-105'
+                "group flex flex-col items-center gap-2 transition-all",
+                "-m-2 rounded-lg p-2 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                isSelected && "scale-105"
               )}
               key={item.primaryColor}
               onClick={() => saveValue(item.value)}
+              type="button"
             >
               <div
                 className={cn(
-                  'relative size-10 rounded-full border-2 transition-all',
+                  "relative size-10 rounded-full border-2 transition-all",
                   isSelected
-                    ? 'border-primary shadow-lg ring-2 ring-primary/20'
-                    : 'border-border group-hover:border-primary/50'
+                    ? "border-primary shadow-lg ring-2 ring-primary/20"
+                    : "border-border group-hover:border-primary/50"
                 )}
                 style={{ backgroundColor: item.primaryColor }}
               >
@@ -187,10 +188,10 @@ export function DemoThemePicker(
               </div>
               <span
                 className={cn(
-                  'text-xs transition-colors',
+                  "text-xs transition-colors",
                   isSelected
-                    ? 'font-medium text-foreground'
-                    : 'text-muted-foreground group-hover:text-foreground'
+                    ? "font-medium text-foreground"
+                    : "text-muted-foreground group-hover:text-foreground"
                 )}
               >
                 {item.label}
@@ -201,10 +202,11 @@ export function DemoThemePicker(
         <button
           aria-label="Add custom theme"
           className={cn(
-            'group flex flex-col items-center gap-2 transition-all',
-            '-m-2 rounded-lg p-2 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+            "group flex flex-col items-center gap-2 transition-all",
+            "-m-2 rounded-lg p-2 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           )}
           onClick={() => setIsEditing(true)}
+          type="button"
         >
           <div className="flex size-10 items-center justify-center rounded-full border-2 border-muted-foreground/30 border-dashed bg-muted/50 transition-colors group-hover:border-primary/50">
             <PlusIcon className="h-5 w-5 text-muted-foreground transition-colors group-hover:text-foreground" />

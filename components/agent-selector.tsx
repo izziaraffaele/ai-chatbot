@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import type { UseChatHelpers } from '@ai-sdk/react';
-import { Button } from '@/components/ui/button';
+import type { UseChatHelpers } from "@ai-sdk/react";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { getAvailableAgents } from '@/lib/ai/agent-config';
-import type { ChatMessage } from '@/lib/types';
-import { cn } from '@/lib/utils';
-import { useTranslations } from '@/lib/i18n/use-translations';
-import { CheckCircleFillIcon, ChevronDownIcon } from './icons';
+} from "@/components/ui/dropdown-menu";
+import { getAvailableAgents } from "@/lib/ai/agent-config";
+import { useTranslations } from "@/lib/i18n/use-translations";
+import type { ChatMessage } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { CheckCircleFillIcon, ChevronDownIcon } from "./icons";
 
 export function AgentSelector({
   selectedAgent,
@@ -25,7 +25,7 @@ export function AgentSelector({
     | { id: string; name: string; description: string; avatar?: string }
     | undefined;
   onAgentChange: (agentId: string) => void;
-  status: UseChatHelpers<ChatMessage>['status'];
+  status: UseChatHelpers<ChatMessage>["status"];
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -35,7 +35,7 @@ export function AgentSelector({
   const displayAgent = useMemo(() => {
     return selectedAgent
       ? selectedAgent.name
-      : t('agent.selector.placeholder', 'Assistant');
+      : t("agent.selector.placeholder", "Assistant");
   }, [selectedAgent, t]);
 
   return (
@@ -43,15 +43,15 @@ export function AgentSelector({
       <DropdownMenuTrigger
         asChild
         className={cn(
-          'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
+          "w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
           className
         )}
       >
         <Button
           className="md:h-[34px] md:px-2"
           data-testid="agent-selector"
+          disabled={status === "streaming"}
           variant="outline"
-          disabled={status === 'streaming'}
         >
           {selectedAgent?.avatar && (
             <span className="mr-2">{selectedAgent.avatar}</span>

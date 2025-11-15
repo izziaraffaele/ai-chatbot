@@ -3,11 +3,17 @@
  * Central export point for all tool-specific UI components used in message rendering
  */
 
-export { WeatherToolUI } from './weather-tool';
-export { CreateDocumentToolUI } from './create-document-tool';
-export { UpdateDocumentToolUI } from './update-document-tool';
-export { RequestSuggestionsToolUI } from './request-suggestions-tool';
+import { CreateDocumentToolUI } from "./create-document-tool";
+import { RequestSuggestionsToolUI } from "./request-suggestions-tool";
 
-export { FallbackToolUI } from './fallback-tool';
+export type { InferToolUIComponentProps, ToolUIComponentProps } from "./types";
 
-export type { ToolUIComponentProps, InferToolUIComponentProps } from './types';
+import { UpdateDocumentToolUI } from "./update-document-tool";
+import { WeatherToolUI } from "./weather-tool";
+
+export const ToolUI = {
+  createDocument: CreateDocumentToolUI,
+  updateDocument: UpdateDocumentToolUI,
+  requestSuggestions: RequestSuggestionsToolUI,
+  weather: WeatherToolUI,
+};

@@ -1215,7 +1215,6 @@ export const WarningIcon = ({ size = 16 }: { size?: number }) => {
 export const SettingsIcon = ({
   size = 16,
   className,
-  ...props
 }: { size?: number } & React.SVGProps<SVGSVGElement>) => {
   return (
     <svg

@@ -8,14 +8,11 @@
  * - writer: DataStream writer for real-time UI updates
  */
 
-import type { InferUITool } from '@mastra/core/tools';
-import { getWeatherTool } from './weather-tool';
-import { createDocumentTool } from './create-document-tool';
-import { updateDocumentTool } from './update-document-tool';
-import { requestSuggestionsTool } from './request-suggestions-tool';
-
-// Export all tool instances
-export { getWeatherTool, createDocumentTool, updateDocumentTool, requestSuggestionsTool };
+import type { InferUITool } from "@mastra/core/tools";
+import { createDocumentTool } from "./create-document-tool";
+import { requestSuggestionsTool } from "./request-suggestions-tool";
+import { updateDocumentTool } from "./update-document-tool";
+import { getWeatherTool } from "./weather-tool";
 
 /**
  * Inferred Tool Types
@@ -50,8 +47,8 @@ export const mastraTools = {
  * Tool names for easy reference
  */
 export const TOOL_NAMES = {
-  GET_WEATHER: 'getWeather',
-  CREATE_DOCUMENT: 'createDocument',
-  UPDATE_DOCUMENT: 'updateDocument',
-  REQUEST_SUGGESTIONS: 'requestSuggestions',
+  GET_WEATHER: "getWeather",
+  CREATE_DOCUMENT: "createDocument",
+  UPDATE_DOCUMENT: "updateDocument",
+  REQUEST_SUGGESTIONS: "requestSuggestions",
 } as const;

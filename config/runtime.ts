@@ -1,6 +1,5 @@
-import { deepMerge } from '@/lib/utils';
-import { type DemoConfig, DemoConfigSchema } from './demo.schema';
-import { RuntimeConfig, RuntimeConfigSchema } from './runtime.schema';
+import { deepMerge } from "@/lib/utils";
+import { type RuntimeConfig, RuntimeConfigSchema } from "./runtime.schema";
 
 /**
  * Get environment variable defaults for runtime configuration
@@ -12,19 +11,27 @@ function getEnvironmentDefaults(): Record<string, unknown> {
 
   // Assistant configuration
   const assistant: Record<string, unknown> = {};
-  if (process.env.NEXT_PUBLIC_ASSISTANT_NAME)
+  if (process.env.NEXT_PUBLIC_ASSISTANT_NAME) {
     assistant.name = process.env.NEXT_PUBLIC_ASSISTANT_NAME;
-  if (process.env.NEXT_PUBLIC_ASSISTANT_DESCRIPTION)
+  }
+  if (process.env.NEXT_PUBLIC_ASSISTANT_DESCRIPTION) {
     assistant.description = process.env.NEXT_PUBLIC_ASSISTANT_DESCRIPTION;
-  if (Object.keys(assistant).length > 0) envConfig.assistant = assistant;
+  }
+  if (Object.keys(assistant).length > 0) {
+    envConfig.assistant = assistant;
+  }
 
   // Tenant configuration
-  const tenant: Record<string, unknown> = { id: 'test' };
-  if (process.env.NEXT_PUBLIC_ORGANIZATION_NAME)
+  const tenant: Record<string, unknown> = { id: "test" };
+  if (process.env.NEXT_PUBLIC_ORGANIZATION_NAME) {
     tenant.name = process.env.NEXT_PUBLIC_ORGANIZATION_NAME;
-  if (process.env.NEXT_PUBLIC_ORGANIZATION_DESCRIPTION)
+  }
+  if (process.env.NEXT_PUBLIC_ORGANIZATION_DESCRIPTION) {
     tenant.description = process.env.NEXT_PUBLIC_ORGANIZATION_DESCRIPTION;
-  if (Object.keys(tenant).length > 0) tenant.organization = tenant;
+  }
+  if (Object.keys(tenant).length > 0) {
+    tenant.organization = tenant;
+  }
 
   // Environment configuration
   const environment: Record<string, unknown> = {};
@@ -34,7 +41,9 @@ function getEnvironmentDefaults(): Record<string, unknown> {
     site.title = `${tenant.name} Site`;
     site.description = `${tenant.name}'s main webiste`;
     site.url = process.env.NEXT_PUBLIC_ORGANIZATION_URL;
-    if (site.url) environment.site = site;
+    if (site.url) {
+      environment.site = site;
+    }
   }
 
   // const app: Record<string, unknown> = {};
@@ -44,7 +53,9 @@ function getEnvironmentDefaults(): Record<string, unknown> {
   //   app.description = process.env.NEXT_PUBLIC_APP_DESCRIPTION;
   // if (Object.keys(app).length > 0) context.app = app;
 
-  if (Object.keys(environment).length > 0) envConfig.environment = environment;
+  if (Object.keys(environment).length > 0) {
+    envConfig.environment = environment;
+  }
 
   return envConfig;
 }
@@ -55,13 +66,13 @@ function getEnvironmentDefaults(): Record<string, unknown> {
  */
 const schemaDefaults: RuntimeConfig = {
   assistant: {
-    name: 'Assistant',
-    description: 'AI assistant',
-    tone: 'friendly',
+    name: "Assistant",
+    description: "AI assistant",
+    tone: "friendly",
     roles: [],
   },
   organization: {
-    name: 'Demo',
+    name: "Demo",
   },
   features: {
     webSearch: true,
@@ -84,9 +95,9 @@ export function getDefaultRuntimeConfig(): RuntimeConfig {
     // Validate and return the configuration (defaults are applied by zod)
     return RuntimeConfigSchema.parse(deepMerge(schemaDefaults, envDefaults));
   } catch (error) {
-    console.error('Branding configuration validation failed:', error);
+    console.error("Branding configuration validation failed:", error);
     throw new Error(
-      'Invalid branding configuration. Please check your environment variables and config/demo.ts'
+      "Invalid branding configuration. Please check your environment variables and config/demo.ts"
     );
   }
 }

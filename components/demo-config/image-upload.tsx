@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-interface ImageUploadProps {
+type ImageUploadProps = {
   value?: string;
   onChange?: (value: string) => void;
   onBlur?: () => void;
   className?: string;
   accept?: string;
   maxSizeMB?: number;
-}
+};
 
 export const ImageUpload = (props: ImageUploadProps) => {
   const {
@@ -86,7 +86,7 @@ export const ImageUpload = (props: ImageUploadProps) => {
       setIsDragging(false);
 
       const file = e.dataTransfer.files?.[0];
-      if (file && file.type.startsWith("image/")) {
+      if (file?.type.startsWith("image/")) {
         handleFileChange(file);
       } else {
         setError("Please drop a valid image file");
@@ -138,7 +138,13 @@ export const ImageUpload = (props: ImageUploadProps) => {
       {value ? (
         <div className="relative inline-block">
           <div className="overflow-hidden rounded-lg border border-border">
-            <img alt="Preview" className="h-32 w-32 object-cover" src={value} />
+            <img
+              alt="Preview"
+              className="h-32 w-32 object-cover"
+              height={32}
+              src={value}
+              width={32}
+            />
           </div>
           <Button
             className="-right-2 -top-2 absolute h-6 w-6 rounded-full"

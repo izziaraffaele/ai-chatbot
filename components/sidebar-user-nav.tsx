@@ -100,6 +100,7 @@ export function SidebarUserNav({ user }: { user: User }) {
                 <DropdownMenuSubContent>
                   {Object.keys(LANGUAGE_NAMES).map((item) => (
                     <DropdownMenuItem
+                      key={item}
                       onSelect={() => setLocale(item as Locale)}
                     >
                       {LANGUAGE_NAMES[item as Locale]}

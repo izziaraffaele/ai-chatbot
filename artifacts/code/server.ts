@@ -1,18 +1,18 @@
-import { codePrompt, updateDocumentPrompt } from '@/lib/ai/prompts';
-import { createDocumentHandler } from '@/lib/artifacts/server';
+import { codePrompt, updateDocumentPrompt } from "@/lib/ai/prompts";
+import { createDocumentHandler } from "@/lib/artifacts/server";
 
 /**
  * Code document handler using Mastra agents for streaming code generation.
  * Uses agent.stream() to generate code in real-time, emitting data-codeDelta
  * events for each chunk received from the AI model.
  */
-export const codeDocumentHandler = createDocumentHandler<'code'>({
-  kind: 'code',
+export const codeDocumentHandler = createDocumentHandler<"code">({
+  kind: "code",
   onCreateDocument: async ({ title, dataStream, agent }) => {
-    let draftContent = '';
+    let draftContent = "";
 
     if (!agent) {
-      throw new Error('Agent is required for code document generation');
+      throw new Error("Agent is required for code document generation");
     }
 
     // Stream code generation from agent
@@ -23,7 +23,7 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
       draftContent += chunk;
 
       await dataStream.write({
-        type: 'data-codeDelta',
+        type: "data-codeDelta",
         data: chunk,
         transient: true,
       });
@@ -32,14 +32,14 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
     return draftContent;
   },
   onUpdateDocument: async ({ document, description, dataStream, agent }) => {
-    let draftContent = '';
+    let draftContent = "";
 
     if (!agent) {
-      throw new Error('Agent is required for code document update');
+      throw new Error("Agent is required for code document update");
     }
 
     // Stream code updates from agent
-    const systemPrompt = updateDocumentPrompt(document.content, 'code');
+    const systemPrompt = updateDocumentPrompt(document.content, "code");
     const stream = await agent.stream(description, {
       system: systemPrompt,
     });
@@ -49,7 +49,7 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
       draftContent += chunk;
 
       await dataStream.write({
-        type: 'data-codeDelta',
+        type: "data-codeDelta",
         data: chunk,
         transient: true,
       });

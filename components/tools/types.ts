@@ -1,4 +1,4 @@
-import { ChatToolUIPart } from '@/lib/types';
+import type { ChatToolUIPart } from "@/lib/types";
 
 /**
  * Common props for tool UI components

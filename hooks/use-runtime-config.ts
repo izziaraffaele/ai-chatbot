@@ -1,7 +1,7 @@
-import { runtimeConfig as defaultRuntimeConfig } from '@/config/runtime';
-import { useDemoConfig } from './use-demo-config';
-import { useMemo } from 'react';
-import { RuntimeConfig } from '@/config/runtime.schema';
+import { useMemo } from "react";
+import { runtimeConfig as defaultRuntimeConfig } from "@/config/runtime";
+import type { RuntimeConfig } from "@/config/runtime.schema";
+import { useDemoConfig } from "./use-demo-config";
 
 export function useRuntimeConfig() {
   const { value: demoConfig } = useDemoConfig();

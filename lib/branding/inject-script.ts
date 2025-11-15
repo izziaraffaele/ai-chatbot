@@ -12,7 +12,10 @@ export function getBrandingInjectScript() {
   // Serialize theme presets as JSON for the client-side script
   const presetsJson = JSON.stringify(
     THEME_PRESETS.reduce(
-      (carry, v) => ({ ...carry, [v.id]: v.css }),
+      (carry, v) => {
+        carry[v.id] = v.css;
+        return carry;
+      },
       {} as Record<string, string>
     )
   );

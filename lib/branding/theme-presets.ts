@@ -4,9 +4,9 @@
  */
 export const THEME_PRESETS = [
   {
-    id: 'playful',
-    name: 'Playful',
-    description: 'Vibrant, friendly theme',
+    id: "playful",
+    name: "Playful",
+    description: "Vibrant, friendly theme",
     css: `:root {
   --radius: 1.25rem;
   --shadow-x: 0;
@@ -44,9 +44,9 @@ export const THEME_PRESETS = [
 }`,
   },
   {
-    id: 'tech',
-    name: 'Tech',
-    description: 'Dark, professional theme',
+    id: "tech",
+    name: "Tech",
+    description: "Dark, professional theme",
     css: `:root {
   --radius: 0.25rem;
   --shadow-x: 0;
@@ -89,11 +89,11 @@ export const THEME_PRESETS = [
 
 export const THEME_COLOR_PRESETS = [
   {
-    id: 'yellow',
-    name: 'Yellow',
-    description: 'Vibrant, friendly theme',
+    id: "yellow",
+    name: "Yellow",
+    description: "Vibrant, friendly theme",
     previewColors: {
-      primary: 'oklch(0.852 0.199 91.936)',
+      primary: "oklch(0.852 0.199 91.936)",
     },
     css: `:root {
   --background: oklch(1 0 0);
@@ -188,11 +188,11 @@ export const THEME_COLOR_PRESETS = [
 }`,
   },
   {
-    id: 'violet-bloom',
-    name: 'Violet Bloom',
-    description: 'Dark, professional theme',
+    id: "violet-bloom",
+    name: "Violet Bloom",
+    description: "Dark, professional theme",
     previewColors: {
-      primary: 'oklch(0.5393 0.2713 286.7462)',
+      primary: "oklch(0.5393 0.2713 286.7462)",
     },
     css: `:root {
   --background: oklch(0.9940 0 0);
@@ -294,11 +294,11 @@ export const THEME_COLOR_PRESETS = [
 }`,
   },
   {
-    id: 'nature',
-    name: 'Nature',
-    description: 'Harmony and connection',
+    id: "nature",
+    name: "Nature",
+    description: "Harmony and connection",
     previewColors: {
-      primary: 'oklch(0.5234 0.1347 144.1672)',
+      primary: "oklch(0.5234 0.1347 144.1672)",
     },
     css: `:root {
   --background: oklch(0.9711 0.0074 80.7211);
@@ -402,11 +402,11 @@ export const THEME_COLOR_PRESETS = [
 }`,
   },
   {
-    id: 'claude',
-    name: 'Claude',
-    description: 'Inspired bly Claude',
+    id: "claude",
+    name: "Claude",
+    description: "Inspired bly Claude",
     previewColors: {
-      primary: 'oklch(0.6171 0.1375 39.0427)',
+      primary: "oklch(0.6171 0.1375 39.0427)",
     },
     css: `:root {
   --background: oklch(0.9818 0.0054 95.0986);

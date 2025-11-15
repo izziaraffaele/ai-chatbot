@@ -11,6 +11,9 @@
   },
   "linter": {
     "rules": {
+      "performance": {
+        "noImgElement": "warn"
+      },
       "suspicious": {
         /* Needs more work to fix */
         "noExplicitAny": "off",
@@ -44,7 +47,8 @@
       },
       "a11y": {
         /* Needs more work to fix */
-        "noSvgWithoutTitle": "off"
+        "noSvgWithoutTitle": "off",
+        "useSemanticElements": "warn"
       }
     }
   }

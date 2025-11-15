@@ -1,11 +1,11 @@
-import { AppUsage } from '@/lib/usage';
-import useSWR from 'swr';
+import useSWR from "swr";
+import type { AppUsage } from "@/lib/usage";
 
 export function useChatUsage(props: {
   chatId: string;
   initialValue?: AppUsage;
 }) {
-  const { data, mutate } = useSWR(['chat-usage', props.chatId], null, {
+  const { data, mutate } = useSWR(["chat-usage", props.chatId], null, {
     fallbackData: props.initialValue,
   });
 

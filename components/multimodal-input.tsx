@@ -1,41 +1,41 @@
-'use client';
+"use client";
 
-import type { UseChatHelpers } from '@ai-sdk/react';
+import type { UseChatHelpers } from "@ai-sdk/react";
 import {
-  FormEvent,
+  type FormEvent,
   memo,
   useCallback,
   useEffect,
   useRef,
   useState,
-} from 'react';
-import { useLocalStorage, useWindowSize } from 'usehooks-ts';
-import { AgentSelector } from '@/components/agent-selector';
-import { useTranslations } from '@/lib/i18n/use-translations';
-import type { ChatMessage } from '@/lib/types';
-import { cn } from '@/lib/utils';
-import { useSelectedAgent } from '@/hooks/use-selected-agent';
-import { Context } from './elements/context';
+} from "react";
+import { useLocalStorage, useWindowSize } from "usehooks-ts";
+import { AgentSelector } from "@/components/agent-selector";
+import { useChatUsage } from "@/hooks/use-chat-usage";
+import { useSelectedAgent } from "@/hooks/use-selected-agent";
+import { useTranslations } from "@/lib/i18n/use-translations";
+import type { ChatMessage } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { Context } from "./elements/context";
 import {
   PromptInput,
+  PromptInputActionAddAttachments,
+  PromptInputActionMenu,
+  PromptInputActionMenuContent,
+  PromptInputActionMenuTrigger,
+  PromptInputAttachment,
+  PromptInputAttachments,
+  PromptInputBody,
+  PromptInputFooter,
+  PromptInputHeader,
+  type PromptInputMessage,
   PromptInputSubmit,
   PromptInputTextarea,
-  PromptInputFooter,
   PromptInputTools,
   usePromptInputController,
-  PromptInputMessage,
   useProviderAttachments,
-  PromptInputHeader,
-  PromptInputAttachments,
-  PromptInputAttachment,
-  PromptInputBody,
-  PromptInputActionMenu,
-  PromptInputActionMenuTrigger,
-  PromptInputActionMenuContent,
-  PromptInputActionAddAttachments,
-} from './elements/prompt-input';
-import { SuggestedActions } from './suggested-actions';
-import { useChatUsage } from '@/hooks/use-chat-usage';
+} from "./elements/prompt-input";
+import { SuggestedActions } from "./suggested-actions";
 
 function PureMultimodalInput({
   chatId,
@@ -47,11 +47,11 @@ function PureMultimodalInput({
   className,
 }: {
   chatId: string;
-  status: UseChatHelpers<ChatMessage>['status'];
+  status: UseChatHelpers<ChatMessage>["status"];
   showSuggestion?: boolean;
   disabled?: boolean;
   stop: () => void;
-  sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
+  sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
   className?: string;
 }) {
   const t = useTranslations();
@@ -66,8 +66,8 @@ function PureMultimodalInput({
   const { files } = useProviderAttachments();
 
   const [localStorageInput, setLocalStorageInput] = useLocalStorage(
-    'input',
-    ''
+    "input",
+    ""
   );
 
   const inputValue = composer.textInput.value;
@@ -76,18 +76,18 @@ function PureMultimodalInput({
     if (textareaRef.current) {
       const domValue = textareaRef.current.value;
       // Prefer DOM value over localStorage to handle hydration
-      const finalValue = domValue || localStorageInput || '';
+      const finalValue = domValue || localStorageInput || "";
       composer.textInput.setInput(finalValue);
     }
     // Only run once after hydration
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatId]);
+  }, [composer.textInput.setInput, localStorageInput]);
 
   useEffect(() => {
     setLocalStorageInput(inputValue);
-  }, [composer.textInput.value, setLocalStorageInput]);
+  }, [setLocalStorageInput, inputValue]);
 
-  const [uploadQueue, setUploadQueue] = useState<string[]>([]);
+  const [uploadQueue, _setUploadQueue] = useState<string[]>([]);
 
   const submitForm = useCallback(
     (message: PromptInputMessage) => {
@@ -95,22 +95,30 @@ function PureMultimodalInput({
       const hasAttachments = Boolean(message.files?.length);
 
       // skip if message is empty
-      if (!(hasText || hasAttachments)) return;
+      if (!(hasText || hasAttachments)) {
+        return;
+      }
 
       sendMessage({
-        text: message.text || 'Sent with attachments',
+        text: message.text || "Sent with attachments",
         files: message.files,
       });
-      composer.textInput.setInput('');
+      composer.textInput.setInput("");
       composer.attachments.clear();
 
-      window.history.pushState({}, '', `/chat/${chatId}`);
+      window.history.pushState({}, "", `/chat/${chatId}`);
 
       if (width && width > 768) {
         textareaRef.current?.focus();
       }
     },
-    [sendMessage, width, chatId]
+    [
+      sendMessage,
+      width,
+      chatId,
+      composer.attachments.clear,
+      composer.textInput.setInput,
+    ]
   );
 
   // const uploadFile = useCallback(async (file: File) => {
@@ -230,12 +238,12 @@ function PureMultimodalInput({
     (message: PromptInputMessage, event: FormEvent) => {
       event.preventDefault();
 
-      if (status === 'ready') {
+      if (status === "ready") {
         submitForm(message);
         return;
       }
 
-      if (status !== 'error') {
+      if (status !== "error") {
         stop();
       }
     },
@@ -243,16 +251,16 @@ function PureMultimodalInput({
   );
 
   return (
-    <div className={cn('relative flex w-full flex-col gap-4', className)}>
+    <div className={cn("relative flex w-full flex-col gap-4", className)}>
       {showSuggestion && files.length === 0 && uploadQueue.length === 0 && (
         <SuggestedActions chatId={chatId} sendMessage={sendMessage} />
       )}
 
       <PromptInput
         className="rounded-xl border border-border bg-background p-3 shadow-xs transition-all duration-200 focus-within:border-border hover:border-muted-foreground/50"
-        onSubmit={handleSubmitForm}
         globalDrop
         multiple
+        onSubmit={handleSubmitForm}
       >
         <PromptInputHeader className="flex flex-row items-end gap-2 overflow-x-scroll">
           <PromptInputAttachments>
@@ -263,11 +271,11 @@ function PureMultimodalInput({
           <PromptInputTextarea
             autoFocus
             className="max-h-[200px] min-h-11"
-            placeholder={t('chat.input.placeholder', 'Send a message...')}
+            disabled={disabled}
+            placeholder={t("chat.input.placeholder", "Send a message...")}
             ref={textareaRef}
             rows={1}
             value={inputValue}
-            disabled={disabled}
           />
           <Context {...usage} />
         </PromptInputBody>

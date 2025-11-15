@@ -3,14 +3,14 @@
  * Defines available agents that users can select to handle specialized tasks
  */
 
-export interface AgentConfig {
+export type AgentConfig = {
   id: string;
   name: string;
   description: string;
   avatar: string; // emoji or URL
   color?: string; // optional: for styling (e.g., 'blue', '#3b82f6')
   icon?: string; // optional: alternative to avatar
-}
+};
 
 /**
  * Available agent configurations
@@ -18,11 +18,11 @@ export interface AgentConfig {
  */
 export const AGENT_CONFIGS: Record<string, AgentConfig> = {
   researchAgent: {
-    id: 'researchAgent',
-    name: 'Researcher',
-    description: 'Specializes in web research and synthesis',
-    avatar: '🔍',
-    color: 'blue',
+    id: "researchAgent",
+    name: "Researcher",
+    description: "Specializes in web research and synthesis",
+    avatar: "🔍",
+    color: "blue",
   },
 } as const;
 

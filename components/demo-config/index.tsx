@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import {
   AppWindow,
   Building2,
@@ -11,10 +11,10 @@ import {
   Sparkles,
   Target,
   User,
-} from 'lucide-react';
-import type React from 'react';
-import { useFormContext } from 'react-hook-form';
-import { FormInput } from '@/components/ui/form-input';
+} from "lucide-react";
+import type React from "react";
+import { useFormContext } from "react-hook-form";
+import { FormInput } from "@/components/ui/form-input";
 import {
   Select,
   SelectContent,
@@ -22,29 +22,29 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { type DemoConfig as DemoConfigType } from '@/config/demo.schema';
-import { THEME_COLOR_PRESETS } from '@/lib/branding/theme-presets';
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import type { DemoConfig as DemoConfigType } from "@/config/demo.schema";
+import { THEME_COLOR_PRESETS } from "@/lib/branding/theme-presets";
+import { DemoConfigActions } from "./assistant-actions";
 import {
   type ExperienceConfig,
   ExperiencesListControl,
-} from './experiences-list';
-import { DemoConfigFieldGroup, DemoConfigForm } from './form';
-import { ImageUpload } from './image-upload';
-import { IntentsListControl } from './intents-list';
+} from "./experiences-list";
+import { DemoConfigFieldGroup, DemoConfigForm } from "./form";
+import { ImageUpload } from "./image-upload";
+import { IntentsListControl } from "./intents-list";
 import {
   DemoConfigPanel,
   DemoConfigPanelContent,
   DemoConfigPanelTrigger,
-} from './panel';
-import { SuggestionListControl } from './suggestion-list';
-import { SwitchListControl } from './switch-list';
-import { DemoThemePicker } from './theme-picker';
-import { DemoConfigActions } from './assistant-actions';
+} from "./panel";
+import { SuggestionListControl } from "./suggestion-list";
+import { SwitchListControl } from "./switch-list";
+import { DemoThemePicker } from "./theme-picker";
 
 const DemoConfigSection = (
-  props: React.ComponentProps<'section'> & {
+  props: React.ComponentProps<"section"> & {
     title: string;
     description?: string;
   }
@@ -319,14 +319,14 @@ const ChatFeaturesFieldset = () => {
               field.onBlur();
             }}
             options={[
-              { label: 'Memory', value: 'memory', disabled: true },
-              { label: 'Artifacts', value: 'artifacts', disabled: true },
+              { label: "Memory", value: "memory", disabled: true },
+              { label: "Artifacts", value: "artifacts", disabled: true },
               {
-                label: 'Multimodal Input',
-                value: 'multimodalInput',
+                label: "Multimodal Input",
+                value: "multimodalInput",
                 disabled: true,
               },
-              { label: 'Web Search', value: 'webSearch' },
+              { label: "Web Search", value: "webSearch" },
             ]}
             value={field.value as Record<string, boolean>}
           />
@@ -405,29 +405,29 @@ const ContextIndexesFieldset = () => {
           return (
             <SwitchListControl
               onValueChange={(v) => {
-                const newValue = Object.entries(v).reduce((carry, [k, v]) => {
-                  if (v) {
+                const newValue = Object.entries(v).reduce((carry, [k, vv]) => {
+                  if (vv) {
                     carry.push(k);
                   }
                   return carry;
                 }, [] as string[]);
 
-                if (!newValue.includes('memoraiz')) {
-                  newValue.push('memoraiz');
+                if (!newValue.includes("memoraiz")) {
+                  newValue.push("memoraiz");
                 }
 
                 field.onChange({ target: { value: newValue } } as any);
                 field.onBlur();
               }}
               options={[
-                { label: 'MemorAIz', value: 'memoraiz', disabled: true },
-                { label: 'Demo Courses', value: 'demo-courses' },
+                { label: "MemorAIz", value: "memoraiz", disabled: true },
+                { label: "Demo Courses", value: "demo-courses" },
               ]}
               value={currentValue.reduce(
-                (carry, v) => ({
-                  ...carry,
-                  [v]: true,
-                }),
+                (carry, v) => {
+                  carry[v] = true;
+                  return carry;
+                },
                 {} as Record<string, boolean>
               )}
             />

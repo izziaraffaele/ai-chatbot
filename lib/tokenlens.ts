@@ -6,11 +6,11 @@
  * Compatible with both AI SDK and Mastra agent responses.
  */
 
-import type { ModelCatalog } from 'tokenlens/core';
-import { fetchModels } from 'tokenlens/fetch';
-import { getUsage } from 'tokenlens/helpers';
-import type { AppUsage } from '@/lib/usage';
-import { unstable_cache as cache } from 'next/cache';
+import { unstable_cache as cache } from "next/cache";
+import type { ModelCatalog } from "tokenlens/core";
+import { fetchModels } from "tokenlens/fetch";
+import { getUsage } from "tokenlens/helpers";
+import type { AppUsage } from "@/lib/usage";
 
 /**
  * Cached tokenlens model catalog fetcher
@@ -22,13 +22,13 @@ const getTokenlensCatalog = cache(
       return await fetchModels();
     } catch (err) {
       console.warn(
-        'TokenLens: catalog fetch failed, using default catalog',
+        "TokenLens: catalog fetch failed, using default catalog",
         err
       );
       return; // tokenlens helpers will fall back to defaultCatalog
     }
   },
-  ['tokenlens-catalog'],
+  ["tokenlens-catalog"],
   { revalidate: 24 * 60 * 60 } // 24 hours
 );
 
@@ -89,7 +89,7 @@ export async function enrichUsageWithTokenlens(
 
     return enrichedUsage;
   } catch (error) {
-    console.warn('TokenLens enrichment failed:', error);
+    console.warn("TokenLens enrichment failed:", error);
     // Fallback to raw usage data
     return {
       ...usage,
@@ -130,11 +130,11 @@ export async function trackUsage(
   if (dataStream && enrichedUsage) {
     try {
       dataStream.write({
-        type: 'data-usage',
+        type: "data-usage",
         data: enrichedUsage,
       });
     } catch (err) {
-      console.warn('Failed to write usage to dataStream:', err);
+      console.warn("Failed to write usage to dataStream:", err);
     }
   }
 
@@ -159,6 +159,6 @@ export async function safeTrackUsage(
   try {
     await trackUsage(modelId, usage, dataStream);
   } catch (error) {
-    console.error('Error tracking usage:', error);
+    console.error("Error tracking usage:", error);
   }
 }

@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import { ToolUIPart } from 'ai';
-import { FallbackToolUI } from './tools';
-import { CreateDocumentToolUI } from './tools/create-document-tool';
-import { RequestSuggestionsToolUI } from './tools/request-suggestions-tool';
-import { UpdateDocumentToolUI } from './tools/update-document-tool';
-import { WeatherToolUI } from './tools/weather-tool';
-import { ChatToolUIPart } from '@/lib/types';
+import type { ChatToolUIPart } from "@/lib/types";
+import { FallbackToolUI } from "./tools";
+import { CreateDocumentToolUI } from "./tools/create-document-tool";
+import { RequestSuggestionsToolUI } from "./tools/request-suggestions-tool";
+import { UpdateDocumentToolUI } from "./tools/update-document-tool";
+import { WeatherToolUI } from "./tools/weather-tool";
 
 type ToolUIRouterProps = {
   part: ChatToolUIPart;
@@ -20,7 +19,7 @@ type ToolUIRouterProps = {
  */
 export function ToolUIRouter({ part, isReadonly = false }: ToolUIRouterProps) {
   switch (part.type) {
-    case 'tool-getWeather':
+    case "tool-getWeather":
       return (
         <WeatherToolUI
           isReadonly={isReadonly}
@@ -28,7 +27,7 @@ export function ToolUIRouter({ part, isReadonly = false }: ToolUIRouterProps) {
           part={part}
         />
       );
-    case 'tool-createDocument':
+    case "tool-createDocument":
       return (
         <CreateDocumentToolUI
           isReadonly={isReadonly}
@@ -36,7 +35,7 @@ export function ToolUIRouter({ part, isReadonly = false }: ToolUIRouterProps) {
           part={part}
         />
       );
-    case 'tool-updateDocument':
+    case "tool-updateDocument":
       return (
         <UpdateDocumentToolUI
           isReadonly={isReadonly}
@@ -44,7 +43,7 @@ export function ToolUIRouter({ part, isReadonly = false }: ToolUIRouterProps) {
           part={part}
         />
       );
-    case 'tool-requestSuggestions':
+    case "tool-requestSuggestions":
       return (
         <RequestSuggestionsToolUI
           isReadonly={isReadonly}
@@ -53,14 +52,11 @@ export function ToolUIRouter({ part, isReadonly = false }: ToolUIRouterProps) {
         />
       );
     default: {
-      const fallbackPart = part as ToolUIPart;
-      const clientTools = ['tool-updateDemoConfig'];
+      const clientTools = ["tool-updateDemoConfig"];
 
-      if (clientTools.includes(fallbackPart.type)) {
-        console.log(fallbackPart);
-        return (
-          <FallbackToolUI key={fallbackPart.toolCallId} part={fallbackPart} />
-        );
+      if (clientTools.includes(part.type)) {
+        console.log(part);
+        return <FallbackToolUI key={part.toolCallId} part={part} />;
       }
 
       // unsupported tool call

@@ -1,17 +1,16 @@
-'use client';
+"use client";
 
-import { type ClientTool } from '@mastra/client-js';
-import type { ToolsInput } from '@mastra/core/agent';
-import z from 'zod';
+import type { ClientTool } from "@mastra/client-js";
+import type { ToolsInput } from "@mastra/core/agent";
+import z from "zod";
 
 export type AnyClientTool = ClientTool<any, any>;
-export { ClientTool };
 
 /**
  * Dynamic registry for assistant actions (client-side tools).
  * Supports runtime registration and deregistration of actions from React components.
  */
-export interface AssistantActionsRegistry {
+export type AssistantActionsRegistry = {
   /**
    * Register an assistant action to make it available to the agent.
    * If an action with the same ID exists, it will be replaced.
@@ -29,7 +28,7 @@ export interface AssistantActionsRegistry {
    * Returns an object keyed by action ID, suitable for passing to the Mastra agent.
    */
   getTools(): Record<string, AnyClientTool>;
-}
+};
 
 /**
  * Create a new assistant actions registry instance.
@@ -116,7 +115,7 @@ export function serializeClientTools(clientTools: ToolsInput): ToolsInput {
 /**
  * Tool call object received from useChat hook's onToolCall callback.
  */
-export interface ClientToolCall<T extends string, INPUT = unknown> {
+export type ClientToolCall<T extends string, INPUT = unknown> = {
   /** Name of the tool being called */
   toolName: T;
   /** Unique identifier for this tool invocation */
@@ -125,19 +124,19 @@ export interface ClientToolCall<T extends string, INPUT = unknown> {
   input: INPUT;
   /** Whether this is a dynamic tool (should not be processed by us) */
   dynamic?: boolean;
-}
+};
 
 /**
  * Result object returned by tool execution, compatible with useChat's addToolOutput().
  */
-export interface ClientToolCallResult<T extends string, OUTPUT = unknown> {
+export type ClientToolCallResult<T extends string, OUTPUT = unknown> = {
   /** The tool call ID */
   toolCallId: string;
   /** Name of the tool that was called */
   tool: T;
   /** Output/result from the tool execution */
   output: OUTPUT | { error?: string };
-}
+};
 
 /**
  * Process a client tool call from the useChat hook.
@@ -170,7 +169,9 @@ export async function processClientToolCall(
   const { toolName, toolCallId, input, dynamic } = toolCall;
 
   // Skip dynamic tools - let Vercel AI SDK handle them
-  if (dynamic) return;
+  if (dynamic) {
+    return;
+  }
 
   try {
     // Look up the tool in the registry
@@ -179,7 +180,9 @@ export async function processClientToolCall(
     const tool = tools[toolName];
 
     // Skip unregistered tools - Might be a backed tool call
-    if (!tool) return;
+    if (!tool) {
+      return;
+    }
 
     if (!tool.execute) {
       return {

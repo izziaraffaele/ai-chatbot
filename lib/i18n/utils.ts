@@ -39,7 +39,9 @@ export function isSupportedLocale(locale: string): locale is Locale {
  * Get the locale from cookie
  */
 export function getLocaleFromCookie(): Locale | null {
-  if (typeof document === "undefined") return null;
+  if (typeof document === "undefined") {
+    return null;
+  }
 
   const cookies = document.cookie.split("; ");
   const localeCookie = cookies.find((cookie) =>
@@ -58,8 +60,10 @@ export function getLocaleFromCookie(): Locale | null {
  * Set the locale in cookie
  */
 export function setLocaleToCookie(locale: Locale): void {
-  if (typeof document === "undefined") return;
-
+  if (typeof document === "undefined") {
+    return;
+  }
+  // biome-ignore lint: to fix
   document.cookie = `${LOCALE_COOKIE_NAME}=${locale}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; samesite=lax`;
 }
 
@@ -68,7 +72,9 @@ export function setLocaleToCookie(locale: Locale): void {
  */
 export function getCurrentLocale(): Locale {
   const cookieLocale = getLocaleFromCookie();
-  if (cookieLocale) return cookieLocale;
+  if (cookieLocale) {
+    return cookieLocale;
+  }
   return getDefaultLocale();
 }
 
@@ -81,7 +87,6 @@ export async function loadTranslations(
   switch (locale) {
     case "it":
       return (await import("./translations/it")).it;
-    case "en":
     default:
       return (await import("./translations/en")).en;
   }

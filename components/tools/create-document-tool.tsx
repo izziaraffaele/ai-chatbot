@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import equal from 'fast-deep-equal';
-import { memo } from 'react';
-import { DocumentPreview } from '@/components/document-preview';
-import type { InferToolUIComponentProps } from './types';
+import equal from "fast-deep-equal";
+import { memo } from "react";
+import { DocumentPreview } from "@/components/document-preview";
+import type { InferToolUIComponentProps } from "./types";
 
 export type CreateDocumentToolUIProps =
-  InferToolUIComponentProps<'tool-createDocument'>;
+  InferToolUIComponentProps<"tool-createDocument">;
 
 /**
  * CreateDocumentToolUI Component
@@ -18,7 +18,7 @@ function PureCreateDocumentToolUI({
   isReadonly = false,
 }: CreateDocumentToolUIProps) {
   // Check if output contains an error
-  if (part.output && 'error' in part.output) {
+  if (part.output && "error" in part.output) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50">
         Error creating document: {String(part.output.error)}
@@ -40,4 +40,4 @@ export const CreateDocumentToolUI = memo(
   }
 );
 
-CreateDocumentToolUI.displayName = 'CreateDocumentToolUI';
+CreateDocumentToolUI.displayName = "CreateDocumentToolUI";

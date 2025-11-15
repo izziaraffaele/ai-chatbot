@@ -140,8 +140,8 @@ This agent is designed for use within agent networks and workflows—not for dir
   // FOOTER
   // ========================================================================
   sections.push(
-    '\n---\n\nYou are now ready to assist with research requests. Focus on finding authoritative sources, synthesizing information accurately, and maintaining intellectual honesty about what is and is not known.'
+    "\n---\n\nYou are now ready to assist with research requests. Focus on finding authoritative sources, synthesizing information accurately, and maintaining intellectual honesty about what is and is not known."
   );
 
-  return sections.join('\n');
+  return sections.join("\n");
 }

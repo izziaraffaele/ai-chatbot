@@ -1,6 +1,6 @@
-import { Vote } from '@/lib/db/schema';
-import { fetcher } from '@/lib/utils';
-import useSWR from 'swr';
+import useSWR from "swr";
+import type { Vote } from "@/lib/db/schema";
+import { fetcher } from "@/lib/utils";
 
 export function useChatVotes({ chatId }: { chatId: string | null }) {
   const { data: votes, mutate } = useSWR<Vote[]>(
@@ -15,21 +15,23 @@ export function useChatVotes({ chatId }: { chatId: string | null }) {
 
   const voteMessage = (
     messageId: string,
-    vote: 'up' | 'down',
-    notes?: string
+    vote: "up" | "down",
+    _notes?: string
   ) => {
-    if (!chatId) return;
+    if (!chatId) {
+      return;
+    }
 
     // optimistically update cache
     mutate((value) => {
       const newValue = value?.filter((v) => v.messageId === messageId) || [];
-      newValue.push({ chatId, messageId, isUpvoted: vote === 'up' });
+      newValue.push({ chatId, messageId, isUpvoted: vote === "up" });
 
       return newValue;
     });
 
-    fetch('/api/vote', {
-      method: 'PATCH',
+    fetch("/api/vote", {
+      method: "PATCH",
       body: JSON.stringify({ messageId, chatId, type: vote }),
     }).catch((e) => {
       console.error(e);

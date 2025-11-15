@@ -1,6 +1,7 @@
-import { THEME_COLOR_PRESETS } from '@/lib/branding/theme-presets';
-import { z } from 'zod';
+import { z } from "zod";
+import { THEME_COLOR_PRESETS } from "@/lib/branding/theme-presets";
 
+const URL_BASE64_REGEX = /^data:image\/[a-zA-Z]+;base64,/;
 /**
  * Enhanced URL validation that supports both absolute URLs, relative paths, and base64 data URLs
  */
@@ -9,23 +10,25 @@ const urlSchema = z
   .refine(
     (value) => {
       // Allow empty strings
-      if (!value) return true;
+      if (!value) {
+        return true;
+      }
 
       // Allow base64 data URLs
-      if (value.startsWith('data:')) {
-        return /^data:image\/[a-zA-Z]+;base64,/.test(value);
+      if (value.startsWith("data:")) {
+        return URL_BASE64_REGEX.test(value);
       }
 
       // Allow HTTP(S) URLs
       try {
         const url = new URL(value);
-        return url.protocol === 'http:' || url.protocol === 'https:';
+        return url.protocol === "http:" || url.protocol === "https:";
       } catch {
         return false;
       }
     },
     {
-      message: 'Must be a valid URL or base64 data URL',
+      message: "Must be a valid URL or base64 data URL",
     }
   )
   .optional();
@@ -41,8 +44,8 @@ export const DemoConfigSchema = z.object({
     avatar: urlSchema,
     description: z.string().optional(),
     tone: z
-      .enum(['friendly', 'supportive', 'excited', 'informative'])
-      .default('friendly'),
+      .enum(["friendly", "supportive", "excited", "informative"])
+      .default("friendly"),
     // behaviour
     instructions: z.string().optional(),
     guidelines: z.string().optional(),
@@ -50,9 +53,9 @@ export const DemoConfigSchema = z.object({
   }),
   appearance: z.object({
     // theme
-    preset: z.enum(['default', 'playful', 'tech']).default('default'),
+    preset: z.enum(["default", "playful", "tech"]).default("default"),
     customCss: z.string().optional(),
-    defaultMode: z.enum(['dark', 'light', 'auto']).default('auto'),
+    defaultMode: z.enum(["dark", "light", "auto"]).default("auto"),
     // assets
     favicon: urlSchema,
     logo: urlSchema,
@@ -86,7 +89,7 @@ export const DemoConfigSchema = z.object({
       })
       .optional(),
     // knowledgebase
-    indexes: z.array(z.string()).default(['memoraiz']),
+    indexes: z.array(z.string()).default(["memoraiz"]),
   }),
   runtime: z.object({
     intents: z
@@ -116,7 +119,7 @@ export const DemoConfigMemorySchema = z.object({
       name: z
         .string()
         .describe(
-          'The name of the AI assistant. Should be a professional, memorable name.'
+          "The name of the AI assistant. Should be a professional, memorable name."
         ),
       description: z
         .string()
@@ -125,7 +128,7 @@ export const DemoConfigMemorySchema = z.object({
           "A brief description of the assistant's role and capabilities. Used in the UI to introduce the assistant."
         ),
       tone: z
-        .enum(['friendly', 'supportive', 'excited', 'informative'])
+        .enum(["friendly", "supportive", "excited", "informative"])
         .optional()
         .describe(
           'The communication style of the assistant. "friendly" is conversational, "supportive" is empathetic, "excited" is enthusiastic, "informative" is factual.'
@@ -134,13 +137,13 @@ export const DemoConfigMemorySchema = z.object({
         .string()
         .optional()
         .describe(
-          'System instructions that define how the assistant should behave, respond, and handle various situations.'
+          "System instructions that define how the assistant should behave, respond, and handle various situations."
         ),
       guidelines: z
         .string()
         .optional()
         .describe(
-          'Guidelines and policies that the assistant should follow when interacting with users.'
+          "Guidelines and policies that the assistant should follow when interacting with users."
         ),
     })
     .optional()
@@ -148,7 +151,7 @@ export const DemoConfigMemorySchema = z.object({
   appearance: z
     .object({
       preset: z
-        .enum(['default', 'playful', 'tech'])
+        .enum(["default", "playful", "tech"])
         .optional()
         .describe(
           'Visual theme preset for the UI. "default" is neutral, "playful" is colorful and friendly, "tech" is modern and sleek.'
@@ -157,7 +160,7 @@ export const DemoConfigMemorySchema = z.object({
         .enum(THEME_COLOR_PRESETS.map((p) => p.id) as [string, ...string[]])
         .optional()
         .describe(
-          'The color theme to use. Options include various named color schemes.'
+          "The color theme to use. Options include various named color schemes."
         ),
     })
     .optional()
@@ -170,21 +173,21 @@ export const DemoConfigMemorySchema = z.object({
         .array(z.string())
         .optional()
         .describe(
-          'List of suggested starter prompts that users can click to begin conversations.'
+          "List of suggested starter prompts that users can click to begin conversations."
         ),
     })
     .optional()
-    .describe('Configuration for chat interface and user experience.'),
+    .describe("Configuration for chat interface and user experience."),
   context: z
     .object({
       organization: z
         .object({
-          name: z.string().optional().describe('The name of the organization.'),
+          name: z.string().optional().describe("The name of the organization."),
           description: z
             .string()
             .optional()
             .describe(
-              'A brief description of the organization and its mission.'
+              "A brief description of the organization and its mission."
             ),
           websiteUrl: z
             .string()
@@ -193,25 +196,25 @@ export const DemoConfigMemorySchema = z.object({
             .describe("The organization's official website URL."),
         })
         .optional()
-        .describe('Information about the organization or company.'),
+        .describe("Information about the organization or company."),
       app: z
         .object({
           name: z
             .string()
             .optional()
-            .describe('The name of the application or product.'),
+            .describe("The name of the application or product."),
           description: z
             .string()
             .optional()
             .describe(
-              'A brief description of what the application does and its purpose.'
+              "A brief description of what the application does and its purpose."
             ),
         })
         .optional()
-        .describe('Information about the application being configured.'),
+        .describe("Information about the application being configured."),
     })
     .optional()
-    .describe('Context information about the organization and application.'),
+    .describe("Context information about the organization and application."),
   runtime: z
     .object({
       intents: z
@@ -225,31 +228,31 @@ export const DemoConfigMemorySchema = z.object({
             description: z
               .string()
               .describe(
-                'Description of what this intent represents and when it should be triggered.'
+                "Description of what this intent represents and when it should be triggered."
               ),
           })
         )
         .optional()
         .describe(
-          'List of user intents that the assistant can recognize and handle.'
+          "List of user intents that the assistant can recognize and handle."
         ),
       experiences: z
         .array(
           z.object({
             name: z
               .string()
-              .describe('The name of the experience or interaction flow.'),
+              .describe("The name of the experience or interaction flow."),
             description: z
               .string()
               .describe(
-                'Description of the experience and what it provides to the user.'
+                "Description of the experience and what it provides to the user."
               ),
             triggeredBy: z
               .string()
               .nullable()
               .optional()
               .describe(
-                'The intent that triggers this experience. Should match an intent name.'
+                "The intent that triggers this experience. Should match an intent name."
               ),
             triggerThreshold: z
               .number()
@@ -257,17 +260,17 @@ export const DemoConfigMemorySchema = z.object({
               .max(1)
               .optional()
               .describe(
-                'Confidence threshold (0-1) required to trigger this experience. Higher values require higher confidence.'
+                "Confidence threshold (0-1) required to trigger this experience. Higher values require higher confidence."
               ),
           })
         )
         .optional()
         .describe(
-          'List of custom experiences or interaction flows triggered by specific intents.'
+          "List of custom experiences or interaction flows triggered by specific intents."
         ),
     })
     .optional()
-    .describe('Runtime configuration for intents and custom experiences.'),
+    .describe("Runtime configuration for intents and custom experiences."),
 });
 
 /**

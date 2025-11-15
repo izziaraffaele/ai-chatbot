@@ -21,18 +21,17 @@ export function SuggestionListControl(
   const {
     value = [],
     placeholder,
-    defaultValue,
     className,
-    onValueChange = () => {},
+    onValueChange,
     ...others
   } = props;
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const prepend = (newValue: string) => onValueChange([newValue, ...value]);
+  const prepend = (newValue: string) => onValueChange?.([newValue, ...value]);
 
   const remove = (index: number) =>
-    onValueChange(value?.filter((_, i) => i !== index));
+    onValueChange?.(value?.filter((_, i) => i !== index));
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {

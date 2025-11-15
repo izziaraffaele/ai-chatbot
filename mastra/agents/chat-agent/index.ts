@@ -1,15 +1,15 @@
-import { Agent } from '@mastra/core/agent';
-import { Memory } from '@mastra/memory';
-import { LibSQLStore } from '@mastra/libsql';
+import { Agent } from "@mastra/core/agent";
+import { LibSQLStore } from "@mastra/libsql";
+import { Memory } from "@mastra/memory";
 import {
-  getWeatherTool,
   createDocumentTool,
-  updateDocumentTool,
+  getWeatherTool,
   requestSuggestionsTool,
-} from '../../tools';
-import { getRuntimeConfig, getGeoHints } from '../../utils/runtime-utils';
-import { chatAgentSystemPrompt } from './system-prompt';
-import { researchAgent } from '../research-agent';
+  updateDocumentTool,
+} from "../../tools";
+import { getGeoHints, getRuntimeConfig } from "../../utils/runtime-utils";
+import { researchAgent } from "../research-agent";
+import { chatAgentSystemPrompt } from "./system-prompt";
 
 /**
  * Mastra Chat Agent
@@ -22,7 +22,7 @@ import { researchAgent } from '../research-agent';
  * - Model can be overridden in agent.generate() call during Phase 2 integration
  */
 export const chatAgent = new Agent({
-  name: 'Chat Agent',
+  name: "Chat Agent",
   instructions: ({ runtimeContext }) => {
     // Extract runtime configuration and geolocation hints
     const config = getRuntimeConfig(runtimeContext);
@@ -33,7 +33,7 @@ export const chatAgent = new Agent({
 
     return prompt;
   },
-  model: 'google/gemini-2.5-flash', // Default, overridden at runtime
+  model: "google/gemini-2.5-flash", // Default, overridden at runtime
   tools: {
     getWeather: getWeatherTool,
     createDocument: createDocumentTool,
@@ -45,7 +45,7 @@ export const chatAgent = new Agent({
   },
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: "file:../mastra.db",
     }),
   }),
 });

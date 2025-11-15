@@ -1,25 +1,24 @@
-import { createTool } from '@mastra/core/tools';
-import { streamObject } from 'ai';
-import { z } from 'zod';
-import { getDocumentById, saveSuggestions } from '@/lib/db/queries';
-import type { Suggestion } from '@/lib/db/schema';
-import { generateUUID } from '@/lib/utils';
-import { myProvider } from '@/lib/ai/providers';
-import { getSession } from '../utils/runtime-utils';
-import { artifactKinds } from '@/lib/artifacts/server';
+import { createTool } from "@mastra/core/tools";
+import { streamObject } from "ai";
+import { z } from "zod";
+import { myProvider } from "@/lib/ai/providers";
+import { getDocumentById, saveSuggestions } from "@/lib/db/queries";
+import type { Suggestion } from "@/lib/db/schema";
+import { generateUUID } from "@/lib/utils";
+import { getSession } from "../utils/runtime-utils";
 
 export const requestSuggestionsTool = createTool({
-  id: 'requestSuggestions',
-  description: 'Request suggestions for a document',
+  id: "requestSuggestions",
+  description: "Request suggestions for a document",
   inputSchema: z.object({
-    documentId: z.string().describe('The ID of the document to request edits'),
+    documentId: z.string().describe("The ID of the document to request edits"),
   }),
   outputSchema: z.union([
     z.object({ error: z.string() }),
     z.object({
       id: z.string(),
       title: z.string(),
-      kind: z.enum(['text', 'code', 'sheet', 'image']),
+      kind: z.enum(["text", "code", "sheet", "image"]),
       message: z.string().optional(),
     }),
   ]),
@@ -31,25 +30,25 @@ export const requestSuggestionsTool = createTool({
 
     if (!document || !document.content) {
       return {
-        error: 'Document not found',
+        error: "Document not found",
       };
     }
 
     const suggestions: Omit<
       Suggestion,
-      'userId' | 'createdAt' | 'documentCreatedAt'
+      "userId" | "createdAt" | "documentCreatedAt"
     >[] = [];
 
     const { elementStream } = streamObject({
-      model: myProvider.languageModel('artifact-model'),
+      model: myProvider.languageModel("artifact-model"),
       system:
-        'You are a help writing assistant. Given a piece of writing, please offer suggestions to improve the piece of writing and describe the change. It is very important for the edits to contain full sentences instead of just words. Max 5 suggestions.',
+        "You are a help writing assistant. Given a piece of writing, please offer suggestions to improve the piece of writing and describe the change. It is very important for the edits to contain full sentences instead of just words. Max 5 suggestions.",
       prompt: document.content,
-      output: 'array',
+      output: "array",
       schema: z.object({
-        originalSentence: z.string().describe('The original sentence'),
-        suggestedSentence: z.string().describe('The suggested sentence'),
-        description: z.string().describe('The description of the suggestion'),
+        originalSentence: z.string().describe("The original sentence"),
+        suggestedSentence: z.string().describe("The suggested sentence"),
+        description: z.string().describe("The description of the suggestion"),
       }),
     });
 
@@ -61,13 +60,13 @@ export const requestSuggestionsTool = createTool({
         id: generateUUID(),
         documentId,
         isResolved: false,
-        userId: '',
+        userId: "",
         createdAt: new Date(),
         documentCreatedAt: document.createdAt,
       };
 
       await writer?.write({
-        type: 'data-suggestion',
+        type: "data-suggestion",
         data: suggestion,
         transient: true,
       });
@@ -92,7 +91,7 @@ export const requestSuggestionsTool = createTool({
       id: documentId,
       title: document.title,
       kind: document.kind,
-      message: 'Suggestions have been added to the document',
+      message: "Suggestions have been added to the document",
     };
   },
 });

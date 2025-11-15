@@ -1,12 +1,12 @@
-import { useChat } from '@ai-sdk/react';
-import { Artifact } from './artifact';
-import { useChatRuntime } from './chat';
-import { useChatVotes } from '@/hooks/use-chat-votes';
+import { useChat } from "@ai-sdk/react";
+import { useChatVotes } from "@/hooks/use-chat-votes";
+import { Artifact } from "./artifact";
+import { useChatRuntime } from "./chat";
 
 export const ChatArtifact = (props: { isReadonly?: boolean }) => {
   const runtime = useChatRuntime();
   const chat = useChat({ chat: runtime.chat });
-  const isStreaming = chat.status === 'streaming';
+  const isStreaming = chat.status === "streaming";
   const votes = useChatVotes({ chatId: chat.id });
 
   return (

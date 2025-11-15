@@ -1,32 +1,32 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useTranslations } from '@/lib/i18n/use-translations';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { useTranslations } from "@/lib/i18n/use-translations";
+import { cn } from "@/lib/utils";
 import {
   CheckCircleFillIcon,
   ChevronDownIcon,
   GlobeIcon,
   LockIcon,
-} from './icons';
+} from "./icons";
 
-export type VisibilityType = 'private' | 'public';
+export type VisibilityType = "private" | "public";
 
 export function VisibilitySelector({
   className,
   value,
-  onValueChage = () => {},
+  onValueChange,
   ...others
 }: React.ComponentProps<typeof Button> & {
   value?: VisibilityType;
-  onValueChage?: (value: VisibilityType) => void;
+  onValueChange?: (value: VisibilityType) => void;
 }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
@@ -34,28 +34,27 @@ export function VisibilitySelector({
   // Dynamic visibilities array with translations
   const visibilities = [
     {
-      id: 'private' as VisibilityType,
-      label: t('visibility.private', 'Private'),
+      id: "private" as VisibilityType,
+      label: t("visibility.private", "Private"),
       description: t(
-        'visibility.private.description',
-        'Only you can access this chat'
+        "visibility.private.description",
+        "Only you can access this chat"
       ),
       icon: <LockIcon />,
     },
     {
-      id: 'public' as VisibilityType,
-      label: t('visibility.public', 'Public'),
+      id: "public" as VisibilityType,
+      label: t("visibility.public", "Public"),
       description: t(
-        'visibility.public.description',
-        'Anyone with the link can access this chat'
+        "visibility.public.description",
+        "Anyone with the link can access this chat"
       ),
       icon: <GlobeIcon />,
     },
   ];
 
-  const selectedVisibility = useMemo(
-    () => visibilities.find((visibility) => visibility.id === value),
-    [value, visibilities]
+  const selectedVisibility = visibilities.find(
+    (visibility) => visibility.id === value
   );
 
   return (
@@ -63,7 +62,7 @@ export function VisibilitySelector({
       <DropdownMenuTrigger
         asChild
         className={cn(
-          'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
+          "w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
           className
         )}
       >
@@ -87,7 +86,7 @@ export function VisibilitySelector({
             data-testid={`visibility-selector-item-${visibility.id}`}
             key={visibility.id}
             onSelect={() => {
-              onValueChage(visibility.id);
+              onValueChange?.(visibility.id);
               setOpen(false);
             }}
           >

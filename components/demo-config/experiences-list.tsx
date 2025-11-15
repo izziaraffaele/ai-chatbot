@@ -3,8 +3,8 @@ import { TrashIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { type DemoConfig, DemoConfigSchema } from "@/config/demo.schema";
+import { z } from "zod";
+import type { DemoConfig } from "@/config/demo.schema";
 import { cn } from "@/lib/utils";
 import { PlusIcon } from "../icons";
 import { Button } from "../ui/button";
@@ -45,14 +45,7 @@ export const ExperiencesListControl = (
     onRemove?: (index: number) => void;
   }
 ) => {
-  const {
-    value = [],
-    className,
-    intents,
-    onAdd = () => {},
-    onRemove = () => {},
-    ...others
-  } = props;
+  const { value = [], className, intents, onAdd, onRemove, ...others } = props;
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -67,7 +60,7 @@ export const ExperiencesListControl = (
   });
 
   const handleSubmitAdd = experienceForm.handleSubmit((data) => {
-    onAdd(data);
+    onAdd?.(data);
     setIsEditing(false);
     experienceForm.reset();
   });
@@ -89,7 +82,7 @@ export const ExperiencesListControl = (
             <ItemActions>
               <Button
                 className="rounded-full"
-                onClick={() => onRemove(i)}
+                onClick={() => onRemove?.(i)}
                 size="icon"
                 variant="ghost"
               >
@@ -145,7 +138,7 @@ export const ExperiencesListControl = (
                 <SelectContent>
                   <SelectGroup>
                     {intents?.map((v) => (
-                      <SelectItem value={v.name}>
+                      <SelectItem key={v.name} value={v.name}>
                         {v.name}: ${v.description}
                       </SelectItem>
                     ))}

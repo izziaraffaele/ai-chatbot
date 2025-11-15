@@ -1,43 +1,44 @@
-'use client';
+"use client";
 
-import { Chat as ChatController } from '@ai-sdk/react';
+import { Chat as ChatController } from "@ai-sdk/react";
 import {
-  ChatInit,
+  type ChatInit,
   DefaultChatTransport,
-  HttpChatTransportInitOptions,
+  type HttpChatTransportInitOptions,
   lastAssistantMessageIsCompleteWithToolCalls,
-} from 'ai';
-import { useSearchParams } from 'next/navigation';
-import React, {
+} from "ai";
+import { useSearchParams } from "next/navigation";
+import type React from "react";
+import {
   createContext,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { useSWRConfig } from 'swr';
-import { unstable_serialize } from 'swr/infinite';
-import { useChatVisibility } from '@/hooks/use-chat-visibility';
-import { useClientTools } from '@/hooks/use-client-tools';
-import { ChatSDKError } from '@/lib/errors';
-import type { ChatMessage } from '@/lib/types';
-import type { AppUsage } from '@/lib/usage';
-import { fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
-import { useDataStream } from './data-stream-provider';
-import { getChatHistoryPaginationKey } from './sidebar-history';
-import { toast } from './toast';
-import type { VisibilityType } from './visibility-selector';
-import { useRuntimeConfig } from '@/hooks/use-runtime-config';
+} from "react";
+import { useSWRConfig } from "swr";
+import { unstable_serialize } from "swr/infinite";
+import { useChatUsage } from "@/hooks/use-chat-usage";
+import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import { useClientTools } from "@/hooks/use-client-tools";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import {
   processClientToolCall,
   serializeClientTools,
-} from '@/lib/ai/client-tools';
-import { useChatUsage } from '@/hooks/use-chat-usage';
-import { PromptInputProvider } from './elements/prompt-input';
+} from "@/lib/ai/client-tools";
+import { ChatSDKError } from "@/lib/errors";
+import type { ChatMessage } from "@/lib/types";
+import type { AppUsage } from "@/lib/usage";
+import { fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
+import { useDataStream } from "./data-stream-provider";
+import { PromptInputProvider } from "./elements/prompt-input";
+import { getChatHistoryPaginationKey } from "./sidebar-history";
+import { toast } from "./toast";
+import type { VisibilityType } from "./visibility-selector";
 
 const CHAT_API =
-  process.env.CHAT_API || process.env.NEXT_PUBLIC_CHAT_API || '/api/chat';
+  process.env.CHAT_API || process.env.NEXT_PUBLIC_CHAT_API || "/api/chat";
 
 export function createChatTransport(
   props: Partial<HttpChatTransportInitOptions<ChatMessage>>
@@ -60,7 +61,7 @@ const ChatRuntimeContext = createContext<ChatRuntime>({
 export function useChatRuntime(): ChatRuntime {
   const value = useContext(ChatRuntimeContext);
   if (!value) {
-    throw new Error('Invalid runtime context');
+    throw new Error("Invalid runtime context");
   }
   return value;
 }
@@ -77,7 +78,7 @@ export function useChatController({
   id,
   api,
   initialMessages = [],
-  initialVisibilityType = 'private',
+  initialVisibilityType = "private",
   initialUsage,
 }: ChatControllerProps): ChatController<ChatMessage> {
   const { mutate } = useSWRConfig();
@@ -128,7 +129,7 @@ export function useChatController({
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     onData(dataPart) {
       setDataStream((ds) => (ds ? [...ds, dataPart] : []));
-      if (dataPart.type === 'data-usage') {
+      if (dataPart.type === "data-usage") {
         usage.setValue(dataPart.data);
       }
     },
@@ -138,7 +139,7 @@ export function useChatController({
     onError(error) {
       if (error instanceof ChatSDKError) {
         toast({
-          type: 'error',
+          type: "error",
           description: error.message,
         });
       }
@@ -153,7 +154,9 @@ export function useChatController({
       const result = await processClientToolCall(toolCall);
 
       // Exit early if no client tool call happened
-      if (!result) return;
+      if (!result) {
+        return;
+      }
       console.log(result);
 
       // Send the result back to the stream (no await to avoid deadlocks)
@@ -165,12 +168,11 @@ export function useChatController({
     new ChatController(chatConfig)
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: suppress dependency chatConfig
   useEffect(() => {
     setChat(new ChatController(chatConfig));
     // NOTE: we only want to run only if the chat id changes
-    // eslint-disable-next-line
   }, [chatConfig.id]);
-
   return chat;
 }
 
@@ -201,6 +203,7 @@ export const ChatAutoResume = (props: {
 
   const { chat } = useChatRuntime();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: suppress dependency chatConfig
   useEffect(() => {
     if (!enabled) {
       return;
@@ -208,7 +211,7 @@ export const ChatAutoResume = (props: {
 
     const mostRecentMessage = initialMessages.at(-1);
 
-    if (mostRecentMessage?.role === 'user') {
+    if (mostRecentMessage?.role === "user") {
       chat.resumeStream();
     }
 
@@ -222,24 +225,25 @@ export const ChatAutoResume = (props: {
 export const ChatRouteParamsHandler = () => {
   const { chat } = useChatRuntime();
   const searchParams = useSearchParams();
-  const query = searchParams.get('query');
+  const query = searchParams.get("query");
 
   const hasAppendedQueryRef = useRef(false);
 
   const lastMessage = chat.messages.at(0);
   const shouldAppendQuery =
     !lastMessage ||
-    (chat.messages.length === 1 && lastMessage.role === 'assistant');
+    (chat.messages.length === 1 && lastMessage.role === "assistant");
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: suppress dependency chatConfig
   useEffect(() => {
     if (query && shouldAppendQuery && !hasAppendedQueryRef.current) {
       chat.sendMessage({
-        role: 'user' as const,
-        parts: [{ type: 'text', text: query }],
+        role: "user" as const,
+        parts: [{ type: "text", text: query }],
       });
 
       hasAppendedQueryRef.current = true;
-      window.history.replaceState({}, '', `/chat/${chat.id}`);
+      window.history.replaceState({}, "", `/chat/${chat.id}`);
     }
   }, [query, shouldAppendQuery]);
 

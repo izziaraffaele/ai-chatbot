@@ -1,11 +1,11 @@
-import type { ToolUIPart, UIMessage } from 'ai';
-import { z } from 'zod';
-import { ChatAgentUITools } from '@/mastra/agents';
-import type { ArtifactKind } from '@/components/artifact';
-import type { Suggestion } from './db/schema';
-import type { AppUsage } from './usage';
+import type { ToolUIPart, UIMessage } from "ai";
+import { z } from "zod";
+import type { ArtifactKind } from "@/components/artifact";
+import type { ChatAgentUITools } from "@/mastra/agents";
+import type { Suggestion } from "./db/schema";
+import type { AppUsage } from "./usage";
 
-export type DataPart = { type: 'append-message'; message: string };
+export type DataPart = { type: "append-message"; message: string };
 
 export const messageMetadataSchema = z.object({
   createdAt: z.string(),
