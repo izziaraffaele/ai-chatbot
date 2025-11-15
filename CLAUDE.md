@@ -159,6 +159,7 @@ The application supports multiple languages through a client-side translation sy
 - **Dynamic loading:** Translation files loaded on-demand based on user preference
 
 **Usage in Components:**
+
 ```typescript
 import { useTranslations } from "@/lib/i18n/use-translations";
 
@@ -174,11 +175,13 @@ function MyComponent() {
 ```
 
 **Language Configuration:**
+
 - `NEXT_PUBLIC_DEFAULT_LOCALE` - Default language (defaults to "en")
 - `NEXT_PUBLIC_SUPPORTED_LOCALES` - Comma-separated supported languages (defaults to "en,it")
 - Language switcher available in settings/user navigation menu
 
 **Adding New Languages:**
+
 1. Create new translation file: `lib/i18n/translations/[locale].ts`
 2. Add locale to `NEXT_PUBLIC_SUPPORTED_LOCALES` environment variable
 3. Update `Locale` type in `lib/i18n/types.ts`
@@ -270,6 +273,7 @@ function MyComponent() {
 ```
 
 **Key Points:**
+
 - Actions are registered when the component mounts and deregistered when it unmounts
 - The hook handles lifecycle automatically via `useEffect`
 - Multiple components can each register their own actions
@@ -319,3 +323,10 @@ Use `@/openspec/AGENTS.md` to learn:
 Keep this managed block so 'openspec update' can refresh the instructions.
 
 <!-- OPENSPEC:END -->
+
+- [AI Elements](https://www.npmjs.com/package/ai-elements) is a component library and custom registry built on top of shadcn/ui to help you build AI-native applications faster. It provides pre-built components like conversations, messages and more.
+
+It's a library provided by Vercel and it's fully integrated with AI SDK.
+[Documentation](https://ai-sdk.dev/elements) | [Repository](https://github.com/vercel/ai-elements)
+
+- AI Elements components are installed in `@/components/elements/*`. You should use them following the same usage rules you apply to normal shadcn components (do not override them, use it to create more complex compositions).

@@ -1,66 +1,61 @@
-"use client";
+'use client';
 
-import { type ReactNode, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import { useTranslations } from "@/lib/i18n/use-translations";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dropdown-menu';
+import { useTranslations } from '@/lib/i18n/use-translations';
+import { cn } from '@/lib/utils';
 import {
   CheckCircleFillIcon,
   ChevronDownIcon,
   GlobeIcon,
   LockIcon,
-} from "./icons";
+} from './icons';
 
-export type VisibilityType = "private" | "public";
+export type VisibilityType = 'private' | 'public';
 
 export function VisibilitySelector({
-  chatId,
   className,
-  selectedVisibilityType,
-}: {
-  chatId: string;
-  selectedVisibilityType: VisibilityType;
-} & React.ComponentProps<typeof Button>) {
+  value,
+  onValueChage = () => {},
+  ...others
+}: React.ComponentProps<typeof Button> & {
+  value?: VisibilityType;
+  onValueChage?: (value: VisibilityType) => void;
+}) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
-
-  const { visibilityType, setVisibilityType } = useChatVisibility({
-    chatId,
-    initialVisibilityType: selectedVisibilityType,
-  });
 
   // Dynamic visibilities array with translations
   const visibilities = [
     {
-      id: "private" as VisibilityType,
-      label: t("visibility.private", "Private"),
+      id: 'private' as VisibilityType,
+      label: t('visibility.private', 'Private'),
       description: t(
-        "visibility.private.description",
-        "Only you can access this chat"
+        'visibility.private.description',
+        'Only you can access this chat'
       ),
       icon: <LockIcon />,
     },
     {
-      id: "public" as VisibilityType,
-      label: t("visibility.public", "Public"),
+      id: 'public' as VisibilityType,
+      label: t('visibility.public', 'Public'),
       description: t(
-        "visibility.public.description",
-        "Anyone with the link can access this chat"
+        'visibility.public.description',
+        'Anyone with the link can access this chat'
       ),
       icon: <GlobeIcon />,
     },
   ];
 
   const selectedVisibility = useMemo(
-    () => visibilities.find((visibility) => visibility.id === visibilityType),
-    [visibilityType, visibilities]
+    () => visibilities.find((visibility) => visibility.id === value),
+    [value, visibilities]
   );
 
   return (
@@ -68,7 +63,7 @@ export function VisibilitySelector({
       <DropdownMenuTrigger
         asChild
         className={cn(
-          "w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+          'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
           className
         )}
       >
@@ -76,6 +71,7 @@ export function VisibilitySelector({
           className="hidden h-8 md:flex md:h-fit md:px-2"
           data-testid="visibility-selector"
           variant="outline"
+          {...others}
         >
           {selectedVisibility?.icon}
           <span className="md:sr-only">{selectedVisibility?.label}</span>
@@ -87,11 +83,11 @@ export function VisibilitySelector({
         {visibilities.map((visibility) => (
           <DropdownMenuItem
             className="group/item flex flex-row items-center justify-between gap-4"
-            data-active={visibility.id === visibilityType}
+            data-active={visibility.id === value}
             data-testid={`visibility-selector-item-${visibility.id}`}
             key={visibility.id}
             onSelect={() => {
-              setVisibilityType(visibility.id);
+              onValueChage(visibility.id);
               setOpen(false);
             }}
           >

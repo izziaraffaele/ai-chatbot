@@ -1,40 +1,30 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
+import { Chat as ChatController } from '@ai-sdk/react';
 import {
+  ChatInit,
   DefaultChatTransport,
+  HttpChatTransportInitOptions,
   lastAssistantMessageIsCompleteWithToolCalls,
 } from 'ai';
 import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import useSWR, { useSWRConfig } from 'swr';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { useSWRConfig } from 'swr';
 import { unstable_serialize } from 'swr/infinite';
-import { ChatHeader } from '@/components/chat-header';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useArtifactSelector } from '@/hooks/use-artifact';
-import { useAutoResume } from '@/hooks/use-auto-resume';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useClientTools } from '@/hooks/use-client-tools';
-import { useSelectedAgent } from '@/hooks/use-selected-agent';
-import type { Vote } from '@/lib/db/schema';
 import { ChatSDKError } from '@/lib/errors';
-import { useTranslations } from '@/lib/i18n/use-translations';
-import type { Attachment, ChatMessage } from '@/lib/types';
+import type { ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
-import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
-import { Artifact } from './artifact';
+import { fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { useDataStream } from './data-stream-provider';
-import { Messages } from './messages';
-import { MultimodalInput } from './multimodal-input';
 import { getChatHistoryPaginationKey } from './sidebar-history';
 import { toast } from './toast';
 import type { VisibilityType } from './visibility-selector';
@@ -43,55 +33,78 @@ import {
   processClientToolCall,
   serializeClientTools,
 } from '@/lib/ai/client-tools';
+import { useChatUsage } from '@/hooks/use-chat-usage';
+import { PromptInputProvider } from './elements/prompt-input';
 
-export function Chat({
-  id,
-  initialMessages,
-  initialVisibilityType,
-  isReadonly,
-  autoResume,
-  initialLastContext,
-}: {
+const CHAT_API =
+  process.env.CHAT_API || process.env.NEXT_PUBLIC_CHAT_API || '/api/chat';
+
+export function createChatTransport(
+  props: Partial<HttpChatTransportInitOptions<ChatMessage>>
+) {
+  return new DefaultChatTransport({
+    api: CHAT_API,
+    fetch: fetchWithErrorHandlers,
+    ...props,
+  });
+}
+
+export type ChatRuntime = {
+  chat: ChatController<ChatMessage>;
+};
+
+const ChatRuntimeContext = createContext<ChatRuntime>({
+  chat: new ChatController({}),
+});
+
+export function useChatRuntime(): ChatRuntime {
+  const value = useContext(ChatRuntimeContext);
+  if (!value) {
+    throw new Error('Invalid runtime context');
+  }
+  return value;
+}
+
+export type ChatControllerProps = {
   id: string;
-  initialMessages: ChatMessage[];
-  initialVisibilityType: VisibilityType;
-  isReadonly: boolean;
-  autoResume: boolean;
-  initialLastContext?: AppUsage;
-}) {
-  const t = useTranslations();
+  api?: string;
+  initialMessages?: ChatMessage[];
+  initialVisibilityType?: VisibilityType;
+  initialUsage?: AppUsage;
+};
+
+export function useChatController({
+  id,
+  api,
+  initialMessages = [],
+  initialVisibilityType = 'private',
+  initialUsage,
+}: ChatControllerProps): ChatController<ChatMessage> {
+  const { mutate } = useSWRConfig();
+
+  // const { selectedAgent } = useSelectedAgent();
+
+  // visibility state
   const { visibilityType } = useChatVisibility({
     chatId: id,
     initialVisibilityType,
   });
 
+  // runtime
   const runtimeConfig = useRuntimeConfig();
+
+  // client tools
   const registry = useClientTools();
-  const { selectedAgent } = useSelectedAgent();
-  const { mutate } = useSWRConfig();
+
+  // streaming
   const { setDataStream } = useDataStream();
 
-  const [input, setInput] = useState<string>('');
-  const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
-  const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
+  // usage
+  const usage = useChatUsage({ chatId: id, initialValue: initialUsage });
 
-  const {
-    messages,
-    setMessages,
-    sendMessage: _sendMessage,
-    status,
-    stop,
-    regenerate,
-    resumeStream,
-  } = useChat<ChatMessage>({
-    id,
-    messages: initialMessages,
-    experimental_throttle: 100,
-    generateId: generateUUID,
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    transport: new DefaultChatTransport({
-      api: '/api/chat',
-      fetch: fetchWithErrorHandlers,
+  const transport = useRef(
+    createChatTransport({
+      api,
       prepareSendMessagesRequest(request) {
         return {
           body: {
@@ -104,32 +117,33 @@ export function Chat({
           },
         };
       },
-    }),
-    onData: (dataPart) => {
+    })
+  );
+
+  const chatConfig: ChatInit<ChatMessage> = {
+    id,
+    messages: initialMessages,
+    transport: transport.current,
+    generateId: generateUUID,
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    onData(dataPart) {
       setDataStream((ds) => (ds ? [...ds, dataPart] : []));
       if (dataPart.type === 'data-usage') {
-        setUsage(dataPart.data);
+        usage.setValue(dataPart.data);
       }
     },
-    onFinish: () => {
+    onFinish() {
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
-    onError: (error) => {
+    onError(error) {
       if (error instanceof ChatSDKError) {
-        // Check if it's a credit card error
-        if (
-          error.message?.includes('AI Gateway requires a valid credit card')
-        ) {
-          setShowCreditCardAlert(true);
-        } else {
-          toast({
-            type: 'error',
-            description: error.message,
-          });
-        }
+        toast({
+          type: 'error',
+          description: error.message,
+        });
       }
     },
-    onToolCall: async ({ toolCall }) => {
+    async onToolCall({ toolCall }) {
       // Check if it's a dynamic tool first (for proper type narrowing)
       if (toolCall.dynamic) {
         return;
@@ -141,150 +155,93 @@ export function Chat({
       // Exit early if no client tool call happened
       if (!result) return;
       console.log(result);
-      // Send the result back to the stream (no await to avoid deadlocks)
-      // addToolResult(result);
-    },
-  });
 
-  const sendMessage = useCallback<typeof _sendMessage>(
-    (message, opts) =>
-      _sendMessage(
-        {
-          ...message,
-          metadata: {
-            createdAt: new Date().toISOString(),
-            forwardTo: selectedAgent?.id,
-            ...message?.metadata,
-          },
-        } as any,
-        opts
-      ),
-    [_sendMessage]
+      // Send the result back to the stream (no await to avoid deadlocks)
+      // controller.addToolResult(result);
+    },
+  };
+
+  const [chat, setChat] = useState<ChatController<ChatMessage>>(
+    new ChatController(chatConfig)
   );
 
+  useEffect(() => {
+    setChat(new ChatController(chatConfig));
+    // NOTE: we only want to run only if the chat id changes
+    // eslint-disable-next-line
+  }, [chatConfig.id]);
+
+  return chat;
+}
+
+export const ChatProvider = (
+  props: React.PropsWithChildren<ChatControllerProps> & {
+    initialInput?: string;
+  }
+) => {
+  const { children, initialInput, ...controllerProps } = props;
+
+  const chat = useChatController(controllerProps);
+  const runtime = useMemo(() => ({ chat }), [chat]);
+
+  return (
+    <ChatRuntimeContext.Provider value={runtime}>
+      <PromptInputProvider initialInput={initialInput}>
+        {children}
+      </PromptInputProvider>
+    </ChatRuntimeContext.Provider>
+  );
+};
+
+export const ChatAutoResume = (props: {
+  initialMessages?: ChatMessage[];
+  enabled?: boolean;
+}) => {
+  const { initialMessages = [], enabled = true } = props;
+
+  const { chat } = useChatRuntime();
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    const mostRecentMessage = initialMessages.at(-1);
+
+    if (mostRecentMessage?.role === 'user') {
+      chat.resumeStream();
+    }
+
+    // we intentionally control hook execution
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, initialMessages.at, chat?.id]);
+
+  return null;
+};
+
+export const ChatRouteParamsHandler = () => {
+  const { chat } = useChatRuntime();
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
 
-  const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
+  const hasAppendedQueryRef = useRef(false);
+
+  const lastMessage = chat.messages.at(0);
+  const shouldAppendQuery =
+    !lastMessage ||
+    (chat.messages.length === 1 && lastMessage.role === 'assistant');
 
   useEffect(() => {
-    if (query && !hasAppendedQuery) {
-      sendMessage({
+    if (query && shouldAppendQuery && !hasAppendedQueryRef.current) {
+      chat.sendMessage({
         role: 'user' as const,
         parts: [{ type: 'text', text: query }],
       });
 
-      setHasAppendedQuery(true);
-      window.history.replaceState({}, '', `/chat/${id}`);
+      hasAppendedQueryRef.current = true;
+      window.history.replaceState({}, '', `/chat/${chat.id}`);
     }
-  }, [query, sendMessage, hasAppendedQuery, id]);
+  }, [query, shouldAppendQuery]);
 
-  const { data: votes } = useSWR<Vote[]>(
-    messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
-    fetcher
-  );
-
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
-
-  useAutoResume({
-    autoResume,
-    initialMessages,
-    resumeStream,
-    setMessages,
-  });
-
-  return (
-    <>
-      <div className="overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background">
-        <ChatHeader
-          chatId={id}
-          isReadonly={isReadonly}
-          selectedVisibilityType={initialVisibilityType}
-        />
-
-        <Messages
-          chatId={id}
-          isArtifactVisible={isArtifactVisible}
-          isReadonly={isReadonly}
-          messages={messages}
-          regenerate={regenerate}
-          setMessages={setMessages}
-          status={status}
-          votes={votes}
-        />
-
-        <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
-          {!isReadonly && (
-            <MultimodalInput
-              attachments={attachments}
-              chatId={id}
-              input={input}
-              messages={messages}
-              selectedVisibilityType={visibilityType}
-              sendMessage={sendMessage}
-              setAttachments={setAttachments}
-              setInput={setInput}
-              setMessages={setMessages}
-              status={status}
-              stop={stop}
-              usage={usage}
-            />
-          )}
-        </div>
-      </div>
-
-      <Artifact
-        attachments={attachments}
-        chatId={id}
-        input={input}
-        isReadonly={isReadonly}
-        messages={messages}
-        regenerate={regenerate}
-        selectedVisibilityType={visibilityType}
-        sendMessage={sendMessage}
-        setAttachments={setAttachments}
-        setInput={setInput}
-        setMessages={setMessages}
-        status={status}
-        stop={stop}
-        votes={votes}
-      />
-
-      <AlertDialog
-        onOpenChange={setShowCreditCardAlert}
-        open={showCreditCardAlert}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t('chat.gateway.title', 'Activate AI Gateway')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t(
-                'chat.gateway.description',
-                `This application requires ${process.env.NODE_ENV === 'production' ? 'the owner' : 'you'} to activate Vercel AI Gateway.`
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>
-              {t('common.cancel', 'Cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                window.open(
-                  'https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card',
-                  '_blank'
-                );
-                window.location.href = '/';
-              }}
-            >
-              {t('chat.gateway.buttonActivate', 'Activate')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
-}
+  return null;
+};
