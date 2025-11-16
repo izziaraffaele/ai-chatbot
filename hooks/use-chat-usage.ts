@@ -5,12 +5,22 @@ export function useChatUsage(props: {
   chatId: string;
   initialValue?: AppUsage;
 }) {
-  const { data, mutate } = useSWR(["chat-usage", props.chatId], null, {
-    fallbackData: props.initialValue,
-  });
+  const fallbackData = props.initialValue || {
+    inputTokens: 0,
+    outputTokens: 0,
+    totalTokens: 0,
+  };
+
+  const { data, mutate } = useSWR<AppUsage>(
+    ["chat-usage", props.chatId],
+    null,
+    {
+      fallbackData,
+    }
+  );
 
   return {
-    value: data,
+    value: data || fallbackData,
     setValue: mutate as React.Dispatch<React.SetStateAction<AppUsage>>,
   };
 }

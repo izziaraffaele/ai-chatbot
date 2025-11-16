@@ -189,6 +189,7 @@ export const ChatThreadComposer = ({
         <MultimodalInput
           chatId={chat.id}
           sendMessage={chat.sendMessage}
+          showSuggestion={chat.messages.length === 0}
           status={chat.status}
           stop={chat.stop}
         />

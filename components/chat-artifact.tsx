@@ -14,7 +14,6 @@ export const ChatArtifact = (props: { isReadonly?: boolean }) => {
       chatId={chat.id}
       isReadonly={isStreaming || props.isReadonly || false}
       messages={chat.messages}
-      regenerate={chat.regenerate}
       sendMessage={chat.sendMessage}
       setMessages={chat.setMessages}
       status={chat.status}

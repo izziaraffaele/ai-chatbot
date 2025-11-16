@@ -28,11 +28,11 @@ type ChatMessageMode = "view" | "edit";
 
 export const ChatMessage = ({
   from,
-  className,
   mode = "view",
   isStreaming,
   isReadonly,
   children,
+  className,
   ...others
 }: React.ComponentProps<typeof Message> & {
   mode?: ChatMessageMode;
@@ -40,11 +40,11 @@ export const ChatMessage = ({
   isStreaming?: boolean;
 }) => (
   <Message
+    asChild
     className={cn(
-      "items-end",
+      "flex-row",
       {
-        "flex-row-reverse justify-start":
-          from === "assistant" && mode !== "edit",
+        "flex-row-reverse": from === "user",
       },
       className
     )}
@@ -76,7 +76,11 @@ export const ChatMessageReasoning = ({
   }
 
   return (
-    <Reasoning className="w-full" isStreaming={isStreaming}>
+    <Reasoning
+      className="w-full"
+      data-slot="chat-message-reasoning"
+      isStreaming={isStreaming}
+    >
       <ReasoningTrigger />
       <ReasoningContent>{reasoningText}</ReasoningContent>
     </Reasoning>
@@ -105,6 +109,7 @@ export const ChatMessageText = ({
       className={cn(
         "group-[.is-user]:wrap-break-words group-[.is-user]:rounded-2xl group-[.is-user]:px-3! group-[.is-user]:py-2!"
       )}
+      data-slot="chat-message-text"
     >
       <MessageResponse>{sanitizeText(part.text)}</MessageResponse>
     </MessageContent>
@@ -142,7 +147,7 @@ export const ChatMessageActions = ({
   }, [message]);
 
   return (
-    <MessageActions {...others}>
+    <MessageActions data-slot="chat-message-actions" {...others}>
       {!isReadonly && (
         <MessageAction label="Edit" onClick={() => onModeChange?.("edit")}>
           <PencilIcon className="size-3" />
@@ -179,7 +184,7 @@ export const ChatMessageParts = ({
   isLastMessage,
   isStreaming,
   isReadonly,
-}: React.ComponentProps<"div"> & {
+}: {
   message: ChatMessageType;
   mode?: ChatMessageMode;
   isLastMessage?: boolean;
@@ -256,7 +261,7 @@ export const ChatMessageAvatar = ({
 }: React.ComponentProps<"div">) => (
   <div
     className={cn(
-      "-mb-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border",
+      "flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border",
       className
     )}
     data-slot="chat-message-avatar"
@@ -269,10 +274,7 @@ export const ChatMessageContent = ({
   ...others
 }: React.ComponentProps<"div">) => (
   <div
-    className={cn(
-      "flex flex-col group-[.is-user]:max-w-[calc(100%-2.5rem)] group-data-[mode=edit]:w-full! sm:group-[.is-user]:max-w-[min(fit-content,80%)]",
-      className
-    )}
+    className={cn("flex flex-col gap-2", className)}
     data-slot="chat-message-content"
     {...others}
   />
@@ -301,13 +303,16 @@ export const DefaultChatMessage = ({
   );
 
   return (
-    <ChatMessage asChild from={message.role}>
-      {avatar && <ChatMessageAvatar>{avatar}</ChatMessageAvatar>}
+    <ChatMessage from={message.role}>
+      {avatar && (
+        <div className="flex shrink-0 items-end pb-7.5">
+          <ChatMessageAvatar>{avatar}</ChatMessageAvatar>
+        </div>
+      )}
       <ChatMessageContent
-        className={cn({
-          "gap-2 md:gap-4": hasText,
+        className={cn("grow", {
+          "md:gap-4": hasText,
           "min-h-96": isAssistant && isLastMessage,
-          "w-full": isAssistant && hasText,
         })}
       >
         <ChatMessageParts

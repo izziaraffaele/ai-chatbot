@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/app/(auth)/auth";
-import { Chat } from "@/components/chat";
+import { AssistantChat } from "@/components/assistant-chat";
 import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
 
@@ -37,9 +37,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const uiMessages = convertToUIMessages(messagesFromDb);
 
   return (
-    <Chat
+    <AssistantChat
       autoResume={true}
-      id={chat.id}
+      chatId={chat.id}
       initialMessages={uiMessages}
       initialUsage={chat.lastContext ?? undefined}
       initialVisibilityType={chat.visibility}

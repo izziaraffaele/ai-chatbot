@@ -1,11 +1,9 @@
 "use client";
 
+import { isToolUIPart, type UIMessagePart } from "ai";
 import type { ChatToolUIPart } from "@/lib/types";
-import { FallbackToolUI } from "./tools";
-import { CreateDocumentToolUI } from "./tools/create-document-tool";
-import { RequestSuggestionsToolUI } from "./tools/request-suggestions-tool";
-import { UpdateDocumentToolUI } from "./tools/update-document-tool";
-import { WeatherToolUI } from "./tools/weather-tool";
+import { ToolUI } from "./tools";
+import { FallbackToolUI } from "./tools/fallback-tool";
 
 type ToolUIRouterProps = {
   part: ChatToolUIPart;
@@ -21,7 +19,7 @@ export function ToolUIRouter({ part, isReadonly = false }: ToolUIRouterProps) {
   switch (part.type) {
     case "tool-getWeather":
       return (
-        <WeatherToolUI
+        <ToolUI.weather
           isReadonly={isReadonly}
           key={part.toolCallId}
           part={part}
@@ -29,7 +27,7 @@ export function ToolUIRouter({ part, isReadonly = false }: ToolUIRouterProps) {
       );
     case "tool-createDocument":
       return (
-        <CreateDocumentToolUI
+        <ToolUI.createDocument
           isReadonly={isReadonly}
           key={part.toolCallId}
           part={part}
@@ -37,7 +35,7 @@ export function ToolUIRouter({ part, isReadonly = false }: ToolUIRouterProps) {
       );
     case "tool-updateDocument":
       return (
-        <UpdateDocumentToolUI
+        <ToolUI.updateDocument
           isReadonly={isReadonly}
           key={part.toolCallId}
           part={part}
@@ -45,18 +43,16 @@ export function ToolUIRouter({ part, isReadonly = false }: ToolUIRouterProps) {
       );
     case "tool-requestSuggestions":
       return (
-        <RequestSuggestionsToolUI
+        <ToolUI.requestSuggestions
           isReadonly={isReadonly}
           key={part.toolCallId}
           part={part}
         />
       );
     default: {
-      const clientTools = ["tool-updateDemoConfig"];
-
-      if (clientTools.includes(part.type)) {
-        console.log(part);
-        return <FallbackToolUI key={part.toolCallId} part={part} />;
+      const _part = part as UIMessagePart<any, any>;
+      if (isToolUIPart(_part)) {
+        return <FallbackToolUI key={_part.toolCallId} part={part} />;
       }
 
       // unsupported tool call

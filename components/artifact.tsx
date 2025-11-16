@@ -1,3 +1,5 @@
+"use client";
+
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { formatDistance } from "date-fns";
 import equal from "fast-deep-equal";
@@ -50,7 +52,6 @@ function PureArtifact({
   sendMessage,
   messages,
   setMessages,
-  regenerate,
   votes,
   isReadonly,
 }: {
@@ -61,7 +62,6 @@ function PureArtifact({
   setMessages: UseChatHelpers<ChatMessage>["setMessages"];
   votes: Vote[] | undefined;
   sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
-  regenerate: UseChatHelpers<ChatMessage>["regenerate"];
   isReadonly: boolean;
 }) {
   const { artifact, setArtifact, metadata, setMetadata } = useArtifact();
@@ -280,12 +280,8 @@ function PureArtifact({
 
               <div className="flex h-full flex-col items-center justify-between">
                 <ArtifactMessages
-                  artifactStatus={artifact.status}
-                  chatId={chatId}
                   isReadonly={isReadonly}
                   messages={messages}
-                  regenerate={regenerate}
-                  setMessages={setMessages}
                   status={status}
                   votes={votes}
                 />

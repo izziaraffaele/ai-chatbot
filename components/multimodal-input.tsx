@@ -11,12 +11,12 @@ import {
 } from "react";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
 import { AgentSelector } from "@/components/agent-selector";
-import { useChatUsage } from "@/hooks/use-chat-usage";
 import { useSelectedAgent } from "@/hooks/use-selected-agent";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import type { ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Context } from "./elements/context";
+import { ChatSuggestions } from "./chat-suggestions";
+import { ChatContextUsage } from "./chat-usage";
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -29,13 +29,13 @@ import {
   PromptInputFooter,
   PromptInputHeader,
   type PromptInputMessage,
+  PromptInputSpeechButton,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
   usePromptInputController,
   useProviderAttachments,
 } from "./elements/prompt-input";
-import { SuggestedActions } from "./suggested-actions";
 
 function PureMultimodalInput({
   chatId,
@@ -60,7 +60,6 @@ function PureMultimodalInput({
   const { width } = useWindowSize();
 
   const composer = usePromptInputController();
-  const usage = useChatUsage({ chatId });
 
   const { selectedAgent, setSelectedAgent } = useSelectedAgent();
   const { files } = useProviderAttachments();
@@ -119,6 +118,15 @@ function PureMultimodalInput({
       composer.attachments.clear,
       composer.textInput.setInput,
     ]
+  );
+
+  const handleSelectSuggestion = useCallback(
+    (suggestion: string) => {
+      sendMessage({ text: suggestion });
+      composer.textInput.setInput("");
+      composer.attachments.clear();
+    },
+    [sendMessage, composer]
   );
 
   // const uploadFile = useCallback(async (file: File) => {
@@ -249,38 +257,39 @@ function PureMultimodalInput({
     },
     [submitForm, stop, status]
   );
-
+  console.log(files);
   return (
     <div className={cn("relative flex w-full flex-col gap-4", className)}>
       {showSuggestion && files.length === 0 && uploadQueue.length === 0 && (
-        <SuggestedActions chatId={chatId} sendMessage={sendMessage} />
+        <ChatSuggestions
+          onSuggestionSelect={handleSelectSuggestion}
+          variant="default"
+        />
       )}
 
-      <PromptInput
-        className="rounded-xl border border-border bg-background p-3 shadow-xs transition-all duration-200 focus-within:border-border hover:border-muted-foreground/50"
-        globalDrop
-        multiple
-        onSubmit={handleSubmitForm}
-      >
-        <PromptInputHeader className="flex flex-row items-end gap-2 overflow-x-scroll">
+      <PromptInput globalDrop multiple onSubmit={handleSubmitForm}>
+        <PromptInputHeader>
           <PromptInputAttachments>
-            {(attachment) => <PromptInputAttachment data={attachment} />}
+            {(attachment) => {
+              console.log(attachment);
+              return <PromptInputAttachment data={attachment} />;
+            }}
           </PromptInputAttachments>
         </PromptInputHeader>
-        <PromptInputBody className="flex flex-row items-start gap-1 sm:gap-2">
+        <PromptInputBody className="max-h-[200px] min-h-11">
           <PromptInputTextarea
             autoFocus
-            className="max-h-[200px] min-h-11"
+            className="px-5 pt-0 pb-5"
             disabled={disabled}
             placeholder={t("chat.input.placeholder", "Send a message...")}
             ref={textareaRef}
             rows={1}
             value={inputValue}
           />
-          <Context {...usage} />
         </PromptInputBody>
+
         <PromptInputFooter>
-          <PromptInputTools className="gap-0 sm:gap-0.5">
+          <PromptInputTools>
             <PromptInputActionMenu>
               <PromptInputActionMenuTrigger />
               <PromptInputActionMenuContent>
@@ -292,12 +301,15 @@ function PureMultimodalInput({
               selectedAgent={selectedAgent}
               status={status}
             />
+            <ChatContextUsage />
           </PromptInputTools>
-
-          <PromptInputSubmit
-            disabled={disabled || (!inputValue && !status)}
-            status={status}
-          />
+          <div className="flex">
+            <PromptInputSpeechButton />
+            <PromptInputSubmit
+              disabled={disabled || (!inputValue && !status)}
+              status={status}
+            />
+          </div>
         </PromptInputFooter>
       </PromptInput>
     </div>

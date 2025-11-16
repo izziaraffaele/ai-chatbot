@@ -128,7 +128,7 @@ export function useChatController({
     generateId: generateUUID,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     onData(dataPart) {
-      setDataStream((ds) => (ds ? [...ds, dataPart] : []));
+      setDataStream((ds) => (ds ? [...ds, dataPart] : [dataPart]));
       if (dataPart.type === "data-usage") {
         usage.setValue(dataPart.data);
       }
@@ -170,7 +170,9 @@ export function useChatController({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: suppress dependency chatConfig
   useEffect(() => {
-    setChat(new ChatController(chatConfig));
+    if (chat.id !== chatConfig.id) {
+      setChat(new ChatController(chatConfig));
+    }
     // NOTE: we only want to run only if the chat id changes
   }, [chatConfig.id]);
   return chat;

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Chat } from "@/components/chat";
+import { AssistantChat } from "@/components/assistant-chat";
 import { generateUUID } from "@/lib/utils";
 import { auth } from "../(auth)/auth";
 
@@ -13,9 +13,9 @@ export default async function Page() {
   const id = generateUUID();
 
   return (
-    <Chat
+    <AssistantChat
       autoResume={false}
-      id={id}
+      chatId={id}
       initialMessages={[]}
       initialVisibilityType="private"
       isReadonly={false}

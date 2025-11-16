@@ -1,12 +1,7 @@
 import { Agent } from "@mastra/core/agent";
 import { LibSQLStore } from "@mastra/libsql";
 import { Memory } from "@mastra/memory";
-import {
-  createDocumentTool,
-  getWeatherTool,
-  requestSuggestionsTool,
-  updateDocumentTool,
-} from "../../tools";
+import { mastraTools } from "../../tools";
 import { getGeoHints, getRuntimeConfig } from "../../utils/runtime-utils";
 import { researchAgent } from "../research-agent";
 import { chatAgentSystemPrompt } from "./system-prompt";
@@ -35,10 +30,10 @@ export const chatAgent = new Agent({
   },
   model: "google/gemini-2.5-flash", // Default, overridden at runtime
   tools: {
-    getWeather: getWeatherTool,
-    createDocument: createDocumentTool,
-    updateDocument: updateDocumentTool,
-    requestSuggestions: requestSuggestionsTool,
+    getWeather: mastraTools.getWeather,
+    createDocument: mastraTools.createDocument,
+    updateDocument: mastraTools.updateDocument,
+    requestSuggestions: mastraTools.requestSuggestions,
   },
   agents: {
     researchAgent,

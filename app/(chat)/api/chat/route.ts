@@ -24,7 +24,7 @@ import {
 } from "@/lib/db/queries";
 import type { DBMessage } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
-import { enrichUsageWithTokenlens } from "@/lib/tokenlens/integration";
+import { enrichUsageWithTokenlens } from "@/lib/tokenlens";
 import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
@@ -94,7 +94,8 @@ export async function POST(request: Request) {
       differenceInHours: 24,
     });
 
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
+    const { maxMessagesPerDay } = entitlementsByUserType[userType];
+    if (messageCount > maxMessagesPerDay) {
       return new ChatSDKError("rate_limit:chat").toResponse();
     }
 
@@ -182,8 +183,8 @@ export async function POST(request: Request) {
       });
 
       let _lastMessageId: string | undefined;
-      if (uiMessages.length > 0 && uiMessages.at(-1).role === "assistant") {
-        _lastMessageId = uiMessages.at(-1).id;
+      if (uiMessages.length > 0 && uiMessages.at(-1)?.role === "assistant") {
+        _lastMessageId = uiMessages.at(-1)?.id;
       }
 
       // Transform stream into AI SDK format and create UI messages stream
