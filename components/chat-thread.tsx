@@ -1,5 +1,6 @@
 "use client";
 import { useChat } from "@ai-sdk/react";
+import { Slot } from "@radix-ui/react-slot";
 import { motion } from "framer-motion";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
@@ -25,12 +26,17 @@ import { VisibilitySelector } from "./visibility-selector";
 export const ChatThread = ({
   className,
   isReadonly,
+  asChild,
   ...others
-}: React.ComponentProps<"div"> & { isReadonly?: boolean }) => {
+}: React.ComponentProps<"div"> & {
+  isReadonly?: boolean;
+  asChild?: boolean;
+}) => {
+  const Comp = asChild ? Slot : "div";
   return (
-    <div
+    <Comp
       className={cn(
-        "overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background",
+        "flex h-dvh min-w-0 flex-col overflow-hidden bg-background",
         className
       )}
       data-slot="chat-thread"
@@ -93,6 +99,7 @@ export function ChatThreadHeader({
 
 export type ChatThreadMessageProps = {
   key: string;
+  className?: string;
   message: ChatMessage;
   sender: {
     displayName?: string;
@@ -129,53 +136,43 @@ export function ChatThreadMessages({
   > = { user: displayUser, assistant: displayAssistant };
 
   return (
-    <div
-      className={cn(
-        "overscroll-behavior-contain -webkit-overflow-scrolling-touch flex-1 touch-pan-y overflow-y-scroll",
-        className
-      )}
+    <Conversation
+      className={className}
       data-slot="chat-thread-messages"
-      style={{ overflowAnchor: "none" }}
       {...others}
     >
-      <Conversation className="mx-auto flex min-w-0 max-w-4xl flex-col gap-4 md:gap-6">
-        <ConversationContent className="flex flex-col gap-4 px-2 py-4 md:gap-6 md:px-4">
-          {messages.length === 0 ? empty : null}
+      <ConversationContent className="mx-auto flex max-w-4xl flex-col gap-4 px-2 py-4 md:gap-6 md:px-4">
+        {messages.length === 0 ? empty : null}
 
-          {messages.map((message, index) => {
-            const messageSender = senders[message.role];
-            const messageVote = votes.find(
-              (vote) => vote.messageId === message.id
-            );
+        {messages.map((message, index) => {
+          const messageSender = senders[message.role];
+          const messageVote = votes.find(
+            (vote) => vote.messageId === message.id
+          );
 
-            const isLastMessage = index === messages.length - 1;
+          const isLastMessage = index === messages.length - 1;
 
-            return renderMessage({
-              key: message.id,
-              message,
-              isLastMessage,
-              isStreaming: status === "streaming" && isLastMessage,
-              requiresScrollPadding: isLastMessage,
-              vote: messageVote,
-              onVote: (value, notes) => voteMessage(message.id, value, notes),
-              sender: messageSender || null,
-            });
-          })}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
-    </div>
+          return renderMessage({
+            key: message.id,
+            message,
+            isLastMessage,
+            isStreaming: status === "streaming" && isLastMessage,
+            requiresScrollPadding: isLastMessage,
+            vote: messageVote,
+            onVote: (value, notes) => voteMessage(message.id, value, notes),
+            sender: messageSender || null,
+          });
+        })}
+      </ConversationContent>
+      <ConversationScrollButton />
+    </Conversation>
   );
 }
 
 export const ChatThreadComposer = ({
-  isReadonly,
   className,
   ...others
-}: React.ComponentProps<"div"> & { isReadonly?: boolean }) => {
-  const runtime = useChatRuntime();
-  const chat = useChat({ chat: runtime.chat });
-
+}: React.ComponentProps<"div">) => {
   return (
     <div
       className={cn(
@@ -184,17 +181,29 @@ export const ChatThreadComposer = ({
       )}
       data-slot="chat-thread-composer"
       {...others}
-    >
-      {!isReadonly && (
-        <MultimodalInput
-          chatId={chat.id}
-          sendMessage={chat.sendMessage}
-          showSuggestion={chat.messages.length === 0}
-          status={chat.status}
-          stop={chat.stop}
-        />
-      )}
-    </div>
+    />
+  );
+};
+
+export const ChatThreadInput = ({
+  showSuggestion,
+  ...others
+}: {
+  className?: string;
+  showSuggestion?: boolean;
+}) => {
+  const runtime = useChatRuntime();
+  const chat = useChat({ chat: runtime.chat });
+
+  return (
+    <MultimodalInput
+      {...others}
+      chatId={chat.id}
+      sendMessage={chat.sendMessage}
+      showSuggestion={showSuggestion === true || chat.messages.length === 0}
+      status={chat.status}
+      stop={chat.stop}
+    />
   );
 };
 

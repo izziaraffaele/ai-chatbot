@@ -1,10 +1,9 @@
 import { createTool } from "@mastra/core/tools";
-import { streamObject } from "ai";
+// import { streamObject } from "ai";
 import { z } from "zod";
-import { myProvider } from "@/lib/ai/providers";
 import { getDocumentById, saveSuggestions } from "@/lib/db/queries";
 import type { Suggestion } from "@/lib/db/schema";
-import { generateUUID } from "@/lib/utils";
+// import { generateUUID } from "@/lib/utils";
 import { getSession } from "../utils/runtime-utils";
 
 export const requestSuggestionsTool = createTool({
@@ -22,7 +21,11 @@ export const requestSuggestionsTool = createTool({
       message: z.string().optional(),
     }),
   ]),
-  execute: async ({ context, runtimeContext, writer }) => {
+  execute: async ({
+    context,
+    runtimeContext,
+    // writer
+  }) => {
     const { documentId } = context;
     const session = getSession(runtimeContext);
 
@@ -39,40 +42,40 @@ export const requestSuggestionsTool = createTool({
       "userId" | "createdAt" | "documentCreatedAt"
     >[] = [];
 
-    const { elementStream } = streamObject({
-      model: myProvider.languageModel("artifact-model"),
-      system:
-        "You are a help writing assistant. Given a piece of writing, please offer suggestions to improve the piece of writing and describe the change. It is very important for the edits to contain full sentences instead of just words. Max 5 suggestions.",
-      prompt: document.content,
-      output: "array",
-      schema: z.object({
-        originalSentence: z.string().describe("The original sentence"),
-        suggestedSentence: z.string().describe("The suggested sentence"),
-        description: z.string().describe("The description of the suggestion"),
-      }),
-    });
+    // const { elementStream } = streamObject({
+    //   model: myProvider.languageModel("artifact-model"),
+    //   system:
+    //     "You are a help writing assistant. Given a piece of writing, please offer suggestions to improve the piece of writing and describe the change. It is very important for the edits to contain full sentences instead of just words. Max 5 suggestions.",
+    //   prompt: document.content,
+    //   output: "array",
+    //   schema: z.object({
+    //     originalSentence: z.string().describe("The original sentence"),
+    //     suggestedSentence: z.string().describe("The suggested sentence"),
+    //     description: z.string().describe("The description of the suggestion"),
+    //   }),
+    // });
 
-    for await (const element of elementStream) {
-      const suggestion: Suggestion = {
-        originalText: element.originalSentence,
-        suggestedText: element.suggestedSentence,
-        description: element.description,
-        id: generateUUID(),
-        documentId,
-        isResolved: false,
-        userId: "",
-        createdAt: new Date(),
-        documentCreatedAt: document.createdAt,
-      };
+    // for await (const element of elementStream) {
+    //   const suggestion: Suggestion = {
+    //     originalText: element.originalSentence,
+    //     suggestedText: element.suggestedSentence,
+    //     description: element.description,
+    //     id: generateUUID(),
+    //     documentId,
+    //     isResolved: false,
+    //     userId: "",
+    //     createdAt: new Date(),
+    //     documentCreatedAt: document.createdAt,
+    //   };
 
-      await writer?.write({
-        type: "data-suggestion",
-        data: suggestion,
-        transient: true,
-      });
+    //   await writer?.write({
+    //     type: "data-suggestion",
+    //     data: suggestion,
+    //     transient: true,
+    //   });
 
-      suggestions.push(suggestion);
-    }
+    //   suggestions.push(suggestion);
+    // }
 
     if (session?.user?.id) {
       const userId = session.user.id;

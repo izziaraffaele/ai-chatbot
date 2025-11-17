@@ -1,6 +1,6 @@
 import { isToolUIPart, type ReasoningUIPart, type TextUIPart } from "ai";
 import { motion } from "framer-motion";
-import { CopyIcon, PencilIcon, SparklesIcon } from "lucide-react";
+import { CopyIcon, PencilIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import type { Vote } from "@/lib/db/schema";
 import { useTranslations } from "@/lib/i18n/use-translations";
@@ -21,7 +21,7 @@ import {
   ReasoningContent,
   ReasoningTrigger,
 } from "./elements/reasoning";
-import { ThumbDownIcon, ThumbUpIcon } from "./icons";
+import { SparklesIcon, ThumbDownIcon, ThumbUpIcon } from "./icons";
 import { ToolUIRouter } from "./tool-ui-router";
 
 type ChatMessageMode = "view" | "edit";
@@ -42,7 +42,7 @@ export const ChatMessage = ({
   <Message
     asChild
     className={cn(
-      "flex-row",
+      "flex-row gap-2 md:gap-3",
       {
         "flex-row-reverse": from === "user",
       },
@@ -59,6 +59,17 @@ export const ChatMessage = ({
       {children}
     </motion.div>
   </Message>
+);
+
+export const ChatMessageContent = ({
+  className,
+  ...others
+}: React.ComponentProps<"div">) => (
+  <div
+    className={cn("flex flex-col gap-2", className)}
+    data-slot="chat-message-content"
+    {...others}
+  />
 );
 
 export const ChatMessageReasoning = ({
@@ -107,7 +118,7 @@ export const ChatMessageText = ({
   return (
     <MessageContent
       className={cn(
-        "group-[.is-user]:wrap-break-words group-[.is-user]:rounded-2xl group-[.is-user]:px-3! group-[.is-user]:py-2!"
+        "group-[.is-user]:wrap-break-words group-[.is-user]:rounded-2xl group-[.is-user]:bg-primary group-[.is-user]:px-3! group-[.is-user]:py-2! group-[.is-user]:text-primary-foreground"
       )}
       data-slot="chat-message-text"
     >
@@ -128,6 +139,7 @@ export const ChatMessageActions = ({
   isReadonly,
   message,
   vote,
+  className,
   ...others
 }: React.ComponentProps<typeof MessageActions> & {
   onModeChange?: (mode: ChatMessageMode) => void;
@@ -147,13 +159,23 @@ export const ChatMessageActions = ({
   }, [message]);
 
   return (
-    <MessageActions data-slot="chat-message-actions" {...others}>
+    <MessageActions
+      className={cn("group-[.is-user]:ml-auto", className)}
+      data-slot="chat-message-actions"
+      {...others}
+    >
       {!isReadonly && (
-        <MessageAction label="Edit" onClick={() => onModeChange?.("edit")}>
+        <MessageAction
+          onClick={() => onModeChange?.("edit")}
+          tooltip={t("message.actions.edit", "Edit")}
+        >
           <PencilIcon className="size-3" />
         </MessageAction>
       )}
-      <MessageAction label="Copy" onClick={handleCopy}>
+      <MessageAction
+        onClick={handleCopy}
+        tooltip={t("message.actions.copy", "Copy")}
+      >
         <CopyIcon className="size-3" />
       </MessageAction>
       {message.role === "assistant" && (
@@ -261,21 +283,10 @@ export const ChatMessageAvatar = ({
 }: React.ComponentProps<"div">) => (
   <div
     className={cn(
-      "flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border",
+      "flex size-8 shrink-0 items-center justify-center rounded-full border-current bg-border/20 ring-1 ring-border dark:bg-background",
       className
     )}
     data-slot="chat-message-avatar"
-    {...others}
-  />
-);
-
-export const ChatMessageContent = ({
-  className,
-  ...others
-}: React.ComponentProps<"div">) => (
-  <div
-    className={cn("flex flex-col gap-2", className)}
-    data-slot="chat-message-content"
     {...others}
   />
 );
@@ -288,6 +299,7 @@ export const DefaultChatMessage = ({
   isStreaming,
   isLastMessage,
   onVote,
+  className,
 }: ChatThreadMessageProps & {
   isReadonly?: boolean;
   isLastMessage?: boolean;
@@ -303,16 +315,17 @@ export const DefaultChatMessage = ({
   );
 
   return (
-    <ChatMessage from={message.role}>
+    <ChatMessage className={className} from={message.role}>
       {avatar && (
-        <div className="flex shrink-0 items-end pb-7.5">
-          <ChatMessageAvatar>{avatar}</ChatMessageAvatar>
+        <div className="flex shrink-0 items-end pb-9">
+          <ChatMessageAvatar className="text-[#FFBE2C]">
+            {avatar}
+          </ChatMessageAvatar>
         </div>
       )}
       <ChatMessageContent
         className={cn("grow", {
           "md:gap-4": hasText,
-          "min-h-96": isAssistant && isLastMessage,
         })}
       >
         <ChatMessageParts

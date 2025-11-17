@@ -330,3 +330,4 @@ It's a library provided by Vercel and it's fully integrated with AI SDK.
 [Documentation](https://ai-sdk.dev/elements) | [Repository](https://github.com/vercel/ai-elements)
 
 - AI Elements components are installed in `@/components/elements/*`. You should use them following the same usage rules you apply to normal shadcn components (do not override them, use it to create more complex compositions).
+- Neveer use hard-coded text. Always use the existing useTranslations hooks and ensure to keep translation files in sync ( @lib/i18n/translations )

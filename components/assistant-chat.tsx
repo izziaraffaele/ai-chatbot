@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import { cn } from "@/lib/utils";
 import {
   ChatAutoResume,
   type ChatControllerProps,
@@ -14,6 +15,7 @@ import {
   ChatThreadComposer,
   ChatThreadEmpty,
   ChatThreadHeader,
+  ChatThreadInput,
   ChatThreadMessages,
 } from "./chat-thread";
 import { DataStreamHandler } from "./data-stream-handler";
@@ -48,9 +50,21 @@ function PureAssistantChat({
       <ChatThread {...others}>
         <ChatThreadHeader />
         <ChatThreadMessages empty={<ChatThreadEmpty />}>
-          {(messageProps) => <DefaultChatMessage {...messageProps} />}
+          {({ key, message, isLastMessage, ...messageProps }) => (
+            <DefaultChatMessage
+              className={cn({
+                "min-h-96": message.role === "assistant" && isLastMessage,
+              })}
+              isLastMessage={isLastMessage}
+              key={key}
+              message={message}
+              {...messageProps}
+            />
+          )}
         </ChatThreadMessages>
-        <ChatThreadComposer />
+        <ChatThreadComposer>
+          <ChatThreadInput />
+        </ChatThreadComposer>
       </ChatThread>
       <ChatArtifact />
       {autoResume && <ChatAutoResume />}

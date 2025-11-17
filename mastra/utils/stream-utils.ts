@@ -1,7 +1,7 @@
 import type { UIMessageStreamWriter } from "ai";
-import type { ModelCatalog } from "tokenlens/core";
-import { getUsage } from "tokenlens/helpers";
-import { myProvider } from "@/lib/ai/providers";
+// import type { ModelCatalog } from "tokenlens/core";
+// import { getUsage } from "tokenlens/helpers";
+// import { myProvider } from "@/lib/ai/providers";
 import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 
@@ -11,9 +11,9 @@ import type { AppUsage } from "@/lib/usage";
  */
 export function handleAgentUsage(
   agentResponse: any,
-  dataStream: UIMessageStreamWriter<ChatMessage>,
-  selectedChatModel: string,
-  tokenLensCatalog?: ModelCatalog
+  dataStream: UIMessageStreamWriter<ChatMessage>
+  // selectedChatModel: string,
+  // tokenLensCatalog?: ModelCatalog
 ): Promise<AppUsage | undefined> {
   try {
     // Extract usage from Mastra response
@@ -24,26 +24,26 @@ export function handleAgentUsage(
       totalTokens: 0,
     };
 
-    let finalUsage: AppUsage = usage;
+    const finalUsage: AppUsage = usage;
 
     // Try to enrich with tokenlens if catalog is available
-    if (tokenLensCatalog) {
-      try {
-        const modelId = myProvider.languageModel(selectedChatModel).modelId;
+    // if (tokenLensCatalog) {
+    //   try {
+    //     const modelId = myProvider.languageModel(selectedChatModel).modelId;
 
-        if (modelId) {
-          const summary = getUsage({
-            modelId,
-            usage,
-            providers: tokenLensCatalog,
-          });
-          finalUsage = { ...usage, ...summary, modelId } as AppUsage;
-        }
-      } catch (err) {
-        console.warn("TokenLens enrichment failed", err);
-        // Continue with raw usage data
-      }
-    }
+    //     if (modelId) {
+    //       const summary = getUsage({
+    //         modelId,
+    //         usage,
+    //         providers: tokenLensCatalog,
+    //       });
+    //       finalUsage = { ...usage, ...summary, modelId } as AppUsage;
+    //     }
+    //   } catch (err) {
+    //     console.warn("TokenLens enrichment failed", err);
+    //     // Continue with raw usage data
+    //   }
+    // }
 
     // Write usage to dataStream
     dataStream.write({

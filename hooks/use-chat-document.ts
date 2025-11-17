@@ -29,3 +29,7 @@ export function useChatDocument(documentId: string | null) {
     mutate,
   };
 }
+
+// export function useChatDocumentEditor(documentId: string | null) {
+
+// }

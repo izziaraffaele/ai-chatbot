@@ -1,7 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/app/(auth)/auth";
-import { AssistantChat } from "@/components/assistant-chat";
+import { AssistantChat } from "@/components/assistant-chat-new";
+import { ChatProvider } from "@/components/chat";
+import { DataStreamProvider } from "@/components/chat/streaming";
 import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
 
@@ -37,13 +39,18 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const uiMessages = convertToUIMessages(messagesFromDb);
 
   return (
-    <AssistantChat
-      autoResume={true}
-      chatId={chat.id}
+    <ChatProvider
+      id={chat.id}
       initialMessages={uiMessages}
       initialUsage={chat.lastContext ?? undefined}
       initialVisibilityType={chat.visibility}
-      isReadonly={session?.user?.id !== chat.userId}
-    />
+    >
+      <DataStreamProvider>
+        <AssistantChat
+          autoResume={true}
+          isReadonly={session?.user?.id !== chat.userId}
+        />
+      </DataStreamProvider>
+    </ChatProvider>
   );
 }

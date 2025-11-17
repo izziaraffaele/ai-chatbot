@@ -234,6 +234,8 @@ export const en = {
   // ============================================================================
 
   "agent.selector.placeholder": "Assistant",
+  "agent.selector.search": "Search agents...",
+  "agent.selector.empty": "No agents found.",
 
   "model.selector.label": "Model",
   "model.selector.description": "Choose AI model",

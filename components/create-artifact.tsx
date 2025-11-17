@@ -10,7 +10,7 @@ export type ArtifactActionContext<M = any> = {
   handleVersionChange: (type: "next" | "prev" | "toggle" | "latest") => void;
   currentVersionIndex: number;
   isCurrentVersion: boolean;
-  mode: "edit" | "diff";
+  mode: "view" | "edit" | "diff";
   metadata: M;
   setMetadata: Dispatch<SetStateAction<M>>;
 };

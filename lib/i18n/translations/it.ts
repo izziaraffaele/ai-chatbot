@@ -232,6 +232,8 @@ export const it: TranslationDict = {
   // ============================================================================
 
   "agent.selector.placeholder": "Assistente",
+  "agent.selector.search": "Cerca agenti...",
+  "agent.selector.empty": "Nessun agente trovato.",
 
   "model.selector.label": "Modello",
   "model.selector.description": "Scegli il modello AI",
