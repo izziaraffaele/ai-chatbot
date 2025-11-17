@@ -1,6 +1,10 @@
 {
   "permissions": {
-    "allow": ["Bash(openspec list:*)", "mcp__chrome-devtools__list_pages"],
+    "allow": [
+      "Bash(openspec list:*)",
+      "mcp__chrome-devtools__list_pages",
+      "Bash(openspec validate:*)"
+    ],
     "deny": [],
     "ask": []
   }

@@ -1,8 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/app/(auth)/auth";
-import { AssistantChat } from "@/components/assistant-chat";
 import { ChatProvider } from "@/components/chat/context";
+import { DemoChat } from "@/components/demo-chat";
 import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
 
@@ -44,7 +44,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       initialUsage={chat.lastContext ?? undefined}
       initialVisibilityType={chat.visibility}
     >
-      <AssistantChat
+      <DemoChat
         autoResume={true}
         isReadonly={session?.user?.id !== chat.userId}
       />

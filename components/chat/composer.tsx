@@ -41,7 +41,7 @@ export function ChatComposer({
   return (
     <div
       className={cn(
-        "z-1 mx-auto flex w-full max-w-4xl shrink-0 gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4",
+        "sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl shrink-0 flex-col gap-4 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4",
         className
       )}
       data-slot="chat-composer"
@@ -217,7 +217,10 @@ export function ChatInput({
   const { status, inputValue, textareaRef, handleSubmit } = useChatComposer();
 
   return (
-    <div className={cn("relative flex w-full flex-col gap-4", className)}>
+    <div
+      className={cn("relative flex w-full flex-col gap-4", className)}
+      data-slot="chat-input"
+    >
       <PromptInput
         globalDrop={globalDrop}
         multiple={multiple}
@@ -228,7 +231,10 @@ export function ChatInput({
         <PromptInputBody className="max-h-[200px] min-h-11">
           <PromptInputTextarea
             autoFocus
-            className="px-5 pt-0 pb-5"
+            className={cn({
+              "px-5 pb-5": Boolean(header),
+              "px-5 py-5": !header,
+            })}
             disabled={disabled}
             placeholder={placeholder}
             ref={textareaRef}

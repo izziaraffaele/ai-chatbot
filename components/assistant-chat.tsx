@@ -1,5 +1,6 @@
 "use client";
 
+import { useChat } from "@ai-sdk/react";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { useWindowSize } from "usehooks-ts";
@@ -19,9 +20,14 @@ import {
 } from "./chat/composer";
 import { useChatRuntime } from "./chat/context";
 import { ChatAutoResume, ChatRouteParamsHandler } from "./chat/effects";
-import { ChatThreadEmpty } from "./chat/empty";
+import { ChatGreeting } from "./chat/empty";
 import { MessageIterator } from "./chat/iterators";
 import { DataStreamDispatcher } from "./chat/streaming";
+import {
+  ChatSuggestionProvider,
+  type ChatSuggestionProviderProps,
+  ChatSuggestions,
+} from "./chat/suggestions";
 import { ChatThread, ChatThreadContent, ChatThreadHeader } from "./chat/thread";
 import { AssistantMessage } from "./messages/assistant-message";
 import { UserMessage } from "./messages/user-message";
@@ -34,7 +40,10 @@ import { VisibilitySelector } from "./visibility-selector";
  * AssistantChat Component Props
  * NOTE: This component expects to be rendered INSIDE a ChatProvider
  */
-export type AssistantChatProps = {
+export type AssistantChatProps = Omit<
+  ChatSuggestionProviderProps,
+  "children" | "onApply"
+> & {
   /**
    * Whether to automatically resume streaming on mount
    */
@@ -51,6 +60,8 @@ export type AssistantChatProps = {
    * Additional className for the thread
    */
   promptInputMode?: "speech" | "text" | "prefer-speech" | "all";
+
+  onApplySuggestion?: (suggestion: string) => void;
 };
 
 export function AssistantChat({
@@ -58,11 +69,16 @@ export function AssistantChat({
   isReadonly,
   className,
   promptInputMode = "prefer-speech",
+  initialSuggestions,
+  suggestions,
+  autoApply,
+  onApplySuggestion,
 }: AssistantChatProps) {
   const t = useTranslations();
   const { open } = useSidebar();
   const { width: windowWidth } = useWindowSize();
   const { chat } = useChatRuntime();
+  const { messages } = useChat({ chat });
   const { artifact } = useArtifact();
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId: chat.id,
@@ -72,7 +88,12 @@ export function AssistantChat({
   useArtifactStreaming();
 
   return (
-    <>
+    <ChatSuggestionProvider
+      autoApply={autoApply}
+      initialSuggestions={initialSuggestions}
+      onApply={onApplySuggestion}
+      suggestions={suggestions}
+    >
       <ChatThread className={className}>
         <ChatThreadHeader>
           <SidebarToggle />
@@ -104,7 +125,7 @@ export function AssistantChat({
         <ChatThreadContent>
           <MessageIterator
             empty={
-              <ChatThreadEmpty
+              <ChatGreeting
                 primaryText={t("chat.greeting.title", "Hello there!")}
                 secondaryText={t(
                   "chat.greeting.subtitle",
@@ -165,6 +186,7 @@ export function AssistantChat({
 
         {!isReadonly && (
           <ChatComposer>
+            {messages.length === 0 && <ChatSuggestions mode="default" />}
             <ChatInput
               actions={({ status, hasInput }) => {
                 const submitButton = (
@@ -284,6 +306,6 @@ export function AssistantChat({
       {autoResume && <ChatAutoResume initialMessages={chat.messages} />}
       <ChatRouteParamsHandler />
       <DataStreamDispatcher />
-    </>
+    </ChatSuggestionProvider>
   );
 }

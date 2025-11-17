@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ConversationEmptyState } from "@/components/elements/conversation";
 import { cn } from "@/lib/utils";
+import { ChatSuggestions } from "./suggestions";
 
 export type ChatThreadEmptyProps = React.ComponentProps<"div"> & {
   primaryText?: React.ReactNode;
@@ -10,11 +11,6 @@ export type ChatThreadEmptyProps = React.ComponentProps<"div"> & {
   icon?: React.ReactNode;
   title?: string;
   description?: string;
-  /**
-   * Whether to use the new ConversationEmptyState primitive or the classic animated layout
-   * @default "classic"
-   */
-  variant?: "classic" | "primitive";
 };
 
 /**
@@ -47,23 +43,30 @@ export const ChatThreadEmpty = ({
   title,
   description,
   icon,
-  variant = "classic",
   ...others
 }: ChatThreadEmptyProps) => {
-  // Use the new primitive if variant is set to "primitive"
-  if (variant === "primitive") {
-    return (
-      <ConversationEmptyState
-        className={className}
-        description={description}
-        icon={icon}
-        title={title}
-        {...others}
-      />
-    );
-  }
+  return (
+    <ConversationEmptyState
+      className={cn("grow", className)}
+      description={description}
+      icon={icon}
+      title={title}
+      {...others}
+    />
+  );
+};
 
-  // Default: Classic animated layout (preserving original design)
+export const ChatGreeting = ({
+  className,
+  primaryText,
+  secondaryText,
+  title,
+  description,
+  icon,
+  children,
+  showSuggestions = false,
+  ...props
+}: ChatThreadEmptyProps & { showSuggestions?: boolean }) => {
   return (
     <div
       className={cn(
@@ -71,7 +74,7 @@ export const ChatThreadEmpty = ({
         className
       )}
       data-slot="chat-thread-empty"
-      {...others}
+      {...props}
     >
       <motion.div
         animate={{ opacity: 1, y: 0 }}
@@ -91,6 +94,7 @@ export const ChatThreadEmpty = ({
       >
         {secondaryText}
       </motion.div>
+      {showSuggestions && <ChatSuggestions className="mt-4" mode="default" />}
     </div>
   );
 };
