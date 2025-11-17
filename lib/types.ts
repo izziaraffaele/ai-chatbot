@@ -1,6 +1,6 @@
 import type { ToolUIPart, UIMessage } from "ai";
 import { z } from "zod";
-import type { ArtifactKind } from "@/components/artifact";
+import type { ArtifactKind } from "@/components/artifacts";
 import type { ChatAgentUITools } from "@/mastra/agents";
 import type { Suggestion } from "./db/schema";
 import type { AppUsage } from "./usage";

@@ -26,8 +26,27 @@ import { cn } from "@/lib/utils";
 // Types
 // ============================================================================
 
+/**
+ * Generic UI artifact state for any artifact type
+ */
+export type UIArtifact<TKind = string, TContent = any> = {
+  title: string;
+  documentId: string;
+  kind: TKind;
+  content: TContent;
+  isVisible: boolean;
+  status: "streaming" | "idle";
+  boundingBox: {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  };
+};
+
 export type ArtifactVersion<T = any> = {
   id: string;
+  title: string;
   content: T;
   createdAt: Date;
   metadata?: Record<string, any>;
@@ -379,7 +398,7 @@ export type ChatArtifactActionProps = React.ComponentProps<"button"> & {
 /**
  * Base action button for artifacts
  */
-function ChatArtifactActionButton({
+export function ChatArtifactActionButton({
   tooltip,
   icon,
   label,
@@ -506,7 +525,6 @@ function ChatArtifactActionToggleMode({
  * Common actions
  */
 function ChatArtifactActionCopy({
-  onClick,
   ...props
 }: ChatArtifactActionProps & {
   content?: string;
@@ -515,20 +533,18 @@ function ChatArtifactActionCopy({
   const contentToCopy = props.content ?? draftContent;
 
   const handleClick = useCallback(
-    async (e: React.MouseEvent<HTMLButtonElement>) => {
+    async (_e: React.MouseEvent<HTMLButtonElement>) => {
       if (contentToCopy) {
         await navigator.clipboard.writeText(contentToCopy);
       }
-      onClick?.(e);
     },
-    [contentToCopy, onClick]
+    [contentToCopy]
   );
 
   return <ChatArtifactActionButton onClick={handleClick} {...props} />;
 }
 
 function ChatArtifactActionDownload({
-  onClick,
   filename = "artifact.txt",
   ...props
 }: ChatArtifactActionProps & {
@@ -539,7 +555,7 @@ function ChatArtifactActionDownload({
   const contentToDownload = props.content ?? draftContent;
 
   const handleClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
+    (_e: React.MouseEvent<HTMLButtonElement>) => {
       if (contentToDownload) {
         const blob = new Blob([contentToDownload], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
@@ -549,9 +565,8 @@ function ChatArtifactActionDownload({
         a.click();
         URL.revokeObjectURL(url);
       }
-      onClick?.(e);
     },
-    [contentToDownload, filename, onClick]
+    [contentToDownload, filename]
   );
 
   return <ChatArtifactActionButton onClick={handleClick} {...props} />;

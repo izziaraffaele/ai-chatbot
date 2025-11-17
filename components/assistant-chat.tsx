@@ -1,82 +1,289 @@
 "use client";
 
-import { memo } from "react";
+import { PlusIcon } from "lucide-react";
+import Link from "next/link";
+import { useWindowSize } from "usehooks-ts";
+import { useArtifact } from "@/hooks/use-artifact";
+import { useArtifactStreaming } from "@/hooks/use-artifact-streaming";
+import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { cn } from "@/lib/utils";
+import { DocumentArtifact, isDocumentArtifact } from "./artifacts/document";
+import { isMediaArtifact, MediaArtifact } from "./artifacts/media";
+import { ChatCanvas, ChatCanvasMain, ChatCanvasThread } from "./chat/canvas";
 import {
-  ChatAutoResume,
-  type ChatControllerProps,
-  ChatProvider,
-  ChatRouteParamsHandler,
-} from "./chat";
-import { ChatArtifact } from "./chat-artifact";
-import { DefaultChatMessage } from "./chat-message";
-import {
-  ChatThread,
-  ChatThreadComposer,
-  ChatThreadEmpty,
-  ChatThreadHeader,
-  ChatThreadInput,
-  ChatThreadMessages,
-} from "./chat-thread";
-import { DataStreamHandler } from "./data-stream-handler";
+  ChatComposer,
+  ChatComposerAction,
+  ChatComposerTool,
+  ChatInput,
+} from "./chat/composer";
+import { useChatRuntime } from "./chat/context";
+import { ChatAutoResume, ChatRouteParamsHandler } from "./chat/effects";
+import { ChatThreadEmpty } from "./chat/empty";
+import { MessageIterator } from "./chat/iterators";
+import { DataStreamDispatcher } from "./chat/streaming";
+import { ChatThread, ChatThreadContent, ChatThreadHeader } from "./chat/thread";
+import { AssistantMessage } from "./messages/assistant-message";
+import { UserMessage } from "./messages/user-message";
+import { SidebarToggle } from "./sidebar-toggle";
+import { Button } from "./ui/button";
+import { useSidebar } from "./ui/sidebar";
+import { VisibilitySelector } from "./visibility-selector";
 
-function PureAssistantChat({
+/**
+ * AssistantChat Component Props
+ * NOTE: This component expects to be rendered INSIDE a ChatProvider
+ */
+export type AssistantChatProps = {
+  /**
+   * Whether to automatically resume streaming on mount
+   */
+  autoResume?: boolean;
+  /**
+   * Whether the chat is in readonly mode (no input)
+   */
+  isReadonly?: boolean;
+  /**
+   * Additional className for the thread
+   */
+  className?: string;
+  /**
+   * Additional className for the thread
+   */
+  promptInputMode?: "speech" | "text" | "prefer-speech" | "all";
+};
+
+export function AssistantChat({
   autoResume = false,
-  api,
-  initialInput,
-  initialMessages,
-  initialUsage,
-  initialVisibilityType,
-  id,
-  chatId,
-  ...others
-}: React.ComponentProps<typeof ChatThread> &
-  Omit<ChatControllerProps, "id"> & {
-    autoResume?: boolean;
-    initialInput?: string;
-    chatId: string;
-  }) {
-  const providerProps = {
-    id: chatId,
-    api,
-    initialInput,
-    initialMessages,
-    initialUsage,
-    initialVisibilityType,
-  };
+  isReadonly,
+  className,
+  promptInputMode = "prefer-speech",
+}: AssistantChatProps) {
+  const t = useTranslations();
+  const { open } = useSidebar();
+  const { width: windowWidth } = useWindowSize();
+  const { chat } = useChatRuntime();
+  const { artifact } = useArtifact();
+  const { visibilityType, setVisibilityType } = useChatVisibility({
+    chatId: chat.id,
+  });
+
+  // Subscribe to artifact streaming
+  useArtifactStreaming();
 
   return (
-    <ChatProvider {...providerProps}>
-      <ChatThread {...others}>
-        <ChatThreadHeader />
-        <ChatThreadMessages empty={<ChatThreadEmpty />}>
-          {({ key, message, isLastMessage, ...messageProps }) => (
-            <DefaultChatMessage
-              className={cn({
-                "min-h-96": message.role === "assistant" && isLastMessage,
-              })}
-              isLastMessage={isLastMessage}
-              key={key}
-              message={message}
-              {...messageProps}
+    <>
+      <ChatThread className={className}>
+        <ChatThreadHeader>
+          <SidebarToggle />
+
+          {(!open || windowWidth < 768) && (
+            <Button
+              asChild
+              className="order-2 ml-auto h-8 px-2 md:order-1 md:ml-0 md:h-fit md:px-2"
+              variant="outline"
+            >
+              <Link href="/">
+                <PlusIcon />
+                <span className="md:sr-only">
+                  {t("sidebar.buttonNewChat", "New Chat")}
+                </span>
+              </Link>
+            </Button>
+          )}
+
+          {!isReadonly && (
+            <VisibilitySelector
+              className="order-1 md:order-2"
+              onValueChange={setVisibilityType}
+              value={visibilityType}
             />
           )}
-        </ChatThreadMessages>
-        <ChatThreadComposer>
-          <ChatThreadInput />
-        </ChatThreadComposer>
+        </ChatThreadHeader>
+
+        <ChatThreadContent>
+          <MessageIterator
+            empty={
+              <ChatThreadEmpty
+                primaryText={t("chat.greeting.title", "Hello there!")}
+                secondaryText={t(
+                  "chat.greeting.subtitle",
+                  "How can I help you today?"
+                )}
+              />
+            }
+          >
+            {({
+              message,
+              isLastMessage,
+              sender,
+              vote,
+              onVote,
+              isStreaming,
+            }) => {
+              const baseProps = {
+                message,
+                isLastMessage,
+                sender,
+                isStreaming,
+              };
+
+              // Render based on message role
+              if (message.role === "user") {
+                return (
+                  <UserMessage
+                    {...baseProps}
+                    className={cn({
+                      "min-h-96": isLastMessage,
+                    })}
+                    isReadonly={isReadonly}
+                    key={message.id}
+                  />
+                );
+              }
+
+              if (message.role === "assistant") {
+                return (
+                  <AssistantMessage
+                    {...baseProps}
+                    className={cn({
+                      "min-h-96": isLastMessage,
+                    })}
+                    isReadonly={isReadonly}
+                    key={message.id}
+                    onVoteAction={onVote}
+                    vote={vote}
+                  />
+                );
+              }
+
+              // Skip other message types
+              return null;
+            }}
+          </MessageIterator>
+        </ChatThreadContent>
+
+        {!isReadonly && (
+          <ChatComposer>
+            <ChatInput
+              actions={({ status, hasInput }) => {
+                const submitButton = (
+                  <ChatComposerAction.Submit
+                    disabled={!hasInput}
+                    status={status}
+                  />
+                );
+
+                if (hasInput || promptInputMode === "text") {
+                  return submitButton;
+                }
+
+                if (["speech", "prefer-speech"].includes(promptInputMode)) {
+                  return <ChatComposerAction.Speech />;
+                }
+
+                return (
+                  <div className="flex gap-0.5">
+                    <ChatComposerAction.Speech />
+                    {submitButton}
+                  </div>
+                );
+              }}
+              placeholder={t("chat.input.placeholder", "Send a message...")}
+              tools={
+                <>
+                  <ChatComposerTool.AttachmentMenu />
+                  <ChatComposerTool.AgentSelector />
+                  <ChatComposerTool.ContextUsage />
+                </>
+              }
+            />
+          </ChatComposer>
+        )}
       </ChatThread>
-      <ChatArtifact />
-      {autoResume && <ChatAutoResume />}
+
+      {/* Artifact Canvas View */}
+      <ChatCanvas isVisible={artifact.isVisible}>
+        {/* Message thread sidebar */}
+        <ChatCanvasThread isCurrentVersion={true}>
+          <div className="flex h-full flex-col">
+            <div className="flex-1 overflow-y-auto px-4 pt-20 pb-4">
+              <MessageIterator>
+                {({
+                  message,
+                  isLastMessage,
+                  sender,
+                  vote,
+                  onVote,
+                  isStreaming,
+                }) => {
+                  const baseProps = {
+                    message,
+                    isLastMessage,
+                    sender,
+                    isStreaming,
+                    className: "max-w-full",
+                  };
+
+                  if (message.role === "user") {
+                    return <UserMessage {...baseProps} key={message.id} />;
+                  }
+
+                  if (message.role === "assistant") {
+                    return (
+                      <AssistantMessage
+                        {...baseProps}
+                        key={message.id}
+                        onVoteAction={onVote}
+                        vote={vote}
+                      />
+                    );
+                  }
+
+                  return null;
+                }}
+              </MessageIterator>
+            </div>
+
+            {/* Composer in canvas thread */}
+            <div className="px-4 pb-4">
+              <ChatComposer>
+                <ChatInput
+                  actions={({ status, hasInput }) => (
+                    <ChatComposerAction.Submit
+                      disabled={!hasInput}
+                      status={status}
+                    />
+                  )}
+                  placeholder={t("chat.input.placeholder", "Send a message...")}
+                />
+              </ChatComposer>
+            </div>
+          </div>
+        </ChatCanvasThread>
+
+        {/* Artifact display */}
+        <ChatCanvasMain boundingBox={artifact.boundingBox}>
+          {isDocumentArtifact(artifact.kind) && (
+            <DocumentArtifact
+              documentId={artifact.documentId}
+              kind={artifact.kind}
+              title={artifact.title || "Untitled"}
+            />
+          )}
+          {isMediaArtifact(artifact.kind) && (
+            <MediaArtifact
+              documentId={artifact.documentId}
+              kind={artifact.kind}
+              title={artifact.title || "Untitled"}
+            />
+          )}
+        </ChatCanvasMain>
+      </ChatCanvas>
+
+      {autoResume && <ChatAutoResume initialMessages={chat.messages} />}
       <ChatRouteParamsHandler />
-      <DataStreamHandler />
-    </ChatProvider>
+      <DataStreamDispatcher />
+    </>
   );
 }
-
-export const AssistantChat = memo(PureAssistantChat, (prev, next) => {
-  if (prev.chatId !== next.chatId) {
-    return false;
-  }
-  return true;
-});

@@ -12,10 +12,10 @@ import {
 } from "@/components/chat/message";
 import { ChatMessagePart } from "@/components/chat/message-parts";
 import { SparklesIcon } from "@/components/icons";
-import { ToolUIRouter } from "@/components/tool-ui-router";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage as ChatMessageType } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { FallbackToolUI, ToolUI, type ToolUIRender } from "../tools";
 
 export type AssistantMessageProps = {
   message: ChatMessageType;
@@ -30,6 +30,7 @@ export type AssistantMessageProps = {
   showReasoning?: boolean;
   onVoteAction?: (value: "up" | "down", notes?: string) => Promise<void> | void;
   className?: string;
+  fallback?: ToolUIRender;
 };
 
 export function AssistantMessage({
@@ -42,6 +43,7 @@ export function AssistantMessage({
   showReasoning = true,
   onVoteAction,
   className,
+  fallback = (fallbackProps) => <FallbackToolUI {...fallbackProps} />,
 }: AssistantMessageProps) {
   const [mode, setMode] = useState<ChatMessageMode>("view");
 
@@ -99,9 +101,10 @@ export function AssistantMessage({
                 ) : null;
 
               default:
-                // Tool UI rendering - delegate to ToolUIRouter for custom tool UIs
+                // Tool UI rendering - use inline renderTool function
                 if (isToolUIPart(part)) {
-                  return <ToolUIRouter isReadonly={isReadonly} part={part} />;
+                  const renderTool = ToolUI[part.toolCallId] || fallback;
+                  return renderTool({ part, isReadonly });
                 }
 
                 // Fallback for unsupported parts

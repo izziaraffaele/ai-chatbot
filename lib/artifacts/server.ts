@@ -4,7 +4,7 @@ import type { Session } from "next-auth";
 import { codeDocumentHandler } from "@/artifacts/code/server";
 import { sheetDocumentHandler } from "@/artifacts/sheet/server";
 import { textDocumentHandler } from "@/artifacts/text/server";
-import type { ArtifactKind } from "@/components/artifact";
+import type { ArtifactKind } from "@/components/artifacts";
 import { mastra } from "@/mastra";
 import { artifactSystemPrompt } from "../ai/prompts";
 import { saveDocument } from "../db/queries";

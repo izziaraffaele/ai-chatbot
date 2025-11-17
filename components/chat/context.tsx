@@ -7,7 +7,6 @@ import {
   type HttpChatTransportInitOptions,
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
-import { useSearchParams } from "next/navigation";
 import type React from "react";
 import {
   createContext,
@@ -19,6 +18,10 @@ import {
 } from "react";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
+import { PromptInputProvider } from "@/components/elements/prompt-input";
+import { getChatHistoryPaginationKey } from "@/components/sidebar-history";
+import { toast } from "@/components/toast";
+import type { VisibilityType } from "@/components/visibility-selector";
 import { useChatUsage } from "@/hooks/use-chat-usage";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useClientTools } from "@/hooks/use-client-tools";
@@ -31,11 +34,7 @@ import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
-import { useDataStream } from "./data-stream-provider";
-import { PromptInputProvider } from "./elements/prompt-input";
-import { getChatHistoryPaginationKey } from "./sidebar-history";
-import { toast } from "./toast";
-import type { VisibilityType } from "./visibility-selector";
+import { useDataStream } from "./streaming";
 
 const CHAT_API =
   process.env.CHAT_API || process.env.NEXT_PUBLIC_CHAT_API || "/api/chat";
@@ -195,59 +194,4 @@ export const ChatProvider = (
       </PromptInputProvider>
     </ChatRuntimeContext.Provider>
   );
-};
-
-export const ChatAutoResume = (props: {
-  initialMessages?: ChatMessage[];
-  enabled?: boolean;
-}) => {
-  const { initialMessages = [], enabled = true } = props;
-
-  const { chat } = useChatRuntime();
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: suppress dependency chatConfig
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    const mostRecentMessage = initialMessages.at(-1);
-
-    if (mostRecentMessage?.role === "user") {
-      chat.resumeStream();
-    }
-
-    // we intentionally control hook execution
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, initialMessages.at, chat?.id]);
-
-  return null;
-};
-
-export const ChatRouteParamsHandler = () => {
-  const { chat } = useChatRuntime();
-  const searchParams = useSearchParams();
-  const query = searchParams.get("query");
-
-  const hasAppendedQueryRef = useRef(false);
-
-  const lastMessage = chat.messages.at(0);
-  const shouldAppendQuery =
-    !lastMessage ||
-    (chat.messages.length === 1 && lastMessage.role === "assistant");
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: suppress dependency chatConfig
-  useEffect(() => {
-    if (query && shouldAppendQuery && !hasAppendedQueryRef.current) {
-      chat.sendMessage({
-        role: "user" as const,
-        parts: [{ type: "text", text: query }],
-      });
-
-      hasAppendedQueryRef.current = true;
-      window.history.replaceState({}, "", `/chat/${chat.id}`);
-    }
-  }, [query, shouldAppendQuery]);
-
-  return null;
 };

@@ -4,7 +4,7 @@ import type { UseChatHelpers } from "@ai-sdk/react";
 import { useChat } from "@ai-sdk/react";
 import React, { type FormEvent, useCallback, useEffect, useRef } from "react";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
-import { useChatRuntime } from "@/components/chat";
+import { useChatRuntime } from "@/components/chat/context";
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -20,7 +20,6 @@ import {
   PromptInputTextarea,
   PromptInputTools,
   usePromptInputController,
-  useProviderAttachments,
 } from "@/components/elements/prompt-input";
 import { useSelectedAgent } from "@/hooks/use-selected-agent";
 import type { ChatMessage } from "@/lib/types";
@@ -66,7 +65,6 @@ export function useChatComposer() {
   const runtime = useChatRuntime();
   const chat = useChat({ chat: runtime.chat });
   const composer = usePromptInputController();
-  const { files } = useProviderAttachments();
   const { width } = useWindowSize();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -136,20 +134,26 @@ export function useChatComposer() {
   );
 
   return {
-    // Chat helpers
+    /** Chat ID from the current chat session */
     chatId: chat.id,
+    /** Current chat status ('ready', 'streaming', 'error') */
     status: chat.status,
+    /** Function to send a message to the chat */
     sendMessage: chat.sendMessage,
+    /** Function to stop the current streaming response */
     stop: chat.stop,
 
-    // Composer state
+    /** Prompt input controller with text and attachment state */
     composer,
+    /** Current input text value from the textarea */
     inputValue,
+    /** Ref to the textarea element for focus control */
     textareaRef,
-    files,
+    /** Array of attached files */
 
-    // Handlers
+    /** Form submission handler that prevents default and sends/stops chat */
     handleSubmit,
+    /** Core form submission logic that handles message sending */
     submitForm,
   };
 }

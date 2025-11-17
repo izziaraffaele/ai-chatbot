@@ -152,8 +152,21 @@ Enforced by **Ultracite** (Biome-based) with strict rules:
 - Migrations auto-run on build
 - Uses Neon serverless Postgres driver
 
-**8. File Organization**
-- `components/elements/` - Core message and conversation UI
+**8. Composable Chat Primitives**
+- Small, focused components that compose together (vs monolithic chat components)
+- Namespace organization: `ChatComposerTool.*`, `ChatComposerAction.*`
+- Centralized logic in hooks: `useChatComposer`, `useDataStreamSubscription`
+- Subscription-based streaming with pub/sub pattern
+- Canvas-based artifact view with split layout (thread sidebar + main panel)
+- Self-contained message components with inline tool rendering
+- Located in: `components/chat/*`, `components/messages/*`, `components/artifacts/*`
+
+**9. File Organization**
+- `components/chat/` - Composable chat primitives (composer, thread, canvas, streaming)
+- `components/messages/` - Message type components (assistant, user, system)
+- `components/artifacts/` - Artifact implementations (document, code, sheet)
+- `components/tools/` - Tool UI components (weather, createDocument, etc.)
+- `components/elements/` - Core message and conversation UI (AI Elements)
 - `components/ui/` - shadcn/ui primitives
 - `lib/ai/` - AI provider config, prompts, server tools, client tools
 - `lib/db/` - Database schema, queries, migrations

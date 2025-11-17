@@ -10,7 +10,9 @@ import {
   EyeIcon,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { useChatRuntime } from "@/components/chat";
+import { codeArtifact } from "@/artifacts/code/client";
+import { sheetArtifact } from "@/artifacts/sheet/client";
+import { textArtifact } from "@/artifacts/text/client";
 import {
   ArtifactDraftProvider,
   type ArtifactVersion,
@@ -23,17 +25,30 @@ import {
   useArtifactDraft,
   useArtifactVersion,
 } from "@/components/chat/artifact";
+import { useChatRuntime } from "@/components/chat/context";
 import { Toolbar } from "@/components/toolbar";
 import { VersionFooter } from "@/components/version-footer";
 import { useArtifact } from "@/hooks/use-artifact";
 import { useChatDocument } from "@/hooks/use-chat-document";
 import type { Document } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
-import { artifactDefinitions } from "../artifact";
+
+export const documentArtifactDefinitions = [
+  textArtifact,
+  codeArtifact,
+  sheetArtifact,
+];
+
+export type DocumentArtifactKind =
+  (typeof documentArtifactDefinitions)[number]["kind"];
+
+export const isDocumentArtifact = (
+  kind: string
+): kind is DocumentArtifactKind => ["text", "code", "sheet"].includes(kind);
 
 export type DocumentArtifactProps = {
   documentId: string;
-  kind: "text" | "code" | "sheet";
+  kind: DocumentArtifactKind;
   title: string;
   isReadonly?: boolean;
   className?: string;
@@ -58,7 +73,7 @@ export function DocumentArtifact({
   const chatDocument = useChatDocument(documentId);
 
   // Find artifact definition (text, code, or sheet)
-  const artifactDefinition = artifactDefinitions.find(
+  const artifactDefinition = documentArtifactDefinitions.find(
     (def) => def.kind === kind
   );
 
@@ -70,6 +85,7 @@ export function DocumentArtifact({
   const versions = useMemo<ArtifactVersion<string>[]>(() => {
     return (chatDocument.entries || []).map((doc: Document) => ({
       id: doc.id,
+      title: doc.title,
       content: doc.content || "",
       createdAt: doc.createdAt,
       metadata: {},

@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { useChatRuntime } from "@/components/chat";
+import { useChatRuntime } from "@/components/chat/context";
 import type { ChatMessage } from "@/lib/types";
 
 /**

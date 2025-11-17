@@ -1,6 +1,7 @@
 import { createTool } from "@mastra/core/tools";
 // import { streamObject } from "ai";
 import { z } from "zod";
+import { artifactKinds } from "@/lib/artifacts/server";
 import { getDocumentById, saveSuggestions } from "@/lib/db/queries";
 import type { Suggestion } from "@/lib/db/schema";
 // import { generateUUID } from "@/lib/utils";
@@ -17,7 +18,7 @@ export const requestSuggestionsTool = createTool({
     z.object({
       id: z.string(),
       title: z.string(),
-      kind: z.enum(["text", "code", "sheet", "image"]),
+      kind: z.enum(artifactKinds),
       message: z.string().optional(),
     }),
   ]),
@@ -31,7 +32,7 @@ export const requestSuggestionsTool = createTool({
 
     const document = await getDocumentById({ id: documentId });
 
-    if (!document || !document.content) {
+    if (!document || !document.content || document.kind === "image") {
       return {
         error: "Document not found",
       };

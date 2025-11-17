@@ -13,9 +13,7 @@ import {
 } from "react";
 import type { CustomUIDataTypes } from "@/lib/types";
 
-/**
- * DataStream Context
- */
+/** Handles stream data parts in subscription callbacks */
 type DataStreamSubscriptionHandler = (
   part: DataUIPart<CustomUIDataTypes>
 ) => void;
@@ -26,14 +24,22 @@ type DataStreamContextValue = {
     React.SetStateAction<DataUIPart<CustomUIDataTypes>[]>
   >;
   subscribe: (handler: DataStreamSubscriptionHandler) => () => void;
-  _registerSubscriber: (callback: (subscribers: Set<DataStreamSubscriptionHandler>) => void) => void;
+  _registerSubscriber: (
+    callback: (subscribers: Set<DataStreamSubscriptionHandler>) => void
+  ) => void;
 };
 
 const DataStreamContext = createContext<DataStreamContextValue | null>(null);
 
 /**
- * DataStreamProvider
- * Provides streaming data context with subscription mechanism
+ * Provides pub/sub stream data context for real-time features.
+ * Use with DataStreamDispatcher to handle streaming updates.
+ *
+ * @example
+ * <DataStreamProvider>
+ *   <AssistantChat />
+ *   <DataStreamDispatcher />
+ * </DataStreamProvider>
  */
 export function DataStreamProvider({
   children,

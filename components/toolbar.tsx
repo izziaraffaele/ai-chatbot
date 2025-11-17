@@ -18,6 +18,7 @@ import {
   useState,
 } from "react";
 import { useOnClickOutside } from "usehooks-ts";
+import { type ArtifactKind, artifactDefinitions } from "@/components/artifacts";
 import {
   Tooltip,
   TooltipContent,
@@ -26,7 +27,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import type { ChatMessage } from "@/lib/types";
-import { type ArtifactKind, artifactDefinitions } from "./artifact";
 import type { ArtifactToolbarItem } from "./create-artifact";
 import { ArrowUpIcon, StopIcon, SummarizeIcon } from "./icons";
 
@@ -324,8 +324,9 @@ const PureToolbar = ({
   setMessages: UseChatHelpers<ChatMessage>["setMessages"];
   artifactKind: ArtifactKind;
 }) => {
-  const toolbarRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  // @ts-expect-error TODO: Fix this
+  const toolbarRef = useRef<HTMLDivElement>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);

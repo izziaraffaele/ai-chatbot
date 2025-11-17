@@ -1,17 +1,23 @@
+import type { ToolUIPart, UITools } from "ai";
 import type { ChatToolUIPart } from "@/lib/types";
 
-/**
- * Common props for tool UI components
- * @template T - The tool type
- */
-export type ToolUIComponentProps = {
-  /** The tool part containing input, output, and state information */
-  part: ChatToolUIPart;
-  /** Whether the message/tool is in read-only mode. Disables interactive elements when true. */
+export type ChatToolUIProps<TOOLS extends UITools = any> = {
+  part: ToolUIPart<TOOLS>;
   isReadonly?: boolean;
-  /** Optional CSS class name for custom styling */
-  className?: string;
 };
 
-export type InferToolUIComponentProps<K extends string> =
-  ToolUIComponentProps & { part: Extract<ChatToolUIPart, { type: K }> };
+/**
+ * Generic type utility to infer props for any Chat Tool UI component
+ * Infers the tool type dynamically from the part itself
+ */
+export type InferChatToolUIProps<T extends ChatToolUIPart["type"]> = {
+  part: Extract<ChatToolUIPart, { type: T }>;
+  isReadonly?: boolean;
+};
+
+/**
+ * Generic props for document-related tools (inferred dynamically)
+ */
+export type DocumentToolUIProps = InferChatToolUIProps<
+  Extract<ChatToolUIPart, { toolCallId: `tool-${string}Document` }>
+>;

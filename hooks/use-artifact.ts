@@ -2,9 +2,10 @@
 
 import { useCallback, useMemo } from "react";
 import useSWR from "swr";
-import type { UIArtifact } from "@/components/artifact";
+import type { DocumentUIArtifact } from "@/components/artifacts";
+import type { UIArtifact } from "@/components/chat/artifact";
 
-export const initialArtifactData: UIArtifact = {
+export const initialArtifactData: DocumentUIArtifact = {
   documentId: "init",
   content: "",
   kind: "text",
@@ -19,31 +20,35 @@ export const initialArtifactData: UIArtifact = {
   },
 };
 
-type Selector<T> = (state: UIArtifact) => T;
+type Selector<T extends UIArtifact<any, any>, R> = (state: T) => R;
 
-export function useArtifactSelector<Selected>(selector: Selector<Selected>) {
-  const { data: localArtifact } = useSWR<UIArtifact>("artifact", null, {
-    fallbackData: initialArtifactData,
-  });
-
-  const selectedValue = useMemo(() => {
-    if (!localArtifact) {
-      return selector(initialArtifactData);
-    }
-    return selector(localArtifact);
-  }, [localArtifact, selector]);
-
-  return selectedValue;
-}
-
-export function useArtifact() {
-  const { data: localArtifact, mutate: setLocalArtifact } = useSWR<UIArtifact>(
+export function useArtifactSelector<T extends UIArtifact<any, any>, Selected>(
+  selector: Selector<T, Selected>
+) {
+  const { data: localArtifact } = useSWR<UIArtifact<any, any>>(
     "artifact",
     null,
     {
       fallbackData: initialArtifactData,
     }
   );
+
+  const selectedValue = useMemo(() => {
+    if (!localArtifact) {
+      return selector(initialArtifactData as T);
+    }
+    return selector(localArtifact as T);
+  }, [localArtifact, selector]);
+
+  return selectedValue;
+}
+
+export function useArtifact<T extends UIArtifact<any, any> = UIArtifact>() {
+  const { data: localArtifact, mutate: setLocalArtifact } = useSWR<
+    UIArtifact<any, any>
+  >("artifact", null, {
+    fallbackData: initialArtifactData,
+  });
 
   const artifact = useMemo(() => {
     if (!localArtifact) {
@@ -53,12 +58,12 @@ export function useArtifact() {
   }, [localArtifact]);
 
   const setArtifact = useCallback(
-    (updaterFn: UIArtifact | ((currentArtifact: UIArtifact) => UIArtifact)) => {
+    (updaterFn: T | ((currentArtifact: T) => T)) => {
       setLocalArtifact((currentArtifact) => {
         const artifactToUpdate = currentArtifact || initialArtifactData;
 
         if (typeof updaterFn === "function") {
-          return updaterFn(artifactToUpdate);
+          return updaterFn(artifactToUpdate as T);
         }
 
         return updaterFn;

@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback } from "react";
+import { artifactDefinitions } from "@/components/artifacts";
 import { useDataStreamSubscription } from "@/components/chat/streaming";
 import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
-import { artifactDefinitions } from "@/components/artifact";
 
 /**
  * useArtifactStreaming Hook

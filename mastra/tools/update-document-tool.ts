@@ -1,6 +1,9 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
-import { documentHandlersByArtifactKind } from "@/lib/artifacts/server";
+import {
+  artifactKinds,
+  documentHandlersByArtifactKind,
+} from "@/lib/artifacts/server";
 import { getDocumentById } from "@/lib/db/queries";
 import { getSession } from "../utils/runtime-utils";
 
@@ -16,7 +19,7 @@ export const updateDocumentTool = createTool({
   outputSchema: z.object({
     id: z.string(),
     title: z.string(),
-    kind: z.enum(["text", "code", "sheet", "image"]),
+    kind: z.enum(artifactKinds),
     content: z.string(),
   }),
   execute: async ({ context, runtimeContext, writer }) => {
@@ -26,7 +29,7 @@ export const updateDocumentTool = createTool({
 
     const document = await getDocumentById({ id });
 
-    if (!document) {
+    if (!document || document.kind === "image") {
       throw new Error("Document not found");
     }
 

@@ -9,18 +9,16 @@ import {
   ToolInput,
   ToolOutput,
 } from "@/components/elements/tool";
-import { Weather } from "@/components/weather";
+import { Weather as WeatherDisplay } from "@/components/weather";
+import type { InferChatToolUIProps } from "./types";
 
-import type { InferToolUIComponentProps } from "./types";
-
-export type WeatherToolUIProps = InferToolUIComponentProps<"tool-getWeather">;
+export type WeatherProps = InferChatToolUIProps<"tool-getWeather">;
 
 /**
- * WeatherToolUI Component
+ * Weather Tool UI Component
  * Displays weather tool invocations with location input and weather output
- * Memoized to prevent re-renders when part or isReadonly props haven't changed
  */
-function PureWeatherToolUI({ part }: WeatherToolUIProps) {
+function PureWeather({ part }: WeatherProps) {
   return (
     <Tool defaultOpen={true}>
       <ToolHeader state={part.state} type="tool-getWeather" />
@@ -29,7 +27,7 @@ function PureWeatherToolUI({ part }: WeatherToolUIProps) {
         {part.state === "output-available" && part.output && (
           <ToolOutput
             errorText={undefined}
-            output={<Weather weatherAtLocation={part.output as any} />}
+            output={<WeatherDisplay weatherAtLocation={part.output as any} />}
           />
         )}
       </ToolContent>
@@ -37,11 +35,11 @@ function PureWeatherToolUI({ part }: WeatherToolUIProps) {
   );
 }
 
-export const WeatherToolUI = memo(PureWeatherToolUI, (prevProps, nextProps) => {
+export const Weather = memo(PureWeather, (prevProps, nextProps) => {
   return (
     equal(prevProps.part, nextProps.part) &&
     prevProps.isReadonly === nextProps.isReadonly
   );
 });
 
-WeatherToolUI.displayName = "WeatherToolUI";
+Weather.displayName = "Weather";

@@ -7,6 +7,20 @@ import {
 } from "@/components/elements/conversation";
 import { cn } from "@/lib/utils";
 
+/**
+ * Chat interface container with full-height layout.
+ *
+ * @example
+ * <ChatThread>
+ *   <ChatThreadHeader />
+ *   <ChatThreadContent>
+ *     <MessageIterator empty={<ChatThreadEmpty />} />
+ *   </ChatThreadContent>
+ *   <ChatThreadComposer>
+ *     <ChatInput />
+ *   </ChatThreadComposer>
+ * </ChatThread>
+ */
 export const ChatThread = ({
   className,
   ...others
@@ -23,6 +37,18 @@ export const ChatThread = ({
   );
 };
 
+/**
+ * Chat header for navigation and controls.
+ *
+ * @example
+ * <ChatThreadHeader>
+ *   <SidebarToggle />
+ *   <Button asChild variant="outline">
+ *     <Link href="/"><PlusIcon /> New Chat</Link>
+ *   </Button>
+ *   <VisibilitySelector />
+ * </ChatThreadHeader>
+ */
 export const ChatThreadHeader = ({
   className,
   ...others
@@ -39,6 +65,23 @@ export const ChatThreadHeader = ({
   );
 };
 
+/**
+ * Main message content area with auto-scroll. Includes ConversationScrollButton.
+ *
+ * @example
+ * <ChatThreadContent>
+ *   <MessageIterator empty={<ChatThreadEmpty />}>
+ *     {({ message, isLastMessage, vote, onVote }) => (
+ *       <AssistantMessage
+ *         message={message}
+ *         isLastMessage={isLastMessage}
+ *         vote={vote}
+ *         onVoteAction={onVote}
+ *       />
+ *     )}
+ *   </MessageIterator>
+ * </ChatThreadContent>
+ */
 export const ChatThreadContent = ({
   className,
   children,
@@ -57,6 +100,17 @@ export const ChatThreadContent = ({
   );
 };
 
+/**
+ * Bottom input container with spacing and z-index layering.
+ *
+ * @example
+ * <ChatThreadComposer>
+ *   <ChatInput
+ *     placeholder="Send a message..."
+ *     actions={({ status }) => <ChatComposerAction.Submit status={status} />}
+ *   />
+ * </ChatThreadComposer>
+ */
 export const ChatThreadComposer = ({
   className,
   ...others

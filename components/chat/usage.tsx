@@ -1,7 +1,6 @@
 "use client";
 
-import { useChatUsage } from "@/hooks/use-chat-usage";
-import { useChatRuntime } from "@/components/chat";
+import { useChatRuntime } from "@/components/chat/context";
 import {
   Context,
   ContextCacheUsage,
@@ -14,6 +13,7 @@ import {
   ContextReasoningUsage,
   ContextTrigger,
 } from "@/components/elements/context";
+import { useChatUsage } from "@/hooks/use-chat-usage";
 
 const DEFAULT_MAX_TOKEN = Number.parseInt(
   process.env.CHAT_DEFAULT_MAX_TOKEN ||

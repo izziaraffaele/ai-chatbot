@@ -1,16 +1,15 @@
 "use client";
 
-import { Fragment } from "react";
 import { useChat } from "@ai-sdk/react";
-import { useChatRuntime } from "@/components/chat";
+import { Fragment } from "react";
+import { useChatRuntime } from "@/components/chat/context";
 import { useChatVotes } from "@/hooks/use-chat-votes";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 
-// ============================================================================
-// Message Iterator
-// ============================================================================
-
+/**
+ * Props passed to MessageIterator render function
+ */
 export type MessageIteratorRenderProps = {
   message: ChatMessage;
   sender: {
@@ -23,6 +22,22 @@ export type MessageIteratorRenderProps = {
   onVote: (value: "up" | "down", notes?: string) => Promise<void> | void;
 };
 
+/**
+ * Iterates through chat messages and provides render props for each message.
+ * Handles voting, streaming state, and empty state display.
+ *
+ * @example
+ * <MessageIterator empty={<ChatThreadEmpty />}>
+ *   {({ message, isLastMessage, vote, onVote }) => (
+ *     <AssistantMessage
+ *       message={message}
+ *       isLastMessage={isLastMessage}
+ *       vote={vote}
+ *       onVoteAction={onVote}
+ *     />
+ *   )}
+ * </MessageIterator>
+ */
 export type MessageIteratorProps = {
   empty?: React.ReactNode;
   displayUser?: { displayName?: string; avatar?: React.ReactNode };
