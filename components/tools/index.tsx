@@ -1,18 +1,26 @@
-import type { ToolUIPart } from "ai";
+import { getToolName, type ToolUIPart } from "ai";
 import { DocumentTool } from "./document";
 import { Fallback } from "./fallback";
+import type { ChatToolProps } from "./types";
 import { Weather } from "./weather";
 
-export type ToolUIRender = (props: {
-  part: ToolUIPart<any>;
-  isReadonly?: boolean;
-}) => React.ReactNode;
+export type * from "./types";
 
-export const ToolUI: Record<string, ToolUIRender> = {
-  "tool-createDocument": DocumentTool,
-  "tool-updateDocument": DocumentTool,
-  "tool-requestSuggestions": DocumentTool,
-  "tool-getWeather": Weather,
+export const ToolUI = {
+  createDocument: DocumentTool,
+  updateDocument: DocumentTool,
+  requestSuggestions: DocumentTool,
+  getWeather: Weather,
 };
 
 export const FallbackToolUI = Fallback;
+
+export const getToolUI = (
+  part: ToolUIPart,
+  fallback: React.ElementType<ChatToolProps> = FallbackToolUI
+) => {
+  const toolName = getToolName(part);
+  const registry = ToolUI as Record<string, React.ElementType<ChatToolProps>>;
+
+  return toolName in ToolUI ? registry[toolName] : fallback;
+};

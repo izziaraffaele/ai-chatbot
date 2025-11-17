@@ -1,7 +1,15 @@
-import type { ToolUIPart, UIMessage } from "ai";
+import type {
+  DeepPartial,
+  InferUITool,
+  ProviderMetadata,
+  Tool,
+  ToolUIPart,
+  UIMessage,
+  UITool,
+} from "ai";
 import { z } from "zod";
 import type { ArtifactKind } from "@/components/artifacts";
-import type { ChatAgentUITools } from "@/mastra/agents";
+import type { ChatAgentTools } from "@/mastra/agents";
 import type { Suggestion } from "./db/schema";
 import type { AppUsage } from "./usage";
 
@@ -17,10 +25,13 @@ export const messageMetadataSchema = z.object({
 
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>;
 
-export type ChatUITools = ChatAgentUITools;
-export type ChatToolUIPart = ToolUIPart<ChatUITools>;
+export type ChatTools = ChatAgentTools;
+export type ChatToolPart = ToolUIPart<ChatTools>;
+export type ChatToolInvocation = {
+  [K in keyof ChatTools]: UIToolInvocation<ChatTools[K]>;
+};
 
-export type CustomUIDataTypes = {
+export type ChatDataTypes = {
   textDelta: string;
   imageDelta: string;
   sheetDelta: string;
@@ -35,14 +46,105 @@ export type CustomUIDataTypes = {
   usage: AppUsage;
 };
 
-export type ChatMessage = UIMessage<
-  MessageMetadata,
-  CustomUIDataTypes,
-  ChatUITools
->;
+export type ChatMessage = UIMessage<MessageMetadata, ChatDataTypes, ChatTools>;
 
 export type Attachment = {
   name: string;
   url: string;
   contentType: string;
 };
+
+type asUITool<TOOL extends UITool | Tool> = TOOL extends Tool
+  ? InferUITool<TOOL>
+  : TOOL;
+
+type UIToolInvocation<TOOL extends UITool | Tool> = {
+  /**
+   * ID of the tool call.
+   */
+  toolCallId: string;
+  title?: string;
+
+  /**
+   * Whether the tool call was executed by the provider.
+   */
+  providerExecuted?: boolean;
+} & (
+  | {
+      state: "input-streaming";
+      input: DeepPartial<asUITool<TOOL>["input"]> | undefined;
+      output?: never;
+      errorText?: never;
+      approval?: never;
+    }
+  | {
+      state: "input-available";
+      input: asUITool<TOOL>["input"];
+      output?: never;
+      errorText?: never;
+      callProviderMetadata?: ProviderMetadata;
+      approval?: never;
+    }
+  | {
+      state: "approval-requested";
+      input: asUITool<TOOL>["input"];
+      output?: never;
+      errorText?: never;
+      callProviderMetadata?: ProviderMetadata;
+      approval: {
+        id: string;
+        approved?: never;
+        reason?: never;
+      };
+    }
+  | {
+      state: "approval-responded";
+      input: asUITool<TOOL>["input"];
+      output?: never;
+      errorText?: never;
+      callProviderMetadata?: ProviderMetadata;
+      approval: {
+        id: string;
+        approved: boolean;
+        reason?: string;
+      };
+    }
+  | {
+      state: "output-available";
+      input: asUITool<TOOL>["input"];
+      output: asUITool<TOOL>["output"];
+      errorText?: never;
+      callProviderMetadata?: ProviderMetadata;
+      preliminary?: boolean;
+      approval?: {
+        id: string;
+        approved: true;
+        reason?: string;
+      };
+    }
+  | {
+      state: "output-error"; // TODO AI SDK 6: change to 'error' state
+      input: asUITool<TOOL>["input"] | undefined;
+      rawInput?: unknown; // TODO AI SDK 6: remove this field, input should be unknown
+      output?: never;
+      errorText: string;
+      callProviderMetadata?: ProviderMetadata;
+      approval?: {
+        id: string;
+        approved: true;
+        reason?: string;
+      };
+    }
+  | {
+      state: "output-denied";
+      input: asUITool<TOOL>["input"];
+      output?: never;
+      errorText?: never;
+      callProviderMetadata?: ProviderMetadata;
+      approval: {
+        id: string;
+        approved: false;
+        reason?: string;
+      };
+    }
+);

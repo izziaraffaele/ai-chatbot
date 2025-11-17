@@ -30,7 +30,7 @@ export function ChatCanvas({
         <motion.div
           animate={{ opacity: 1 }}
           className={cn(
-            "fixed top-0 left-0 z-50 flex h-dvh w-dvw flex-row bg-transparent",
+            "grpup/canvas fixed top-0 left-0 z-50 flex h-dvh w-dvw flex-row bg-transparent",
             className
           )}
           data-slot="chat-canvas"

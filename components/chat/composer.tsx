@@ -40,10 +40,7 @@ export function ChatComposer({
 }: ChatComposerProps) {
   return (
     <div
-      className={cn(
-        "sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl shrink-0 flex-col gap-4 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4",
-        className
-      )}
+      className={cn("relative flex w-full flex-col gap-4", className)}
       data-slot="chat-composer"
       {...others}
     >
@@ -66,7 +63,7 @@ export function useChatComposer() {
   const chat = useChat({ chat: runtime.chat });
   const composer = usePromptInputController();
   const { width } = useWindowSize();
-
+  console.log(chat.error, chat.messages.at(-1));
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [localStorageInput, setLocalStorageInput] = useLocalStorage(
@@ -217,44 +214,41 @@ export function ChatInput({
   const { status, inputValue, textareaRef, handleSubmit } = useChatComposer();
 
   return (
-    <div
-      className={cn("relative flex w-full flex-col gap-4", className)}
+    <PromptInput
+      className={className}
       data-slot="chat-input"
+      globalDrop={globalDrop}
+      multiple={multiple}
+      onSubmit={handleSubmit}
     >
-      <PromptInput
-        globalDrop={globalDrop}
-        multiple={multiple}
-        onSubmit={handleSubmit}
-      >
-        {header && <PromptInputHeader>{header}</PromptInputHeader>}
+      {header && <PromptInputHeader>{header}</PromptInputHeader>}
 
-        <PromptInputBody className="max-h-[200px] min-h-11">
-          <PromptInputTextarea
-            autoFocus
-            className={cn({
-              "px-5 pb-5": Boolean(header),
-              "px-5 py-5": !header,
-            })}
-            disabled={disabled}
-            placeholder={placeholder}
-            ref={textareaRef}
-            rows={1}
-            value={inputValue}
-          />
-        </PromptInputBody>
+      <PromptInputBody className="max-h-[200px] min-h-11">
+        <PromptInputTextarea
+          autoFocus
+          className={cn({
+            "px-5 pb-5": Boolean(header),
+            "px-5 py-5": !header,
+          })}
+          disabled={disabled}
+          placeholder={placeholder}
+          ref={textareaRef}
+          rows={1}
+          value={inputValue}
+        />
+      </PromptInputBody>
 
-        <PromptInputFooter>
-          {tools && <PromptInputTools>{tools}</PromptInputTools>}
-          {typeof actions === "function"
-            ? actions({
-                status,
-                hasInput: Boolean(inputValue),
-                disabled,
-              })
-            : actions}
-        </PromptInputFooter>
-      </PromptInput>
-    </div>
+      <PromptInputFooter>
+        {tools && <PromptInputTools>{tools}</PromptInputTools>}
+        {typeof actions === "function"
+          ? actions({
+              status,
+              hasInput: Boolean(inputValue),
+              disabled,
+            })
+          : actions}
+      </PromptInputFooter>
+    </PromptInput>
   );
 }
 

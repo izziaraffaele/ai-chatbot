@@ -10,7 +10,7 @@ import "react-data-grid/lib/styles.css";
 
 type SheetEditorProps = {
   content: string;
-  saveContent: (content: string, isCurrentVersion: boolean) => void;
+  onSaveContent: (content: string, isCurrentVersion: boolean) => void;
   currentVersionIndex: number;
   isCurrentVersion: boolean;
   status: string;
@@ -19,7 +19,10 @@ type SheetEditorProps = {
 const MIN_ROWS = 50;
 const MIN_COLS = 26;
 
-const PureSpreadsheetEditor = ({ content, saveContent }: SheetEditorProps) => {
+const PureSpreadsheetEditor = ({
+  content,
+  onSaveContent,
+}: SheetEditorProps) => {
   const { resolvedTheme } = useTheme();
 
   const parseData = useMemo(() => {
@@ -103,7 +106,7 @@ const PureSpreadsheetEditor = ({ content, saveContent }: SheetEditorProps) => {
     });
 
     const newCsvContent = generateCsv(updatedData);
-    saveContent(newCsvContent, true);
+    onSaveContent(newCsvContent, true);
   };
 
   return (
@@ -133,7 +136,7 @@ function areEqual(prevProps: SheetEditorProps, nextProps: SheetEditorProps) {
     prevProps.isCurrentVersion === nextProps.isCurrentVersion &&
     !(prevProps.status === "streaming" && nextProps.status === "streaming") &&
     prevProps.content === nextProps.content &&
-    prevProps.saveContent === nextProps.saveContent
+    prevProps.onSaveContent === nextProps.onSaveContent
   );
 }
 

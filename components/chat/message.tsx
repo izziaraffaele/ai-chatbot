@@ -43,7 +43,7 @@ export const ChatMessage = ({
   <Message
     asChild
     className={cn(
-      "flex-row gap-2 md:gap-3",
+      "flex-row gap-2 group/canvas:w-full md:gap-3",
       {
         "flex-row-reverse": from === "user",
       },

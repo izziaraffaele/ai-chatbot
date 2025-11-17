@@ -1,6 +1,7 @@
 "use client";
 
 import { isToolUIPart } from "ai";
+import type React from "react";
 import { useState } from "react";
 import { MessagePartIterator } from "@/components/chat/iterators";
 import {
@@ -15,7 +16,7 @@ import { SparklesIcon } from "@/components/icons";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage as ChatMessageType } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { FallbackToolUI, ToolUI, type ToolUIRender } from "../tools";
+import { type ChatToolProps, getToolUI } from "../tools";
 
 export type AssistantMessageProps = {
   message: ChatMessageType;
@@ -30,7 +31,7 @@ export type AssistantMessageProps = {
   showReasoning?: boolean;
   onVoteAction?: (value: "up" | "down", notes?: string) => Promise<void> | void;
   className?: string;
-  fallback?: ToolUIRender;
+  fallbackTool?: React.ElementType<ChatToolProps>;
 };
 
 export function AssistantMessage({
@@ -43,7 +44,7 @@ export function AssistantMessage({
   showReasoning = true,
   onVoteAction,
   className,
-  fallback = (fallbackProps) => <FallbackToolUI {...fallbackProps} />,
+  fallbackTool,
 }: AssistantMessageProps) {
   const [mode, setMode] = useState<ChatMessageMode>("view");
 
@@ -55,7 +56,7 @@ export function AssistantMessage({
 
   return (
     <ChatMessage
-      className={className}
+      className={cn({ "min-h-6": isLastMessage }, className)}
       from={message.role}
       isReadonly={isReadonly}
       isStreaming={isStreaming}
@@ -82,7 +83,7 @@ export function AssistantMessage({
           isStreaming={isStreaming}
           message={message}
         >
-          {({ part, isStreaming: isPartStreaming }) => {
+          {({ part, isStreaming: isPartStreaming, isLastPart }) => {
             switch (part.type) {
               case "text":
                 return (
@@ -103,8 +104,15 @@ export function AssistantMessage({
               default:
                 // Tool UI rendering - use inline renderTool function
                 if (isToolUIPart(part)) {
-                  const renderTool = ToolUI[part.toolCallId] || fallback;
-                  return renderTool({ part, isReadonly });
+                  const ToolComponent = getToolUI(part, fallbackTool);
+                  return (
+                    <ToolComponent
+                      isLastPart={isLastPart}
+                      isReadonly={isReadonly}
+                      isStreaming={isStreaming}
+                      part={part}
+                    />
+                  );
                 }
 
                 // Fallback for unsupported parts
@@ -114,13 +122,15 @@ export function AssistantMessage({
         </MessagePartIterator>
 
         {/* Toolbar */}
-        <ChatMessageToolbar
-          isReadonly={isReadonly}
-          message={message}
-          onModeChange={setMode}
-          onVote={onVoteAction}
-          vote={vote}
-        />
+        {!isStreaming && (
+          <ChatMessageToolbar
+            isReadonly={isReadonly}
+            message={message}
+            onModeChange={setMode}
+            onVote={onVoteAction}
+            vote={vote}
+          />
+        )}
       </ChatMessageBody>
     </ChatMessage>
   );

@@ -1,11 +1,13 @@
 "use client";
 
+import type { ChatStatus } from "ai";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/elements/conversation";
 import { cn } from "@/lib/utils";
+import { ChatComposer } from "./composer";
 
 /**
  * Chat interface container with full-height layout.
@@ -23,15 +25,17 @@ import { cn } from "@/lib/utils";
  */
 export const ChatThread = ({
   className,
+  status,
   ...others
-}: React.ComponentProps<"div">) => {
+}: React.ComponentProps<"div"> & { status?: ChatStatus }) => {
   return (
     <div
       className={cn(
-        "relative flex h-dvh min-w-0 flex-col overflow-hidden bg-background",
+        "group/thread relative flex h-dvh min-w-0 flex-col overflow-hidden bg-background",
         className
       )}
       data-slot="chat-thread"
+      data-status={status || "ready"}
       {...others}
     />
   );
@@ -113,6 +117,7 @@ export const ChatThreadContent = ({
  */
 export const ChatThreadComposer = ({
   className,
+  children,
   ...others
 }: React.ComponentProps<"div">) => {
   return (
@@ -123,6 +128,8 @@ export const ChatThreadComposer = ({
       )}
       data-slot="chat-thread-composer"
       {...others}
-    />
+    >
+      <ChatComposer>{children}</ChatComposer>
+    </div>
   );
 };

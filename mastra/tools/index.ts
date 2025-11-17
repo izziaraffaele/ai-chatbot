@@ -8,7 +8,6 @@
  * - writer: DataStream writer for real-time UI updates
  */
 
-import type { InferUITool } from "@mastra/core/tools";
 import { createDocumentTool } from "./create-document-tool";
 import { requestSuggestionsTool } from "./request-suggestions-tool";
 import { updateDocumentTool } from "./update-document-tool";
@@ -18,10 +17,10 @@ import { getWeatherTool } from "./weather-tool";
  * Inferred Tool Types
  * These types are automatically inferred from the tool definitions using Mastra's type utilities
  */
-export type GetWeatherTool = InferUITool<typeof getWeatherTool>;
-export type CreateDocumentTool = InferUITool<typeof createDocumentTool>;
-export type UpdateDocumentTool = InferUITool<typeof updateDocumentTool>;
-export type RequestSuggestionsTool = InferUITool<typeof requestSuggestionsTool>;
+export type GetWeatherTool = typeof getWeatherTool;
+export type CreateDocumentTool = typeof createDocumentTool;
+export type UpdateDocumentTool = typeof updateDocumentTool;
+export type RequestSuggestionsTool = typeof requestSuggestionsTool;
 
 /**
  * All Mastra Tools Union Type

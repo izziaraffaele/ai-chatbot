@@ -1,69 +1,64 @@
 "use client";
 
+import { getToolName } from "ai";
 import equal from "fast-deep-equal";
 import { memo, useCallback, useMemo, useRef } from "react";
+import { toast } from "sonner";
+import { CodeEditor } from "@/components/code-editor";
 import { InlineDocumentSkeleton } from "@/components/document-skeleton";
-import { FileIcon, FullscreenIcon, LoaderIcon } from "@/components/icons";
+import {
+  FileIcon,
+  FullscreenIcon,
+  LoaderIcon,
+  MessageIcon,
+  PencilEditIcon,
+} from "@/components/icons";
+import { Editor } from "@/components/text-editor";
 import { useArtifact } from "@/hooks/use-artifact";
 import { useChatDocument } from "@/hooks/use-chat-document";
 import type { Document } from "@/lib/db/schema";
+import type { ChatTools } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import type { InferChatToolUIProps } from "./types";
+import { SpreadsheetEditor } from "../sheet-editor";
+import type { ChatToolProps } from "./types";
 
-// const getToolAction = (
-//   type:
-//     | "tool-createDocument"
-//     | "tool-updateDocument"
-//     | "tool-requestSuggestions",
-//   title: string
-// ) => {
-//   const message = {
-//     "tool-createDocument": `Created "${title}"`,
-//     "tool-updateDocument": `Updated "${title}"`,
-//     "tool-requestSuggestions": `Added suggestions to "${title}"`,
-//   }[type];
+type DocumentTools = Pick<
+  ChatTools,
+  "createDocument" | "updateDocument" | "requestSuggestions"
+>;
 
-//   return message;
-// };
+export type DocumentToolProps = ChatToolProps<DocumentTools>;
 
-const getToolError = (
-  type:
-    | "tool-createDocument"
-    | "tool-updateDocument"
-    | "tool-requestSuggestions",
-  errorText?: string
-) => {
+const getToolError = (type: string, errorText?: string) => {
   const action = {
-    "tool-createDocument": "creating",
-    "tool-updateDocument": "updating",
-    "tool-requestSuggestions": "requesting suggestions",
+    createDocument: "creating document",
+    updateDocument: "updating document",
+    requestSuggestions: "requesting document suggestions",
   }[type];
 
-  return `Error ${action} document: ${errorText}`;
+  return `Error ${action}: ${errorText}`;
 };
 
 /**
  * Unified Document Tool UI Component
  * Handles both document creation and update tool invocations using custom document layout
  */
-function PureDocumentTool({
-  part,
-  isReadonly = false,
-}: InferChatToolUIProps<
-  "tool-createDocument" | "tool-updateDocument" | "tool-requestSuggestions"
->) {
+function PureDocumentTool(props: DocumentToolProps) {
+  const { part, isReadonly = false, isLastPart, isStreaming } = props;
   const { artifact, setArtifact } = useArtifact();
   const hitboxRef = useRef<HTMLDivElement>(null);
 
-  const result = part.output;
-  const documents = useChatDocument(
-    result && "id" in result ? result.id : null
-  );
+  const documentId = part.output && "id" in part.output ? part.output.id : null;
 
+  const documents = useChatDocument(documentId);
   const previewDocument = useMemo<Document>(
     () => documents.entries[0],
     [documents]
   );
+
+  const isStreamingArtifact =
+    ((isStreaming && isLastPart) || artifact.status === "streaming") &&
+    documentId === artifact.documentId;
 
   // Handle click to open document in canvas
   const handleDocumentClick = useCallback(() => {
@@ -72,17 +67,17 @@ function PureDocumentTool({
     }
 
     const boundingBox = hitboxRef.current?.getBoundingClientRect();
-    if (!boundingBox || !result) {
+    if (!boundingBox || !part.output) {
       return;
     }
 
     setArtifact((currentArtifact) =>
-      "id" in result
+      "id" in part.output
         ? {
-            documentId: result.id,
-            kind: result.kind,
+            documentId: part.output.id,
+            kind: part.output.kind,
             content: currentArtifact.content,
-            title: result.title,
+            title: part.output.title,
             isVisible: true,
             status: "idle",
             boundingBox: {
@@ -94,19 +89,24 @@ function PureDocumentTool({
           }
         : currentArtifact
     );
-  }, [result, isReadonly, setArtifact]);
+  }, [part.output, isReadonly, setArtifact]);
 
   // Check if output contains an error
   if (part.output && "error" in part.output) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50">
-        {getToolError(part.type, String(part.output.error))}
+        {getToolError(getToolName(part), String(part.output.error))}
       </div>
     );
   }
 
+  if (artifact.isVisible) {
+    const Comp = part.output ? DocumentToolResult : DocumentToolCall;
+    return <Comp {...props} isStreaming={isStreamingArtifact} />;
+  }
+
   // Loading state
-  if (documents.isLoading) {
+  if (documents.isLoading || isStreamingArtifact) {
     return <LoadingDocumentSkeleton />;
   }
 
@@ -127,8 +127,6 @@ function PureDocumentTool({
   if (!document) {
     return <LoadingDocumentSkeleton />;
   }
-
-  const isStreaming = artifact.status === "streaming";
 
   return (
     <div className="relative w-full cursor-pointer">
@@ -239,11 +237,50 @@ const LoadingDocumentSkeleton = () => (
   </div>
 );
 
+export const DocumentTool = memo(PureDocumentTool, (prevProps, nextProps) => {
+  return (
+    equal(prevProps.part, nextProps.part) &&
+    prevProps.isReadonly === nextProps.isReadonly
+  );
+});
+
+DocumentTool.displayName = "DocumentTool";
+
+const DOCUMENT_TOOL_ICON_MAP = {
+  createDocument: FileIcon,
+  updateDocument: PencilEditIcon,
+  requestSuggestions: MessageIcon,
+};
+
 /**
  * Document content renderer based on document kind
  */
 const DocumentContent = ({ document }: { document: Document }) => {
   const content = document.content ?? "";
+  // Common props for both editors
+  const commonEditorProps = {
+    content,
+    isCurrentVersion: true,
+    currentVersionIndex: 0,
+    status: "idle" as const,
+    onSaveContent: () => {
+      return;
+    }, // No-op for preview
+    suggestions: [],
+  };
+
+  const renderEditor = () => {
+    switch (document.kind) {
+      case "text":
+        return <Editor {...commonEditorProps} />;
+      case "code":
+        return <CodeEditor {...commonEditorProps} />;
+      case "sheet":
+        return <SpreadsheetEditor {...commonEditorProps} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div
@@ -255,36 +292,110 @@ const DocumentContent = ({ document }: { document: Document }) => {
         }
       )}
     >
-      {document.kind === "text" ? (
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <pre className="whitespace-pre-wrap text-sm">{content}</pre>
-        </div>
-      ) : document.kind === "code" ? (
-        <div className="relative flex w-full flex-1">
-          <pre className="w-full overflow-x-auto bg-muted p-4 text-sm">
-            <code>{content}</code>
-          </pre>
-        </div>
-      ) : document.kind === "sheet" ? (
-        <div className="relative flex size-full flex-1 p-4">
-          <div className="w-full rounded border bg-muted p-4 text-center text-muted-foreground text-sm">
-            Sheet Editor (Content: {content?.slice(0, 50)}...)
-          </div>
-        </div>
-      ) : (
-        <div className="p-4 text-center text-muted-foreground text-sm">
-          Unknown document type: {document.kind}
-        </div>
-      )}
+      {renderEditor()}
     </div>
   );
 };
 
-export const DocumentTool = memo(PureDocumentTool, (prevProps, nextProps) => {
-  return (
-    equal(prevProps.part, nextProps.part) &&
-    prevProps.isReadonly === nextProps.isReadonly
-  );
-});
+function DocumentToolResult({ part, isReadonly }: DocumentToolProps) {
+  const { setArtifact } = useArtifact();
 
-DocumentTool.displayName = "DocumentTool";
+  const toolName = getToolName(part);
+  const DocumentToolIcon = DOCUMENT_TOOL_ICON_MAP[toolName];
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (isReadonly) {
+      toast.error("Viewing files in shared chats is currently not supported.");
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    const boundingBox = {
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+    };
+
+    setArtifact((currentArtifact) => {
+      if (!part.output || !("id" in part.output)) {
+        return currentArtifact;
+      }
+
+      return {
+        documentId: part.output.id,
+        kind: part.output.kind,
+        content: currentArtifact.content,
+        title: part.output.title,
+        isVisible: true,
+        status: "idle",
+        boundingBox,
+      };
+    });
+  };
+
+  return (
+    <button
+      className="flex w-fit cursor-pointer flex-row items-start gap-3 rounded-xl border bg-background px-3 py-2"
+      onClick={handleClick}
+      type="button"
+    >
+      <div className="mt-1 text-muted-foreground">
+        <DocumentToolIcon />
+      </div>
+      <div className="text-left">
+        {part.output && "title" in part.output ? part.output.title : ""}
+      </div>
+    </button>
+  );
+}
+
+function DocumentToolCall({ part, isReadonly }: DocumentToolProps) {
+  const { setArtifact } = useArtifact();
+  const toolName = getToolName(part);
+
+  const DocumentToolIcon = DOCUMENT_TOOL_ICON_MAP[toolName];
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (isReadonly) {
+      toast.error("Viewing files in shared chats is currently not supported.");
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    const boundingBox = {
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+    };
+
+    setArtifact((currentArtifact) => ({
+      ...currentArtifact,
+      isVisible: true,
+      boundingBox,
+    }));
+  };
+
+  return (
+    <button
+      className="cursor pointer flex w-fit flex-row items-start justify-between gap-3 rounded-xl border px-3 py-2"
+      onClick={handleClick}
+      type="button"
+    >
+      <div className="flex flex-row items-start gap-3">
+        <div className="mt-1 text-zinc-500">
+          <DocumentToolIcon />
+        </div>
+
+        <div className="text-left">
+          {part.input && "title" in part.input ? part.input.title : ""}
+        </div>
+      </div>
+
+      <div className="mt-1 animate-spin">{<LoaderIcon />}</div>
+    </button>
+  );
+}

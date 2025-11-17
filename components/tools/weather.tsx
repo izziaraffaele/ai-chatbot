@@ -10,15 +10,18 @@ import {
   ToolOutput,
 } from "@/components/elements/tool";
 import { Weather as WeatherDisplay } from "@/components/weather";
-import type { InferChatToolUIProps } from "./types";
+import type { ChatTools } from "@/lib/types";
+import type { ChatToolProps } from "./types";
 
-export type WeatherProps = InferChatToolUIProps<"tool-getWeather">;
+export type WeatherToolProps = ChatToolProps<{
+  getWeather: ChatTools["getWeather"];
+}>;
 
 /**
  * Weather Tool UI Component
  * Displays weather tool invocations with location input and weather output
  */
-function PureWeather({ part }: WeatherProps) {
+function PureWeather({ part }: WeatherToolProps) {
   return (
     <Tool defaultOpen={true}>
       <ToolHeader state={part.state} type="tool-getWeather" />

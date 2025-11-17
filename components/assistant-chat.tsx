@@ -8,12 +8,10 @@ import { useArtifact } from "@/hooks/use-artifact";
 import { useArtifactStreaming } from "@/hooks/use-artifact-streaming";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useTranslations } from "@/lib/i18n/use-translations";
-import { cn } from "@/lib/utils";
 import { DocumentArtifact, isDocumentArtifact } from "./artifacts/document";
 import { isMediaArtifact, MediaArtifact } from "./artifacts/media";
 import { ChatCanvas, ChatCanvasMain, ChatCanvasThread } from "./chat/canvas";
 import {
-  ChatComposer,
   ChatComposerAction,
   ChatComposerTool,
   ChatInput,
@@ -28,7 +26,12 @@ import {
   type ChatSuggestionProviderProps,
   ChatSuggestions,
 } from "./chat/suggestions";
-import { ChatThread, ChatThreadContent, ChatThreadHeader } from "./chat/thread";
+import {
+  ChatThread,
+  ChatThreadComposer,
+  ChatThreadContent,
+  ChatThreadHeader,
+} from "./chat/thread";
 import { AssistantMessage } from "./messages/assistant-message";
 import { UserMessage } from "./messages/user-message";
 import { SidebarToggle } from "./sidebar-toggle";
@@ -78,7 +81,7 @@ export function AssistantChat({
   const { open } = useSidebar();
   const { width: windowWidth } = useWindowSize();
   const { chat } = useChatRuntime();
-  const { messages } = useChat({ chat });
+  const { messages, status } = useChat({ chat });
   const { artifact } = useArtifact();
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId: chat.id,
@@ -87,6 +90,88 @@ export function AssistantChat({
   // Subscribe to artifact streaming
   useArtifactStreaming();
 
+  const chatInput = (
+    <ChatInput
+      actions={({ status: inputStatus, hasInput }) => {
+        const submitButton = (
+          <ChatComposerAction.Submit
+            disabled={!hasInput}
+            status={inputStatus}
+          />
+        );
+
+        if (hasInput || promptInputMode === "text") {
+          return submitButton;
+        }
+
+        if (["speech", "prefer-speech"].includes(promptInputMode)) {
+          return <ChatComposerAction.Speech />;
+        }
+
+        return (
+          <div className="flex gap-0.5">
+            <ChatComposerAction.Speech />
+            {submitButton}
+          </div>
+        );
+      }}
+      placeholder={t("chat.input.placeholder", "Send a message...")}
+      tools={
+        <>
+          <ChatComposerTool.AttachmentMenu />
+          <ChatComposerTool.AgentSelector />
+          <ChatComposerTool.ContextUsage />
+        </>
+      }
+    />
+  );
+
+  const chatEmpty = (
+    <ChatGreeting
+      primaryText={t("chat.greeting.title", "Hello there!")}
+      secondaryText={t("chat.greeting.subtitle", "How can I help you today?")}
+    />
+  );
+
+  const chatMessages = (
+    <MessageIterator empty={chatEmpty}>
+      {({ message, isLastMessage, sender, vote, onVote, isStreaming }) => {
+        const baseProps = {
+          message,
+          isLastMessage,
+          sender,
+          isStreaming,
+        };
+
+        // Render based on message role
+        if (message.role === "user") {
+          return (
+            <UserMessage
+              {...baseProps}
+              isReadonly={isReadonly}
+              key={message.id}
+            />
+          );
+        }
+
+        if (message.role === "assistant") {
+          return (
+            <AssistantMessage
+              {...baseProps}
+              isReadonly={isReadonly}
+              key={message.id}
+              onVoteAction={onVote}
+              vote={vote}
+            />
+          );
+        }
+
+        // Skip other message types
+        return null;
+      }}
+    </MessageIterator>
+  );
+
   return (
     <ChatSuggestionProvider
       autoApply={autoApply}
@@ -94,7 +179,7 @@ export function AssistantChat({
       onApply={onApplySuggestion}
       suggestions={suggestions}
     >
-      <ChatThread className={className}>
+      <ChatThread className={className} status={status}>
         <ChatThreadHeader>
           <SidebarToggle />
 
@@ -122,105 +207,13 @@ export function AssistantChat({
           )}
         </ChatThreadHeader>
 
-        <ChatThreadContent>
-          <MessageIterator
-            empty={
-              <ChatGreeting
-                primaryText={t("chat.greeting.title", "Hello there!")}
-                secondaryText={t(
-                  "chat.greeting.subtitle",
-                  "How can I help you today?"
-                )}
-              />
-            }
-          >
-            {({
-              message,
-              isLastMessage,
-              sender,
-              vote,
-              onVote,
-              isStreaming,
-            }) => {
-              const baseProps = {
-                message,
-                isLastMessage,
-                sender,
-                isStreaming,
-              };
-
-              // Render based on message role
-              if (message.role === "user") {
-                return (
-                  <UserMessage
-                    {...baseProps}
-                    className={cn({
-                      "min-h-96": isLastMessage,
-                    })}
-                    isReadonly={isReadonly}
-                    key={message.id}
-                  />
-                );
-              }
-
-              if (message.role === "assistant") {
-                return (
-                  <AssistantMessage
-                    {...baseProps}
-                    className={cn({
-                      "min-h-96": isLastMessage,
-                    })}
-                    isReadonly={isReadonly}
-                    key={message.id}
-                    onVoteAction={onVote}
-                    vote={vote}
-                  />
-                );
-              }
-
-              // Skip other message types
-              return null;
-            }}
-          </MessageIterator>
-        </ChatThreadContent>
+        <ChatThreadContent>{chatMessages}</ChatThreadContent>
 
         {!isReadonly && (
-          <ChatComposer>
+          <ChatThreadComposer>
             {messages.length === 0 && <ChatSuggestions mode="default" />}
-            <ChatInput
-              actions={({ status, hasInput }) => {
-                const submitButton = (
-                  <ChatComposerAction.Submit
-                    disabled={!hasInput}
-                    status={status}
-                  />
-                );
-
-                if (hasInput || promptInputMode === "text") {
-                  return submitButton;
-                }
-
-                if (["speech", "prefer-speech"].includes(promptInputMode)) {
-                  return <ChatComposerAction.Speech />;
-                }
-
-                return (
-                  <div className="flex gap-0.5">
-                    <ChatComposerAction.Speech />
-                    {submitButton}
-                  </div>
-                );
-              }}
-              placeholder={t("chat.input.placeholder", "Send a message...")}
-              tools={
-                <>
-                  <ChatComposerTool.AttachmentMenu />
-                  <ChatComposerTool.AgentSelector />
-                  <ChatComposerTool.ContextUsage />
-                </>
-              }
-            />
-          </ChatComposer>
+            {chatInput}
+          </ChatThreadComposer>
         )}
       </ChatThread>
 
@@ -228,60 +221,14 @@ export function AssistantChat({
       <ChatCanvas isVisible={artifact.isVisible}>
         {/* Message thread sidebar */}
         <ChatCanvasThread isCurrentVersion={true}>
-          <div className="flex h-full flex-col">
-            <div className="flex-1 overflow-y-auto px-4 pt-20 pb-4">
-              <MessageIterator>
-                {({
-                  message,
-                  isLastMessage,
-                  sender,
-                  vote,
-                  onVote,
-                  isStreaming,
-                }) => {
-                  const baseProps = {
-                    message,
-                    isLastMessage,
-                    sender,
-                    isStreaming,
-                    className: "max-w-full",
-                  };
+          <ChatThreadContent className="pt-20">
+            {chatMessages}
+          </ChatThreadContent>
 
-                  if (message.role === "user") {
-                    return <UserMessage {...baseProps} key={message.id} />;
-                  }
-
-                  if (message.role === "assistant") {
-                    return (
-                      <AssistantMessage
-                        {...baseProps}
-                        key={message.id}
-                        onVoteAction={onVote}
-                        vote={vote}
-                      />
-                    );
-                  }
-
-                  return null;
-                }}
-              </MessageIterator>
-            </div>
-
-            {/* Composer in canvas thread */}
-            <div className="px-4 pb-4">
-              <ChatComposer>
-                <ChatInput
-                  actions={({ status, hasInput }) => (
-                    <ChatComposerAction.Submit
-                      disabled={!hasInput}
-                      status={status}
-                    />
-                  )}
-                  placeholder={t("chat.input.placeholder", "Send a message...")}
-                />
-              </ChatComposer>
-            </div>
-          </div>
+          {/* Composer in canvas thread */}
+          <ChatThreadComposer className="px-4 pb-4">
+            {chatInput}
+          </ChatThreadComposer>
         </ChatCanvasThread>
 
         {/* Artifact display */}
