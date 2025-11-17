@@ -1,16 +1,23 @@
-import { ReadableStream } from 'stream/web';
-import { geolocation } from '@vercel/functions';
-import { after } from 'next/server';
-import { toAISdkFormat } from '@mastra/ai-sdk';
+import { toAISdkFormat } from "@mastra/ai-sdk";
+import {
+  convertFullStreamChunkToUIMessageStream,
+  convertMastraChunkToAISDKv5,
+} from "@mastra/core/stream";
+import { geolocation } from "@vercel/functions";
+import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
+import { after } from "next/server";
 import {
   createResumableStreamContext,
   type ResumableStreamContext,
-} from 'resumable-stream';
-import { auth, type UserType } from '@/app/(auth)/auth';
-import { enrichUsageWithTokenlens } from '@/lib/tokenlens/integration';
-import type { VisibilityType } from '@/components/visibility-selector';
-import { entitlementsByUserType } from '@/lib/ai/entitlements';
-import type { ChatModel } from '@/lib/ai/models';
+} from "resumable-stream";
+import { ReadableStream } from "stream/web";
+import { auth, type UserType } from "@/app/(auth)/auth";
+import type { VisibilityType } from "@/components/visibility-selector";
+import type { RuntimeConfig } from "@/config/runtime.schema";
+import { entitlementsByUserType } from "@/lib/ai/entitlements";
+import type { ChatModel } from "@/lib/ai/models";
+import { titlePrompt } from "@/lib/ai/prompts";
+import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
   deleteChatById,
@@ -20,24 +27,17 @@ import {
   saveChat,
   saveMessages,
   updateChatLastContextById,
-} from '@/lib/db/queries';
-import type { DBMessage } from '@/lib/db/schema';
-import { ChatSDKError } from '@/lib/errors';
-import type { ChatMessage } from '@/lib/types';
-import type { AppUsage } from '@/lib/usage';
-import { convertToUIMessages, generateUUID } from '@/lib/utils';
-import { type PostRequestBody, postRequestBodySchema } from './schema';
-import { mastra } from '@/mastra';
-import { createToolContext } from '@/mastra/utils/runtime-utils';
-import { isProductionEnvironment } from '@/lib/constants';
-import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
-import { RuntimeConfig } from '@/config/runtime.schema';
-import { AGENT_NAMES } from '@/mastra/agents';
-import { titlePrompt } from '@/lib/ai/prompts';
-import {
-  convertFullStreamChunkToUIMessageStream,
-  convertMastraChunkToAISDKv5,
-} from '@mastra/core/stream';
+} from "@/lib/db/queries";
+import type { DBMessage } from "@/lib/db/schema";
+import { ChatSDKError } from "@/lib/errors";
+import { enrichUsageWithTokenlens } from "@/lib/tokenlens/integration";
+import type { ChatMessage } from "@/lib/types";
+import type { AppUsage } from "@/lib/usage";
+import { convertToUIMessages, generateUUID } from "@/lib/utils";
+import { mastra } from "@/mastra";
+import { AGENT_NAMES } from "@/mastra/agents";
+import { createToolContext } from "@/mastra/utils/runtime-utils";
+import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
 export const maxDuration = 60;
 
@@ -50,9 +50,9 @@ export function getStreamContext() {
         waitUntil: after,
       });
     } catch (error: any) {
-      if (error.message.includes('REDIS_URL')) {
+      if (error.message.includes("REDIS_URL")) {
         console.log(
-          ' > Resumable streams are disabled due to missing REDIS_URL'
+          " > Resumable streams are disabled due to missing REDIS_URL"
         );
       } else {
         console.error(error);
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
   } catch (_) {
-    return new ChatSDKError('bad_request:api').toResponse();
+    return new ChatSDKError("bad_request:api").toResponse();
   }
 
   try {
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
     }: {
       id: string;
       message: ChatMessage;
-      selectedChatModel: ChatModel['id'];
+      selectedChatModel: ChatModel["id"];
       selectedVisibilityType: VisibilityType;
       runtimeConfig?: Partial<RuntimeConfig>;
     } = requestBody;
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     const session = await auth();
 
     if (!session?.user) {
-      return new ChatSDKError('unauthorized:chat').toResponse();
+      return new ChatSDKError("unauthorized:chat").toResponse();
     }
 
     const userType: UserType = session.user.type;
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     });
 
     if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
-      return new ChatSDKError('rate_limit:chat').toResponse();
+      return new ChatSDKError("rate_limit:chat").toResponse();
     }
 
     const { longitude, latitude, city, country } = geolocation(request);
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
 
     if (chat) {
       if (chat.userId !== session.user.id) {
-        return new ChatSDKError('forbidden:chat').toResponse();
+        return new ChatSDKError("forbidden:chat").toResponse();
       }
       // Only fetch messages if chat already exists
       messagesFromDb = await getMessagesByChatId({ id });
@@ -129,13 +129,13 @@ export async function POST(request: Request) {
         message,
         tracingContext: {},
         instructions:
-          'Given a chat message, generate a short title.' + titlePrompt,
+          "Given a chat message, generate a short title." + titlePrompt,
       });
 
       await saveChat({
         id,
         userId: session.user.id,
-        title: title,
+        title,
         visibility: selectedVisibilityType,
       });
       // New chat - no need to fetch messages, it's empty
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
         {
           chatId: id,
           id: message.id,
-          role: 'user',
+          role: "user",
           parts: message.parts,
           attachments: [],
           createdAt: new Date(),
@@ -161,10 +161,14 @@ export async function POST(request: Request) {
 
     try {
       // Call Mastra agent with runtime context
-      const stream = await chatAgent.stream<undefined, 'mastra'>(uiMessages, {
+      const stream = await chatAgent.stream<undefined, "mastra">(uiMessages, {
         runtimeContext,
+        maxSteps: 30,
+        modelSettings: {
+          temperature: 0.7, // Slightly lower temperature for more deterministic agent/tool delegation
+        },
         telemetry: {
-          functionId: 'chatAgent-stream',
+          functionId: "chatAgent-stream",
           isEnabled: isProductionEnvironment,
         },
         onFinish: async ({ usage }) => {
@@ -177,7 +181,7 @@ export async function POST(request: Request) {
               usage
             );
           } catch {
-            console.log('cannot enrich usage');
+            console.log("cannot enrich usage");
           }
 
           if (finalMergedUsage) {
@@ -192,7 +196,7 @@ export async function POST(request: Request) {
       let lastMessageId: string | undefined;
       if (
         uiMessages.length > 0 &&
-        uiMessages[uiMessages.length - 1].role === 'assistant'
+        uiMessages[uiMessages.length - 1].role === "assistant"
       ) {
         lastMessageId = uiMessages[uiMessages.length - 1].id;
       }
@@ -207,7 +211,7 @@ export async function POST(request: Request) {
           for await (const part of stream.fullStream) {
             const aiSDKPart = convertMastraChunkToAISDKv5({
               chunk: part,
-              mode: 'stream',
+              mode: "stream",
             });
 
             const transformedChunk =
@@ -241,23 +245,22 @@ export async function POST(request: Request) {
           });
         },
       });
-
       // Create a Response that streams the UI message stream to the client
       return createUIMessageStreamResponse({
         stream: uiMessageStream,
       });
     } catch (agentError) {
-      console.error('Mastra agent error:', {
+      console.error("Mastra agent error:", {
         chatId: id,
         userId: session.user.id,
         error:
           agentError instanceof Error ? agentError.message : String(agentError),
       });
 
-      return new ChatSDKError('offline:chat').toResponse();
+      return new ChatSDKError("offline:chat").toResponse();
     }
   } catch (error) {
-    const vercelId = request.headers.get('x-vercel-id');
+    const vercelId = request.headers.get("x-vercel-id");
 
     if (error instanceof ChatSDKError) {
       return error.toResponse();
@@ -267,35 +270,35 @@ export async function POST(request: Request) {
     if (
       error instanceof Error &&
       error.message?.includes(
-        'AI Gateway requires a valid credit card on file to service requests'
+        "AI Gateway requires a valid credit card on file to service requests"
       )
     ) {
-      return new ChatSDKError('bad_request:activate_gateway').toResponse();
+      return new ChatSDKError("bad_request:activate_gateway").toResponse();
     }
 
-    console.error('Unhandled error in chat API:', error, { vercelId });
-    return new ChatSDKError('offline:chat').toResponse();
+    console.error("Unhandled error in chat API:", error, { vercelId });
+    return new ChatSDKError("offline:chat").toResponse();
   }
 }
 
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
+  const id = searchParams.get("id");
 
   if (!id) {
-    return new ChatSDKError('bad_request:api').toResponse();
+    return new ChatSDKError("bad_request:api").toResponse();
   }
 
   const session = await auth();
 
   if (!session?.user) {
-    return new ChatSDKError('unauthorized:chat').toResponse();
+    return new ChatSDKError("unauthorized:chat").toResponse();
   }
 
   const chat = await getChatById({ id });
 
   if (chat?.userId !== session.user.id) {
-    return new ChatSDKError('forbidden:chat').toResponse();
+    return new ChatSDKError("forbidden:chat").toResponse();
   }
 
   const deletedChat = await deleteChatById({ id });

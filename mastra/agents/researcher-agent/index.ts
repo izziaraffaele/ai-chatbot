@@ -11,6 +11,6 @@ import { RESEARCHER_SYSTEM_PROMPT } from "./system-prompt";
 export const researcherAgent = new Agent({
   name: "Researcher Agent",
   instructions: RESEARCHER_SYSTEM_PROMPT,
-  model: "google/gemini-2.5-flash", // Default, overridden at runtime
+  model: "openai/gpt-4.1", 
   tools: { webSearch: webSearchTool },
 });

@@ -11,6 +11,6 @@ import { PLANNER_SYSTEM_PROMPT } from "./system-prompt";
 export const plannerAgent = new Agent({
   name: "Planner Agent",
   instructions: PLANNER_SYSTEM_PROMPT,
-  model: "google/gemini-2.5-flash", // Default, overridden at runtime
+  model: "openai/gpt-4.1", 
   agents: { researcherAgent },
 });

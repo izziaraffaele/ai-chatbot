@@ -5,9 +5,10 @@
  * using runtime configuration for identity, capabilities, and behaviors.
  */
 
-import type { RuntimeConfig } from '@/config/runtime.schema';
-import type { Geo } from '@vercel/functions';
-import { artifactsPrompt } from '@/lib/ai/prompts';
+import type { Geo } from "@vercel/functions";
+import type { RuntimeConfig } from "@/config/runtime.schema";
+import { artifactsPrompt } from "@/lib/ai/prompts";
+import { ORCHESTRATION_PROMPT } from "./orchestration-prompt";
 
 /**
  * Builds a dynamic system prompt for the Mastra chat agent
@@ -38,7 +39,7 @@ export function chatAgentSystemPrompt(
     `You are "${config.assistant.name}"${
       config.organization.name
         ? `, a ${config.organization.name} AI assistant developed my MemorAIz.`
-        : ', a MemorAIz AI assistant.'
+        : ", a MemorAIz AI assistant."
     }`
   );
 
@@ -54,7 +55,7 @@ export function chatAgentSystemPrompt(
   // COMMUNICATION STYLE
   // ========================================================================
   if (config.assistant.tone || config.assistant.guidelines) {
-    const styleSection = [];
+    const styleSection: string[] = [];
 
     if (config.assistant.tone) {
       styleSection.push(
@@ -69,7 +70,7 @@ export function chatAgentSystemPrompt(
     }
 
     if (styleSection.length > 0) {
-      sections.push(`\n# GUIDELINES\n\n${styleSection.join('\n')}`);
+      sections.push(`\n# GUIDELINES\n\n${styleSection.join("\n")}`);
     }
   }
 
@@ -103,7 +104,7 @@ export function chatAgentSystemPrompt(
 
   if (environmentDetails.length > 0) {
     sections.push(
-      `\n# ENVIRONMENT CONTEXT\n\n${environmentDetails.join('\n')}`
+      `\n# ENVIRONMENT CONTEXT\n\n${environmentDetails.join("\n")}`
     );
   }
 
@@ -113,147 +114,96 @@ export function chatAgentSystemPrompt(
   const enabledFeatures: string[] = [];
   if (config.features?.artifacts) {
     enabledFeatures.push(
-      '**Document Artifacts** - Create and edit documents, code, and spreadsheets'
+      "**Document Artifacts** - Create and edit documents, code, and spreadsheets"
     );
   }
 
   if (config.features?.webSearch) {
-    enabledFeatures.push('**Web Search Tools** - Access external data');
+    enabledFeatures.push("**Web Search Tools** - Access external data");
   }
 
   if (enabledFeatures.length > 0) {
     sections.push(
-      `\n# YOUR CAPABILITIES\n\n${enabledFeatures.map((f) => `- ${f}`).join('\n')}`
+      `\n# YOUR CAPABILITIES\n\n${enabledFeatures.map((f) => `- ${f}`).join("\n")}`
     );
   }
 
   // ========================================================================
-  // SUB-AGENT ORCHESTRATION
+  // WORKING MEMORY GUIDANCE
   // ========================================================================
   sections.push(`
-# SUB-AGENT ORCHESTRATION
+# WORKING MEMORY
 
-You have access to specialized sub-agents that can help you with specific tasks. Use them intelligently to provide better responses.
+You have access to persistent working memory that tracks important user information across all conversations. Use the \`updateWorkingMemory\` tool to maintain an up-to-date profile of the user.
 
-## Available Sub-Agents
+## When to Update Working Memory
 
-### 1. Researcher Agent (\`researcherAgent\`)
+**Personal Information:**
+- Update name, location, or timezone when explicitly mentioned
+- Store preferred names or nicknames the user wants to be called
 
-**Purpose:** Performs web searches and synthesizes up-to-date information from the internet.
+**Communication Preferences:**
+- Track if the user prefers brief or detailed responses
+- Note citation style preferences (e.g., "I prefer inline URLs" vs "keep citations minimal")
+- Observe and record tone preferences from conversation style
 
-**When to use:**
-- The user explicitly requests a web search (e.g., "search for", "look up", "find information about", "what's the latest on")
-- You lack current or factual context needed to answer the user's question properly
-- Before calling the Planner Agent to gather best practices, current trends, or domain-specific information for planning
+**Active Context:**
+- **Current Planning Task:** Track ongoing planning requests (goal, domain, status, constraints)
+  - Set status to "gathering_context" when starting to collect information
+  - Update to "researching" when delegating to Researcher Agent
+  - Change to "planning" when delegating to Planner Agent
+  - Mark "refining" when user requests modifications
+  - Set "completed" when user is satisfied
+- **Research Interests:** Note recurring topics the user asks about
+- **Document Preferences:** Track preferred document types, code languages, formatting styles
 
-**How to use:**
-- Delegate the entire research task to the Researcher Agent
-- The Researcher will use the \`webSearch\` tool and return structured, cited results
-- Trust the Researcher's findings and incorporate them into your response
+**User Preferences & Patterns:**
+- **Recurring Goals:** Note if user mentions ongoing projects or long-term goals
+- **No-Go Items:** Important constraints to remember (e.g., "no expensive restaurants", "allergic to nuts")
+- **Budget Sensitivity:** Track budget preferences for travel, shopping, etc.
+- **Planning Style:** Observe if user prefers detailed structured plans vs. flexible outlines
+- **Research Depth:** Note if user typically wants quick answers or comprehensive research
 
-**Example scenarios:**
-- User: "What are the best restaurants in Tokyo right now?"
-  → Delegate to Researcher Agent
-- User: "I need to plan a study schedule for my exam"
-  → First delegate to Researcher to gather study planning best practices, then proceed
+**Important Facts:**
+- Store key dates, deadlines, or time-sensitive information
+- Track interests, hobbies, or subjects the user cares about
+- Remember previous assistance areas to provide continuity
 
-### 2. Planner Agent (\`plannerAgent\`)
+**Session Notes:**
+- Log follow-up items or pending questions for next conversation
+- Note unresolved tasks or incomplete workflows
 
-**Purpose:** Creates detailed, structured plans (Quest Plans) with quests, milestones, and tasks for complex goals.
+## Best Practices
 
-**When to use:**
-- The user needs help planning something substantial (study plans, travel itineraries, teaching curricula, project roadmaps)
-- You have gathered sufficient context through conversation (minimum 2-3 exchanges)
-- You understand the user's: goal, time horizon, and key constraints
+1. **Update Incrementally:** Add information as you learn it, don't wait for complete details
+2. **Be Specific:** Store concrete details rather than vague descriptions
+3. **Clear Completed Items:** When a planning task is done, clear it or mark as completed
+4. **Respect Privacy:** Only store information the user explicitly shares
+5. **Use for Personalization:** Reference working memory to provide contextual, personalized assistance
+6. **Track Workflow State:** Use "Active Context" to resume interrupted conversations seamlessly
 
-**When NOT to use:**
-- For simple to-do lists or basic suggestions (handle these yourself)
-- Before gathering necessary context about the user's needs
-- For questions that don't involve planning
+## Examples
 
-**Required context before calling Planner:**
-1. **Goal:** What the user wants to achieve (clear and specific)
-2. **Domain:** Study, travel, teaching, project, or general
-3. **Time Horizon:** Duration or deadline (e.g., "2 weeks", "by March 15")
-4. **Key Constraints:** Budget, availability, materials, preferences, no-go items
+**User mentions name:**
+→ Update "Name: Sarah" in Personal Information
 
-**Information gathering workflow:**
+**User says "I prefer short answers":**
+→ Update "Detail Level: Brief" in Communication Preferences
 
-When you detect a planning need:
+**User starts planning a trip:**
+→ Update Current Planning Task with Goal, Domain (travel), Status (gathering_context)
 
-1. **Initial Assessment**
-   - Identify the planning domain (study/travel/teaching/project)
-   - Determine what information is missing
+**User says "I'm allergic to peanuts":**
+→ Add "peanuts" to No-Go Items in User Preferences
 
-2. **Ask Clarifying Questions** (examples)
-   - "What's your main goal for this [trip/study plan/project]?"
-   - "What's your time frame or deadline?"
-   - "Are there any specific constraints I should know about (budget, schedule, preferences)?"
-   - "Do you have any materials or points of interest already identified?"
-
-3. **Research Phase (if needed)**
-   - If external context would help, delegate to Researcher Agent first
-   - Examples: "best practices for studying [subject]", "typical 3-day itinerary for [city]", "current teaching frameworks for [topic]"
-
-4. **Delegate to Planner**
-   - Once you have sufficient context, structure it as a JSON object and delegate to the Planner Agent
-   - The Planner will return a structured Quest Plan in markdown format
-   - Present the plan to the user and offer to refine it based on feedback
-
-## Orchestration Examples
-
-**Example 1: Travel Planning**
-\`\`\`
-User: "Help me plan a trip to Paris"
-You: "I'd love to help you plan your Paris trip! To create the best itinerary for you:
-- How many days will you be there?
-- What are your main interests (art, food, history, etc.)?
-- Any specific places you definitely want to visit?
-- What's your budget range?"
-
-[User provides details over 1-2 messages]
-
-You: [Delegate to researcherAgent: "Best 3-day Paris itinerary for art and food lovers, must-see attractions"]
-[Researcher returns results]
-
-You: [Delegate to plannerAgent with structured input including goal, timeframe, points of interest, and researcher findings]
-[Planner returns Quest Plan]
-
-You: "Here's your personalized Paris itinerary: [present the plan]"
-\`\`\`
-
-**Example 2: Study Planning**
-\`\`\`
-User: "I need to prepare for my calculus exam"
-You: "I can help you create a study plan! Let me gather some details:
-- When is your exam?
-- What topics will be covered?
-- How much time can you dedicate to studying each day?
-- Do you have specific materials (textbook, practice problems)?"
-
-[User provides context]
-
-You: [Delegate to researcherAgent: "Effective study strategies for calculus exam preparation"]
-[Use research findings to inform planning]
-
-You: [Delegate to plannerAgent with structured study plan input]
-You: "Here's your calculus study plan: [present the plan]"
-\`\`\`
-
-**Example 3: Simple Web Search (No Planning)**
-\`\`\`
-User: "What's the weather like in London today?"
-You: [Delegate to researcherAgent]
-You: "Based on current information: [present findings]"
-\`\`\`
-
-## Key Principles
-
-- **Progressive Disclosure:** Gather information conversationally; don't overwhelm users with too many questions at once
-- **Research First, Plan Second:** When planning requires external context, always research before planning
-- **Context Threshold:** Don't call Planner until you have enough information to create a useful plan
-- **User Confirmation:** After presenting a plan, offer to refine it based on user feedback
+**User mentions timezone:**
+→ Update "Timezone: EST" in Personal Information
 `);
+
+  // ========================================================================
+  // SUB-AGENT ORCHESTRATION
+  // ========================================================================
+  sections.push(ORCHESTRATION_PROMPT);
 
   // ========================================================================
   // ARTIFACTS GUIDANCE (if enabled)
@@ -268,7 +218,7 @@ You: "Based on current information: [present findings]"
   if (config.experiences && config.experiences.length > 0) {
     const experiencesList = config.experiences
       .map((exp) => `- **${exp.name}:** ${exp.description}`)
-      .join('\n');
+      .join("\n");
 
     sections.push(
       `\n# AVAILABLE EXPERIENCES\n\nYou can adopt these specialized roles:\n\n${experiencesList}`
@@ -283,20 +233,20 @@ You: "Based on current information: [present findings]"
 
     if (geoHints.latitude && geoHints.longitude) {
       geoDetails.push(
-        `- **Location:** ${geoHints.city || 'Unknown'}, ${geoHints.country || 'Unknown'}`
+        `- **Location:** ${geoHints.city || "Unknown"}, ${geoHints.country || "Unknown"}`
       );
       geoDetails.push(
         `  - Coordinates: (${geoHints.latitude}, ${geoHints.longitude})`
       );
     } else if (geoHints.city) {
       geoDetails.push(
-        `- **Location:** ${geoHints.city}${geoHints.country ? `, ${geoHints.country}` : ''}`
+        `- **Location:** ${geoHints.city}${geoHints.country ? `, ${geoHints.country}` : ""}`
       );
     }
 
     if (geoDetails.length > 0) {
       sections.push(
-        `\n# REQUEST CONTEXT\n\n${geoDetails.join('\n')}\n\nUse this context to provide location-relevant responses when appropriate.`
+        `\n# REQUEST CONTEXT\n\n${geoDetails.join("\n")}\n\nUse this context to provide location-relevant responses when appropriate.`
       );
     }
   }
@@ -310,10 +260,12 @@ You: "Based on current information: [present findings]"
     );
   }
 
+  sections.push(`---\n\nUser's current time, date and timezone: ${new Date().toLocaleString()}\n\n---`);
+
   // ========================================================================
   // FOOTER
   // ========================================================================
-  sections.push('\n---\n\nYou are now ready to assist the user.');
+  sections.push("You are now ready to assist the user.");
 
-  return sections.join('\n');
+  return sections.join("\n");
 }
