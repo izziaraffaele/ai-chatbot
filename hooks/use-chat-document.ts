@@ -14,16 +14,21 @@ export function useChatDocument(documentId: string | null) {
   );
 
   const latestVersion = data?.length || 0;
+  const latestIndex = Math.max(0, latestVersion - 1);
 
   useEffect(() => {
-    setCurrentIndex(latestVersion);
-  }, [latestVersion]);
+    // Set current index to the latest version when data loads
+    if (latestVersion > 0) {
+      setCurrentIndex(latestIndex);
+    }
+  }, [latestVersion, latestIndex]);
 
   return {
     entries: data || [],
     currentIndex,
     latestVersion,
-    isLatest: currentIndex === latestVersion - 1,
+    latestIndex,
+    isLatest: currentIndex === latestIndex,
     setCurrentIndex,
     isLoading,
     mutate,

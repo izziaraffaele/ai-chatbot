@@ -32,6 +32,7 @@ import { useArtifact } from "@/hooks/use-artifact";
 import { useChatDocument } from "@/hooks/use-chat-document";
 import type { Document } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
+import { ArtifactActions } from "../elements/artifact";
 
 export const documentArtifactDefinitions = [
   textArtifact,
@@ -148,10 +149,14 @@ export function DocumentArtifact({
 
   // Get initial content for draft provider
   const initialContent = artifact.content || "";
+  console.log(artifact, chatDocument);
+
+  // Set initial index to the latest version (last item in versions array)
+  const initialVersionIndex = Math.max(0, versions.length - 1);
 
   return (
     <ArtifactVersionProvider
-      initialIndex={-1}
+      initialIndex={initialVersionIndex}
       initialMode="edit"
       versions={versions}
     >
@@ -234,7 +239,7 @@ function DocumentArtifactContent({
     <ChatArtifact className={cn("h-full rounded-none border-none", className)}>
       <ChatArtifactHeader
         actions={
-          <>
+          <ArtifactActions>
             <ChatArtifactAction.PrevVersion
               icon={<ChevronLeftIcon className="size-4" />}
               tooltip="Previous version"
@@ -257,7 +262,7 @@ function DocumentArtifactContent({
               icon={<DownloadIcon className="size-4" />}
               tooltip="Download"
             />
-          </>
+          </ArtifactActions>
         }
         onClose={onClose}
         subtitle={
@@ -290,9 +295,16 @@ function DocumentArtifactContent({
         <artifactDefinition.content
           content={draftContent}
           currentVersionIndex={currentIndex}
-          getDocumentContentById={(id: number) =>
-            chatDocument.entries[id]?.content || ""
-          }
+          getDocumentContentById={(versionIndex: number) => {
+            // Ensure versionIndex is within bounds
+            if (
+              versionIndex >= 0 &&
+              versionIndex < (chatDocument.entries?.length || 0)
+            ) {
+              return chatDocument.entries[versionIndex]?.content || "";
+            }
+            return "";
+          }}
           isCurrentVersion={isLatest}
           isInline={false}
           isLoading={chatDocument.isLoading && !artifact.content}

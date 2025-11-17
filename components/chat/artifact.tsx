@@ -235,9 +235,15 @@ export function ArtifactVersionProvider<T = any>({
     const totalVersions = versions.length;
     const safeIndex = Math.max(0, Math.min(currentIndex, totalVersions - 1));
     const currentVersion = versions[safeIndex] || null;
-    const isLatest = safeIndex === totalVersions - 1;
+    // When there are no versions yet (new document), treat as latest
+    const isLatest = totalVersions === 0 || safeIndex === totalVersions - 1;
 
     const navigateVersion = (type: "next" | "prev" | "latest" | number) => {
+      if (totalVersions === 0) {
+        // No versions to navigate to
+        return;
+      }
+
       if (type === "latest") {
         setCurrentIndex(totalVersions - 1);
         setMode("edit");
@@ -261,8 +267,8 @@ export function ArtifactVersionProvider<T = any>({
       isLatest,
       totalVersions,
       navigateVersion,
-      canGoNext: safeIndex < totalVersions - 1,
-      canGoPrev: safeIndex > 0,
+      canGoNext: totalVersions > 0 && safeIndex < totalVersions - 1,
+      canGoPrev: totalVersions > 0 && safeIndex > 0,
       mode,
       setMode,
       toggleMode,
@@ -352,7 +358,7 @@ export function ChatArtifactBody({
   return (
     <ArtifactContent
       className={cn(
-        "h-full max-w-full! items-center overflow-y-scroll bg-background dark:bg-muted",
+        "h-full max-w-full overflow-y-scroll bg-background dark:bg-muted",
         className
       )}
       {...others}

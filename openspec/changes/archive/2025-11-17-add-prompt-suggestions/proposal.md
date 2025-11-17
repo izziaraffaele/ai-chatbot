@@ -3,6 +3,14 @@
 ## Summary
 Restore prompt suggestions functionality using a modern provider pattern with optional context provider and component-based rendering, following AI Elements conventions.
 
+## Why
+The prompt suggestions feature was removed during the chat primitives refactor, leaving users without guided conversation starters. This restoration is needed because:
+
+1. **User Experience** - Prompt suggestions help users understand what they can ask the AI and reduce friction in starting conversations
+2. **Feature Parity** - The application previously had this capability and users expect it to be available
+3. **Modern Architecture** - The old implementation used outdated patterns that don't align with the current AI Elements-based architecture
+4. **Developer Experience** - A provider pattern makes the feature more flexible and easier to maintain
+
 ## Background
 During the chat primitives refactor, prompt suggestions were removed. The old `usePromptSuggestions` hook exists but is unused. This proposal introduces a clean provider pattern that:
 
@@ -79,6 +87,28 @@ During the chat primitives refactor, prompt suggestions were removed. The old `u
 2. Update `ChatComposer` to include suggestions in header
 3. Add suggestions to `AssistantChat` with proper provider nesting
 4. Remove deprecated `usePromptSuggestions` hook
+
+## What Changes
+
+### Core Implementation
+- **New Provider Pattern**: Implement `ChatSuggestionProvider` that manages suggestion state and auto-apply behavior
+- **Flexible Component**: Create `ChatSuggestions` component that works with both provider context and direct props
+- **Hook Integration**: Add `useChatSuggestions()` hook for accessing suggestion context
+- **Auto-apply Logic**: Support multiple auto-apply modes (input population, message sending, custom handling)
+
+### Component Architecture
+- **Provider Nesting**: `ChatSuggestionProvider` must be nested within `ChatProvider` for runtime access
+- **Context Integration**: Provider uses `useChatRuntime()` and `usePromptInputController()` for functionality
+- **Layout Options**: Support both grid ('default') and slider ('minimal') layouts using existing AI Elements
+
+### Integration Points
+- **ChatComposer**: Add suggestions to composer header when chat is empty
+- **AssistantChat**: Wrap chat with `ChatSuggestionProvider` for global suggestion management
+- **Existing Elements**: Reuse `Suggestions` and `Suggestion` elements from `@components/elements/suggestion.tsx`
+
+### Removal and Cleanup
+- **Deprecated Hook**: Remove `hooks/use-prompt-suggestions.ts` as it's replaced by the new provider pattern
+- **Clean Integration**: Ensure no legacy patterns remain in the codebase
 
 ## Success Criteria
 - Provider pattern works with optional context and proper nesting

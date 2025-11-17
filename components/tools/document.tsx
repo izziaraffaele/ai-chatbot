@@ -61,8 +61,9 @@ function PureDocumentTool(props: DocumentToolProps) {
     documentId === artifact.documentId;
 
   // Handle click to open document in canvas
-  const handleDocumentClick = useCallback(() => {
+  const handleOpen = useCallback(() => {
     if (isReadonly) {
+      toast.error("Viewing files in shared chats is currently not supported.");
       return;
     }
 
@@ -76,7 +77,7 @@ function PureDocumentTool(props: DocumentToolProps) {
         ? {
             documentId: part.output.id,
             kind: part.output.kind,
-            content: currentArtifact.content,
+            content: previewDocument.content,
             title: part.output.title,
             isVisible: true,
             status: "idle",
@@ -89,7 +90,7 @@ function PureDocumentTool(props: DocumentToolProps) {
           }
         : currentArtifact
     );
-  }, [part.output, isReadonly, setArtifact]);
+  }, [part.output, previewDocument, isReadonly, setArtifact]);
 
   // Check if output contains an error
   if (part.output && "error" in part.output) {
@@ -102,7 +103,9 @@ function PureDocumentTool(props: DocumentToolProps) {
 
   if (artifact.isVisible) {
     const Comp = part.output ? DocumentToolResult : DocumentToolCall;
-    return <Comp {...props} isStreaming={isStreamingArtifact} />;
+    return (
+      <Comp {...props} isStreaming={isStreamingArtifact} onOpen={handleOpen} />
+    );
   }
 
   // Loading state
@@ -133,7 +136,7 @@ function PureDocumentTool(props: DocumentToolProps) {
       <DocumentToolHitboxLayer
         hitboxRef={hitboxRef as React.RefObject<HTMLDivElement>}
         isReadonly={isReadonly}
-        onDocumentClick={handleDocumentClick}
+        onDocumentClick={handleOpen}
       />
 
       <DocumentToolHeader
@@ -297,48 +300,17 @@ const DocumentContent = ({ document }: { document: Document }) => {
   );
 };
 
-function DocumentToolResult({ part, isReadonly }: DocumentToolProps) {
-  const { setArtifact } = useArtifact();
-
+function DocumentToolResult({
+  part,
+  onOpen,
+}: DocumentToolProps & { onOpen?: () => void }) {
   const toolName = getToolName(part);
   const DocumentToolIcon = DOCUMENT_TOOL_ICON_MAP[toolName];
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isReadonly) {
-      toast.error("Viewing files in shared chats is currently not supported.");
-      return;
-    }
-
-    const rect = event.currentTarget.getBoundingClientRect();
-
-    const boundingBox = {
-      top: rect.top,
-      left: rect.left,
-      width: rect.width,
-      height: rect.height,
-    };
-
-    setArtifact((currentArtifact) => {
-      if (!part.output || !("id" in part.output)) {
-        return currentArtifact;
-      }
-
-      return {
-        documentId: part.output.id,
-        kind: part.output.kind,
-        content: currentArtifact.content,
-        title: part.output.title,
-        isVisible: true,
-        status: "idle",
-        boundingBox,
-      };
-    });
-  };
 
   return (
     <button
       className="flex w-fit cursor-pointer flex-row items-start gap-3 rounded-xl border bg-background px-3 py-2"
-      onClick={handleClick}
+      onClick={() => onOpen?.()}
       type="button"
     >
       <div className="mt-1 text-muted-foreground">
@@ -351,38 +323,18 @@ function DocumentToolResult({ part, isReadonly }: DocumentToolProps) {
   );
 }
 
-function DocumentToolCall({ part, isReadonly }: DocumentToolProps) {
-  const { setArtifact } = useArtifact();
+function DocumentToolCall({
+  part,
+  onOpen,
+}: DocumentToolProps & { onOpen?: () => void }) {
   const toolName = getToolName(part);
 
   const DocumentToolIcon = DOCUMENT_TOOL_ICON_MAP[toolName];
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isReadonly) {
-      toast.error("Viewing files in shared chats is currently not supported.");
-      return;
-    }
-
-    const rect = event.currentTarget.getBoundingClientRect();
-
-    const boundingBox = {
-      top: rect.top,
-      left: rect.left,
-      width: rect.width,
-      height: rect.height,
-    };
-
-    setArtifact((currentArtifact) => ({
-      ...currentArtifact,
-      isVisible: true,
-      boundingBox,
-    }));
-  };
-
   return (
     <button
       className="cursor pointer flex w-fit flex-row items-start justify-between gap-3 rounded-xl border px-3 py-2"
-      onClick={handleClick}
+      onClick={() => onOpen?.()}
       type="button"
     >
       <div className="flex flex-row items-start gap-3">
