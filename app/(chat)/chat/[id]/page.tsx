@@ -36,13 +36,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   });
 
   const uiMessages = convertToUIMessages(messagesFromDb);
+  const usage = chat.lastContext ?? undefined;
 
   return (
     <ChatProvider
       id={chat.id}
       initialMessages={uiMessages}
-      initialUsage={chat.lastContext ?? undefined}
+      initialUsage={usage}
       initialVisibilityType={chat.visibility}
+      key={id}
     >
       <DemoChat
         autoResume={true}

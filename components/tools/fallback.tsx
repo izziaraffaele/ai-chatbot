@@ -112,11 +112,11 @@ function FallbackAgent({ part, isStreaming, isLastPart }: FallbackProps) {
 
   return (
     <Tool
-      className="rounded-none border-none"
+      className="mb-0 rounded-none border-none"
       data-slot="chat-fallback-agent-tool"
     >
       <ToolHeader
-        className="rounded-md border [&>div]:w-full [&_span]:grow"
+        className="rounded-md border data-[state=open]:bg-secondary [&>div]:w-full [&_span]:grow"
         icon={MessageSquareShareIcon}
         state={part.state}
         statusBadge={() => (
@@ -134,7 +134,7 @@ function FallbackAgent({ part, isStreaming, isLastPart }: FallbackProps) {
       <ToolContent>
         <div className="my-2 overflow-hidden rounded-md border border-border text-sm">
           {/* <div className="sticky top-0 flex items-center gap-2 bg-background p-4"> */}
-          <div className="flex items-center gap-2 bg-background p-4">
+          <div className="flex items-center gap-3 bg-secondary p-3 font-semibold text-xs">
             <div className="size-6">{agentDisplayAvatar}</div>
             <div>{agentDisplayName}</div>
           </div>

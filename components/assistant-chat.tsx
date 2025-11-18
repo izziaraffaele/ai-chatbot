@@ -32,6 +32,7 @@ import {
   ChatThreadContent,
   ChatThreadHeader,
 } from "./chat/thread";
+import { ChatContextUsage } from "./chat/usage";
 import { AssistantMessage } from "./messages/assistant-message";
 import { UserMessage } from "./messages/user-message";
 import { SidebarToggle } from "./sidebar-toggle";
@@ -120,7 +121,6 @@ export function AssistantChat({
         <>
           <ChatComposerTool.AttachmentMenu />
           <ChatComposerTool.AgentSelector />
-          <ChatComposerTool.ContextUsage />
         </>
       }
     />
@@ -213,6 +213,9 @@ export function AssistantChat({
           <ChatThreadComposer>
             {messages.length === 0 && <ChatSuggestions mode="default" />}
             {chatInput}
+            <div className="absolute top-4 right-4">
+              <ChatContextUsage />
+            </div>
           </ChatThreadComposer>
         )}
       </ChatThread>

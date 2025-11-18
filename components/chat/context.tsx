@@ -22,7 +22,6 @@ import { PromptInputProvider } from "@/components/elements/prompt-input";
 import { getChatHistoryPaginationKey } from "@/components/sidebar-history";
 import { toast } from "@/components/toast";
 import type { VisibilityType } from "@/components/visibility-selector";
-import { useChatUsage } from "@/hooks/use-chat-usage";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useClientTools } from "@/hooks/use-client-tools";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
@@ -35,6 +34,7 @@ import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { useDataStream } from "./streaming";
+import { ChatUsageProvider, useChatUsageContext } from "./usage";
 
 const CHAT_API =
   process.env.CHAT_API || process.env.NEXT_PUBLIC_CHAT_API || "/api/chat";
@@ -70,7 +70,6 @@ export type ChatControllerProps = {
   api?: string;
   initialMessages?: ChatMessage[];
   initialVisibilityType?: VisibilityType;
-  initialUsage?: AppUsage;
 };
 
 export function useChatController({
@@ -78,7 +77,6 @@ export function useChatController({
   api,
   initialMessages = [],
   initialVisibilityType = "private",
-  initialUsage,
 }: ChatControllerProps): ChatController<ChatMessage> {
   const { mutate } = useSWRConfig();
 
@@ -100,7 +98,7 @@ export function useChatController({
   const { setDataStream } = useDataStream();
 
   // usage
-  const usage = useChatUsage({ chatId: id, initialValue: initialUsage });
+  const { setUsage } = useChatUsageContext();
 
   const transport = useRef(
     createChatTransport({
@@ -129,7 +127,7 @@ export function useChatController({
     onData(dataPart) {
       setDataStream((ds) => (ds ? [...ds, dataPart] : [dataPart]));
       if (dataPart.type === "data-usage") {
-        usage.setValue(dataPart.data);
+        setUsage(dataPart.data);
       }
     },
     onFinish() {
@@ -183,18 +181,21 @@ export function useChatController({
 export const ChatProvider = (
   props: React.PropsWithChildren<ChatControllerProps> & {
     initialInput?: string;
+    initialUsage?: AppUsage;
   }
 ) => {
-  const { children, initialInput, ...controllerProps } = props;
+  const { children, initialInput, initialUsage, ...controllerProps } = props;
 
   const chat = useChatController(controllerProps);
   const runtime = useMemo(() => ({ chat }), [chat]);
 
   return (
-    <ChatRuntimeContext.Provider value={runtime}>
-      <PromptInputProvider initialInput={initialInput}>
-        {children}
-      </PromptInputProvider>
-    </ChatRuntimeContext.Provider>
+    <ChatUsageProvider initialUsage={initialUsage}>
+      <ChatRuntimeContext.Provider value={runtime}>
+        <PromptInputProvider initialInput={initialInput}>
+          {children}
+        </PromptInputProvider>
+      </ChatRuntimeContext.Provider>
+    </ChatUsageProvider>
   );
 };

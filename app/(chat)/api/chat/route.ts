@@ -180,23 +180,6 @@ async function createChatStream(params: {
       functionId: "chatAgent-stream",
       isEnabled: isProductionEnvironment,
     },
-    onFinish: async ({ usage }) => {
-      let finalMergedUsage: AppUsage | null = null;
-
-      try {
-        const model = await chatAgent.getModel();
-        finalMergedUsage = await enrichUsageWithTokenlens(model.modelId, usage);
-      } catch {
-        console.log("cannot enrich usage");
-      }
-
-      if (finalMergedUsage) {
-        await updateChatLastContextById({
-          chatId,
-          context: finalMergedUsage,
-        });
-      }
-    },
   });
 
   return createUIMessageStream({
@@ -216,6 +199,44 @@ async function createChatStream(params: {
         lastMessageId,
       }) as any) {
         writer.write(part);
+      }
+
+      // Get usage from stream
+      const requestUsage = await stream.usage.catch(() => {
+        console.log("cannot track usage");
+        return null;
+      });
+
+      // Stop if usage is not available
+      if (!requestUsage) {
+        return;
+      }
+
+      let finalRequestUsage: AppUsage | null = null;
+
+      // Enrich usage with tokenlens for storage
+      try {
+        const model = await chatAgent.getModel();
+        finalRequestUsage = await enrichUsageWithTokenlens(
+          model.modelId,
+          requestUsage
+        );
+      } catch {
+        console.log("cannot enrich usage");
+      }
+
+      if (finalRequestUsage) {
+        // Save usage to DB
+        await updateChatLastContextById({
+          chatId,
+          context: finalRequestUsage,
+        });
+
+        // Send usage to stream
+        writer.write({
+          type: "data-usage",
+          data: finalRequestUsage,
+        });
       }
     },
     onFinish: async ({ responseMessage }) => {

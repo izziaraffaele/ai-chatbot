@@ -79,14 +79,14 @@ export const ToolHeader = ({
 }: ToolHeaderProps) => (
   <CollapsibleTrigger
     className={cn(
-      "flex w-full items-center justify-between gap-4 p-3",
+      "flex w-full items-center justify-between gap-2 p-3",
       className
     )}
     {...props}
   >
     <div className="flex items-center gap-2">
       <ToolIcon className="size-4 text-muted-foreground" />
-      <span className="truncate text-left font-medium text-sm">
+      <span className="truncate text-left font-medium text-xs">
         {title ?? type.split("-").slice(1).join("-")}
       </span>
       {statusBadge(state)}

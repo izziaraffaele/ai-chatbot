@@ -14,7 +14,12 @@ export default async function Page() {
   const id = generateUUID();
 
   return (
-    <ChatProvider id={id} initialMessages={[]} initialVisibilityType="private">
+    <ChatProvider
+      id={id}
+      initialMessages={[]}
+      initialVisibilityType="private"
+      key={id}
+    >
       <DemoChat autoResume={false} isReadonly={false} key={id} />
     </ChatProvider>
   );

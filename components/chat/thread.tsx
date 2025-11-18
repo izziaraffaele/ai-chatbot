@@ -123,7 +123,7 @@ export const ChatThreadComposer = ({
   return (
     <div
       className={cn(
-        "z-1 mx-auto flex w-full max-w-4xl shrink-0 gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4",
+        "relative z-1 mx-auto flex w-full max-w-4xl shrink-0 gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4",
         className
       )}
       data-slot="chat-thread-composer"
