@@ -133,11 +133,15 @@ function PureDocumentTool(props: DocumentToolProps) {
 
   return (
     <div className="relative w-full cursor-pointer">
-      <DocumentToolHitboxLayer
-        hitboxRef={hitboxRef as React.RefObject<HTMLDivElement>}
-        isReadonly={isReadonly}
-        onDocumentClick={handleOpen}
-      />
+      {!isReadonly && (
+        <div
+          aria-hidden="true"
+          className="absolute top-0 left-0 z-10 size-full cursor-pointer rounded-xl"
+          onClick={handleOpen}
+          ref={hitboxRef}
+          role="presentation"
+        />
+      )}
 
       <DocumentToolHeader
         isReadonly={isReadonly}
@@ -181,41 +185,6 @@ const DocumentToolHeader = ({
       </div>
     )}
   </div>
-);
-
-/**
- * Click overlay layer for document interaction
- */
-const DocumentToolHitboxLayer = memo(
-  ({
-    hitboxRef,
-    isReadonly,
-    onDocumentClick,
-  }: {
-    hitboxRef: React.RefObject<HTMLDivElement>;
-    isReadonly: boolean;
-    onDocumentClick: () => void;
-  }) => {
-    if (isReadonly) {
-      return null;
-    }
-
-    return (
-      <div
-        aria-hidden="true"
-        className="absolute top-0 left-0 z-10 size-full cursor-pointer rounded-xl"
-        onClick={onDocumentClick}
-        ref={hitboxRef}
-        role="presentation"
-      >
-        <div className="flex w-full items-center justify-end p-4">
-          <div className="absolute top-[13px] right-[9px] rounded-md p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700">
-            <FullscreenIcon />
-          </div>
-        </div>
-      </div>
-    );
-  }
 );
 
 /**

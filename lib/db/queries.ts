@@ -258,6 +258,25 @@ export async function saveMessages({ messages }: { messages: DBMessage[] }) {
   }
 }
 
+export async function updateMessageParts({
+  messageId,
+  parts,
+}: {
+  messageId: string;
+  parts: unknown;
+}) {
+  try {
+    return await db
+      .update(message)
+      .set({
+        parts,
+      })
+      .where(eq(message.id, messageId));
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:database", "Failed to save messages");
+  }
+}
+
 export async function getMessagesByChatId({ id }: { id: string }) {
   try {
     return await db

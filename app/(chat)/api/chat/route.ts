@@ -21,6 +21,7 @@ import {
   saveChat,
   saveMessages,
   updateChatLastContextById,
+  updateMessageParts,
 } from "@/lib/db/queries";
 import type { DBMessage } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
@@ -67,19 +68,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    const {
-      id,
-      message,
-      runtimeConfig,
-      selectedVisibilityType,
-      tools,
-    }: {
-      id: string;
-      message: ChatMessage;
-      selectedVisibilityType: VisibilityType;
-      runtimeConfig?: Partial<RuntimeConfig>;
-      tools?: Record<string, unknown>;
-    } = requestBody;
+    const { id, message, runtimeConfig, selectedVisibilityType, tools } =
+      requestBody as {
+        id: string;
+        message: ChatMessage;
+        selectedVisibilityType: VisibilityType;
+        runtimeConfig?: Partial<RuntimeConfig>;
+        tools?: Record<string, unknown>;
+      };
 
     const session = await auth();
 
@@ -88,7 +84,6 @@ export async function POST(request: Request) {
     }
 
     const userType: UserType = session.user.type;
-
     const messageCount = await getMessageCountByUserId({
       id: session.user.id,
       differenceInHours: 24,
@@ -111,13 +106,18 @@ export async function POST(request: Request) {
     const chat = await getChatById({ id });
     let messagesFromDb: DBMessage[] = [];
 
+    // Assistants can't start a new chat
+    if (!chat && message.role === "assistant") {
+      return new ChatSDKError("bad_request:api").toResponse();
+    }
+
     if (chat) {
       if (chat.userId !== session.user.id) {
         return new ChatSDKError("forbidden:chat").toResponse();
       }
       // Only fetch messages if chat already exists
       messagesFromDb = await getMessagesByChatId({ id });
-    } else {
+    } else if (message.role === "user") {
       const title = await chatAgent.generateTitleFromUserMessage({
         message,
         tracingContext: {},
@@ -133,20 +133,51 @@ export async function POST(request: Request) {
       // New chat - no need to fetch messages, it's empty
     }
 
-    const uiMessages = [...convertToUIMessages(messagesFromDb), message];
+    const lastDbMessageIdx = messagesFromDb.length - 1;
+    const lastDbMessage = messagesFromDb[lastDbMessageIdx];
 
-    await saveMessages({
-      messages: [
-        {
-          chatId: id,
-          id: message.id,
-          role: "user",
-          parts: message.parts,
-          attachments: [],
-          createdAt: new Date(),
-        },
-      ],
-    });
+    const isAssistantToolResult =
+      lastDbMessage?.role === "assistant" &&
+      lastDbMessage?.id === message.id;
+
+    let uiMessages: ChatMessage[];
+
+    // handle client tool call output
+    if (message.role === "assistant") {
+      // verify that the last message is an assistant message and has the same id as the incoming message
+      if (!isAssistantToolResult) {
+        return new ChatSDKError("bad_request:api").toResponse();
+      }
+
+      // Update UI messages without creating duplicates
+      uiMessages = convertToUIMessages(messagesFromDb);
+      uiMessages[lastDbMessageIdx] = {
+        ...uiMessages[lastDbMessageIdx],
+        parts: uiMessages[lastDbMessageIdx].parts.concat(message.parts),
+      };
+
+      // Update db message with tool results
+      await updateMessageParts({
+        messageId: lastDbMessage.id,
+        parts: uiMessages[lastDbMessageIdx].parts,
+      });
+    } else {
+      // Save user message and add to conversation
+      await saveMessages({
+        messages: [
+          {
+            chatId: id,
+            id: message.id,
+            role: message.role,
+            parts: message.parts,
+            attachments: [],
+            createdAt: new Date(),
+          },
+        ],
+      });
+
+      uiMessages = [...convertToUIMessages(messagesFromDb), message];
+    }
 
     const streamId = generateUUID();
     await createStreamId({ streamId, chatId: id });
@@ -182,22 +213,34 @@ export async function POST(request: Request) {
         },
       });
 
-      let _lastMessageId: string | undefined;
-      if (uiMessages.length > 0 && uiMessages.at(-1)?.role === "assistant") {
-        _lastMessageId = uiMessages.at(-1)?.id;
-      }
-
-      // Transform stream into AI SDK format and create UI messages stream
       const uiMessageStream = createUIMessageStream({
-        generateId: generateUUID,
-        execute: async ({ writer }) => {
-          for await (const part of toAISdkFormat(stream, {
-            from: "agent",
-          }) as any) {
-            writer.write(part);
-          }
-        },
-        onFinish: async ({ responseMessage }) => {
+      generateId: () => (isAssistantToolResult ? message.id : generateUUID()),
+      originalMessages: isAssistantToolResult
+        ? uiMessages.map((msg, idx) =>
+            idx === lastDbMessageIdx
+              ? { ...msg, parts: [] } // Remove parts to prevent duplication
+              : msg
+          )
+        : uiMessages,
+      execute: async ({ writer }) => {
+        const lastMessageId = isAssistantToolResult ? lastDbMessage?.id : undefined;
+
+        for await (const part of toAISdkFormat(stream, {
+          from: "agent",
+          lastMessageId,
+        }) as any) {
+          writer.write(part);
+        }
+      },
+      onFinish: async ({ responseMessage }) => {
+        if (isAssistantToolResult) {
+          // Update existing assistant message with tool result and completion
+          await updateMessageParts({
+            messageId: message.id,
+            parts: responseMessage.parts,
+          });
+        } else {
+          // Save new assistant message
           await saveMessages({
             messages: [
               {
@@ -210,13 +253,14 @@ export async function POST(request: Request) {
               },
             ],
           });
-        },
-      });
+        }
+      },
+    });
 
-      // // Create a Response that streams the UI message stream to the client
-      return createUIMessageStreamResponse({
-        stream: uiMessageStream,
-      });
+    // Create a Response that streams the UI message stream to the client
+    return createUIMessageStreamResponse({
+      stream: uiMessageStream,
+    });
     } catch (agentError) {
       console.error("Mastra agent error:", {
         chatId: id,

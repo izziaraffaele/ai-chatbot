@@ -63,7 +63,6 @@ export function useChatComposer() {
   const chat = useChat({ chat: runtime.chat });
   const composer = usePromptInputController();
   const { width } = useWindowSize();
-  console.log(chat.error, chat.messages.at(-1));
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [localStorageInput, setLocalStorageInput] = useLocalStorage(

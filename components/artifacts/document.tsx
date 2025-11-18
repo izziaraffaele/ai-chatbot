@@ -84,7 +84,10 @@ export function DocumentArtifact({
 
   // Convert Document[] to ArtifactVersion[]
   const versions = useMemo<ArtifactVersion<string>[]>(() => {
-    return (chatDocument.entries || []).map((doc: Document) => ({
+    if (!Array.isArray(chatDocument.entries)) {
+      return [];
+    }
+    return chatDocument.entries.map((doc: Document) => ({
       id: doc.id,
       title: doc.title,
       content: doc.content || "",
@@ -108,48 +111,34 @@ export function DocumentArtifact({
         return;
       }
 
-      await chatDocument.mutate(
-        async (currentDocuments) => {
-          if (!currentDocuments) {
-            return [];
-          }
+      try {
+        const response = await fetch(`/api/document?id=${documentId}`, {
+          method: "POST",
+          body: JSON.stringify({
+            title,
+            content,
+            kind,
+          }),
+        });
 
-          const currentDocument = currentDocuments.at(-1);
+        if (!response.ok) {
+          throw new Error('Failed to save document');
+        }
 
-          if (!currentDocument || !currentDocument.content) {
-            return currentDocuments;
-          }
-
-          if (currentDocument.content !== content) {
-            await fetch(`/api/document?id=${documentId}`, {
-              method: "POST",
-              body: JSON.stringify({
-                title,
-                content,
-                kind,
-              }),
-            });
-
-            const newDocument: Document = {
-              ...currentDocument,
-              content,
-              createdAt: new Date(),
-            };
-
-            return [...currentDocuments, newDocument];
-          }
-
-          return currentDocuments;
-        },
-        { revalidate: false }
-      );
+        // Revalidate the data to get the latest version
+        await chatDocument.mutate();
+      } catch (error) {
+        console.error('Error saving document:', error);
+        // Optionally show error message to user
+      }
     },
     [artifact, chatDocument, documentId, title, kind]
   );
 
   // Get initial content for draft provider
-  const initialContent = artifact.content || "";
-  console.log(artifact, chatDocument);
+  // Use the latest version from documents if available, otherwise fallback to artifact.content
+  const latestDocument = chatDocument.entries?.[chatDocument.entries.length - 1];
+  const initialContent = latestDocument?.content || artifact.content || "";
 
   // Set initial index to the latest version (last item in versions array)
   const initialVersionIndex = Math.max(0, versions.length - 1);
@@ -216,14 +205,16 @@ function DocumentArtifactContent({
   setMetadata,
 }: DocumentArtifactContentProps) {
   const { artifact } = useArtifact();
-  const { currentIndex, isLatest, mode } = useArtifactVersion();
+  const { currentIndex, isLatest, mode, navigateVersion } = useArtifactVersion();
   const {
     isDirty,
     content: draftContent,
     setContent,
   } = useArtifactDraft<string>();
 
-  const currentEntry = chatDocument.entries?.[currentIndex];
+  const currentEntry = Array.isArray(chatDocument.entries)
+    ? chatDocument.entries[currentIndex]
+    : undefined;
 
   // Calculate updated time
   const updatedAt = useMemo(() => {
@@ -322,9 +313,14 @@ function DocumentArtifactContent({
         <VersionFooter
           currentVersionIndex={currentIndex}
           documents={chatDocument.entries}
-          handleVersionChange={() => {
-            // This is handled by the version provider now
-            // but VersionFooter still expects this prop
+          handleVersionChange={(type) => {
+            if (type === "toggle") {
+              // Toggle between edit and diff modes when viewing old versions
+              // For now, just navigate to latest
+              navigateVersion("latest");
+            } else {
+              navigateVersion(type);
+            }
           }}
         />
       </ChatArtifactFooter>

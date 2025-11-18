@@ -156,10 +156,13 @@ export function useChatController({
       if (!result) {
         return;
       }
-      console.log(result);
 
       // Send the result back to the stream (no await to avoid deadlocks)
-      // controller.addToolResult(result);
+      chat.addToolResult({
+        tool: result.tool,
+        toolCallId: result.toolCallId,
+        output: result.output,
+      });
     },
   };
 

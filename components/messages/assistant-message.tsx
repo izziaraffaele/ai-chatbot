@@ -54,12 +54,13 @@ export function AssistantMessage({
     (p) => p.type === "text" && p.text?.trim()
   );
 
+  const isMessageStreaming = isStreaming && isLastMessage;
   return (
     <ChatMessage
       className={cn({ "min-h-6": isLastMessage }, className)}
       from={message.role}
       isReadonly={isReadonly}
-      isStreaming={isStreaming}
+      isStreaming={isMessageStreaming}
       mode={mode}
     >
       {avatar && (
@@ -122,7 +123,7 @@ export function AssistantMessage({
         </MessagePartIterator>
 
         {/* Toolbar */}
-        {!isStreaming && (
+        {!isMessageStreaming && hasText && (
           <ChatMessageToolbar
             isReadonly={isReadonly}
             message={message}

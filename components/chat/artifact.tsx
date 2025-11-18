@@ -112,7 +112,7 @@ export function ArtifactDraftProvider<T = any>({
   children,
 }: ArtifactDraftProviderProps<T>) {
   const [content, setContent] = useState<T>(initialContent);
-  const [originalContent] = useState<T>(initialContent);
+  const [originalContent, setOriginalContent] = useState<T>(initialContent);
   const [isSaving, setIsSaving] = useState(false);
   const isFirstRender = useRef(true);
 
@@ -125,6 +125,8 @@ export function ArtifactDraftProvider<T = any>({
     setIsSaving(true);
     try {
       await Promise.resolve(onSaveAction(contentToSave));
+      // Update originalContent after successful save
+      setOriginalContent(contentToSave);
     } finally {
       setIsSaving(false);
     }
@@ -153,6 +155,8 @@ export function ArtifactDraftProvider<T = any>({
         setIsSaving(true);
         try {
           await Promise.resolve(onSaveAction(content));
+          // Update originalContent after successful save
+          setOriginalContent(content);
         } finally {
           setIsSaving(false);
         }

@@ -1,3 +1,4 @@
+import { isToolUIPart } from "ai";
 import { z } from "zod";
 import { RuntimeConfigSchema } from "@/config/runtime.schema";
 import { messageMetadataSchema } from "@/lib/types";
@@ -14,16 +15,25 @@ const filePartSchema = z.object({
   url: z.url(),
 });
 
-const partSchema = z.union([textPartSchema, filePartSchema]);
+const anyPartSchema = z.looseObject({ type: z.string() });
+
+const userMessageSchema = z.object({
+  id: z.uuid(),
+  role: z.literal("user"),
+  parts: z.array(z.union([textPartSchema, filePartSchema])),
+  metadata: messageMetadataSchema.optional(),
+});
+
+const assistantMessageSchema = z.object({
+  id: z.uuid(),
+  role: z.enum(["user", "assistant"]),
+  parts: z.array(anyPartSchema).transform((v) => v.filter(isToolUIPart)),
+  metadata: messageMetadataSchema.optional(),
+});
 
 export const postRequestBodySchema = z.object({
   id: z.uuid(),
-  message: z.object({
-    id: z.uuid(),
-    role: z.enum(["user"]),
-    parts: z.array(partSchema),
-    metadata: messageMetadataSchema.optional(),
-  }),
+  message: z.union([userMessageSchema, assistantMessageSchema]),
   selectedVisibilityType: z.enum(["public", "private"]),
   runtimeConfig: RuntimeConfigSchema.partial(),
   tools: z.record(z.string(), z.any()).optional(),

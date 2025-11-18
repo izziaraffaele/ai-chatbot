@@ -241,7 +241,6 @@ export function ChatSuggestions({
 }: ChatSuggestionsProps) {
   // Get provider context
   const context = useChatSuggestions();
-  console.log({ context });
 
   // Props always override context
   const suggestions = propsSuggestions || context.suggestions;

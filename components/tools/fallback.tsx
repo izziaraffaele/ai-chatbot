@@ -9,16 +9,16 @@ import {
   ToolInput,
   ToolOutput,
 } from "@/components/elements/tool";
-import type { ChatToolUIProps } from "../tools/types";
+import type { ChatToolProps } from "../tools/types";
 
-export type FallbackProps = ChatToolUIProps;
+export type FallbackProps = ChatToolProps;
 /**
  * Fallback Tool UI Component
  * Displays a default tool UI with input and output when a dedicated tool UI is not available
  */
 function PureFallback({ part }: FallbackProps) {
   return (
-    <Tool defaultOpen={false}>
+    <Tool className="mb-0" defaultOpen={false}>
       <ToolHeader state={part.state} type={part.type} />
       <ToolContent>
         {part.state === "input-available" && <ToolInput input={part.input} />}
