@@ -7,6 +7,7 @@ export type AgentConfig = {
   id: string;
   name: string;
   description: string;
+  registryId: string;
   avatar: string; // emoji or URL
   color?: string; // optional: for styling (e.g., 'blue', '#3b82f6')
   icon?: string; // optional: alternative to avatar
@@ -17,12 +18,13 @@ export type AgentConfig = {
  * Currently supports the Research agent for web search and synthesis
  */
 export const AGENT_CONFIGS: Record<string, AgentConfig> = {
-  researchAgent: {
-    id: "researchAgent",
+  researcher: {
+    id: "researcher",
     name: "Researcher",
     description: "Specializes in web research and synthesis",
     avatar: "🔍",
     color: "blue",
+    registryId: "researchAgent",
   },
 } as const;
 
@@ -46,4 +48,12 @@ export function getAgentConfig(id: string): AgentConfig | undefined {
 export function getDefaultAgent(): AgentConfig {
   const agents = getAvailableAgents();
   return agents[0] || AGENT_CONFIGS.research;
+}
+
+export function getAgentConfigByRegistryId(
+  id: string
+): AgentConfig | undefined {
+  return Object.values(AGENT_CONFIGS).find(
+    (config) => config.registryId === id
+  );
 }

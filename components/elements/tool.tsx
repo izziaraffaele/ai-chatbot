@@ -31,7 +31,7 @@ export const Tool = ({ className, ...props }: ToolProps) => (
 );
 
 export type ToolHeaderProps = {
-  title?: string;
+  title?: React.ReactNode;
   type: ToolUIPart["type"];
   state: ToolUIPart["state"];
   className?: string;
@@ -86,7 +86,7 @@ export const ToolHeader = ({
   >
     <div className="flex items-center gap-2">
       <ToolIcon className="size-4 text-muted-foreground" />
-      <span className="font-medium text-sm">
+      <span className="truncate text-left font-medium text-sm">
         {title ?? type.split("-").slice(1).join("-")}
       </span>
       {statusBadge(state)}
