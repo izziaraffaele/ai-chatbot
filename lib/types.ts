@@ -1,3 +1,4 @@
+import type { AgentDataPart } from "@mastra/ai-sdk";
 import type {
   DeepPartial,
   InferUITool,
@@ -44,6 +45,8 @@ export type ChatDataTypes = {
   clear: null;
   finish: null;
   usage: AppUsage;
+  // mastra-specific
+  "tool-agent": AgentDataPart["data"];
 };
 
 export type ChatMessage = UIMessage<MessageMetadata, ChatDataTypes, ChatTools>;

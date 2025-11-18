@@ -11,17 +11,15 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CustomUIDataTypes } from "@/lib/types";
+import type { ChatDataTypes } from "@/lib/types";
 
 /** Handles stream data parts in subscription callbacks */
-type DataStreamSubscriptionHandler = (
-  part: DataUIPart<CustomUIDataTypes>
-) => void;
+type DataStreamSubscriptionHandler = (part: DataUIPart<ChatDataTypes>) => void;
 
 type DataStreamContextValue = {
-  dataStream: DataUIPart<CustomUIDataTypes>[];
+  dataStream: DataUIPart<ChatDataTypes>[];
   setDataStream: React.Dispatch<
-    React.SetStateAction<DataUIPart<CustomUIDataTypes>[]>
+    React.SetStateAction<DataUIPart<ChatDataTypes>[]>
   >;
   subscribe: (handler: DataStreamSubscriptionHandler) => () => void;
   _registerSubscriber: (
@@ -46,9 +44,7 @@ export function DataStreamProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [dataStream, setDataStream] = useState<DataUIPart<CustomUIDataTypes>[]>(
-    []
-  );
+  const [dataStream, setDataStream] = useState<DataUIPart<ChatDataTypes>[]>([]);
 
   const subscribersRef = useRef<Set<DataStreamSubscriptionHandler>>(new Set());
 
@@ -113,13 +109,13 @@ export function useDataStream() {
  * );
  */
 export function useDataStreamSubscription(
-  filter: (part: DataUIPart<CustomUIDataTypes>) => boolean,
-  handler: (part: DataUIPart<CustomUIDataTypes>) => void
+  filter: (part: DataUIPart<ChatDataTypes>) => boolean,
+  handler: (part: DataUIPart<ChatDataTypes>) => void
 ) {
   const { subscribe } = useDataStream();
 
   useEffect(() => {
-    const wrappedHandler = (part: DataUIPart<CustomUIDataTypes>) => {
+    const wrappedHandler = (part: DataUIPart<ChatDataTypes>) => {
       if (filter(part)) {
         handler(part);
       }

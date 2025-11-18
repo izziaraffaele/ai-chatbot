@@ -212,6 +212,15 @@ export const it: TranslationDict = {
   "tool.result": "Risultato",
   "tool.error": "Errore",
 
+  // Agent Tool UI
+  "agent.status.running": "In esecuzione",
+  "agent.status.completed": "Completato",
+  "agent.status.error": "Errore",
+  "agent.progress.executing": "Esecuzione sub-agent...",
+  "agent.content.title": "Contenuto Generato",
+  "agent.sources.title": "Fonti",
+  "agent.debug.title": "Info Debug",
+
   // ============================================================================
   // Messages & Actions
   // ============================================================================

@@ -64,7 +64,7 @@ export function AssistantMessage({
       mode={mode}
     >
       {avatar && (
-        <div className="flex shrink-0 items-end pb-9">
+        <div className={cn("flex shrink-0 items-end", { "pb-9": hasText })}>
           <ChatMessageAvatar className="text-[#FFBE2C]">
             {avatar}
           </ChatMessageAvatar>

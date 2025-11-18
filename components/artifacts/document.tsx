@@ -122,13 +122,13 @@ export function DocumentArtifact({
         });
 
         if (!response.ok) {
-          throw new Error('Failed to save document');
+          throw new Error("Failed to save document");
         }
 
         // Revalidate the data to get the latest version
         await chatDocument.mutate();
       } catch (error) {
-        console.error('Error saving document:', error);
+        console.error("Error saving document:", error);
         // Optionally show error message to user
       }
     },
@@ -137,7 +137,8 @@ export function DocumentArtifact({
 
   // Get initial content for draft provider
   // Use the latest version from documents if available, otherwise fallback to artifact.content
-  const latestDocument = chatDocument.entries?.[chatDocument.entries.length - 1];
+  const latestDocument =
+    chatDocument.entries?.[chatDocument.entries.length - 1];
   const initialContent = latestDocument?.content || artifact.content || "";
 
   // Set initial index to the latest version (last item in versions array)
@@ -205,7 +206,8 @@ function DocumentArtifactContent({
   setMetadata,
 }: DocumentArtifactContentProps) {
   const { artifact } = useArtifact();
-  const { currentIndex, isLatest, mode, navigateVersion } = useArtifactVersion();
+  const { currentIndex, isLatest, mode, navigateVersion } =
+    useArtifactVersion();
   const {
     isDirty,
     content: draftContent,

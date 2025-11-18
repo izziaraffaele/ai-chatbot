@@ -1,9 +1,12 @@
-import type {
-  AssistantModelMessage,
-  DeepPartial,
-  ToolModelMessage,
-  UIMessage,
-  UIMessagePart,
+import {
+  getToolName,
+  isToolUIPart,
+  ToolUIPart,
+  type AssistantModelMessage,
+  type DeepPartial,
+  type ToolModelMessage,
+  type UIMessage,
+  type UIMessagePart,
 } from 'ai';
 import { type ClassValue, clsx } from 'clsx';
 import { formatISO } from 'date-fns';
@@ -11,6 +14,7 @@ import { twMerge } from 'tailwind-merge';
 import type { DBMessage, Document } from '@/lib/db/schema';
 import type { ChatDataTypes, ChatMessage, ChatTools  } from './types';
 import { ChatSDKError, type ErrorCode } from './errors';
+import { AgentDataPart } from '@mastra/ai-sdk';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -202,4 +206,19 @@ export function deepMerge<T extends Record<string, unknown>>(
   }
 
   return result as T;
+}
+
+export function isAgentToolUIPart(part: UIMessagePart<any,any>): part is ToolUIPart{
+  if (!isToolUIPart(part)) {
+    return false;
+  }
+
+  const toolName = getToolName(part);
+  return toolName.startsWith("agent-");
+}
+
+
+export function getAgentToolName(part: ToolUIPart) {
+  const toolName = getToolName(part);
+  return toolName.replace("agent-", "");
 }

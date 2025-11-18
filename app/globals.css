@@ -164,6 +164,11 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
   }
+
+  * {
+    min-width: 0px;
+    min-height: 0px;
+  }
 }
 
 @utility text-balance {

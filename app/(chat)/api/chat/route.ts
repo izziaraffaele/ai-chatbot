@@ -38,12 +38,15 @@ export const maxDuration = 60;
 let globalStreamContext: ResumableStreamContext | null = null;
 
 /** Validates and parses the incoming chat request */
-function validateRequest(request: Request): PostRequestBody | Response {
+async function validateRequest(
+  request: Request
+): Promise<PostRequestBody | Response> {
   try {
-    const json = request.json();
+    const json = await request.json();
     const parsed = postRequestBodySchema.parse(json);
     return parsed;
   } catch (_) {
+    console.error(_);
     return new ChatSDKError("bad_request:api").toResponse();
   }
 }
@@ -263,7 +266,7 @@ export function getStreamContext() {
 /** Handles chat requests: validates, authenticates, and streams AI responses */
 export async function POST(request: Request) {
   // 1. Validate request
-  const requestBody = validateRequest(request);
+  const requestBody = await validateRequest(request);
   if (requestBody instanceof Response) {
     return requestBody;
   }

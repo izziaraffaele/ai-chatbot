@@ -206,6 +206,15 @@ export const en = {
   "tool.result": "Result",
   "tool.error": "Error",
 
+  // Agent Tool UI
+  "agent.status.running": "Running",
+  "agent.status.completed": "Completed",
+  "agent.status.error": "Error",
+  "agent.progress.executing": "Executing sub-agent...",
+  "agent.content.title": "Generated Content",
+  "agent.sources.title": "Sources",
+  "agent.debug.title": "Debug Info",
+
   // ============================================================================
   // Messages & Actions
   // ============================================================================
