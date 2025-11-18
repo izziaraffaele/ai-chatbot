@@ -15,8 +15,6 @@ const filePartSchema = z.object({
   url: z.url(),
 });
 
-const anyPartSchema = z.looseObject({ type: z.string() });
-
 const userMessageSchema = z.object({
   id: z.uuid(),
   role: z.literal("user"),
@@ -26,8 +24,8 @@ const userMessageSchema = z.object({
 
 const assistantMessageSchema = z.object({
   id: z.uuid(),
-  role: z.enum(["user", "assistant"]),
-  parts: z.array(anyPartSchema).transform((v) => v.filter(isToolUIPart)),
+  role: z.literal("assistant"),
+  parts: z.array(z.unknown()).transform((v) => v.filter(isToolUIPart)),
   metadata: messageMetadataSchema.optional(),
 });
 

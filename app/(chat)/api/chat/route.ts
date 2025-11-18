@@ -1,4 +1,5 @@
 import { toAISdkFormat } from "@mastra/ai-sdk";
+import type { Agent } from "@mastra/core/agent";
 import { geolocation } from "@vercel/functions";
 import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
 import { after } from "next/server";
@@ -8,7 +9,6 @@ import {
 } from "resumable-stream";
 import { auth, type UserType } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/visibility-selector";
-import type { RuntimeConfig } from "@/config/runtime.schema";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import { titlePrompt } from "@/lib/ai/prompts";
 import { isProductionEnvironment } from "@/lib/constants";
@@ -37,6 +37,209 @@ export const maxDuration = 60;
 
 let globalStreamContext: ResumableStreamContext | null = null;
 
+/** Validates and parses the incoming chat request */
+function validateRequest(request: Request): PostRequestBody | Response {
+  try {
+    const json = request.json();
+    const parsed = postRequestBodySchema.parse(json);
+    return parsed;
+  } catch (_) {
+    return new ChatSDKError("bad_request:api").toResponse();
+  }
+}
+
+/** Checks if user has exceeded their daily message limit */
+async function checkRateLimits(
+  userId: string,
+  userType: UserType
+): Promise<Response | null> {
+  const messageCount = await getMessageCountByUserId({
+    id: userId,
+    differenceInHours: 24,
+  });
+
+  const { maxMessagesPerDay } = entitlementsByUserType[userType];
+  if (messageCount > maxMessagesPerDay) {
+    return new ChatSDKError("rate_limit:chat").toResponse();
+  }
+
+  return null;
+}
+
+/** Processes user messages: creates chat if needed, saves message */
+async function handleUserMessage(params: {
+  id: string;
+  message: ChatMessage;
+  session: any;
+  selectedVisibilityType: VisibilityType;
+  chatAgent: any;
+}): Promise<{ messagesFromDb: DBMessage[]; chat: any }> {
+  const { id, message, session, selectedVisibilityType, chatAgent } = params;
+  const chat = await getChatById({ id });
+  let messagesFromDb: DBMessage[] = [];
+
+  if (chat) {
+    if (chat.userId !== session.user.id) {
+      throw new ChatSDKError("forbidden:chat");
+    }
+    messagesFromDb = await getMessagesByChatId({ id });
+  } else {
+    const title = await chatAgent.generateTitleFromUserMessage({
+      message,
+      tracingContext: {},
+      instructions: `Given a chat message, generate a short title.${titlePrompt}`,
+    });
+
+    await saveChat({
+      id,
+      userId: session.user.id,
+      title,
+      visibility: selectedVisibilityType,
+    });
+  }
+
+  await saveMessages({
+    messages: [
+      {
+        chatId: id,
+        id: message.id,
+        role: message.role,
+        parts: message.parts,
+        attachments: [],
+        createdAt: new Date(),
+      },
+    ],
+  });
+
+  return { messagesFromDb, chat };
+}
+
+/** Processes assistant tool results: updates existing messages */
+async function handleAssistantMessage(params: {
+  message: ChatMessage;
+  messagesFromDb: DBMessage[];
+}): Promise<{ uiMessages: ChatMessage[]; lastDbMessage: DBMessage }> {
+  const { message, messagesFromDb } = params;
+  const lastDbMessageIdx = messagesFromDb.length - 1;
+  const lastDbMessage = messagesFromDb[lastDbMessageIdx];
+
+  const isAssistantToolResult =
+    lastDbMessage?.role === "assistant" && lastDbMessage?.id === message.id;
+
+  if (!isAssistantToolResult) {
+    throw new ChatSDKError("bad_request:api");
+  }
+
+  const uiMessages = convertToUIMessages(messagesFromDb);
+  uiMessages[lastDbMessageIdx] = {
+    ...uiMessages[lastDbMessageIdx],
+    parts: uiMessages[lastDbMessageIdx].parts.concat(message.parts),
+  };
+
+  await updateMessageParts({
+    messageId: lastDbMessage.id,
+    parts: uiMessages[lastDbMessageIdx].parts,
+  });
+
+  return { uiMessages, lastDbMessage };
+}
+
+/** Creates and configures the AI chat stream with all required callbacks */
+async function createChatStream(params: {
+  uiMessages: ChatMessage[];
+  isAssistantToolResult: boolean;
+  lastDbMessage: DBMessage | undefined;
+  streamId: string;
+  chatId: string;
+  runtimeContext: any;
+  tools: Record<string, unknown> | undefined;
+  chatAgent: Agent;
+  message: ChatMessage;
+}) {
+  const {
+    uiMessages,
+    isAssistantToolResult,
+    lastDbMessage,
+    streamId,
+    chatId,
+    runtimeContext,
+    tools,
+    chatAgent,
+    message,
+  } = params;
+
+  await createStreamId({ streamId, chatId });
+
+  const stream = await chatAgent.stream(uiMessages, {
+    runtimeContext,
+    clientTools: tools,
+    telemetry: {
+      functionId: "chatAgent-stream",
+      isEnabled: isProductionEnvironment,
+    },
+    onFinish: async ({ usage }) => {
+      let finalMergedUsage: AppUsage | null = null;
+
+      try {
+        const model = await chatAgent.getModel();
+        finalMergedUsage = await enrichUsageWithTokenlens(model.modelId, usage);
+      } catch {
+        console.log("cannot enrich usage");
+      }
+
+      if (finalMergedUsage) {
+        await updateChatLastContextById({
+          chatId,
+          context: finalMergedUsage,
+        });
+      }
+    },
+  });
+
+  return createUIMessageStream({
+    generateId: () => (isAssistantToolResult ? message.id : generateUUID()),
+    originalMessages: isAssistantToolResult
+      ? uiMessages.map((msg, idx) =>
+          idx === uiMessages.length - 1 ? { ...msg, parts: [] } : msg
+        )
+      : uiMessages,
+    execute: async ({ writer }) => {
+      const lastMessageId = isAssistantToolResult
+        ? lastDbMessage?.id
+        : undefined;
+
+      for await (const part of toAISdkFormat(stream, {
+        from: "agent",
+        lastMessageId,
+      }) as any) {
+        writer.write(part);
+      }
+    },
+    onFinish: async ({ responseMessage }) => {
+      if (isAssistantToolResult) {
+        await updateMessageParts({
+          messageId: message.id,
+          parts: responseMessage.parts,
+        });
+      } else {
+        await saveMessages({
+          messages: [
+            {
+              chatId,
+              id: responseMessage.id,
+              role: responseMessage.role,
+              parts: responseMessage.parts,
+              attachments: [],
+              createdAt: new Date(),
+            },
+          ],
+        });
+      }
+    },
+  });
+}
+
+/** Gets or creates the global resumable stream context */
 export function getStreamContext() {
   if (!globalStreamContext) {
     try {
@@ -57,220 +260,92 @@ export function getStreamContext() {
   return globalStreamContext;
 }
 
+/** Handles chat requests: validates, authenticates, and streams AI responses */
 export async function POST(request: Request) {
-  let requestBody: PostRequestBody;
-
-  try {
-    const json = await request.json();
-    requestBody = postRequestBodySchema.parse(json);
-  } catch (_) {
-    return new ChatSDKError("bad_request:api").toResponse();
+  // 1. Validate request
+  const requestBody = validateRequest(request);
+  if (requestBody instanceof Response) {
+    return requestBody;
   }
 
   try {
     const { id, message, runtimeConfig, selectedVisibilityType, tools } =
-      requestBody as {
-        id: string;
-        message: ChatMessage;
-        selectedVisibilityType: VisibilityType;
-        runtimeConfig?: Partial<RuntimeConfig>;
-        tools?: Record<string, unknown>;
-      };
+      requestBody;
 
+    // 2. Authenticate session
     const session = await auth();
-
     if (!session?.user) {
       return new ChatSDKError("unauthorized:chat").toResponse();
     }
 
-    const userType: UserType = session.user.type;
-    const messageCount = await getMessageCountByUserId({
-      id: session.user.id,
-      differenceInHours: 24,
-    });
-
-    const { maxMessagesPerDay } = entitlementsByUserType[userType];
-    if (messageCount > maxMessagesPerDay) {
-      return new ChatSDKError("rate_limit:chat").toResponse();
+    // 3. Check rate limits
+    const rateLimitResponse = await checkRateLimits(
+      session.user.id,
+      session.user.type
+    );
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
+    // 4. Setup agents and context
     const { longitude, latitude, city, country } = geolocation(request);
     const chatAgent = mastra.getAgent("chatAgent");
-
-    // Create runtime context with session and geolocation hints
     const runtimeContext = createToolContext(session, {
       geoHints: { longitude, latitude, city, country },
       config: runtimeConfig,
     });
 
-    const chat = await getChatById({ id });
-    let messagesFromDb: DBMessage[] = [];
+    // 5. Handle message based on type
+    let uiMessages: ChatMessage[];
+    let lastDbMessage: DBMessage | undefined;
+    let isAssistantToolResult = false;
 
-    // Assistants can't start a new chat
-    if (!chat && message.role === "assistant") {
-      return new ChatSDKError("bad_request:api").toResponse();
-    }
-
-    if (chat) {
+    if (message.role === "user") {
+      const { messagesFromDb } = await handleUserMessage({
+        id,
+        message,
+        session,
+        selectedVisibilityType,
+        chatAgent,
+      });
+      uiMessages = [...convertToUIMessages(messagesFromDb), message];
+    } else {
+      // Assistant messages
+      const chat = await getChatById({ id });
+      if (!chat) {
+        return new ChatSDKError("bad_request:api").toResponse();
+      }
       if (chat.userId !== session.user.id) {
         return new ChatSDKError("forbidden:chat").toResponse();
       }
-      // Only fetch messages if chat already exists
-      messagesFromDb = await getMessagesByChatId({ id });
-    } else if (message.role === "user") {
-      const title = await chatAgent.generateTitleFromUserMessage({
-        message,
-        tracingContext: {},
-        instructions: `Given a chat message, generate a short title.${titlePrompt}`,
-      });
 
-      await saveChat({
-        id,
-        userId: session.user.id,
-        title,
-        visibility: selectedVisibilityType,
+      const messagesFromDb = await getMessagesByChatId({ id });
+      const result = await handleAssistantMessage({
+        message: message as ChatMessage,
+        messagesFromDb,
       });
-      // New chat - no need to fetch messages, it's empty
+      uiMessages = result.uiMessages;
+      lastDbMessage = result.lastDbMessage;
+      isAssistantToolResult = true;
     }
 
-    const lastDbMessageIdx = messagesFromDb.length - 1;
-    const lastDbMessage = messagesFromDb[lastDbMessageIdx];
-
-    const isAssistantToolResult =
-      lastDbMessage?.role === "assistant" &&
-      lastDbMessage?.id === message.id;
-
-    let uiMessages: ChatMessage[];
-
-    // handle client tool call output
-    if (message.role === "assistant") {
-      // verify that the last message is an assistant message and has the same id as the incoming message
-      if (!isAssistantToolResult) {
-        return new ChatSDKError("bad_request:api").toResponse();
-      }
-
-      // Update UI messages without creating duplicates
-      uiMessages = convertToUIMessages(messagesFromDb);
-      uiMessages[lastDbMessageIdx] = {
-        ...uiMessages[lastDbMessageIdx],
-        parts: uiMessages[lastDbMessageIdx].parts.concat(message.parts),
-      };
-
-      // Update db message with tool results
-      await updateMessageParts({
-        messageId: lastDbMessage.id,
-        parts: uiMessages[lastDbMessageIdx].parts,
-      });
-    } else {
-      // Save user message and add to conversation
-      await saveMessages({
-        messages: [
-          {
-            chatId: id,
-            id: message.id,
-            role: message.role,
-            parts: message.parts,
-            attachments: [],
-            createdAt: new Date(),
-          },
-        ],
-      });
-
-      uiMessages = [...convertToUIMessages(messagesFromDb), message];
-    }
-
+    // 6. Create and return stream
     const streamId = generateUUID();
-    await createStreamId({ streamId, chatId: id });
-
-    try {
-      // Call Mastra agent with runtime context
-      const stream = await chatAgent.stream(uiMessages, {
-        runtimeContext,
-        clientTools: tools,
-        telemetry: {
-          functionId: "chatAgent-stream",
-          isEnabled: isProductionEnvironment,
-        },
-        onFinish: async ({ usage }) => {
-          let finalMergedUsage: AppUsage | null = null;
-
-          try {
-            const model = await chatAgent.getModel();
-            finalMergedUsage = await enrichUsageWithTokenlens(
-              model.modelId,
-              usage
-            );
-          } catch {
-            console.log("cannot enrich usage");
-          }
-
-          if (finalMergedUsage) {
-            await updateChatLastContextById({
-              chatId: id,
-              context: finalMergedUsage,
-            });
-          }
-        },
-      });
-
-      const uiMessageStream = createUIMessageStream({
-      generateId: () => (isAssistantToolResult ? message.id : generateUUID()),
-      originalMessages: isAssistantToolResult
-        ? uiMessages.map((msg, idx) =>
-            idx === lastDbMessageIdx
-              ? { ...msg, parts: [] } // Remove parts to prevent duplication
-              : msg
-          )
-        : uiMessages,
-      execute: async ({ writer }) => {
-        const lastMessageId = isAssistantToolResult ? lastDbMessage?.id : undefined;
-
-        for await (const part of toAISdkFormat(stream, {
-          from: "agent",
-          lastMessageId,
-        }) as any) {
-          writer.write(part);
-        }
-      },
-      onFinish: async ({ responseMessage }) => {
-        if (isAssistantToolResult) {
-          // Update existing assistant message with tool result and completion
-          await updateMessageParts({
-            messageId: message.id,
-            parts: responseMessage.parts,
-          });
-        } else {
-          // Save new assistant message
-          await saveMessages({
-            messages: [
-              {
-                chatId: id,
-                id: responseMessage.id,
-                role: responseMessage.role,
-                parts: responseMessage.parts,
-                attachments: [],
-                createdAt: new Date(),
-              },
-            ],
-          });
-        }
-      },
+    const uiMessageStream = await createChatStream({
+      uiMessages,
+      isAssistantToolResult,
+      lastDbMessage,
+      streamId,
+      chatId: id,
+      runtimeContext,
+      tools,
+      chatAgent,
+      message: message as ChatMessage,
     });
 
-    // Create a Response that streams the UI message stream to the client
     return createUIMessageStreamResponse({
       stream: uiMessageStream,
     });
-    } catch (agentError) {
-      console.error("Mastra agent error:", {
-        chatId: id,
-        userId: session.user.id,
-        error:
-          agentError instanceof Error ? agentError.message : String(agentError),
-      });
-
-      return new ChatSDKError("offline:chat").toResponse();
-    }
   } catch (error) {
     const vercelId = request.headers.get("x-vercel-id");
 
@@ -293,6 +368,7 @@ export async function POST(request: Request) {
   }
 }
 
+/** Deletes a chat and all its messages */
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
