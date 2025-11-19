@@ -1,6 +1,6 @@
 /**
- * Agent configuration for sub-agents
- * Defines available agents that users can select to handle specialized tasks
+ * Assistant configuration for sub-assistants
+ * Defines available assistants that users can select to handle specialized tasks
  */
 
 export type AgentConfig = {
@@ -13,13 +13,13 @@ export type AgentConfig = {
 };
 
 /**
- * Available agent configurations
- * Supports the Chat Agent for general assistance, Planner for roadmap creation, and Research agent for web search
-*/
+ * Available assistant configurations
+ * Supports the Chat Assistant for general assistance, Planner for roadmap creation, and Research assistant for web search
+ */
 export const AGENT_CONFIGS: Record<string, AgentConfig> = {
   chatAgent: {
     id: "chatAgent",
-    name: "Chat Agent",
+    name: "Chat Assistant",
     description:
       "General-purpose assistant with document creation and weather capabilities",
     avatar: "💬",
@@ -43,21 +43,21 @@ export const AGENT_CONFIGS: Record<string, AgentConfig> = {
 } as const;
 
 /**
- * Get all available agents
+ * Get all available assistants
  */
 export function getAvailableAgents(): AgentConfig[] {
   return Object.values(AGENT_CONFIGS);
 }
 
 /**
- * Get agent config by ID
+ * Get assistant config by ID
  */
 export function getAgentConfig(id: string): AgentConfig | undefined {
   return AGENT_CONFIGS[id];
 }
 
 /**
- * Get default agent (first available)
+ * Get default assistant (first available)
  */
 export function getDefaultAgent(): AgentConfig {
   const agents = getAvailableAgents();

@@ -212,11 +212,11 @@ export const it: TranslationDict = {
   "tool.result": "Risultato",
   "tool.error": "Errore",
 
-  // Agent Tool UI
+  // Assistant Tool UI
   "agent.status.running": "In esecuzione",
   "agent.status.completed": "Completato",
   "agent.status.error": "Errore",
-  "agent.progress.executing": "Esecuzione sub-agent...",
+  "agent.progress.executing": "Esecuzione sub-assistente...",
   "agent.content.title": "Contenuto Generato",
   "agent.sources.title": "Fonti",
   "agent.debug.title": "Info Debug",
@@ -237,12 +237,20 @@ export const it: TranslationDict = {
   "message.actions.tooltipDownvote": "Vota negativamente",
 
   // ============================================================================
-  // Agent & Model Selectors
+  // Assistente & Model Selectors
   // ============================================================================
 
   "agent.selector.placeholder": "Assistente",
-  "agent.selector.search": "Cerca agenti...",
-  "agent.selector.empty": "Nessun agente trovato.",
+  "agent.selector.search": "Cerca assistenti...",
+  "agent.selector.empty": "Nessun assistente trovato.",
+
+  // Assistant Names
+  "agent.chatAgent.name": "Assistente Chat",
+  "agent.chatAgent.description": "Assistente generico con creazione documenti e informazioni meteo",
+  "agent.plannerAgent.name": "Pianificatore",
+  "agent.plannerAgent.description": "Crea roadmap e piani strutturati per studio, viaggi, progetti e altro",
+  "agent.researchAgent.name": "Ricercatore",
+  "agent.researchAgent.description": "Specializzato in ricerca web e sintesi",
 
   "model.selector.label": "Modello",
   "model.selector.description": "Scegli il modello AI",

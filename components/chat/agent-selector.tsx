@@ -61,12 +61,16 @@ export function ChatAgentSelector({
 }: ChatAgentSelectorProps) {
   const [open, setOpen] = useState(false);
   const t = useTranslations();
-  const availableAgents = useMemo(() => getAvailableAgents(), []);
+  const availableAgents = useMemo(() => {
+    return getAvailableAgents();
+  }, []);
 
   const displayAgent = useMemo(() => {
-    return selectedAgent
-      ? selectedAgent.name
-      : placeholder || t("agent.selector.placeholder", "Assistant");
+    if (!selectedAgent) {
+      return placeholder || t("agent.selector.placeholder", "Assistant");
+    }
+    const translationKey = `agent.${selectedAgent.id}.name` as any;
+    return t(translationKey, selectedAgent.name);
   }, [selectedAgent, placeholder, t]);
 
   const isDisabled = disabled || status === "streaming";
@@ -100,6 +104,11 @@ export function ChatAgentSelector({
           <ModelSelectorGroup>
             {availableAgents.map((agent) => {
               const isSelected = selectedAgent?.id === agent.id;
+              const agentName = t(`agent.${agent.id}.name` as any, agent.name);
+              const agentDescription = t(
+                `agent.${agent.id}.description` as any,
+                agent.description
+              );
 
               return (
                 <ModelSelectorItem
@@ -115,9 +124,9 @@ export function ChatAgentSelector({
                     <span className="text-lg">{agent.avatar}</span>
                   )}
                   <div className="flex flex-1 flex-col items-start gap-1">
-                    <ModelSelectorName>{agent.name}</ModelSelectorName>
+                    <ModelSelectorName>{agentName}</ModelSelectorName>
                     <div className="line-clamp-2 text-muted-foreground text-xs">
-                      {agent.description}
+                      {agentDescription}
                     </div>
                   </div>
                   <div className="ml-auto size-4">

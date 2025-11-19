@@ -206,11 +206,11 @@ export const en = {
   "tool.result": "Result",
   "tool.error": "Error",
 
-  // Agent Tool UI
+  // Assistant Tool UI
   "agent.status.running": "Running",
   "agent.status.completed": "Completed",
   "agent.status.error": "Error",
-  "agent.progress.executing": "Executing sub-agent...",
+  "agent.progress.executing": "Executing sub-assistant...",
   "agent.content.title": "Generated Content",
   "agent.sources.title": "Sources",
   "agent.debug.title": "Debug Info",
@@ -239,12 +239,20 @@ export const en = {
   "message.actions.downvoteError": "Failed to downvote response.",
 
   // ============================================================================
-  // Agent & Model Selectors
+  // Assistant & Model Selectors
   // ============================================================================
 
   "agent.selector.placeholder": "Assistant",
-  "agent.selector.search": "Search agents...",
-  "agent.selector.empty": "No agents found.",
+  "agent.selector.search": "Search assistants...",
+  "agent.selector.empty": "No assistants found.",
+
+  // Assistant Names
+  "agent.chatAgent.name": "Chat Assistant",
+  "agent.chatAgent.description": "General-purpose assistant with document creation and weather capabilities",
+  "agent.plannerAgent.name": "Planner",
+  "agent.plannerAgent.description": "Creates structured roadmaps and plans for study, travel, projects, and more",
+  "agent.researchAgent.name": "Researcher",
+  "agent.researchAgent.description": "Specializes in web research and synthesis",
 
   "model.selector.label": "Model",
   "model.selector.description": "Choose AI model",

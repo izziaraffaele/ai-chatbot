@@ -186,15 +186,15 @@ The application uses Mastra for agent orchestration, providing a flexible framew
 - **Memory**: LibSQL-backed for research context
 - **System Prompt**: Specialized for research tasks
 
-##### Agent Configuration for UI
+##### Assistant Configuration for UI
 
-Agents are registered in `lib/ai/agent-config.ts` for UI selection:
+Assistants are registered in `lib/ai/agent-config.ts` for UI selection:
 
 ```typescript
 export const AGENT_CONFIGS: Record<string, AgentConfig> = {
   chatAgent: {
     id: "chatAgent",
-    name: "Chat Agent",
+    name: "Chat Assistant",
     description: "General-purpose assistant with document creation and weather capabilities",
     avatar: "💬",
     color: "purple",
@@ -216,13 +216,22 @@ export const AGENT_CONFIGS: Record<string, AgentConfig> = {
 }
 ```
 
-##### Agent Selector Component
+**Internationalization Support:**
 
-The `ChatAgentSelector` component (`components/chat/agent-selector.tsx`) provides a UI for switching between agents:
+Assistant names and descriptions are translated via i18n keys in `lib/i18n/translations/`:
+- English: "Chat Assistant", "Planner", "Researcher"
+- Italian: "Assistente Chat", "Pianificatore", "Ricercatore"
+
+Translation keys follow the pattern `agent.{agentId}.name` and `agent.{agentId}.description`.
+
+##### Assistant Selector Component
+
+The `ChatAgentSelector` component (`components/chat/agent-selector.tsx`) provides a UI for switching between assistants:
 - Uses ModelSelector from AI Elements
-- Displays agent avatar, name, and description
+- Displays assistant avatar, name, and description
 - Disabled during streaming
-- Automatically loads available agents from `AGENT_CONFIGS`
+- Automatically loads available assistants from `AGENT_CONFIGS`
+- Supports i18n with translations for assistant names and descriptions
 
 #### 5. Tools System
 
@@ -486,6 +495,35 @@ Configuration in `biome.jsonc` enforces:
 - No console statements in production
 
 ## Recent Changes
+
+### Renamed "Agent" to "Assistant" in UI (November 19, 2025)
+
+**Change**: Updated all user-facing text to use "Assistant"/"Assistente" instead of "Agent"/"Agente" for better clarity.
+
+**Files Modified**:
+- `lib/i18n/translations/en.ts` - Updated all agent-related translation keys to use "assistant"
+- `lib/i18n/translations/it.ts` - Updated all agent-related translation keys to use "assistente"
+- `lib/ai/agent-config.ts` - Changed "Chat Agent" to "Chat Assistant" in display names
+- `components/chat/agent-selector.tsx` - Added i18n support for assistant names and descriptions
+- `DEVELOPER_DOCUMENTATION.md` - Updated terminology in user-facing documentation
+
+**Details**:
+- Translation keys updated:
+  - `agent.selector.search`: "Search agents..." → "Search assistants..." (EN) / "Cerca assistenti..." (IT)
+  - `agent.selector.empty`: "No agents found." → "No assistants found." (EN) / "Nessun assistente trovato." (IT)
+  - `agent.progress.executing`: "Executing sub-agent..." → "Executing sub-assistant..." (EN) / "Esecuzione sub-assistente..." (IT)
+- Added new translation keys for assistant names:
+  - `agent.chatAgent.name`: "Chat Assistant" (EN) / "Assistente Chat" (IT)
+  - `agent.plannerAgent.name`: "Planner" (EN) / "Pianificatore" (IT)
+  - `agent.researchAgent.name`: "Researcher" (EN) / "Ricercatore" (IT)
+- Agent selector now dynamically translates assistant names and descriptions based on user language
+- Comments updated to use "assistant" terminology where user-facing
+
+**Impact**:
+- Improved clarity for end users - "Assistant" is more familiar than "Agent"
+- Full i18n support for assistant names in both English and Italian
+- Consistent terminology across the UI
+- Backend code and technical references still use "agent" terminology for consistency with Mastra framework
 
 ### Implemented Knowledge Base Permission Flow (November 19, 2025)
 
