@@ -13,7 +13,8 @@
   "linter": {
     "rules": {
       "performance": {
-        "noImgElement": "warn"
+        "noImgElement": "warn",
+        "noBarrelFile": "warn"
       },
       "suspicious": {
         /* Needs more work to fix */

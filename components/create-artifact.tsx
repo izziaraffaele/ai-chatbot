@@ -3,7 +3,7 @@ import type { DataUIPart } from "ai";
 import type { ComponentType, Dispatch, ReactNode, SetStateAction } from "react";
 import type { UIArtifact } from "@/components/chat/artifact";
 import type { Suggestion } from "@/lib/db/schema";
-import type { ChatMessage, CustomUIDataTypes } from "@/lib/types";
+import type { ChatDataTypes, ChatMessage } from "@/lib/types";
 
 export type ArtifactActionContext<M = any> = {
   content: string;
@@ -64,7 +64,7 @@ type ArtifactConfig<T extends string, M = any> = {
   onStreamPart: (args: {
     setMetadata: Dispatch<SetStateAction<M>>;
     setArtifact: Dispatch<SetStateAction<UIArtifact>>;
-    streamPart: DataUIPart<CustomUIDataTypes>;
+    streamPart: DataUIPart<ChatDataTypes>;
   }) => void;
 };
 
@@ -78,7 +78,7 @@ export class Artifact<T extends string, M = any> {
   readonly onStreamPart: (args: {
     setMetadata: Dispatch<SetStateAction<M>>;
     setArtifact: Dispatch<SetStateAction<UIArtifact>>;
-    streamPart: DataUIPart<CustomUIDataTypes>;
+    streamPart: DataUIPart<ChatDataTypes>;
   }) => void;
 
   constructor(config: ArtifactConfig<T, M>) {

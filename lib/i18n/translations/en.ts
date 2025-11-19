@@ -316,6 +316,26 @@ export const en = {
   "common.yes": "Yes",
   "common.no": "No",
   "common.submit": "Submit form",
+  "common.start": "Start",
+  "common.restart": "Try Again",
+
+  // ============================================================================
+  // Quiz Player
+  // ============================================================================
+
+  // Quiz Welcome Screen
+  "quiz.welcome.questions": "questions",
+  "quiz.welcome.cancel": "Cancel",
+  "quiz.welcome.start": "Start Quiz",
+
+  // Quiz End Screen
+  "quiz.completed.title": "Quiz Completed!",
+  "quiz.completed.correctPercentage": "% correct",
+  "quiz.completed.attempts": "attempts",
+  "quiz.completed.average": "Avg: {score}%",
+  "quiz.feedback.prompt": "How was this quiz?",
+  "quiz.feedback.restart": "Try Again",
+
   "message.copyError": "There's no text to copy!",
   "message.copySuccess": "Copied to clipboard!",
 } as const;

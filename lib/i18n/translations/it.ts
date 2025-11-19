@@ -315,6 +315,25 @@ export const it: TranslationDict = {
   "common.yes": "Sì",
   "common.no": "No",
   "common.submit": "Invia modulo",
+  "common.start": "Inizia",
+  "common.restart": "Riprova",
+
+  // ============================================================================
+  // Quiz Player
+  // ============================================================================
+
+  // Quiz Welcome Screen
+  "quiz.welcome.questions": "domande",
+  "quiz.welcome.cancel": "Annulla",
+  "quiz.welcome.start": "Inizia Quiz",
+
+  // Quiz End Screen
+  "quiz.completed.title": "Quiz Completato!",
+  "quiz.completed.correctPercentage": "% corrette",
+  "quiz.completed.attempts": "tentativi",
+  "quiz.completed.average": "Media: {score}%",
+  "quiz.feedback.prompt": "Com'è stato questo quiz?",
+  "quiz.feedback.restart": "Riprova",
 
   "message.actions.upvote": "Vota Positivamente",
   "message.actions.upvoting": "Votazione in corso...",
