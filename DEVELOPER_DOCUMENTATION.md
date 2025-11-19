@@ -287,6 +287,7 @@ export type DemoConfig = {
     organization?: { name: string; description: string; websiteUrl: string };
     app?: { name: string; description: string };
     indexes: string[];
+    knowledgeBase: "none" | "celio" | "analisi1" | "schoolr";
   };
   runtime: {
     experiences: Array<{ trigger: string; agent: string }>;
@@ -294,6 +295,147 @@ export type DemoConfig = {
   };
 };
 ```
+
+### Knowledge Base System
+
+The application supports loading custom knowledge bases that are injected into agent system prompts. This allows agents to have specialized domain knowledge for specific use cases.
+
+**Important**: The system now implements a permission-based flow where users must explicitly consent before agents use knowledge base content.
+
+#### Available Knowledge Bases
+
+Three mutually exclusive knowledge bases can be activated:
+
+1. **Celio** - Historical and archaeological information about Colle Celio in Rome
+   - File: `mastra/knoledgebase/celio/celio-knowledge-base.md`
+   - Contains: 14 POIs, 70 story points, 5 narrative perspectives
+   - Use case: Tourism, historical guidance, cultural information
+
+2. **Analisi 1** - Mathematical analysis course content
+   - File: `mastra/knoledgebase/uploaded_content/analisi1.md`
+   - Contains: Comprehensive calculus and analysis materials
+   - Use case: Education, tutoring, study assistance
+
+3. **Schoolr** - Online tutoring platform information
+   - Files: `mastra/knoledgebase/schoolr/info.md` + `personal.md`
+   - Contains: Platform features, pricing, tutor information
+   - Use case: Customer support, platform guidance
+
+#### Configuration
+
+Knowledge bases are configured in the Demo Settings UI under "Indexes" section:
+
+- **MemorAIz** toggle - Always enabled (disabled in UI)
+- **Demo Courses** toggle - Optional additional index
+- **Knowledge Base** toggles - Mutually exclusive (Celio, Analisi 1, Schoolr)
+
+When a knowledge base is selected in `config/demo.ts`:
+
+```typescript
+context: {
+  knowledgeBase: "celio", // or "analisi1", "schoolr", "none"
+}
+```
+
+#### Permission-Based Usage Flow
+
+The knowledge base system follows a strict permission protocol to ensure user consent:
+
+##### 1. Detection and Disclosure (Chat Agent)
+
+When a knowledge base is connected and relevant to a user's request, the Chat Agent:
+- Detects that `config.knowledgeBase` exists and is relevant
+- Explicitly informs the user about the available knowledge base
+- Example: "I see you have a knowledge base with your study materials. This could be helpful for creating your study plan."
+
+##### 2. Permission Request (Chat Agent)
+
+The Chat Agent asks for explicit confirmation before using the knowledge base:
+
+**Example permission requests:**
+- **Study programs/materials**: "I see you have uploaded your study program materials. Would you like me to use them to create your study plan?"
+- **POI databases**: "I have a knowledge base with Points of Interest for Rome. Should I use it to plan your trip?"
+- **Notes/documents**: "I see you have notes about calculus. Do you want me to use them as reference material?"
+
+##### 3. Additional Materials (Chat Agent)
+
+After receiving permission, the Chat Agent asks if the user wants to add more content:
+- "Do you want to upload any other documents, notes, or resources before I proceed?"
+- This allows users to supplement the knowledge base with additional materials
+
+##### 4. Handle Permission Refusal (Chat Agent)
+
+If the user declines permission:
+- Chat Agent acknowledges the choice politely
+- Does NOT reference or use any information from the knowledge base
+- Continues using only the user's messages and general knowledge
+
+##### 5. Use Knowledge Base (Chat Agent)
+
+Only after explicit permission, the Chat Agent:
+- Uses the knowledge base to avoid redundant questions
+- Provides personalized responses based on actual user materials
+- References specific content when helpful
+
+##### 6. Pre-Authorized Usage (Planner Agent)
+
+The Planner Agent operates differently:
+- It's called by the Chat Agent after permission is already obtained
+- The knowledge base is only present in its config if permission was granted
+- It can use the knowledge base directly without asking again
+- It structures plans around actual materials (e.g., specific chapters, POIs)
+
+#### Implementation Flow
+
+1. **Client Side** (`hooks/use-runtime-config.ts`):
+   - Demo config's `context.knowledgeBase` is passed as `knowledgeBaseName` in runtime config
+   - Sent to chat API with each message via `components/chat/context.tsx`
+
+2. **Transport Layer** (`components/chat/context.tsx`):
+   - Uses a ref (`runtimeConfigRef`) to avoid stale closure issues
+   - The ref is updated via `useEffect` whenever `runtimeConfig` changes
+   - `prepareSendMessagesRequest` reads from `runtimeConfigRef.current` to ensure latest config is sent
+   - This ensures knowledge base changes are immediately reflected in new messages
+
+3. **Server Side** (`app/(chat)/api/chat/route.ts`):
+   - Knowledge base is loaded from filesystem using `loadKnowledgeBase()`
+   - Content is injected into `runtimeConfig.knowledgeBase` object
+   - Passed to agents via runtime context
+
+4. **Agent System Prompts**:
+   
+   **Chat Agent** (`mastra/agents/chat-agent/system-prompt.ts`):
+   - Implements comprehensive permission protocol (see above)
+   - Must detect relevance, request permission, ask about additional materials
+   - Only uses knowledge base after explicit consent
+   - Handles refusal gracefully by not using the content
+   
+   **Planner Agent** (`mastra/agents/planner-agent/system-prompt.ts`):
+   - Assumes permission is already granted (called by Chat Agent)
+   - Uses knowledge base directly without asking permission again
+   - Structures plans based on actual content in the knowledge base
+   - References specific items (chapters, POIs, materials)
+
+#### Mutual Exclusivity Behavior
+
+Knowledge base selection follows these rules:
+
+- **Nothing toggled** → No extra context added to agent prompts
+- **One selected** → That knowledge base content is loaded and injected
+- **Second one selected** → First is automatically de-toggled, new context replaces old
+  - Example: If Celio is selected, then Schoolr is toggled, Celio is de-toggled and only Schoolr content is used
+  - UI state management in `components/demo-config/index.tsx` handles this via the `SwitchListControl` component
+
+#### Adding New Knowledge Bases
+
+To add a new knowledge base:
+
+1. Add markdown file(s) to `mastra/knoledgebase/`
+2. Update `KnowledgeBaseName` type in `mastra/utils/knowledge-base-loader.ts`
+3. Add file path mapping in `KNOWLEDGE_BASE_PATHS`
+4. Update demo schema enum in `config/demo.schema.ts`
+5. Update runtime schema enum in `config/runtime.schema.ts`
+6. Add UI toggle in `components/demo-config/index.tsx`
 
 ### Runtime Configuration (`config/runtime.ts`)
 
@@ -344,6 +486,33 @@ Configuration in `biome.jsonc` enforces:
 - No console statements in production
 
 ## Recent Changes
+
+### Implemented Knowledge Base Permission Flow (November 19, 2025)
+
+**Change**: Added permission-based protocol for knowledge base usage to ensure user consent.
+
+**Files Modified**:
+- `mastra/agents/chat-agent/system-prompt.ts` - Added comprehensive permission protocol
+- `mastra/agents/planner-agent/system-prompt.ts` - Added note about pre-authorized usage
+- `DEVELOPER_DOCUMENTATION.md` - Documented permission flow
+
+**Details**:
+- **Chat Agent** now follows a 5-step permission protocol:
+  1. **Detect and Disclose**: Informs user when a relevant knowledge base is available
+  2. **Request Permission**: Asks for explicit confirmation before using it
+  3. **Ask About Additional Materials**: Prompts user to supplement the knowledge base
+  4. **Handle Refusal**: Proceeds without using knowledge base if user declines
+  5. **Use Knowledge Base**: Only uses content after explicit permission
+- **Planner Agent** assumes permission is already granted (called by Chat Agent after permission obtained)
+- Knowledge base content is still loaded into prompts but agents are instructed not to use it without permission
+- Example permission requests provided for different scenarios (study materials, POI databases, notes)
+
+**Impact**:
+- Users maintain control over when their uploaded content is used
+- Transparent about available knowledge bases
+- Opportunity to add additional materials before proceeding
+- Graceful handling of permission denial
+- Improved user trust and privacy
 
 ### Fixed Database Error in Document Saving (November 19, 2025)
 

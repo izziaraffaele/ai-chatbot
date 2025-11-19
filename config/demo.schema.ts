@@ -90,6 +90,9 @@ export const DemoConfigSchema = z.object({
       .optional(),
     // knowledgebase
     indexes: z.array(z.string()).default(["memoraiz"]),
+    knowledgeBase: z
+      .enum(["none", "celio", "analisi1", "schoolr"])
+      .default("none"),
   }),
   runtime: z.object({
     intents: z

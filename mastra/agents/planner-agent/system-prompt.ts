@@ -730,13 +730,17 @@ Reason step by step:
   // AVAILABLE FEATURES
   // ========================================================================
   const enabledFeatures: string[] = [];
-  
+
   if (config.features?.webSearch) {
-    enabledFeatures.push("**Web Search Tools** - Access external data via Researcher Agent");
+    enabledFeatures.push(
+      "**Web Search Tools** - Access external data via Researcher Agent"
+    );
   }
 
   if (config.features?.memory) {
-    enabledFeatures.push("**Working Memory** - User preferences and context are available");
+    enabledFeatures.push(
+      "**Working Memory** - User preferences and context are available"
+    );
   }
 
   if (enabledFeatures.length > 0) {
@@ -756,6 +760,38 @@ Reason step by step:
     sections.push(
       `\n# AVAILABLE EXPERIENCES\n\nYou can adapt planning strategies based on these specialized roles:\n\n${experiencesList}`
     );
+  }
+
+  // ========================================================================
+  // KNOWLEDGE BASE USAGE
+  // ========================================================================
+  if (config.knowledgeBase) {
+    sections.push(`
+# KNOWLEDGE BASE USAGE
+
+You have access to a connected knowledge base. The Chat Agent has already obtained user permission to use it, so you can use it directly in your planning without asking for permission again.
+
+The knowledge base is only present in your configuration because:
+1. The user was informed about its availability
+2. The user explicitly granted permission to use it
+3. The user was asked about additional materials
+
+Use the knowledge base to:
+- Inform your roadmap structure and session planning
+- Reference specific materials, locations, or content in your tasks
+- Avoid requiring the user to re-provide information already in the knowledge base
+- Create more accurate time estimates based on actual materials (e.g., pages, chapters, videos)
+- Build realistic and personalized plans
+
+When the knowledge base contains comprehensive information:
+- Use it as your primary source for that domain
+- Structure sessions and tasks around the actual content
+- Reference specific items (e.g., "Read Chapter 3, pages 45-67", "Visit Colosseum (POI ID: 123)")
+
+## Knowledge Base: ${config.knowledgeBase.name}
+
+${config.knowledgeBase.content}
+`);
   }
 
   // ========================================================================

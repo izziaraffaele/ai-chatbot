@@ -154,6 +154,7 @@ const schemaDefaults: DemoConfig = {
   },
   context: {
     indexes: ["memoraiz", "demo-courses"],
+    knowledgeBase: "none",
   },
   runtime: {
     experiences: [],

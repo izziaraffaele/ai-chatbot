@@ -31,6 +31,10 @@ import type { AppUsage } from "@/lib/usage";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { mastra } from "@/mastra";
 import { createToolContext } from "@/mastra/utils/runtime-utils";
+import {
+  loadKnowledgeBase,
+  type KnowledgeBaseName,
+} from "@/mastra/utils/knowledge-base-loader";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
 export const maxDuration = 60;
@@ -290,15 +294,40 @@ export async function POST(request: Request) {
       return rateLimitResponse;
     }
 
-    // 4. Setup agents and context
+    // 4. Load knowledge base if specified
+    let enrichedRuntimeConfig = runtimeConfig;
+    console.log("[KB Debug] knowledgeBaseName from request:", runtimeConfig.knowledgeBaseName);
+    if (
+      runtimeConfig.knowledgeBaseName &&
+      runtimeConfig.knowledgeBaseName !== "none"
+    ) {
+      try {
+        console.log("[KB Debug] Loading knowledge base:", runtimeConfig.knowledgeBaseName);
+        const kb = loadKnowledgeBase(
+          runtimeConfig.knowledgeBaseName as KnowledgeBaseName
+        );
+        console.log("[KB Debug] Loaded KB:", kb?.name, "Content length:", kb?.content.length);
+        if (kb) {
+          enrichedRuntimeConfig = {
+            ...runtimeConfig,
+            knowledgeBase: kb,
+          };
+        }
+      } catch (error) {
+        console.error("Failed to load knowledge base:", error);
+        // Continue without knowledge base if loading fails
+      }
+    }
+
+    // 5. Setup agents and context
     const { longitude, latitude, city, country } = geolocation(request);
     const chatAgent = mastra.getAgent("chatAgent");
     const runtimeContext = createToolContext(session, {
       geoHints: { longitude, latitude, city, country },
-      config: runtimeConfig,
+      config: enrichedRuntimeConfig,
     });
 
-    // 5. Handle message based on type
+    // 6. Handle message based on type
     let uiMessages: ChatMessage[];
     let lastDbMessage: DBMessage | undefined;
     let isAssistantToolResult = false;

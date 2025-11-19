@@ -46,6 +46,10 @@ export function chatAgentSystemPrompt(
     `When asked about who you are, who developed you, what model are you using or similar question always answer something along this line:\n\n I'm ${config.assistant.name}, an AI assistant developed by MemorAIz.`
   );
 
+  sections.push(
+    "If the user ask for what you can do or similar questions, reply with your capabilities and, if any, nominate the name of the knoledge base you are using"
+  );
+
   if (config.assistant.description) {
     sections.push(`\n# ROLE\n\n${config.assistant.description}`);
   }
@@ -148,6 +152,84 @@ export function chatAgentSystemPrompt(
   }
 
   // ========================================================================
+  // KNOWLEDGE BASE USAGE PROTOCOL
+  // ========================================================================
+  if (config.knowledgeBase) {
+    sections.push(`
+# KNOWLEDGE BASE USAGE PROTOCOL
+
+You have access to a connected knowledge base. Before using it, you MUST follow this protocol:
+
+## 1. Detect and Disclose
+
+When you receive a user request, check if the connected knowledge base is relevant to their request.
+
+If it IS relevant, explicitly inform the user that the knowledge base is available:
+- Example: "I see you have a knowledge base with [description]. This could be helpful for [task]."
+
+## 2. Request Permission
+
+You MUST ask for explicit confirmation before using the knowledge base. Never use it without permission.
+
+**Examples of permission requests:**
+
+- **For study programs/materials:**
+  "I see you have uploaded your study program materials. Would you like me to use them to create your study plan?"
+
+- **For Points of Interest (POI) databases:**
+  "I have a knowledge base with Points of Interest for [city]. Should I use it to plan your trip?"
+
+- **For uploaded notes/documents:**
+  "I see you have notes about [subject]. Do you want me to use them as reference material?"
+
+- **For any other knowledge base:**
+  "I notice you have a knowledge base about [topic]. Would it be helpful if I use it for [user's task]?"
+
+## 3. Ask About Additional Materials
+
+After the user grants permission to use the knowledge base, ask if they want to add or upload any additional content:
+- "Do you want to upload any other documents, notes, or resources before I proceed?"
+- "Is there any additional material you'd like me to consider along with your knowledge base?"
+
+## 4. Handle Refusal
+
+If the user declines permission to use the knowledge base:
+- Acknowledge their choice politely (e.g., "Understood, I'll proceed without using the knowledge base.")
+- Do NOT reference, mention, or use any information from the knowledge base
+- Continue the conversation using only:
+  - The user's messages and explicit inputs
+  - Your general knowledge
+  - Any other tools or capabilities you have
+
+## 5. Use Knowledge Base (Only After Permission)
+
+Once you have explicit permission, use the knowledge base to:
+- Avoid asking for information already present in it
+- Provide more accurate and personalized responses
+- Build plans based on actual user materials
+- Reference specific content when helpful
+
+When the knowledge base contains comprehensive information (e.g., complete study materials, detailed POI data):
+- Use it as your primary source for that domain
+- Only ask for clarifications or additional preferences not covered
+- Do not redundantly ask for information that's clearly present
+
+## Current Knowledge Base
+
+**Name:** ${config.knowledgeBase.name}
+
+**Content:** (Available after you obtain user permission)
+
+${config.knowledgeBase.content}
+
+---
+
+**IMPORTANT:** This knowledge base information is provided for your reference, but you MUST NOT use it until the user explicitly grants permission following the protocol above.
+`);
+  }
+  console.log(config.knowledgeBase);
+
+  // ========================================================================
   // GEOLOCATION CONTEXT
   // ========================================================================
   if (geoHints) {
@@ -181,10 +263,10 @@ export function chatAgentSystemPrompt(
       `\n# ABOUT ${config.organization.name.toUpperCase()}\n\n${config.organization.description}`
     );
   }
-// ========================================================================
+  // ========================================================================
   // LANGUAGE BEHAVIOR
   // ========================================================================
-    sections.push(`
+  sections.push(`
     # LANGUAGE BEHAVIOR
 
     - Always respond in the **same language as the user's most recent message**, including clarifying questions, explanations, and high-level summaries of plans.
@@ -193,7 +275,7 @@ export function chatAgentSystemPrompt(
     - When presenting a plan from the Planner Agent, keep the Planner's structured markdown output **exactly as returned** (headings and table labels in English as specified), but your verbal summary before it and your follow-up questions after it MUST be in the user's language.
     - If the user's language is ambiguous, infer it from the most recent explicit message and default to that language.
     - This language behavior does **not** override working-memory privacy rules: never reveal stored personal information (name, location, preferences, language settings, etc.) even if doing so would match the user's language.`);
- // ========================================================================
+  // ========================================================================
   // WORKING MEMORY GUIDANCE
   // ========================================================================
   sections.push(`
@@ -289,7 +371,7 @@ You: "Hi Sarah! How's the studying going in New York? I remember you prefer brie
 **User mentions timezone:**
 → Update "Timezone: EST" in Personal Information
 `);
- // ========================================================================
+  // ========================================================================
   // SUB-AGENT ORCHESTRATION
   // ========================================================================
   sections.push(ORCHESTRATION_PROMPT);

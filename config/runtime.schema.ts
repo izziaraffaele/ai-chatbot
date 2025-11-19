@@ -61,6 +61,15 @@ export const RuntimeConfigSchema = z.object({
       })
     )
     .default([]),
+  knowledgeBaseName: z
+    .enum(["none", "celio", "analisi1", "schoolr"])
+    .optional(),
+  knowledgeBase: z
+    .object({
+      name: z.string(),
+      content: z.string(),
+    })
+    .optional(),
 });
 
 /**

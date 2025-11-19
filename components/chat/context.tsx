@@ -92,6 +92,14 @@ export function useChatController({
 
   // runtime
   const runtimeConfig = useRuntimeConfig();
+  
+  // Store runtimeConfig in a ref to avoid stale closure in transport
+  const runtimeConfigRef = useRef(runtimeConfig);
+  
+  // Update the ref whenever runtimeConfig changes
+  useEffect(() => {
+    runtimeConfigRef.current = runtimeConfig;
+  }, [runtimeConfig]);
 
   // client tools
   const registry = useClientTools();
@@ -111,7 +119,7 @@ export function useChatController({
             id: request.id,
             message: request.messages.at(-1),
             selectedVisibilityType: visibilityType,
-            runtimeConfig,
+            runtimeConfig: runtimeConfigRef.current,
             tools: serializeClientTools(registry.getTools()),
             ...request.body,
           },

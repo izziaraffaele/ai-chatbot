@@ -40,6 +40,7 @@ export const DemoConfigForm = (props: React.PropsWithChildren) => {
   // submit on change
   useEffect(() => {
     const onSubmit = (v: DemoConfig) => {
+      console.log("[KB Debug] Form submitting, knowledgeBase:", v.context?.knowledgeBase);
       setDemoConfig(v);
     };
 

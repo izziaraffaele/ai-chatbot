@@ -434,6 +434,63 @@ const ContextIndexesFieldset = () => {
           );
         }}
       />
+      <FormInput
+        control={form.control}
+        label="Knowledge Base"
+        name="context.knowledgeBase"
+        render={({ field }) => {
+          const currentValue = field.value as string;
+          console.log("[KB Debug] UI current value:", currentValue);
+          return (
+            <SwitchListControl
+              onValueChange={(v) => {
+                console.log("[KB Debug] SwitchListControl onChange received:", v);
+                
+                // Find which toggles are enabled
+                const enabledKeys = Object.entries(v)
+                  .filter(([, enabled]) => enabled)
+                  .map(([key]) => key);
+
+                console.log("[KB Debug] Enabled keys:", enabledKeys);
+
+                // For mutual exclusivity:
+                // If multiple are enabled, use the one that's different from current
+                // If one is enabled, use that one
+                // If none are enabled, set to "none"
+                let newValue: string;
+                
+                if (enabledKeys.length === 0) {
+                  newValue = "none";
+                } else if (enabledKeys.length === 1) {
+                  newValue = enabledKeys[0];
+                } else {
+                  // Multiple enabled - find the new one (not the current one)
+                  const newKey = enabledKeys.find(key => key !== currentValue);
+                  newValue = newKey || enabledKeys[0];
+                }
+
+                console.log("[KB Debug] Setting new value:", newValue);
+                
+                // Set the field value
+                field.onChange({
+                  target: { value: newValue },
+                } as any);
+                field.onBlur();
+              }}
+              options={[
+                { label: "Celio", value: "celio" },
+                { label: "Analisi 1", value: "analisi1" },
+                { label: "Schoolr", value: "schoolr" },
+              ]}
+              value={{
+                celio: currentValue === "celio",
+                analisi1: currentValue === "analisi1",
+                schoolr: currentValue === "schoolr",
+              }}
+            />
+          );
+        }}
+      />
     </DemoConfigFieldGroup>
   );
 };
