@@ -66,7 +66,11 @@ export type QuizStartArgs = {
  * Quiz complete arguments
  */
 export type QuizCompleteArgs = {
-  score: number;
+  score: {
+    raw?: number;
+    max?: number;
+    scaled: number;
+  };
   totalQuestions: number;
   metadata?: Record<string, unknown>;
 };
@@ -336,7 +340,11 @@ export function useQuizPlayer(config: QuizPlayerConfig): UseQuizPlayerReturn {
       // Finish quiz
       try {
         await store.complete({
-          score,
+          score: {
+            raw: score,
+            max: questions.length,
+            scaled: questions.length > 0 ? score / questions.length : 0,
+          },
           totalQuestions: questions.length,
           metadata: {
             answeredCount: state.events.filter(

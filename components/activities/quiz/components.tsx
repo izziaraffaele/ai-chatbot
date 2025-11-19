@@ -13,7 +13,7 @@ function QuizQuestion({
 }: QuizQuestionProps) {
   return (
     <div
-      className={cn("flex flex-col gap-6", className)}
+      className={cn("flex flex-col gap-6 text-card-foreground", className)}
       data-slot="quiz-question"
       {...props}
     >
@@ -60,7 +60,7 @@ function QuizChoice({
   ...props
 }: QuizChoiceProps) {
   const baseClasses =
-    "w-full p-4 rounded-lg bg-transparent border-border border-2 text-foreground text-left transition-all duration-200";
+    "w-full p-4 rounded-lg bg-transparent border-border border-2 text-muted-foreground text-left transition-all duration-200";
 
   const getStateClasses = () => {
     if (isCorrect) {

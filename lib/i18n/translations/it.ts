@@ -329,11 +329,16 @@ export const it: TranslationDict = {
 
   // Quiz End Screen
   "quiz.completed.title": "Quiz Completato!",
+  "quiz.completed.subtitle": "Ecco come sei andato",
   "quiz.completed.correctPercentage": "% corrette",
+  "quiz.completed.score": "Punteggio ottenuto",
   "quiz.completed.attempts": "tentativi",
+  "quiz.completed.averageScore": "Punteggio medio",
   "quiz.completed.average": "Media: {score}%",
   "quiz.feedback.prompt": "Com'è stato questo quiz?",
   "quiz.feedback.restart": "Riprova",
+  "quiz.feedback.useful": "Utile",
+  "quiz.feedback.notUseful": "Non utile",
 
   // Flashcard Player
   "flashcards.welcome.cards": "flashcards",

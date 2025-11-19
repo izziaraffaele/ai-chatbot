@@ -158,7 +158,7 @@ function FlashcardActivityContent({
     return (
       <div className="flashcard-activity-content space-y-6">
         {/* Progress indicator */}
-        <div className="flex items-center justify-between text-gray-600 text-sm">
+        <div className="flex items-center justify-between text-muted-foreground text-sm">
           <span>
             {flashcard.progress.studied} / {totalCards} cards studied
           </span>
@@ -204,7 +204,7 @@ function FlashcardActivityContent({
             Previous
           </Button>
 
-          <div className="text-gray-600 text-sm">
+          <div className="text-muted-foreground text-sm">
             Card {flashcard.currentIndex + 1} of {totalCards}
           </div>
 
@@ -369,13 +369,15 @@ function FlashcardActivityWelcomeScreen({
   return (
     <div className="flashcard-welcome-screen space-y-6 py-8 text-center">
       <div className="space-y-4">
-        {title && <h2 className="font-bold text-2xl text-gray-900">{title}</h2>}
+        {title && <h2 className="font-bold text-2xl">{title}</h2>}
 
         {description && (
-          <p className="mx-auto max-w-md text-gray-600">{description}</p>
+          <p className="mx-auto max-w-md text-muted-foreground">
+            {description}
+          </p>
         )}
 
-        <div className="flex items-center justify-center space-x-6 text-gray-500 text-sm">
+        <div className="flex items-center justify-center space-x-6 text-sm">
           <div className="flex items-center space-x-1">
             <BarChart3 className="h-4 w-4" />
             <span>
@@ -447,19 +449,19 @@ function FlashcardActivityEndScreen({
       {/* Stats display */}
       <div className="space-y-4">
         <div className="space-y-2">
-          <h3 className="font-bold text-2xl text-gray-900">
+          <h3 className="font-bold text-2xl">
             {t("flashcards.completed.title", "Study Session Complete!")}
           </h3>
-          <div className="font-bold text-3xl text-blue-600">
+          <div className="font-bold text-3xl">
             {stats.studiedCards} / {totalCards}
           </div>
-          <div className="text-gray-600 text-lg">
+          <div className="text-lg">
             {percentage}% {t("flashcards.completed.studied", "cards studied")}
           </div>
         </div>
 
         {/* Time stats */}
-        <div className="flex items-center justify-center space-x-6 text-gray-500 text-sm">
+        <div className="flex items-center justify-center space-x-6 text-sm">
           <div className="flex items-center space-x-1">
             <Clock className="h-4 w-4" />
             <span>{formatTime(stats.totalTime)}</span>
@@ -476,7 +478,7 @@ function FlashcardActivityEndScreen({
         stats.confidenceDistribution.medium > 0 ||
         stats.confidenceDistribution.high > 0 ? (
           <div className="space-y-2">
-            <div className="font-medium text-gray-600 text-sm">
+            <div className="font-medium text-sm">
               {t("flashcards.completed.confidence", "Confidence Levels")}
             </div>
             <div className="flex items-center justify-center space-x-4 text-sm">
@@ -521,7 +523,7 @@ function FlashcardActivityEndScreen({
       {/* Feedback */}
       {onFeedback && (
         <div className="space-y-2">
-          <p className="text-gray-600 text-sm">
+          <p className="text-muted-foreground text-sm">
             {t("flashcards.feedback.prompt", "How was this study session?")}
           </p>
           <div className="flex items-center justify-center space-x-2">
@@ -560,10 +562,8 @@ export function FlashcardActivityEmpty(props: {
 }) {
   return (
     <div className="flashcard-activity-empty space-y-4 py-8 text-center">
-      {props.title && (
-        <h2 className="font-semibold text-gray-900 text-xl">{props.title}</h2>
-      )}
-      <p className="text-gray-600">
+      {props.title && <h2 className="font-semibold text-xl">{props.title}</h2>}
+      <p className="text-muted-foreground">
         {props.description || "No flashcards available for this study session."}
       </p>
     </div>

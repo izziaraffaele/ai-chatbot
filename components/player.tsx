@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { AttemptState, AttemptStore } from "@/lib/activity-tracking";
+import { cn } from "@/lib/utils";
 
 /**
  * Player context interface
@@ -17,11 +18,10 @@ const PlayerContext = createContext<PlayerContextValue<any, any> | null>(null);
 /**
  * Player component props
  */
-interface PlayerProps<START, COMPLETE> extends React.ComponentProps<"div"> {
+type PlayerProps<START, COMPLETE> = React.ComponentProps<"div"> & {
   store: AttemptStore<START, COMPLETE>;
   children: React.ReactNode;
-  variant?: "default" | "contained" | "ghost";
-}
+};
 
 /**
  * Player - Generic activity wrapper with state management
@@ -43,7 +43,6 @@ interface PlayerProps<START, COMPLETE> extends React.ComponentProps<"div"> {
 function PlayerRoot<START = unknown, COMPLETE = unknown>({
   store,
   children,
-  variant = "default",
   className = "",
   ...props
 }: PlayerProps<START, COMPLETE>) {
@@ -76,16 +75,14 @@ function PlayerRoot<START = unknown, COMPLETE = unknown>({
     [store, state]
   );
 
-  const variantClasses = {
-    default: "border border-gray-200 bg-white rounded-lg shadow-sm",
-    contained: "bg-gray-50 border border-gray-200 rounded-lg",
-    ghost: "bg-transparent border-0",
-  };
-
   return (
     <PlayerContext.Provider value={contextValue}>
       <div
-        className={`player player-${variant} ${variantClasses[variant]} ${className}`}
+        className={cn(
+          "rounded-lg border border-border bg-secondary shadow-sm",
+          className
+        )}
+        data-slot="player"
         {...props}
       >
         {children}
@@ -121,10 +118,7 @@ const PlayerScreen = function PlayerScreen({
   ...props
 }: PlayerScreenProps) {
   return (
-    <div
-      className={`player-screen player-screen-${variant} ${className}`}
-      {...props}
-    >
+    <div className={className} data-slot="player-screen" {...props}>
       {children}
     </div>
   );
@@ -138,7 +132,7 @@ const PlayerHeader = function PlayerHeader({
   ...props
 }: PlayerHeaderProps) {
   return (
-    <div className={`player-header ${className}`} {...props}>
+    <div className={className} data-slot="player-header" {...props}>
       {children}
     </div>
   );
@@ -151,7 +145,8 @@ const PlayerHeaderActions = function PlayerHeaderActions({
 }: PlayerHeaderProps) {
   return (
     <div
-      className={`player-header-actions flex items-center space-x-2 ${className}`}
+      className={cn("flex items-center space-x-2", className)}
+      data-slot="player-header-actions"
       {...props}
     >
       {children}
@@ -160,12 +155,11 @@ const PlayerHeaderActions = function PlayerHeaderActions({
 };
 
 const PlayerControls = function PlayerControls({
-  className = "",
   children,
   ...props
 }: PlayerHeaderProps) {
   return (
-    <div className={`player-controls ${className}`} {...props}>
+    <div data-slot="player-controls" {...props}>
       {children}
     </div>
   );
@@ -182,19 +176,19 @@ const PlayerProgress = function PlayerProgress({
   current,
   total,
   showBar = false,
-  className = "",
+  className,
 }: PlayerProgressProps) {
   const percentage = total > 0 ? (current / total) * 100 : 0;
 
   return (
-    <div className={`player-progress ${className}`}>
-      <span className="text-gray-600 text-sm">
+    <div className={className} data-slot="player-progress">
+      <span className="text-sm">
         {current} / {total}
       </span>
       {showBar && (
         <div className="mt-1 h-2 w-full rounded-full bg-gray-200">
           <div
-            className="h-2 rounded-full bg-blue-600 transition-all duration-300"
+            className="h-2 rounded-full transition-all duration-300"
             style={{ width: `${percentage}%` }}
           />
         </div>
@@ -246,14 +240,14 @@ const PlayerTimer = function PlayerTimer({
   const isDanger = timeRemaining <= 5;
 
   return (
-    <div className={`player-timer ${className}`}>
+    <div className={className} data-slot="player-timer">
       <span
         className={`font-mono text-sm ${
           isDanger
             ? "text-red-600"
             : isWarning
               ? "text-yellow-600"
-              : "text-gray-600"
+              : "text-muted-foreground"
         }`}
       >
         {formatTime(timeRemaining)}

@@ -330,11 +330,16 @@ export const en = {
 
   // Quiz End Screen
   "quiz.completed.title": "Quiz Completed!",
+  "quiz.completed.subtitle": "Here's how you did",
   "quiz.completed.correctPercentage": "% correct",
+  "quiz.completed.score": "Score achieved",
   "quiz.completed.attempts": "attempts",
+  "quiz.completed.averageScore": "Average score",
   "quiz.completed.average": "Avg: {score}%",
   "quiz.feedback.prompt": "How was this quiz?",
   "quiz.feedback.restart": "Try Again",
+  "quiz.feedback.useful": "Useful",
+  "quiz.feedback.notUseful": "Not useful",
 
   // Flashcard Player
   "flashcards.welcome.cards": "cards",
