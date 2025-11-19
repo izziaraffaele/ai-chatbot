@@ -337,13 +337,13 @@ export async function getVotesByChatId({ id }: { id: string }) {
 export async function saveDocument({
   id,
   title,
-  kind,
+  kind = "text",
   content,
   userId,
 }: {
   id: string;
   title: string;
-  kind: ArtifactKind;
+  kind?: ArtifactKind;
   content: string;
   userId: string;
 }) {
@@ -359,7 +359,14 @@ export async function saveDocument({
         createdAt: new Date(),
       })
       .returning();
-  } catch (_error) {
+  } catch (error) {
+    console.error("Database error in saveDocument:", {
+      error: error instanceof Error ? error.message : String(error),
+      id,
+      title,
+      kind,
+      userId,
+    });
     throw new ChatSDKError("bad_request:database", "Failed to save document");
   }
 }

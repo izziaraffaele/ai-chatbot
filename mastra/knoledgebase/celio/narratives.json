@@ -1,0 +1,2247 @@
+{
+    "collection": "narratives",
+    "documents": [
+        {
+            "id": "262aa2f5-9405-413b-9331-1a58ff5f70fe",
+            "title": "Il Nostro Celio: Un Romano Ti Racconta i Segreti del Colle",
+            "slug": "celio-romano-locale",
+            "summary": "Scopri il Celio attraverso gli occhi di chi ci vive: i luoghi nascosti, le storie che solo i romani conoscono e i segreti di questo colle che sfuggono ai turisti.",
+            "themes": {
+                "primarySubject": [
+                    "2e268e4c-b85e-46ee-9e6c-8ddb63815543"
+                ],
+                "experientialLens": [],
+                "narrativeTone": [
+                    "34584142-e6bb-4238-83a9-38a7a54b2f38"
+                ],
+                "structuralFormat": [
+                    "c223bf87-5db2-4ab6-a0ed-d0f62dd1bf25"
+                ],
+                "travelerArchetype": [
+                    "3b4c5f80-82a2-4990-b1e9-86c8fab9e5a3"
+                ]
+            },
+            "logistics": {
+                "estimatedDuration": 1463.314,
+                "estimatedDistance": 3860,
+                "transportModes": [
+                    "WALK"
+                ],
+                "accessibilityLevel": "LOW"
+            },
+            "steps": [
+                {
+                    "blockType": "VISIT",
+                    "poi": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                    "storyPoint": "c6c7150b-a2bf-483e-9531-f9a04aff246a",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495852,
+                            41.8868262
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                    "destination": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49573747823129,
+                            41.88639143643537
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "storyPoint": "cb1b2b0a-7ae2-40f3-82de-b4066c649fa9",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.494637832306733,
+                            41.88547508009689
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "destination": "bbea95de-2727-410b-b140-629907dedb55",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4946739104357,
+                            41.8849990045724
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "bbea95de-2727-410b-b140-629907dedb55",
+                    "storyPoint": "0b554684-70d1-4c9a-9959-6f5fc2e4db8c",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4967354,
+                            41.8846607
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "bbea95de-2727-410b-b140-629907dedb55",
+                    "destination": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49664070641152,
+                            41.885346338301446
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "storyPoint": "7c36677b-2057-4b9d-9c80-c59c0bb7bfb7",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4951927,
+                            41.8856165
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "destination": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495549944195254,
+                            41.88530013021108
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "storyPoint": "04b6fdc8-a29c-4413-835d-3046bfe10edc",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4952118,
+                            41.883861
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "destination": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495246174073849,
+                            41.88414
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "storyPoint": "75f3c4fc-cf3e-47b4-b46f-519b5718fb44",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4928702,
+                            41.8872296
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "destination": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.493453568444915,
+                            41.887164722043224
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "storyPoint": "58e10b26-2b15-428e-9176-6ca50d423719",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4928652,
+                            41.8863401
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "destination": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49266851975192,
+                            41.88628262335401
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "storyPoint": "3d9ff3da-c60b-4be8-8c56-fdff003309d3",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4922732,
+                            41.8865284
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "destination": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.492167347413307,
+                            41.88632438771556
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "storyPoint": "c838da60-21c6-4e2c-9f2f-3b350bcdd22a",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4915235,
+                            41.8863736
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "destination": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491690425486984,
+                            41.88637994681413
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "storyPoint": "1623e037-a8cd-4a24-9be6-b8609d06fc37",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4918484,
+                            41.886351
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "destination": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491689114296051,
+                            41.886377876189336
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "storyPoint": "d5a263c9-238f-4002-81d3-8941086d1f1f",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4914987,
+                            41.8863464
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "destination": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490923819844461,
+                            41.886404646040965
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "storyPoint": "be7a7506-d5d3-4a6a-9635-126125299fcb",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490431327477038,
+                            41.88595959989323
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "destination": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.489980062543765,
+                            41.885865265811
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "storyPoint": "fae63e2d-f8d2-441d-9c6e-bec155915482",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4915034,
+                            41.8872721
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "destination": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491337476883377,
+                            41.88684869220844
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+                    "storyPoint": "f1f3bf5e-f108-4923-8c5a-176c98907c76",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490885,
+                            41.8867446
+                        ],
+                        "proximity": 50
+                    }
+                }
+            ]
+        },
+        {
+            "id": "caedfca6-a073-4f9c-b08a-581a422260f4",
+            "title": "Caccia al Tesoro sul Celio: Avventure per Piccoli Esploratori",
+            "slug": "celio-bambini-famiglia",
+            "summary": "Un'avventura interattiva pensata per famiglie con bambini: scopri il Celio attraverso giochi, indovinelli e storie che cattureranno l'immaginazione dei pi\u00f9 piccoli.",
+            "themes": {
+                "primarySubject": [
+                    "2e268e4c-b85e-46ee-9e6c-8ddb63815543"
+                ],
+                "experientialLens": [
+                    "c21cd2f9-cc40-4e0e-a224-f14ce88b6a14"
+                ],
+                "narrativeTone": [
+                    "549437df-ad35-42bc-a981-0567e3bda657"
+                ],
+                "structuralFormat": [
+                    "82111985-1287-452c-b81a-d1377795201d"
+                ],
+                "travelerArchetype": [
+                    "3e7a5cc8-8147-4069-93fb-e748e8abc929"
+                ]
+            },
+            "logistics": {
+                "estimatedDuration": 1011.0340000000001,
+                "estimatedDistance": 3860,
+                "transportModes": [
+                    "WALK"
+                ],
+                "accessibilityLevel": "LOW"
+            },
+            "steps": [
+                {
+                    "blockType": "VISIT",
+                    "poi": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                    "storyPoint": "e8ab85c3-ca8b-4a4a-a596-57df99857ff2",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495852,
+                            41.8868262
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                    "destination": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49573747823129,
+                            41.88639143643537
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "storyPoint": "72242ca3-c337-4428-bc47-74e8eed31446",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.6045302,
+                            41.8022082
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "destination": "bbea95de-2727-410b-b140-629907dedb55",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4946739104357,
+                            41.8849990045724
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "bbea95de-2727-410b-b140-629907dedb55",
+                    "storyPoint": "9dd9815d-3392-417b-a96c-7afecc95e2b6",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4967354,
+                            41.8846607
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "bbea95de-2727-410b-b140-629907dedb55",
+                    "destination": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49664070641152,
+                            41.885346338301446
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "storyPoint": "5c9d8f49-945a-4cf2-885a-39212ccc3c43",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4951927,
+                            41.8856165
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "destination": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495549944195254,
+                            41.88530013021108
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "storyPoint": "e3a63424-a353-4db2-aa71-d150d00500dd",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4952118,
+                            41.883861
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "destination": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495246174073849,
+                            41.88414
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "storyPoint": "e52502fc-b224-4961-90be-5c75313b1958",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4928702,
+                            41.8872296
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "destination": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.493453568444915,
+                            41.887164722043224
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "storyPoint": "f923eb2e-f463-4fbe-bded-6ded9d5fe8f4",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4928652,
+                            41.8863401
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "destination": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49266851975192,
+                            41.88628262335401
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "storyPoint": "e4bb6b88-ceb5-4f98-a931-c77a26ec23b3",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4922732,
+                            41.8865284
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "destination": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.492167347413307,
+                            41.88632438771556
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "storyPoint": "4b5d8b19-b0dc-4897-aa35-6b73bfcb2cfd",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4915235,
+                            41.8863736
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "destination": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491690425486984,
+                            41.88637994681413
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "storyPoint": "d864aed4-39e4-4c32-8def-4c3c1aa47f3b",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4918484,
+                            41.886351
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "destination": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491689114296051,
+                            41.886377876189336
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "storyPoint": "fbe7db75-1d7c-4392-8ea6-a2cdf8e0ab92",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4914987,
+                            41.8863464
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "destination": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490923819844461,
+                            41.886404646040965
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "storyPoint": "c11c2af4-9055-4d49-8dac-34d42205c747",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            14.764125,
+                            38.156056
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "destination": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.489980062543765,
+                            41.885865265811
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "storyPoint": "f701c8bf-009d-400c-84ee-1a28d2e7524d",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4915034,
+                            41.8872721
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "destination": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491337476883377,
+                            41.88684869220844
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+                    "storyPoint": "14ca4fb2-ecf5-4eae-b171-6600285cddc8",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490885,
+                            41.8867446
+                        ],
+                        "proximity": 50
+                    }
+                }
+            ]
+        },
+        {
+            "id": "86d3af53-17e6-4c22-b4e2-c37b45587dbe",
+            "title": "Luci e Ombre del Celio: Un Percorso Fotografico",
+            "slug": "celio-fotografo",
+            "summary": "Un itinerario pensato per fotografi che vogliono catturare la bellezza del Celio: i migliori punti di vista, le ore perfette per la luce e i dettagli architettonici pi\u00f9 suggestivi.",
+            "themes": {
+                "primarySubject": [
+                    "38d77149-94c9-4c71-be19-6c38bb941184",
+                    "2e268e4c-b85e-46ee-9e6c-8ddb63815543"
+                ],
+                "experientialLens": [],
+                "narrativeTone": [],
+                "structuralFormat": [
+                    "c223bf87-5db2-4ab6-a0ed-d0f62dd1bf25"
+                ],
+                "travelerArchetype": [
+                    "4ced12e6-5ddf-40d5-b7f6-116325d1bd47"
+                ]
+            },
+            "logistics": {
+                "estimatedDuration": 1515.714,
+                "estimatedDistance": 3860,
+                "transportModes": [
+                    "WALK"
+                ],
+                "accessibilityLevel": "MODERATE"
+            },
+            "steps": [
+                {
+                    "blockType": "VISIT",
+                    "poi": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                    "storyPoint": "887df467-3e64-4708-a879-226b66ff303d",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495852,
+                            41.8868262
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                    "destination": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49573747823129,
+                            41.88639143643537
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "storyPoint": "1361374b-c536-4dc3-ad7d-0142e1c59fc7",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.6045302,
+                            41.8022082
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "destination": "bbea95de-2727-410b-b140-629907dedb55",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4946739104357,
+                            41.8849990045724
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "bbea95de-2727-410b-b140-629907dedb55",
+                    "storyPoint": "f87a2032-e2ae-4f83-bb36-be01220b170d",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4967354,
+                            41.8846607
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "bbea95de-2727-410b-b140-629907dedb55",
+                    "destination": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49664070641152,
+                            41.885346338301446
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "storyPoint": "7ff0ac1a-5934-417c-a3c9-0d17655721a9",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4951927,
+                            41.8856165
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "destination": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495549944195254,
+                            41.88530013021108
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "storyPoint": "297e8021-a61c-4381-96f9-c0b9b12d693c",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4952118,
+                            41.883861
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "destination": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495246174073849,
+                            41.88414
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "storyPoint": "325f6dc2-389a-406c-be30-bae07e36269d",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4928702,
+                            41.8872296
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "destination": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.493453568444915,
+                            41.887164722043224
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "storyPoint": "f2846a99-3c28-415c-b71e-dc5492b09328",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4928652,
+                            41.8863401
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "destination": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49266851975192,
+                            41.88628262335401
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "storyPoint": "d3959951-6578-4bc4-931a-639a21899f48",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4922732,
+                            41.8865284
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "destination": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.492167347413307,
+                            41.88632438771556
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "storyPoint": "ff5796a6-278f-4389-b39b-365421df5dd8",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4915235,
+                            41.8863736
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "destination": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491690425486984,
+                            41.88637994681413
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "storyPoint": "afea55ba-34e1-4ccf-81eb-c42c20dcfcfe",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4918484,
+                            41.886351
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "destination": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491689114296051,
+                            41.886377876189336
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "storyPoint": "c017c9f9-4915-4e97-9066-3ad7fc588020",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4914987,
+                            41.8863464
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "destination": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490923819844461,
+                            41.886404646040965
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "storyPoint": "7f9efe70-c5ff-4d75-837d-4525d829ca04",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            14.764125,
+                            38.156056
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "destination": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.489980062543765,
+                            41.885865265811
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "storyPoint": "14d87dc8-7fce-48f2-91ef-129d16408d36",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4915034,
+                            41.8872721
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "destination": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491337476883377,
+                            41.88684869220844
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+                    "storyPoint": "524464f7-2697-4be3-adae-1fd803845178",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490885,
+                            41.8867446
+                        ],
+                        "proximity": 50
+                    }
+                }
+            ]
+        },
+        {
+            "id": "77827d27-f990-4481-8395-01f95358b3a0",
+            "title": "Stratificazioni del Tempo: Un Viaggio Archeologico Approfondito",
+            "slug": "celio-storia-cultura",
+            "summary": "Un'esplorazione scientifica e culturale del Celio per gli appassionati di storia e archeologia: dalle Mura Serviane all'architettura medievale, ogni pietra racconta millenni di storia romana.",
+            "themes": {
+                "primarySubject": [
+                    "2e268e4c-b85e-46ee-9e6c-8ddb63815543"
+                ],
+                "experientialLens": [],
+                "narrativeTone": [
+                    "549437df-ad35-42bc-a981-0567e3bda657"
+                ],
+                "structuralFormat": [
+                    "45959cc1-55b9-49eb-975e-2cbe69da260c",
+                    "c223bf87-5db2-4ab6-a0ed-d0f62dd1bf25"
+                ],
+                "travelerArchetype": [
+                    "2cbc34e0-5449-4257-9888-a43904cfc0e5"
+                ]
+            },
+            "logistics": {
+                "estimatedDuration": 1482.7940000000003,
+                "estimatedDistance": 3860,
+                "transportModes": [
+                    "WALK"
+                ],
+                "accessibilityLevel": "HIGH"
+            },
+            "steps": [
+                {
+                    "blockType": "VISIT",
+                    "poi": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                    "storyPoint": "8922ceea-cd36-4c5f-8269-3d3fb7aa6a07",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495852,
+                            41.8868262
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                    "destination": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49573747823129,
+                            41.88639143643537
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "storyPoint": "431fa263-5079-443d-a608-f4f25eb68153",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.6045302,
+                            41.8022082
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "destination": "bbea95de-2727-410b-b140-629907dedb55",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4946739104357,
+                            41.8849990045724
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "bbea95de-2727-410b-b140-629907dedb55",
+                    "storyPoint": "afb686db-cec9-4080-9780-afb9db96cec2",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4967354,
+                            41.8846607
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "bbea95de-2727-410b-b140-629907dedb55",
+                    "destination": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49664070641152,
+                            41.885346338301446
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "storyPoint": "4f3770bf-1cf4-4a38-b4e7-de97a6971a1e",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4951927,
+                            41.8856165
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "destination": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495549944195254,
+                            41.88530013021108
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "storyPoint": "86779431-56f3-4a8c-b96a-4198ad9a7999",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4952118,
+                            41.883861
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "destination": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495246174073849,
+                            41.88414
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "storyPoint": "21af4aff-b5cf-47e2-8f6c-d1d45566bddb",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4928702,
+                            41.8872296
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "destination": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.493453568444915,
+                            41.887164722043224
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "storyPoint": "d40a49ae-18fa-4bf6-951e-48f6d2585e6e",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4928652,
+                            41.8863401
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "destination": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49266851975192,
+                            41.88628262335401
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "storyPoint": "9b52bbf6-5e8d-4433-9f4f-02343321fb97",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4922732,
+                            41.8865284
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "destination": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.492167347413307,
+                            41.88632438771556
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "storyPoint": "b85d9722-4588-45b3-ac88-814d4072ca2e",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4915235,
+                            41.8863736
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "destination": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491690425486984,
+                            41.88637994681413
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "storyPoint": "33b12e39-369b-4865-9d3b-47b5e2fcc6e4",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4918484,
+                            41.886351
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "destination": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491689114296051,
+                            41.886377876189336
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "storyPoint": "222fb3a7-7f71-465d-9c72-8402bccea5d0",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4914987,
+                            41.8863464
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "destination": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490923819844461,
+                            41.886404646040965
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "storyPoint": "7060940e-16ef-476d-b619-2ab76eaf34e6",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            14.764125,
+                            38.156056
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "destination": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.489980062543765,
+                            41.885865265811
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "storyPoint": "e73551c3-10ba-44ec-82f9-b8df4dc5b520",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4915034,
+                            41.8872721
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "destination": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491337476883377,
+                            41.88684869220844
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+                    "storyPoint": "e127dc92-866e-497b-90b5-1694a3e4487a",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490885,
+                            41.8867446
+                        ],
+                        "proximity": 50
+                    }
+                }
+            ]
+        },
+        {
+            "id": "0930382e-a517-42e2-8cac-447988871a36",
+            "title": "Essential Celio: A Traveler's Complete Guide",
+            "slug": "celio-traveler",
+            "summary": "The complete traveler's experience of Celio Hill: all the must-see sights, practical information, and cultural insights you need for an unforgettable visit to Rome's most peaceful archaeological area.",
+            "themes": {
+                "primarySubject": [
+                    "2e268e4c-b85e-46ee-9e6c-8ddb63815543"
+                ],
+                "experientialLens": [
+                    "5316f713-13ca-409b-b44e-93f849bf81d4"
+                ],
+                "narrativeTone": [],
+                "structuralFormat": [
+                    "c223bf87-5db2-4ab6-a0ed-d0f62dd1bf25"
+                ],
+                "travelerArchetype": [
+                    "d97fba7a-118f-4036-abda-a17fc2c00c18"
+                ]
+            },
+            "logistics": {
+                "estimatedDuration": 1090.274,
+                "estimatedDistance": 3860,
+                "transportModes": [
+                    "WALK"
+                ],
+                "accessibilityLevel": "MODERATE"
+            },
+            "steps": [
+                {
+                    "blockType": "VISIT",
+                    "poi": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                    "storyPoint": "1c786abd-de90-41b0-9f65-eb1be709f692",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495852,
+                            41.8868262
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b5e070cb-d683-4dce-9824-cdfc0ea20244",
+                    "destination": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49573747823129,
+                            41.88639143643537
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "storyPoint": "f88ca685-444c-4a6c-a64e-05ee43ab17d5",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.6045302,
+                            41.8022082
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "0ce2db46-27ca-4258-bead-11d652250daa",
+                    "destination": "bbea95de-2727-410b-b140-629907dedb55",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4946739104357,
+                            41.8849990045724
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "bbea95de-2727-410b-b140-629907dedb55",
+                    "storyPoint": "bc22e022-3c33-4e80-b5c1-2794a1f612f2",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4967354,
+                            41.8846607
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "bbea95de-2727-410b-b140-629907dedb55",
+                    "destination": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49664070641152,
+                            41.885346338301446
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "storyPoint": "8ad5317e-226b-4aea-b740-2cb37e34082f",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4951927,
+                            41.8856165
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "1738a9c2-d158-4a39-8633-ad3e7773e99b",
+                    "destination": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495549944195254,
+                            41.88530013021108
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "storyPoint": "1d5d5d5b-36f4-4bba-9cf7-779aa1ff16c3",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4952118,
+                            41.883861
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b04bc2cc-e62d-4d5e-be1c-456c099b1fbb",
+                    "destination": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.495246174073849,
+                            41.88414
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "storyPoint": "dd885de7-e1bb-4d6b-b3f0-8c8e7696ebd0",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4928702,
+                            41.8872296
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "e61a7dbd-d073-42ba-9a74-054601999f95",
+                    "destination": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.493453568444915,
+                            41.887164722043224
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "storyPoint": "6be51945-5a1d-42fa-82f2-94761e736194",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4928652,
+                            41.8863401
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "6dbcea0f-3ec2-47e6-9c26-3126fac65cd2",
+                    "destination": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.49266851975192,
+                            41.88628262335401
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "storyPoint": "dbb0f7f9-6d85-4611-955c-c6ba3d105887",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4922732,
+                            41.8865284
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "046819ae-862c-443d-a05c-adace03f75ef",
+                    "destination": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.492167347413307,
+                            41.88632438771556
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "storyPoint": "103a1f1d-574a-4c86-8c5e-39c21372ae5b",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4915235,
+                            41.8863736
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "69966a09-cd36-4ffc-82a9-bf4631c0d3c6",
+                    "destination": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491690425486984,
+                            41.88637994681413
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "storyPoint": "ab8f5cbd-9ad8-4a2e-9ba3-bd905e9800a5",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4918484,
+                            41.886351
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "58828776-ed22-4f3b-a2c3-25f99fda96ec",
+                    "destination": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491689114296051,
+                            41.886377876189336
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "storyPoint": "80e3f7d7-a0e3-4b0c-97a9-b1c84b4e41c9",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4914987,
+                            41.8863464
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "b3889b9c-9a1c-4480-b84c-f27a50ada911",
+                    "destination": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490923819844461,
+                            41.886404646040965
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "storyPoint": "2cae9344-b91b-40ac-aa39-251c3c7cb42c",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            14.764125,
+                            38.156056
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "2e986678-12b6-4b66-8a43-839a6485b82f",
+                    "destination": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.489980062543765,
+                            41.885865265811
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "storyPoint": "0f2e3b2c-2685-45bc-84eb-8bf4b0567799",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.4915034,
+                            41.8872721
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "TRAVEL",
+                    "source": "685f2b32-1835-4d5c-886d-9d2f6d84459f",
+                    "destination": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+                    "travelModes": [
+                        "WALK"
+                    ],
+                    "featured": false,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.491337476883377,
+                            41.88684869220844
+                        ],
+                        "proximity": 50
+                    }
+                },
+                {
+                    "blockType": "VISIT",
+                    "poi": "7077f40f-4df4-43f1-91d8-cdaea5959f45",
+                    "storyPoint": "4b7b5ed6-2b47-4090-8753-6aa06e42e33a",
+                    "featured": true,
+                    "trigger": {
+                        "strategy": "MANUAL",
+                        "coordinates": [
+                            12.490885,
+                            41.8867446
+                        ],
+                        "proximity": 50
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -14,9 +14,25 @@ export type AgentConfig = {
 
 /**
  * Available agent configurations
- * Currently supports the Research agent for web search and synthesis
- */
+ * Supports the Chat Agent for general assistance, Planner for roadmap creation, and Research agent for web search
+*/
 export const AGENT_CONFIGS: Record<string, AgentConfig> = {
+  chatAgent: {
+    id: "chatAgent",
+    name: "Chat Agent",
+    description:
+      "General-purpose assistant with document creation and weather capabilities",
+    avatar: "💬",
+    color: "purple",
+  },
+  plannerAgent: {
+    id: "plannerAgent",
+    name: "Planner",
+    description:
+      "Creates structured roadmaps and plans for study, travel, projects, and more",
+    avatar: "🗓️",
+    color: "green",
+  },
   researchAgent: {
     id: "researchAgent",
     name: "Researcher",
@@ -45,5 +61,5 @@ export function getAgentConfig(id: string): AgentConfig | undefined {
  */
 export function getDefaultAgent(): AgentConfig {
   const agents = getAvailableAgents();
-  return agents[0] || AGENT_CONFIGS.research;
+  return agents[0] || AGENT_CONFIGS.chatAgent;
 }
