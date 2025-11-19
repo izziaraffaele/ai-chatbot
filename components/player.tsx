@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { AttemptState, AttemptStore } from "@/lib/activity-tracking";
 
 /**
@@ -40,19 +40,17 @@ interface PlayerProps<START, COMPLETE> extends React.ComponentProps<"div"> {
  * </Player>
  * ```
  */
-export function Player<START = unknown, COMPLETE = unknown>({
+function PlayerRoot<START = unknown, COMPLETE = unknown>({
   store,
   children,
   variant = "default",
   className = "",
   ...props
 }: PlayerProps<START, COMPLETE>) {
-  const [state, setState] = React.useState<AttemptState>(() =>
-    store.getState()
-  );
+  const [state, setState] = useState<AttemptState>(() => store.getState());
 
   // Subscribe to state changes
-  React.useEffect(() => {
+  useEffect(() => {
     const unsubscribe = store.subscribe(() => {
       setState(store.getState());
     });
@@ -61,7 +59,7 @@ export function Player<START = unknown, COMPLETE = unknown>({
   }, [store]);
 
   // Auto-cleanup on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       const currentState = store.getState();
       if (currentState.currentAttempt?.status === "in_progress") {
@@ -112,17 +110,11 @@ export function usePlayer<
   return context as PlayerContextValue<START, COMPLETE>;
 }
 
-/**
- * Player sub-components for composition
- */
-
-Player.Root = Player;
-
 interface PlayerScreenProps extends React.ComponentProps<"div"> {
   variant?: "welcome" | "quiz" | "end";
 }
 
-Player.Screen = function PlayerScreen({
+const PlayerScreen = function PlayerScreen({
   variant = "quiz",
   className = "",
   children,
@@ -140,7 +132,7 @@ Player.Screen = function PlayerScreen({
 
 interface PlayerHeaderProps extends React.ComponentProps<"div"> {}
 
-Player.Header = function PlayerHeader({
+const PlayerHeader = function PlayerHeader({
   className = "",
   children,
   ...props
@@ -152,7 +144,7 @@ Player.Header = function PlayerHeader({
   );
 };
 
-Player.HeaderActions = function PlayerHeaderActions({
+const PlayerHeaderActions = function PlayerHeaderActions({
   className = "",
   children,
   ...props
@@ -167,7 +159,7 @@ Player.HeaderActions = function PlayerHeaderActions({
   );
 };
 
-Player.Controls = function PlayerControls({
+const PlayerControls = function PlayerControls({
   className = "",
   children,
   ...props
@@ -186,7 +178,7 @@ type PlayerProgressProps = {
   className?: string;
 };
 
-Player.Progress = function PlayerProgress({
+const PlayerProgress = function PlayerProgress({
   current,
   total,
   showBar = false,
@@ -218,15 +210,15 @@ type PlayerTimerProps = {
   className?: string;
 };
 
-Player.Timer = function PlayerTimer({
+const PlayerTimer = function PlayerTimer({
   timeLimit,
   isActive,
   onTimeUp,
   className = "",
 }: PlayerTimerProps) {
-  const [timeRemaining, setTimeRemaining] = React.useState(timeLimit);
+  const [timeRemaining, setTimeRemaining] = useState(timeLimit);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isActive) {
       return;
     }
@@ -269,3 +261,12 @@ Player.Timer = function PlayerTimer({
     </div>
   );
 };
+
+export const Player = Object.assign(PlayerRoot, {
+  Screen: PlayerScreen,
+  Header: PlayerHeader,
+  HeaderActions: PlayerHeaderActions,
+  Controls: PlayerControls,
+  Progress: PlayerProgress,
+  Timer: PlayerTimer,
+});

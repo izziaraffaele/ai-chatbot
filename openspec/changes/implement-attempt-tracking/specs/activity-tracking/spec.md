@@ -152,3 +152,74 @@ The system SHALL provide comprehensive TypeScript support and runtime validation
 - **WHEN** score data is stored or retrieved
 - **THEN** score structure SHALL be enforced (raw, scaled, max)
 - **AND** score calculations SHALL be type-safe
+
+### Requirement: Standardized Activity Structure
+The system SHALL enforce a standardized folder structure and pattern for all interactive activities.
+
+#### Scenario: Activity folder organization
+- **WHEN** creating new activities (quiz, flashcard, etc.)
+- **THEN** each SHALL follow the structure: index.tsx, player.tsx, components.tsx
+
+#### Scenario: Provider pattern implementation
+- **WHEN** implementing activity providers
+- **THEN** they SHALL follow use[Activity]Player(config) wrapped in [Activity]Provider pattern
+
+#### Scenario: Context access pattern
+- **WHEN** accessing activity state from components
+- **THEN** use[Activity]Context() SHALL return { [activity]: ... } structure
+
+### Requirement: Component Composition Patterns
+The system SHALL provide compound component patterns for flexible UI construction.
+
+#### Scenario: Main activity composition
+- **WHEN** implementing activity components
+- **THEN** they SHALL support welcome screen, main activity, and end screen states
+
+#### Scenario: Standalone screen variants
+- **WHEN** using individual screens outside main activity
+- **THEN** standalone Welcome, End, and Empty components SHALL be available
+
+#### Scenario: UI primitive composition
+- **WHEN** building activity UI elements
+- **THEN** compound components (Quiz.Question, Flashcard.Front/Back) SHALL be composable
+
+### Requirement: Event System Integration
+The system SHALL provide domain-specific event factories with consistent naming patterns.
+
+#### Scenario: Domain event creation
+- **WHEN** creating activity-specific events (QuizEvent, FlashcardEvent, etc.)
+- **THEN** events SHALL follow consistent action naming pattern ([activity].[event_name])
+
+#### Scenario: Event data integrity
+- **WHEN** recording events with custom data
+- **THEN** the system SHALL preserve type safety and metadata structure
+
+### Requirement: Flashcard Activity Implementation
+The system SHALL provide a complete flashcard activity implementation demonstrating the standardized patterns.
+
+#### Scenario: Flashcard study session
+- **WHEN** users engage with flashcard activity
+- **THEN** they SHALL experience welcome screen, card flipping, confidence rating, and completion summary
+
+#### Scenario: Card navigation and progress
+- **WHEN** studying flashcards
+- **THEN** users SHALL navigate between cards with progress tracking and shuffle options
+
+#### Scenario: Confidence tracking
+- **WHEN** users rate card difficulty
+- **THEN** confidence levels (low/medium/high) SHALL be tracked with statistics
+
+### Requirement: Developer Experience Patterns
+The system SHALL provide comprehensive patterns and utilities for activity development.
+
+#### Scenario: New activity creation
+- **WHEN** developers create new activity types
+- **THEN** they SHALL follow documented patterns with TypeScript support
+
+#### Scenario: Activity debugging
+- **WHEN** troubleshooting activity state issues
+- **THEN** developers SHALL have access to current state, events, and debugging utilities
+
+#### Scenario: Internationalization support
+- **WHEN** implementing activity UI text
+- **THEN** translation keys SHALL follow established patterns for multi-language support

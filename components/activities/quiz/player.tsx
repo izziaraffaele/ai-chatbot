@@ -1,21 +1,31 @@
-import { useCallback, useMemo, useState } from "react";
+import type React from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import type { AttemptState, AttemptStore } from "@/lib/activity-tracking";
-import { usePlayer } from "../player";
-import { QuizEvent } from "./types";
+import { usePlayer } from "../../player";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 /**
  * Quiz question definition
  */
-export type QuizQuestion = {
+export type QuizQuestion<T = unknown> = {
   /** Unique identifier for the question */
   id: string;
   /** The question text or content */
   question: string;
   /** The correct answer */
-  correctAnswer: unknown;
+  correctAnswer: T;
   /** Available options (for multiple choice) */
   choices?: Array<{
-    value: unknown;
+    value: T;
     label: string;
   }>;
   /** Optional explanation for the answer */
@@ -23,6 +33,26 @@ export type QuizQuestion = {
   /** Optional time limit in seconds */
   timeLimit?: number;
 };
+
+/**
+ * Quiz event data types
+ */
+export type QuizAnswerEventData = {
+  questionId: string;
+  answer: unknown;
+  isCorrect: boolean;
+  timeSpent?: number;
+} & Record<string, unknown>;
+
+export type QuizTimeUpEventData = {
+  questionId: string;
+  timeSpent?: number;
+} & Record<string, unknown>;
+
+export type QuizRequestHintEventData = {
+  questionId: string;
+  hint?: string;
+} & Record<string, unknown>;
 
 /**
  * Quiz start arguments
@@ -44,9 +74,9 @@ export type QuizCompleteArgs = {
 /**
  * Quiz player configuration
  */
-export type QuizPlayerConfig = {
+export type QuizPlayerConfig<T = unknown> = {
   /** Quiz questions */
-  questions: QuizQuestion[];
+  questions: QuizQuestion<T>[];
   /** Optional validation function for custom answer checking */
   validate?: (answer: unknown, correctAnswer: unknown) => Promise<boolean>;
   /** Whether to require confirmation before submitting answers */
@@ -60,17 +90,17 @@ export type QuizPlayerConfig = {
 /**
  * Quiz player hook return type
  */
-export type UseQuizPlayerReturn = {
+export type UseQuizPlayerReturn<T = unknown> = {
   /** Current state from Player */
   state: AttemptState;
   /** Store instance from Player */
   store: AttemptStore<QuizStartArgs, QuizCompleteArgs>;
   /** Current question */
-  currentQuestion: QuizQuestion | null;
+  currentQuestion: QuizQuestion<T> | null;
   /** Current question index */
   currentIndex: number;
   /** Selected answer */
-  selectedAnswer: unknown | null;
+  selectedAnswer: T | null;
   /** Whether answer has been validated */
   isAnswerValidated: boolean;
   /** Whether current answer is correct */
@@ -96,7 +126,86 @@ export type UseQuizPlayerReturn = {
   isTimerActive: boolean;
   /** Current screen */
   screen: "welcome" | "quiz" | "end";
+  /** Quiz configuration */
+  config: QuizPlayerConfig<T>;
 };
+
+/**
+ * Quiz context type
+ */
+export type QuizContextValue<T = any> = {
+  quiz: UseQuizPlayerReturn<T>;
+};
+
+// ============================================================================
+// Events
+// ============================================================================
+
+/**
+ * Quiz event factory for type-safe event creation
+ */
+export const QuizEvent = {
+  /**
+   * Create answer submission event
+   */
+  answer: (data: QuizAnswerEventData) => ({
+    action: "quiz.answer" as const,
+    data,
+  }),
+
+  /**
+   * Create time-up event for unanswered questions
+   */
+  timeUp: (data: QuizTimeUpEventData) => ({
+    action: "quiz.time_up" as const,
+    data,
+  }),
+
+  /**
+   * Create hint request event
+   */
+  requestHint: (data: QuizRequestHintEventData) => ({
+    action: "quiz.request_hint" as const,
+    data,
+  }),
+};
+
+// ============================================================================
+// Context
+// ============================================================================
+
+const QuizContext = createContext<QuizContextValue | null>(null);
+
+/**
+ * Quiz Provider component
+ */
+export function QuizProvider({
+  children,
+  config,
+}: React.PropsWithChildren<{
+  config: QuizPlayerConfig;
+}>) {
+  const quiz = useQuizPlayer(config);
+
+  return (
+    <QuizContext.Provider value={{ quiz }}>{children}</QuizContext.Provider>
+  );
+}
+
+/**
+ * Hook to access quiz context
+ */
+export function useQuizContext<T = any>(): QuizContextValue<T> {
+  const context = useContext(QuizContext);
+  if (!context) {
+    throw new Error("useQuizContext must be used within a QuizProvider");
+  }
+  return context;
+}
+
+// ============================================================================
+// Hook
+// ============================================================================
 
 /**
  * Quiz player hook - Demonstrates domain-specific activity tracking
@@ -106,25 +215,6 @@ export type UseQuizPlayerReturn = {
  *
  * @param config - Quiz configuration
  * @returns Quiz player state and controls
- *
- * @example
- * ```typescript
- * function QuizComponent() {
- *   const quiz = useQuizPlayer({
- *     questions: [
- *       { id: 'q1', question: 'What is 2+2?', correctAnswer: 4 }
- *     ]
- *   });
- *
- *   return (
- *     <div>
- *       <p>{quiz.currentQuestion?.question}</p>
- *       <button onClick={() => quiz.handlers.selectAnswer(4)}>4</button>
- *       <button onClick={quiz.handlers.confirmAnswer}>Submit</button>
- *     </div>
- *   );
- * }
- * ```
  */
 export function useQuizPlayer(config: QuizPlayerConfig): UseQuizPlayerReturn {
   const {
@@ -367,5 +457,6 @@ export function useQuizPlayer(config: QuizPlayerConfig): UseQuizPlayerReturn {
     },
     isTimerActive,
     screen,
+    config,
   };
 }

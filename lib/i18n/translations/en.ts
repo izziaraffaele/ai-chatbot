@@ -336,6 +336,18 @@ export const en = {
   "quiz.feedback.prompt": "How was this quiz?",
   "quiz.feedback.restart": "Try Again",
 
+  // Flashcard Player
+  "flashcards.welcome.cards": "cards",
+  "flashcards.welcome.cancel": "Cancel",
+  "flashcards.welcome.start": "Start Study",
+
+  // Flashcard End Screen
+  "flashcards.completed.title": "Study Session Complete!",
+  "flashcards.completed.studied": "cards studied",
+  "flashcards.completed.confidence": "Confidence Levels",
+  "flashcards.feedback.prompt": "How was this study session?",
+  "flashcards.feedback.restart": "Study Again",
+
   "message.copyError": "There's no text to copy!",
   "message.copySuccess": "Copied to clipboard!",
 } as const;

@@ -17,6 +17,15 @@ Add a reusable, in-memory attempt tracking system for managing dynamic AI chat e
 - Integrate with existing chat canvas components for seamless UI experience
 - Connect to existing streaming architecture for real-time activity updates
 
+### Activity Structure Patterns
+- **Standardized folder structure**: `index.tsx`, `player.tsx`, `components.tsx` for each activity
+- **Provider pattern**: `use[Activity]Player(config)` wrapped in `[Activity]Provider`
+- **Context pattern**: `use[Activity]Context()` returning `{ [activity]: ... }`
+- **Component composition**: Main activity with welcome/end screens and standalone variants
+- **Event system**: Domain-specific event factories (`[Activity]Event`) with proper action format
+- **Type safety**: Complete TypeScript definitions for all activity components
+- **UI primitives**: Compound component patterns for reusable activity UI elements
+
 ### Event System
 - Implement event factory patterns for domain-specific tracking (`QuizEvent`, etc.)
 - Add score calculation and metadata support for AI-driven activities
@@ -46,6 +55,13 @@ Add a reusable, in-memory attempt tracking system for managing dynamic AI chat e
   - Domain-specific hooks (e.g., `useQuizPlayer`)
   - Activity lifecycle management helpers
 
+- **Activity components in `components/activities/`**:
+  - Standardized activity structure with `index.tsx`, `player.tsx`, `components.tsx`
+  - Domain-specific providers and context hooks
+  - Compound component patterns for UI primitives
+  - Welcome/end screens and standalone variants
+  - Event factory integration for activity tracking
+
 - **Chat canvas components in `components/chat/`**:
   - Integration with existing chat primitives
   - Activity rendering within chat threads
@@ -64,3 +80,6 @@ Add a reusable, in-memory attempt tracking system for managing dynamic AI chat e
 - **Domain Extensibility**: Event factory patterns for different activity types
 - **Chat Integration**: Seamless embedding within existing chat canvas experience
 - **AI Agent Compatibility**: Enables AI agents to launch and manage interactive experiences
+- **DX-Friendly Patterns**: Standardized activity structure ensures consistency and developer experience
+- **Composable Components**: Compound component patterns for flexible UI construction
+- **Internationalization Support**: Built-in translation system integration for all activities

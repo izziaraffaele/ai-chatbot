@@ -335,6 +335,18 @@ export const it: TranslationDict = {
   "quiz.feedback.prompt": "Com'è stato questo quiz?",
   "quiz.feedback.restart": "Riprova",
 
+  // Flashcard Player
+  "flashcards.welcome.cards": "flashcards",
+  "flashcards.welcome.cancel": "Annulla",
+  "flashcards.welcome.start": "Inizia Studio",
+
+  // Flashcard End Screen
+  "flashcards.completed.title": "Sessione di Studio Completata!",
+  "flashcards.completed.studied": "flashcards studiate",
+  "flashcards.completed.confidence": "Livelli di Confidenza",
+  "flashcards.feedback.prompt": "Com'è stata questa sessione di studio?",
+  "flashcards.feedback.restart": "Studia Ancora",
+
   "message.actions.upvote": "Vota Positivamente",
   "message.actions.upvoting": "Votazione in corso...",
   "message.actions.upvoted": "Votato positivamente!",
