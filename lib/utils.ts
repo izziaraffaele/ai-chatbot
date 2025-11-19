@@ -12,9 +12,9 @@ import { type ClassValue, clsx } from 'clsx';
 import { formatISO } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
 import type { DBMessage, Document } from '@/lib/db/schema';
-import type { ChatDataTypes, ChatMessage, ChatTools  } from './types';
+import type { ChatDataTypes, ChatMessage, ChatTools, UIActivity  } from './types';
 import { ChatSDKError, type ErrorCode } from './errors';
-import { AgentDataPart } from '@mastra/ai-sdk';
+import { z } from 'zod';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -221,4 +221,15 @@ export function isAgentToolUIPart(part: UIMessagePart<any,any>): part is ToolUIP
 export function getAgentToolName(part: ToolUIPart) {
   const toolName = getToolName(part);
   return toolName.replace("agent-", "");
+}
+
+
+export function defineActivity<
+  T extends UIActivity<any, any>,
+  SCHEMA extends z.ZodType,
+>(props: {
+  Component: React.ElementType<{ activity: T }>;
+  contentSchema: SCHEMA;
+}) {
+  return props;
 }

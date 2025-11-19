@@ -57,10 +57,6 @@ export function ChatUsageProvider({
   children,
   initialUsage,
 }: React.PropsWithChildren<{ initialUsage?: AppUsage }>) {
-  console.log(
-    "ChatUsageProvider initialUsage:",
-    JSON.stringify(initialUsage, null, 2)
-  );
   const [usage, setUsage] = useState<AppUsage>({
     inputTokens: 0,
     outputTokens: 0,

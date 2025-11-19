@@ -198,7 +198,7 @@ export async function processClientToolCall(
 
     // Execute the tool with the provided input
     // Mastra tools expect { context: input } shape for the execute function
-    const output = await tool.execute({ context: input } as any);
+    const output = await tool.execute({ context: input }, { toolCallId });
 
     console.info(`[${toolName}][${toolCallId}] Tool call complete.`);
     console.log(`[${toolName}][${toolCallId}] Result:`);

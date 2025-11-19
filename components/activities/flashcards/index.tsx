@@ -6,6 +6,7 @@ import {
   Star,
   ThumbsDown,
 } from "lucide-react";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import { Flashcard } from "./components";
@@ -14,6 +15,31 @@ import type {
   Flashcard as FlashcardType,
 } from "./player";
 import { FlashcardProvider, useFlashcardContext } from "./player";
+import type { UIFlashcardActivity } from "./schema";
+
+type FlashcardActivityProps = {
+  /** Activity configuration with title, description, and payload */
+  activity: UIFlashcardActivity;
+  /** Whether to shuffle cards */
+  shuffle?: boolean;
+  /** Show hints when available */
+  showHints?: boolean;
+  /** Track confidence levels */
+  trackConfidence?: boolean;
+  /** Auto-flip after delay (ms) */
+  autoFlipDelay?: number;
+  /** Default screen to show */
+  defaultScreen?: "welcome" | "study";
+  /** Previous study sessions for statistics */
+  sessions?: Array<{
+    cardId: string;
+    confidence: "low" | "medium" | "high";
+    timeSpent: number;
+    studiedAt: Date;
+  }>;
+  /** Optional feedback handler */
+  onFeedback?: (value: number) => void;
+};
 
 /**
  * Flashcard Activity component - Main entry point for flashcard study sessions
@@ -42,65 +68,48 @@ import { FlashcardProvider, useFlashcardContext } from "./player";
  */
 export function FlashcardActivity(props: FlashcardActivityProps) {
   const {
-    cards,
-    title,
-    description,
-    shuffle = false,
-    options,
+    activity,
     defaultScreen = "welcome",
     sessions = [],
     onFeedback,
+    ...others
   } = props;
 
-  const config: FlashcardPlayerConfig = {
-    cards,
-    shuffle,
-    options,
-    defaultScreen,
-    sessions,
-  };
+  const { shuffle = false, showHints, trackConfidence, autoFlipDelay } = others;
+
+  const config = useMemo<FlashcardPlayerConfig>(
+    () => ({
+      cards: activity.payload,
+      shuffle,
+      options: {
+        showHints,
+        trackConfidence,
+        autoFlipDelay,
+      },
+      defaultScreen,
+      sessions,
+    }),
+    [
+      shuffle,
+      showHints,
+      trackConfidence,
+      autoFlipDelay,
+      defaultScreen,
+      sessions,
+      activity.payload,
+    ]
+  );
 
   return (
     <FlashcardProvider config={config}>
       <FlashcardActivityContent
-        description={description}
+        description={activity.description}
         onFeedback={onFeedback}
-        title={title}
+        title={activity.title}
       />
     </FlashcardProvider>
   );
 }
-
-type FlashcardActivityProps = {
-  /** Flashcards to study */
-  cards: FlashcardType[];
-  /** Optional title for welcome screen */
-  title?: React.ReactNode;
-  /** Optional description for welcome screen */
-  description?: React.ReactNode;
-  /** Whether to shuffle cards */
-  shuffle?: boolean;
-  /** Study session options */
-  options?: {
-    /** Show hints when available */
-    showHints?: boolean;
-    /** Track confidence levels */
-    trackConfidence?: boolean;
-    /** Auto-flip after delay (ms) */
-    autoFlipDelay?: number;
-  };
-  /** Default screen to show */
-  defaultScreen?: "welcome" | "study";
-  /** Previous study sessions for statistics */
-  sessions?: Array<{
-    cardId: string;
-    confidence: "low" | "medium" | "high";
-    timeSpent: number;
-    studiedAt: Date;
-  }>;
-  /** Optional feedback handler */
-  onFeedback?: (value: number) => void;
-};
 
 /**
  * Flashcard Activity Content component - Internal composition

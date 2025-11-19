@@ -1,9 +1,14 @@
-import { BarChart3, Clock, Star, Trophy } from "lucide-react";
+import { BarChart3, Clock, Play, RotateCcw, Star, Trophy } from "lucide-react";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import { Quiz } from "./components";
-import type { QuizPlayerConfig, QuizQuestion } from "./player";
+import type {
+  QuizPlayerConfig,
+  QuizQuestion as QuizQuestionType,
+} from "./player";
 import { QuizProvider, useQuizContext } from "./player";
+import type { UIQuizActivity } from "./schema";
 
 /**
  * Quiz Activity component - Main entry point for quiz activities
@@ -35,50 +40,54 @@ import { QuizProvider, useQuizContext } from "./player";
  */
 export function QuizActivity(props: QuizActivityProps) {
   const {
-    questions,
-    title,
-    description,
-    requireConfirm = false,
-    validate,
+    activity,
     defaultScreen = "welcome",
     attempts = [],
     onFeedback,
+    ...others
   } = props;
 
-  const config: QuizPlayerConfig = {
-    questions,
-    requireConfirm,
-    validate,
-    defaultScreen,
-    attempts,
-  };
+  const { requireConfirm = false, validate } = others;
+
+  const config = useMemo<QuizPlayerConfig>(
+    () => ({
+      questions: activity.payload,
+      requireConfirm,
+      validate,
+      defaultScreen,
+      attempts,
+    }),
+    [requireConfirm, validate, defaultScreen, attempts, activity.payload]
+  );
 
   return (
     <QuizProvider config={config}>
       <QuizActivityContent
-        description={description}
+        description={activity.description}
         onFeedback={onFeedback}
-        title={title}
+        title={activity.title}
       />
     </QuizProvider>
   );
 }
 
 type QuizActivityProps = {
-  /** Quiz questions */
-  questions: QuizQuestion[];
-  /** Optional title for welcome screen */
-  title?: React.ReactNode;
-  /** Optional description for welcome screen */
-  description?: React.ReactNode;
+  /** Activity configuration with title, description, and payload */
+  activity: UIQuizActivity;
   /** Whether to require confirmation before submitting answers */
   requireConfirm?: boolean;
   /** Optional validation function for custom answer checking */
   validate?: (answer: unknown, correctAnswer: unknown) => Promise<boolean>;
   /** Default screen to show */
   defaultScreen?: "welcome" | "quiz";
-  /** Attempts history for statistics */
-  attempts?: any[];
+  /** Previous quiz attempts for statistics */
+  attempts?: Array<{
+    questionId: string;
+    selectedAnswer: string;
+    isCorrect: boolean;
+    timeSpent: number;
+    attemptedAt: Date;
+  }>;
   /** Optional feedback handler */
   onFeedback?: (value: number) => void;
 };
@@ -129,6 +138,17 @@ function QuizActivityContent({
   if (quiz.currentQuestion) {
     return (
       <div className="quiz-player-content space-y-6">
+        {/* Progress indicator */}
+        <div className="flex items-center justify-between text-gray-600 text-sm">
+          <span>
+            {quiz.currentIndex + 1} / {totalQuestions} questions
+          </span>
+          <span>
+            {Math.round(((quiz.currentIndex + 1) / totalQuestions) * 100)}%
+            complete
+          </span>
+        </div>
+
         <Quiz.Question question={quiz.currentQuestion.question}>
           <Quiz.Choices>
             {quiz.currentQuestion.choices?.map(
@@ -181,7 +201,7 @@ function QuizActivityContent({
 export function QuizActivityWelcome(props: {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  questions: QuizQuestion[];
+  questions: QuizQuestionType[];
   onStart: () => void;
   onCancel: () => void;
 }) {
@@ -230,7 +250,7 @@ export function QuizActivityEnd(props: {
 type QuizPlayerWelcomeScreenProps = {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  questions: QuizQuestion[];
+  questions: QuizQuestionType[];
   onStart: () => void;
   onCancel: () => void;
 };
@@ -261,6 +281,16 @@ function QuizPlayerWelcomeScreen({
 }: QuizPlayerWelcomeScreenProps) {
   const t = useTranslations();
 
+  const formatTime = (seconds: number) => {
+    if (seconds < 60) {
+      return `${seconds}s`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}m`;
+  };
+
+  const estimatedTime = formatTime(questions.length * 30); // Estimate 30s per question
+
   return (
     <div className="quiz-welcome-screen space-y-6 py-8 text-center">
       <div className="space-y-4">
@@ -270,12 +300,17 @@ function QuizPlayerWelcomeScreen({
           <p className="mx-auto max-w-md text-gray-600">{description}</p>
         )}
 
-        <div className="flex items-center justify-center space-x-4 text-gray-500 text-sm">
+        <div className="flex items-center justify-center space-x-6 text-gray-500 text-sm">
           <div className="flex items-center space-x-1">
             <Trophy className="h-4 w-4" />
             <span>
               {questions.length} {t("quiz.welcome.questions", "questions")}
             </span>
+          </div>
+
+          <div className="flex items-center space-x-1">
+            <Clock className="h-4 w-4" />
+            <span>~{estimatedTime}</span>
           </div>
         </div>
       </div>
@@ -285,6 +320,7 @@ function QuizPlayerWelcomeScreen({
           {t("quiz.welcome.cancel", t("common.cancel", "Cancel"))}
         </Button>
         <Button onClick={onStart} size="lg">
+          <Play className="mr-2 h-4 w-4" />
           {t("quiz.welcome.start", t("common.start", "Start Quiz"))}
         </Button>
       </div>
@@ -407,6 +443,7 @@ function QuizPlayerEndScreen({
       {/* Actions */}
       <div className="flex items-center justify-center space-x-3">
         <Button onClick={onRestart} size="lg">
+          <RotateCcw className="mr-2 h-4 w-4" />
           {t("quiz.feedback.restart", t("common.restart", "Try Again"))}
         </Button>
       </div>
