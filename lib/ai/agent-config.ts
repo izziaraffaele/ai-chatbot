@@ -7,6 +7,7 @@ export type AgentConfig = {
   id: string;
   name: string;
   description: string;
+  registryId: string;
   avatar: string; // emoji or URL
   color?: string; // optional: for styling (e.g., 'blue', '#3b82f6')
   icon?: string; // optional: alternative to avatar
@@ -24,6 +25,7 @@ export const AGENT_CONFIGS: Record<string, AgentConfig> = {
       "General-purpose assistant with document creation and weather capabilities",
     avatar: "💬",
     color: "purple",
+    registryId: "chatAgent",
   },
   plannerAgent: {
     id: "plannerAgent",
@@ -32,6 +34,7 @@ export const AGENT_CONFIGS: Record<string, AgentConfig> = {
       "Creates structured roadmaps and plans for study, travel, projects, and more",
     avatar: "🗓️",
     color: "green",
+    registryId: "plannerAgent",
   },
   researchAgent: {
     id: "researchAgent",
@@ -39,6 +42,7 @@ export const AGENT_CONFIGS: Record<string, AgentConfig> = {
     description: "Specializes in web research and synthesis",
     avatar: "🔍",
     color: "blue",
+    registryId: "researchAgent",
   },
 } as const;
 
@@ -62,4 +66,12 @@ export function getAgentConfig(id: string): AgentConfig | undefined {
 export function getDefaultAgent(): AgentConfig {
   const agents = getAvailableAgents();
   return agents[0] || AGENT_CONFIGS.chatAgent;
+}
+
+export function getAgentConfigByRegistryId(
+  id: string
+): AgentConfig | undefined {
+  return Object.values(AGENT_CONFIGS).find(
+    (config) => config.registryId === id
+  );
 }

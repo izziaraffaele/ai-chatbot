@@ -1,5 +1,8 @@
 "use client";
 
+import type { LanguageModelUsage } from "ai";
+import { type ComponentProps, createContext, useContext } from "react";
+import { getUsage } from "tokenlens";
 import { Button } from "@/components/ui/button";
 import {
   HoverCard,
@@ -8,9 +11,6 @@ import {
 } from "@/components/ui/hover-card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import type { LanguageModelUsage } from "ai";
-import { type ComponentProps, createContext, useContext } from "react";
-import { getUsage } from "tokenlens";
 
 const PERCENT_MAX = 100;
 const ICON_RADIUS = 10;
@@ -60,11 +60,13 @@ export const Context = ({
   </ContextContext.Provider>
 );
 
-const ContextIcon = () => {
+export const ContextIcon = () => {
   const { usedTokens, maxTokens } = useContextValue();
   const circumference = 2 * Math.PI * ICON_RADIUS;
   const usedPercent = usedTokens / maxTokens;
-  const dashOffset = circumference * (1 - usedPercent);
+  // Clamp the visual percentage to 1 (100%) to prevent negative dashOffset
+  const visualPercent = Math.min(usedPercent, 1);
+  const dashOffset = circumference * (1 - visualPercent);
 
   return (
     <svg

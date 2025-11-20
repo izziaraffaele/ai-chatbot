@@ -323,6 +323,42 @@ export const it: TranslationDict = {
   "common.yes": "Sì",
   "common.no": "No",
   "common.submit": "Invia modulo",
+  "common.start": "Inizia",
+  "common.restart": "Riprova",
+
+  // ============================================================================
+  // Quiz Player
+  // ============================================================================
+
+  // Quiz Welcome Screen
+  "quiz.welcome.questions": "domande",
+  "quiz.welcome.cancel": "Annulla",
+  "quiz.welcome.start": "Inizia Quiz",
+
+  // Quiz End Screen
+  "quiz.completed.title": "Quiz Completato!",
+  "quiz.completed.subtitle": "Ecco come sei andato",
+  "quiz.completed.correctPercentage": "% corrette",
+  "quiz.completed.score": "Punteggio ottenuto",
+  "quiz.completed.attempts": "tentativi",
+  "quiz.completed.averageScore": "Punteggio medio",
+  "quiz.completed.average": "Media: {score}%",
+  "quiz.feedback.prompt": "Com'è stato questo quiz?",
+  "quiz.feedback.restart": "Riprova",
+  "quiz.feedback.useful": "Utile",
+  "quiz.feedback.notUseful": "Non utile",
+
+  // Flashcard Player
+  "flashcards.welcome.cards": "flashcards",
+  "flashcards.welcome.cancel": "Annulla",
+  "flashcards.welcome.start": "Inizia Studio",
+
+  // Flashcard End Screen
+  "flashcards.completed.title": "Sessione di Studio Completata!",
+  "flashcards.completed.studied": "flashcards studiate",
+  "flashcards.completed.confidence": "Livelli di Confidenza",
+  "flashcards.feedback.prompt": "Com'è stata questa sessione di studio?",
+  "flashcards.feedback.restart": "Studia Ancora",
 
   "message.actions.upvote": "Vota Positivamente",
   "message.actions.upvoting": "Votazione in corso...",

@@ -57,6 +57,60 @@ export type Attachment = {
   contentType: string;
 };
 
+/**
+ * Generic Activity type for typed activity configurations (legacy)
+ */
+export type ActivityType<T extends string, P> = {
+  /** Activity type identifier */
+  type: T;
+  /** Activity-specific payload data */
+  payload: P;
+  /** Optional title for the activity */
+  title?: string;
+  /** Optional description for the activity */
+  description?: string;
+  /** Optional activity ID */
+  id?: string;
+  /** Optional difficulty level */
+  difficulty?: "easy" | "medium" | "hard";
+  /** Optional learning objectives */
+  objectives?: string[];
+};
+
+/**
+ * UI Activity type - for frontend components and user interactions
+ */
+export type UIActivity<T extends string, P> = {
+  /** activity ID */
+  id: string;
+  /** Activity type identifier */
+  type: T;
+  /** Activity-specific payload data */
+  payload: P;
+  /** Optional title for the activity */
+  title: string;
+  /** Optional description for the activity */
+  description?: string;
+  /** Optional difficulty level */
+  difficulty?: "easy" | "medium" | "hard";
+  /** Optional learning objectives */
+  objectives: string[];
+};
+
+/**
+ * Model Activity type - for AI model generation with minimal required fields
+ */
+export type ModelActivity<T extends string, P> = {
+  /** Auto-generated activity ID if not provided */
+  id?: string;
+  type: T;
+  payload: P;
+  title: string;
+  description?: string;
+  difficulty?: "easy" | "medium" | "hard";
+  objectives?: string[];
+};
+
 type asUITool<TOOL extends UITool | Tool> = TOOL extends Tool
   ? InferUITool<TOOL>
   : TOOL;

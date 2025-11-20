@@ -32,9 +32,11 @@ import {
   ChatThreadContent,
   ChatThreadHeader,
 } from "./chat/thread";
+import { ChatContextUsage } from "./chat/usage";
 import { AssistantMessage } from "./messages/assistant-message";
 import { UserMessage } from "./messages/user-message";
 import { SidebarToggle } from "./sidebar-toggle";
+import { ActivityToolProvider } from "./tools/activity";
 import { Button } from "./ui/button";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector } from "./visibility-selector";
@@ -120,7 +122,6 @@ export function AssistantChat({
         <>
           <ChatComposerTool.AttachmentMenu />
           <ChatComposerTool.AgentSelector />
-          <ChatComposerTool.ContextUsage />
         </>
       }
     />
@@ -173,86 +174,91 @@ export function AssistantChat({
   );
 
   return (
-    <ChatSuggestionProvider
-      autoApply={autoApply}
-      initialSuggestions={initialSuggestions}
-      onApply={onApplySuggestion}
-      suggestions={suggestions}
-    >
-      <ChatThread className={className} status={status}>
-        <ChatThreadHeader>
-          <SidebarToggle />
+    <ActivityToolProvider>
+      <ChatSuggestionProvider
+        autoApply={autoApply}
+        initialSuggestions={initialSuggestions}
+        onApply={onApplySuggestion}
+        suggestions={suggestions}
+      >
+        <ChatThread className={className} status={status}>
+          <ChatThreadHeader>
+            <SidebarToggle />
 
-          {(!open || windowWidth < 768) && (
-            <Button
-              asChild
-              className="order-2 ml-auto h-8 px-2 md:order-1 md:ml-0 md:h-fit md:px-2"
-              variant="outline"
-            >
-              <Link href="/">
-                <PlusIcon />
-                <span className="md:sr-only">
-                  {t("sidebar.buttonNewChat", "New Chat")}
-                </span>
-              </Link>
-            </Button>
-          )}
+            {(!open || windowWidth < 768) && (
+              <Button
+                asChild
+                className="order-2 ml-auto h-8 px-2 md:order-1 md:ml-0 md:h-fit md:px-2"
+                variant="outline"
+              >
+                <Link href="/">
+                  <PlusIcon />
+                  <span className="md:sr-only">
+                    {t("sidebar.buttonNewChat", "New Chat")}
+                  </span>
+                </Link>
+              </Button>
+            )}
+
+            {!isReadonly && (
+              <VisibilitySelector
+                className="order-1 md:order-2"
+                onValueChange={setVisibilityType}
+                value={visibilityType}
+              />
+            )}
+          </ChatThreadHeader>
+
+          <ChatThreadContent>{chatMessages}</ChatThreadContent>
 
           {!isReadonly && (
-            <VisibilitySelector
-              className="order-1 md:order-2"
-              onValueChange={setVisibilityType}
-              value={visibilityType}
-            />
+            <ChatThreadComposer>
+              {messages.length === 0 && <ChatSuggestions mode="default" />}
+              {chatInput}
+              <div className="absolute top-4 right-4">
+                <ChatContextUsage />
+              </div>
+            </ChatThreadComposer>
           )}
-        </ChatThreadHeader>
+        </ChatThread>
 
-        <ChatThreadContent>{chatMessages}</ChatThreadContent>
+        {/* Artifact Canvas View */}
+        <ChatCanvas isVisible={artifact.isVisible}>
+          {/* Message thread sidebar */}
+          <ChatCanvasThread isCurrentVersion={true}>
+            <ChatThreadContent className="pt-20">
+              {chatMessages}
+            </ChatThreadContent>
 
-        {!isReadonly && (
-          <ChatThreadComposer>
-            {messages.length === 0 && <ChatSuggestions mode="default" />}
-            {chatInput}
-          </ChatThreadComposer>
-        )}
-      </ChatThread>
+            {/* Composer in canvas thread */}
+            <ChatThreadComposer className="px-4 pb-4">
+              {chatInput}
+            </ChatThreadComposer>
+          </ChatCanvasThread>
 
-      {/* Artifact Canvas View */}
-      <ChatCanvas isVisible={artifact.isVisible}>
-        {/* Message thread sidebar */}
-        <ChatCanvasThread isCurrentVersion={true}>
-          <ChatThreadContent className="pt-20">
-            {chatMessages}
-          </ChatThreadContent>
+          {/* Artifact display */}
+          <ChatCanvasMain boundingBox={artifact.boundingBox}>
+            {isDocumentArtifact(artifact.kind) && (
+              <DocumentArtifact
+                documentId={artifact.documentId}
+                kind={artifact.kind}
+                title={artifact.title || "Untitled"}
+              />
+            )}
+            {isMediaArtifact(artifact.kind) && (
+              <MediaArtifact
+                documentId={artifact.documentId}
+                kind={artifact.kind}
+                title={artifact.title || "Untitled"}
+              />
+            )}
+          </ChatCanvasMain>
+        </ChatCanvas>
 
-          {/* Composer in canvas thread */}
-          <ChatThreadComposer className="px-4 pb-4">
-            {chatInput}
-          </ChatThreadComposer>
-        </ChatCanvasThread>
-
-        {/* Artifact display */}
-        <ChatCanvasMain boundingBox={artifact.boundingBox}>
-          {isDocumentArtifact(artifact.kind) && (
-            <DocumentArtifact
-              documentId={artifact.documentId}
-              kind={artifact.kind}
-              title={artifact.title || "Untitled"}
-            />
-          )}
-          {isMediaArtifact(artifact.kind) && (
-            <MediaArtifact
-              documentId={artifact.documentId}
-              kind={artifact.kind}
-              title={artifact.title || "Untitled"}
-            />
-          )}
-        </ChatCanvasMain>
-      </ChatCanvas>
-
-      {autoResume && <ChatAutoResume initialMessages={chat.messages} />}
-      <ChatRouteParamsHandler />
-      <DataStreamDispatcher />
-    </ChatSuggestionProvider>
+        {autoResume && <ChatAutoResume initialMessages={chat.messages} />}
+        <ChatRouteParamsHandler />
+        <DataStreamDispatcher />
+      </ChatSuggestionProvider>
+    </ActivityToolProvider>
   );
 }

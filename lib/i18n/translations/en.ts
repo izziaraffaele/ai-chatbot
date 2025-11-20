@@ -324,6 +324,43 @@ export const en = {
   "common.yes": "Yes",
   "common.no": "No",
   "common.submit": "Submit form",
+  "common.start": "Start",
+  "common.restart": "Try Again",
+
+  // ============================================================================
+  // Quiz Player
+  // ============================================================================
+
+  // Quiz Welcome Screen
+  "quiz.welcome.questions": "questions",
+  "quiz.welcome.cancel": "Cancel",
+  "quiz.welcome.start": "Start Quiz",
+
+  // Quiz End Screen
+  "quiz.completed.title": "Quiz Completed!",
+  "quiz.completed.subtitle": "Here's how you did",
+  "quiz.completed.correctPercentage": "% correct",
+  "quiz.completed.score": "Score achieved",
+  "quiz.completed.attempts": "attempts",
+  "quiz.completed.averageScore": "Average score",
+  "quiz.completed.average": "Avg: {score}%",
+  "quiz.feedback.prompt": "How was this quiz?",
+  "quiz.feedback.restart": "Try Again",
+  "quiz.feedback.useful": "Useful",
+  "quiz.feedback.notUseful": "Not useful",
+
+  // Flashcard Player
+  "flashcards.welcome.cards": "cards",
+  "flashcards.welcome.cancel": "Cancel",
+  "flashcards.welcome.start": "Start Study",
+
+  // Flashcard End Screen
+  "flashcards.completed.title": "Study Session Complete!",
+  "flashcards.completed.studied": "cards studied",
+  "flashcards.completed.confidence": "Confidence Levels",
+  "flashcards.feedback.prompt": "How was this study session?",
+  "flashcards.feedback.restart": "Study Again",
+
   "message.copyError": "There's no text to copy!",
   "message.copySuccess": "Copied to clipboard!",
 } as const;

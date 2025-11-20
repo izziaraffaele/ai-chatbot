@@ -1,6 +1,6 @@
 "use client";
 
-import { useChatRuntime } from "@/components/chat/context";
+import { createContext, useContext, useMemo, useState } from "react";
 import {
   Context,
   ContextCacheUsage,
@@ -8,19 +8,82 @@ import {
   ContextContentBody,
   ContextContentFooter,
   ContextContentHeader,
+  ContextIcon,
   ContextInputUsage,
   ContextOutputUsage,
   ContextReasoningUsage,
   ContextTrigger,
 } from "@/components/elements/context";
-import { useChatUsage } from "@/hooks/use-chat-usage";
+import type { AppUsage } from "@/lib/usage";
 
 const DEFAULT_MAX_TOKEN = Number.parseInt(
   process.env.CHAT_DEFAULT_MAX_TOKEN ||
     process.env.NEXT_PUBLIC_CHAT_DEFAULT_MAX_TOKEN ||
-    "128_000",
+    "128000",
   10
 );
+
+export const ChatUsageContext = createContext<{
+  usage: AppUsage;
+  maxTokens: number;
+  usedTokens: number;
+  setUsage: (value: AppUsage) => void;
+  setUsedTokens: (value: number) => void;
+}>({
+  maxTokens: DEFAULT_MAX_TOKEN,
+  usedTokens: 0,
+  usage: {
+    inputTokens: 0,
+    outputTokens: 0,
+    totalTokens: 0,
+  },
+  setUsedTokens: () => {
+    return;
+  },
+  setUsage: () => {
+    return;
+  },
+});
+
+export function useChatUsageContext() {
+  return useContext(ChatUsageContext);
+}
+
+export function useChatUsage() {
+  return useContext(ChatUsageContext).usage;
+}
+
+export function ChatUsageProvider({
+  children,
+  initialUsage,
+}: React.PropsWithChildren<{ initialUsage?: AppUsage }>) {
+  const [usage, setUsage] = useState<AppUsage>({
+    inputTokens: 0,
+    outputTokens: 0,
+    totalTokens: 0,
+    ...initialUsage,
+  });
+
+  const [usedTokens, setUsedTokens] = useState(0);
+
+  const contextValue = useMemo(() => {
+    const { inputTokens = 0, outputTokens = 0 } = usage;
+    return {
+      usage,
+      maxTokens: DEFAULT_MAX_TOKEN,
+      usedTokens:
+        usedTokens || (usage.inputTokens && inputTokens + outputTokens) || 0,
+      setUsage,
+      setUsedTokens,
+    };
+  }, [usage, usedTokens]);
+
+  return (
+    <ChatUsageContext.Provider value={contextValue}>
+      {children}
+    </ChatUsageContext.Provider>
+  );
+}
 
 /**
  * ChatContextUsage
@@ -32,23 +95,33 @@ export type ChatContextUsageProps = React.ComponentProps<"div"> & {
   usedTokens?: number;
 };
 
-export function ChatContextUsage({
-  maxTokens = DEFAULT_MAX_TOKEN,
-  usedTokens,
-  ...others
-}: ChatContextUsageProps) {
-  const { chat } = useChatRuntime();
-  const { value: usage } = useChatUsage({ chatId: chat.id });
+export function ChatContextUsage(props: ChatContextUsageProps) {
+  const {
+    usage,
+    maxTokens: defaultMaxTokens,
+    usedTokens: defaultUsedTokens,
+  } = useChatUsageContext();
+
+  const {
+    maxTokens = defaultMaxTokens,
+    usedTokens = defaultUsedTokens,
+    ...others
+  } = props;
 
   return (
     <Context
       {...others}
       maxTokens={maxTokens}
+      modelId={usage.modelId}
       usage={usage}
-      usedTokens={usedTokens || usage.totalTokens || 0}
+      usedTokens={usedTokens}
     >
-      <ContextTrigger />
-      <ContextContent>
+      <ContextTrigger>
+        <div className="cursor-pointer hover:text-accent-foreground">
+          <ContextIcon />
+        </div>
+      </ContextTrigger>
+      <ContextContent align="end">
         <ContextContentHeader />
         <ContextContentBody>
           <ContextInputUsage />
