@@ -1,3 +1,5 @@
+// import { BatchPartsProcessor } from "@mastra/core/processors";
+
 import { updateDocumentPrompt } from "@/lib/ai/prompts";
 import { createDocumentHandler } from "@/lib/artifacts/server";
 
@@ -21,7 +23,7 @@ export const textDocumentHandler = createDocumentHandler<"text">({
         "Write about the given topic. Markdown is supported. Use headings wherever appropriate.",
     });
 
-    // Consume stream chunks and emit to client in real-time
+    // Apply smooth streaming for more natural text delivery
     for await (const chunk of stream.textStream) {
       draftContent += chunk;
 
@@ -47,7 +49,7 @@ export const textDocumentHandler = createDocumentHandler<"text">({
       system: systemPrompt,
     });
 
-    // Consume stream chunks and emit to client in real-time
+    // Apply smooth streaming for more natural text delivery
     for await (const chunk of stream.textStream) {
       draftContent += chunk;
 

@@ -1,10 +1,16 @@
 "use client";
 
 import type { UseChatHelpers } from "@ai-sdk/react";
-import { useChat } from "@ai-sdk/react";
-import React, { type FormEvent, useCallback, useEffect, useRef } from "react";
-import { useLocalStorage, useWindowSize } from "usehooks-ts";
-import { useChatRuntime } from "@/components/chat/context";
+import React, {
+  createContext,
+  type FormEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+import { useChatContext } from "@/components/chat/context";
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -19,13 +25,73 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
-  usePromptInputController,
 } from "@/components/elements/prompt-input";
 import { useSelectedAgent } from "@/hooks/use-selected-agent";
 import type { ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { ChatAgentSelector } from "./agent-selector";
 import { ChatContextUsage } from "./usage";
+
+// ============================================================================
+// ChatComposerProvider Context & Types
+// ============================================================================
+
+export type ChatComposerContextValue = {
+  /** Textarea ref for this specific composer */
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  /** Form handling for this composer */
+  submitForm: (message: PromptInputMessage, event: FormEvent) => void;
+  /** Composer-specific status */
+  status: UseChatHelpers<ChatMessage>["status"];
+};
+
+const ChatComposerContext = createContext<ChatComposerContextValue | null>(
+  null
+);
+
+export function useChatComposerContext(): ChatComposerContextValue {
+  const ctx = useContext(ChatComposerContext);
+  if (!ctx) {
+    throw new Error(
+      "useChatComposerContext must be used within a ChatComposerProvider"
+    );
+  }
+  return ctx;
+}
+
+export type ChatComposerProviderProps = {
+  children: React.ReactNode;
+  onSubmit: (message: PromptInputMessage, event: FormEvent) => void;
+  status: UseChatHelpers<ChatMessage>["status"];
+};
+
+/**
+ * ChatComposerProvider
+ * Provides composer-specific state including textareaRef sharing and form handling.
+ * Each instance manages its own textarea and form state, supporting multiple composers.
+ */
+export function ChatComposerProvider({
+  children,
+  onSubmit,
+  status,
+}: ChatComposerProviderProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const contextValue = useMemo<ChatComposerContextValue>(
+    () => ({
+      textareaRef,
+      submitForm: onSubmit,
+      status,
+    }),
+    [onSubmit, status]
+  );
+
+  return (
+    <ChatComposerContext.Provider value={contextValue}>
+      {children}
+    </ChatComposerContext.Provider>
+  );
+}
 
 /**
  * ChatComposer
@@ -38,57 +104,13 @@ export function ChatComposer({
   children,
   ...others
 }: ChatComposerProps) {
-  return (
-    <div
-      className={cn("relative flex w-full flex-col gap-4", className)}
-      data-slot="chat-composer"
-      {...others}
-    >
-      {children}
-    </div>
-  );
-}
+  const { status, sendMessage } = useChatContext();
 
-/**
- * useChatComposer Hook
- * Centralizes chat composer logic by combining:
- * - Chat runtime (useChatRuntime)
- * - Chat helpers (useChat)
- * - Prompt input controller (usePromptInputController)
- * - Local storage persistence
- * - Form submission logic
- */
-export function useChatComposer() {
-  const runtime = useChatRuntime();
-  const chat = useChat({ chat: runtime.chat });
-  const composer = usePromptInputController();
-  const { width } = useWindowSize();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Create handleSubmit that integrates with global state
+  const handleSubmit = useCallback(
+    (message: PromptInputMessage, event: FormEvent) => {
+      event.preventDefault();
 
-  const [localStorageInput, setLocalStorageInput] = useLocalStorage(
-    "input",
-    ""
-  );
-
-  const inputValue = composer.textInput.value;
-
-  // Hydrate input from localStorage
-  useEffect(() => {
-    if (textareaRef.current) {
-      const domValue = textareaRef.current.value;
-      const finalValue = domValue || localStorageInput || "";
-      composer.textInput.setInput(finalValue);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [composer.textInput.setInput, localStorageInput]);
-
-  // Persist input to localStorage
-  useEffect(() => {
-    setLocalStorageInput(inputValue);
-  }, [setLocalStorageInput, inputValue]);
-
-  const submitForm = useCallback(
-    (message: PromptInputMessage) => {
       const hasText = Boolean(message.text);
       const hasAttachments = Boolean(message.files?.length);
 
@@ -96,67 +118,28 @@ export function useChatComposer() {
         return;
       }
 
-      chat.sendMessage({
-        text: message.text || "Sent with attachments",
-        files: message.files,
-      });
-
-      composer.textInput.setInput("");
-      composer.attachments.clear();
-
-      window.history.pushState({}, "", `/chat/${chat.id}`);
-
-      if (width && width > 768) {
-        textareaRef.current?.focus();
-      }
+      // Use global sendMessage from context
+      sendMessage(message);
     },
-    [chat, width, composer]
+    [sendMessage]
   );
 
-  const handleSubmit = useCallback(
-    (message: PromptInputMessage, event: FormEvent) => {
-      event.preventDefault();
-
-      if (chat.status === "ready") {
-        submitForm(message);
-        return;
-      }
-
-      if (chat.status !== "error") {
-        chat.stop();
-      }
-    },
-    [submitForm, chat]
+  return (
+    <div
+      className={cn("relative flex w-full flex-col gap-4", className)}
+      data-slot="chat-composer"
+      {...others}
+    >
+      <ChatComposerProvider onSubmit={handleSubmit} status={status}>
+        {children}
+      </ChatComposerProvider>
+    </div>
   );
-
-  return {
-    /** Chat ID from the current chat session */
-    chatId: chat.id,
-    /** Current chat status ('ready', 'streaming', 'error') */
-    status: chat.status,
-    /** Function to send a message to the chat */
-    sendMessage: chat.sendMessage,
-    /** Function to stop the current streaming response */
-    stop: chat.stop,
-
-    /** Prompt input controller with text and attachment state */
-    composer,
-    /** Current input text value from the textarea */
-    inputValue,
-    /** Ref to the textarea element for focus control */
-    textareaRef,
-    /** Array of attached files */
-
-    /** Form submission handler that prevents default and sends/stops chat */
-    handleSubmit,
-    /** Core form submission logic that handles message sending */
-    submitForm,
-  };
 }
 
 /**
  * ChatInput
- * Runtime-aware input component using useChatComposer hook
+ * Runtime-aware input component using new context hooks
  */
 export type ChatInputProps = {
   /**
@@ -198,6 +181,8 @@ export type ChatInputProps = {
         hasInput: boolean;
         disabled?: boolean;
       }) => React.ReactNode);
+
+  showUsage?: boolean;
 };
 
 export function ChatInput({
@@ -209,16 +194,32 @@ export function ChatInput({
   header,
   tools,
   actions = null,
+  showUsage = false,
 }: ChatInputProps) {
-  const { status, inputValue, textareaRef, handleSubmit } = useChatComposer();
+  const isRenderedRef = useRef(false);
+  const { inputValue, setInput } = useChatContext();
+  const { textareaRef, submitForm, status } = useChatComposerContext();
+
+  // Hydrate input
+  useEffect(() => {
+    if (textareaRef.current && !isRenderedRef.current) {
+      isRenderedRef.current = true;
+      const domValue = textareaRef.current.value;
+      // Prefer DOM value over localStorage to handle hydration
+      const finalValue = domValue || inputValue;
+      if (finalValue !== inputValue) {
+        setInput(finalValue);
+      }
+    }
+  }, [setInput, inputValue, textareaRef.current]);
 
   return (
     <PromptInput
-      className={className}
+      className={cn("relative", className)}
       data-slot="chat-input"
       globalDrop={globalDrop}
       multiple={multiple}
-      onSubmit={handleSubmit}
+      onSubmit={submitForm}
     >
       {header && <PromptInputHeader>{header}</PromptInputHeader>}
 
@@ -230,6 +231,7 @@ export function ChatInput({
             "px-5 py-5": !header,
           })}
           disabled={disabled}
+          onChange={(e) => setInput(e.target.value)}
           placeholder={placeholder}
           ref={textareaRef}
           rows={1}
@@ -247,6 +249,12 @@ export function ChatInput({
             })
           : actions}
       </PromptInputFooter>
+
+      {showUsage && (
+        <div className="absolute top-4 right-4">
+          <ChatContextUsage />
+        </div>
+      )}
     </PromptInput>
   );
 }
@@ -268,7 +276,7 @@ const ChatComposerToolAttachmentMenu = () => (
 
 const ChatComposerToolAgentSelector = () => {
   const { selectedAgent, setSelectedAgent } = useSelectedAgent();
-  const { status } = useChatComposer();
+  const { status } = useChatContext();
   return (
     <ChatAgentSelector
       onAgentChange={setSelectedAgent}
@@ -297,22 +305,8 @@ const ComposerInputSpeechButton = ({
   onTranscriptionChange,
   ...others
 }: React.ComponentProps<typeof PromptInputSpeechButton>) => {
-  const { textInput } = usePromptInputController();
-
-  const handleTranscriptionChange = useCallback(
-    (text: string) => {
-      textInput.setInput(text);
-      onTranscriptionChange?.(text);
-    },
-    [textInput, onTranscriptionChange]
-  );
-
-  return (
-    <PromptInputSpeechButton
-      {...others}
-      onTranscriptionChange={handleTranscriptionChange}
-    />
-  );
+  const { textareaRef } = useChatComposerContext();
+  return <PromptInputSpeechButton textareaRef={textareaRef} {...others} />;
 };
 
 export const ChatComposerAction = {

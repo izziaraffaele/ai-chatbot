@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import type { DataUIPart } from "ai";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import {
   Context,
   ContextCacheUsage,
@@ -14,7 +21,9 @@ import {
   ContextReasoningUsage,
   ContextTrigger,
 } from "@/components/elements/context";
+import type { ChatDataTypes } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
+import { useDataStreamSubscription } from "./streaming";
 
 const DEFAULT_MAX_TOKEN = Number.parseInt(
   process.env.CHAT_DEFAULT_MAX_TOKEN ||
@@ -66,6 +75,33 @@ export function ChatUsageProvider({
 
   const [usedTokens, setUsedTokens] = useState(0);
 
+  useDataStreamSubscription(
+    (part) => part.type === "data-usage",
+    (part) => {
+      console.log(part);
+      if (part.type === "data-usage") {
+        setUsage(part.data);
+      }
+    }
+  );
+
+  const handleDataUsageStream = useCallback(
+    (part: DataUIPart<ChatDataTypes>) => {
+      if (part.type === "data-usage") {
+        setUsage(part.data);
+      }
+    },
+    []
+  );
+
+  // Subscribe to artifact-related stream parts
+  const filter = useCallback(
+    (part: DataUIPart<ChatDataTypes>) => part.type === "data-usage",
+    []
+  );
+
+  useDataStreamSubscription(filter, handleDataUsageStream);
+
   const contextValue = useMemo(() => {
     const { inputTokens = 0, outputTokens = 0 } = usage;
     return {
@@ -107,6 +143,8 @@ export function ChatContextUsage(props: ChatContextUsageProps) {
     usedTokens = defaultUsedTokens,
     ...others
   } = props;
+
+  // console.log({ usage, maxTokens, usedTokens });
 
   return (
     <Context

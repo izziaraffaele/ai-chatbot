@@ -44,7 +44,7 @@ export const createDocumentTool = createTool({
       transient: true,
     } as any);
 
-    await writer?.write({
+    await writer?.custom({
       type: "data-clear",
       data: null,
       transient: true,

@@ -10,7 +10,11 @@ export function useChatDocument(documentId: string | null) {
     documentId !== null && documentId !== "init"
       ? `/api/document?id=${documentId}`
       : null,
-    fetcher
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
   );
 
   const latestVersion = data?.length || 0;

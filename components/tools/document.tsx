@@ -19,6 +19,7 @@ import { useChatDocument } from "@/hooks/use-chat-document";
 import type { Document } from "@/lib/db/schema";
 import type { ChatTools } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import type { DocumentArtifactKind } from "../artifacts/document";
 import { SpreadsheetEditor } from "../sheet-editor";
 import type { ChatToolProps } from "./types";
 
@@ -44,53 +45,87 @@ const getToolError = (type: string, errorText?: string) => {
  * Handles both document creation and update tool invocations using custom document layout
  */
 function PureDocumentTool(props: DocumentToolProps) {
-  const { part, isReadonly = false, isLastPart, isStreaming } = props;
+  const { part, isReadonly = false, isStreaming, isLastPart } = props;
   const { artifact, setArtifact } = useArtifact();
   const hitboxRef = useRef<HTMLDivElement>(null);
 
-  const documentId = part.output && "id" in part.output ? part.output.id : null;
+  const fetchDocumentId =
+    part.output && "id" in part.output ? part.output.id : null;
 
-  const documents = useChatDocument(documentId);
+  // if output does not exists it means that we're actually streaming this document so
+  // the id of the artifact is the document id
+  const documentId = fetchDocumentId || artifact.documentId;
+
+  const documentKind =
+    part.output && "id" in part.output ? part.output.kind : artifact.kind;
+
+  const documents = useChatDocument(fetchDocumentId);
   const previewDocument = useMemo<Document>(
     () => documents.entries[0],
     [documents]
   );
 
+  const isCurrentArtifact = documentId === artifact.documentId;
+
   const isStreamingArtifact =
-    ((isStreaming && isLastPart) || artifact.status === "streaming") &&
-    documentId === artifact.documentId;
+    isCurrentArtifact && isLastPart && artifact.status === "streaming";
+
+  const { title, content } = useMemo(() => {
+    if (!(part.output && "id" in part.output)) {
+      return { content: "", title: "" };
+    }
+
+    const currentContent = previewDocument?.content || "";
+    return {
+      title: part.output && "id" in part.output ? part.output.title : null,
+      content: isCurrentArtifact
+        ? artifact.content || currentContent
+        : currentContent,
+    };
+  }, [part, artifact, previewDocument, isCurrentArtifact]);
 
   // Handle click to open document in canvas
   const handleOpen = useCallback(() => {
+    console.log("open", { isCurrentArtifact, visible: artifact.isVisible });
     if (isReadonly) {
       toast.error("Viewing files in shared chats is currently not supported.");
       return;
     }
 
     const boundingBox = hitboxRef.current?.getBoundingClientRect();
-    if (!boundingBox || !part.output) {
+    if (!boundingBox || !documentId) {
       return;
     }
 
-    setArtifact((currentArtifact) =>
-      "id" in part.output
-        ? {
-            documentId: part.output.id,
-            kind: part.output.kind,
-            content: previewDocument.content,
-            title: part.output.title,
-            isVisible: true,
-            status: "idle",
-            boundingBox: {
-              top: boundingBox.top,
-              left: boundingBox.left,
-              width: boundingBox.width,
-              height: boundingBox.height,
-            },
-          }
-        : currentArtifact
-    );
-  }, [part.output, previewDocument, isReadonly, setArtifact]);
+    if (isCurrentArtifact) {
+      setArtifact((v) => ({ ...v, isVisible: !v.isVisible }));
+    } else {
+      setArtifact({
+        documentId,
+        kind: documentKind || "text",
+        content,
+        title: title || "",
+        isVisible: true,
+        status: artifact.status,
+        boundingBox: {
+          top: boundingBox.top,
+          left: boundingBox.left,
+          width: boundingBox.width,
+          height: boundingBox.height,
+        },
+      });
+    }
+  }, [
+    isReadonly,
+    isCurrentArtifact,
+    documentKind,
+    documentId,
+    title,
+    content,
+    artifact.status,
+    artifact.isVisible,
+    setArtifact,
+  ]);
 
   // Check if output contains an error
   if (part.output && "error" in part.output) {
@@ -109,7 +144,7 @@ function PureDocumentTool(props: DocumentToolProps) {
   }
 
   // Loading state
-  if (documents.isLoading || isStreamingArtifact) {
+  if (documents.isLoading) {
     return <LoadingDocumentSkeleton />;
   }
 
@@ -131,6 +166,10 @@ function PureDocumentTool(props: DocumentToolProps) {
     return <LoadingDocumentSkeleton />;
   }
 
+  if (document.kind === "image") {
+    return null;
+  }
+
   return (
     <div className="relative w-full cursor-pointer">
       {!isReadonly && (
@@ -149,10 +188,24 @@ function PureDocumentTool(props: DocumentToolProps) {
         title={document.title}
       />
 
-      <DocumentContent document={document} />
+      <DocumentContent
+        content={document.content?.slice(0, 500)}
+        kind={document.kind}
+      />
     </div>
   );
 }
+
+export const DocumentTool = memo(PureDocumentTool, (prevProps, nextProps) => {
+  return (
+    equal(prevProps.part, nextProps.part) &&
+    prevProps.isReadonly === nextProps.isReadonly &&
+    prevProps.isLastPart === nextProps.isLastPart &&
+    prevProps.isStreaming === nextProps.isStreaming
+  );
+});
+
+DocumentTool.displayName = "DocumentTool";
 
 /**
  * Custom document header with specific styling for document tools
@@ -209,15 +262,6 @@ const LoadingDocumentSkeleton = () => (
   </div>
 );
 
-export const DocumentTool = memo(PureDocumentTool, (prevProps, nextProps) => {
-  return (
-    equal(prevProps.part, nextProps.part) &&
-    prevProps.isReadonly === nextProps.isReadonly
-  );
-});
-
-DocumentTool.displayName = "DocumentTool";
-
 const DOCUMENT_TOOL_ICON_MAP = {
   createDocument: FileIcon,
   updateDocument: PencilEditIcon,
@@ -227,8 +271,13 @@ const DOCUMENT_TOOL_ICON_MAP = {
 /**
  * Document content renderer based on document kind
  */
-const DocumentContent = ({ document }: { document: Document }) => {
-  const content = document.content ?? "";
+const PureDocumentContent = ({
+  content = "",
+  kind,
+}: {
+  content?: string;
+  kind: DocumentArtifactKind;
+}) => {
   // Common props for both editors
   const commonEditorProps = {
     content,
@@ -242,7 +291,7 @@ const DocumentContent = ({ document }: { document: Document }) => {
   };
 
   const renderEditor = () => {
-    switch (document.kind) {
+    switch (kind) {
       case "text":
         return <Editor {...commonEditorProps} />;
       case "code":
@@ -259,15 +308,23 @@ const DocumentContent = ({ document }: { document: Document }) => {
       className={cn(
         "h-[257px] overflow-y-scroll rounded-b-2xl border border-t-0 dark:border-zinc-700 dark:bg-muted",
         {
-          "p-4 sm:px-14 sm:py-16": document.kind === "text",
-          "p-0": document.kind === "code",
+          "p-4 sm:px-14 sm:py-16": kind === "text",
+          "p-0": kind === "code",
         }
       )}
+      data-document-kind={kind}
+      data-slot="document-content"
     >
       {renderEditor()}
     </div>
   );
 };
+
+const DocumentContent = memo(PureDocumentContent, (prevProps, nextProps) => {
+  return (
+    prevProps.content === nextProps.content && prevProps.kind === nextProps.kind
+  );
+});
 
 function DocumentToolResult({
   part,

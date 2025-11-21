@@ -11,14 +11,9 @@ import {
   UndoIcon,
 } from "@/components/icons";
 import { Editor } from "@/components/text-editor";
-import type { Suggestion } from "@/lib/db/schema";
 import { getSuggestions } from "../actions";
 
-type TextArtifactMetadata = {
-  suggestions: Suggestion[];
-};
-
-export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
+export const textArtifact = new Artifact<"text">({
   kind: "text",
   description: "Useful for text content, like drafting essays and emails.",
   initialize: async ({ documentId, setMetadata }) => {
@@ -28,15 +23,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
       suggestions,
     });
   },
-  onStreamPart: ({ streamPart, setMetadata, setArtifact }) => {
-    if (streamPart.type === "data-suggestion") {
-      setMetadata((metadata) => {
-        return {
-          suggestions: [...metadata.suggestions, streamPart.data],
-        };
-      });
-    }
-
+  onStreamPart: ({ streamPart, setArtifact }) => {
     if (streamPart.type === "data-textDelta") {
       setArtifact((draftArtifact) => {
         return {

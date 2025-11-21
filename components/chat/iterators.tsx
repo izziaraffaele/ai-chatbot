@@ -1,8 +1,7 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
 import { Fragment } from "react";
-import { useChatRuntime } from "@/components/chat/context";
+import { useChatContext, useChatMessages } from "@/components/chat/context";
 import { useChatVotes } from "@/hooks/use-chat-votes";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
@@ -55,8 +54,8 @@ export function MessageIterator({
   displayUser,
   displayAssistant,
 }: MessageIteratorProps) {
-  const runtime = useChatRuntime();
-  const { id: chatId, messages, status } = useChat({ chat: runtime.chat });
+  const { chatId, status } = useChatContext();
+  const { messages } = useChatMessages();
   const { value: votes, voteMessage } = useChatVotes({ chatId });
 
   const senders: Record<

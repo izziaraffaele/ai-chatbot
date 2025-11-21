@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { useChatRuntime } from "@/components/chat/context";
+import { useChatContext } from "@/components/chat/context";
 import type { ChatMessage } from "@/lib/types";
 
 /**
@@ -26,7 +26,7 @@ export function ChatAutoResume({
   initialMessages = [],
   enabled = true,
 }: ChatAutoResumeProps) {
-  const { chat } = useChatRuntime();
+  const { chat } = useChatContext();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: suppress dependency chatConfig
   useEffect(() => {
@@ -53,7 +53,7 @@ export function ChatAutoResume({
  * Automatically sends a message when ?query=... is present
  */
 export function ChatRouteParamsHandler() {
-  const { chat } = useChatRuntime();
+  const { chat, sendMessage } = useChatContext();
   const searchParams = useSearchParams();
   const query = searchParams.get("query");
 
@@ -67,15 +67,12 @@ export function ChatRouteParamsHandler() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: suppress dependency chatConfig
   useEffect(() => {
     if (query && shouldAppendQuery && !hasAppendedQueryRef.current) {
-      chat.sendMessage({
-        role: "user" as const,
-        parts: [{ type: "text", text: query }],
-      });
+      sendMessage({ text: query, files: [] });
 
       hasAppendedQueryRef.current = true;
       window.history.replaceState({}, "", `/chat/${chat.id}`);
     }
-  }, [query, shouldAppendQuery]);
+  }, [query, shouldAppendQuery, sendMessage]);
 
   return null;
 }

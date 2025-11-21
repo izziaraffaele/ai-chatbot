@@ -1,9 +1,21 @@
 "use client";
 
+import type { DataUIPart } from "ai";
 import { useCallback } from "react";
-import { artifactDefinitions } from "@/components/artifacts";
 import { useDataStreamSubscription } from "@/components/chat/streaming";
 import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
+import type { ChatDataTypes } from "@/lib/types";
+
+const ARTIFACT_DATA_PART = {
+  id: "data-id",
+  title: "data-title",
+  kind: "data-kind",
+  clear: "data-clear",
+  finish: "data-finish",
+  textDelta: "data-textDelta",
+  codeDelta: "data-codeDelta",
+  sheetDelta: "data-sheetDelta",
+} as const;
 
 /**
  * useArtifactStreaming Hook
@@ -14,23 +26,11 @@ import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
  * for feature-specific logic (artifacts in this case)
  */
 export function useArtifactStreaming() {
-  const { artifact, setArtifact, setMetadata } = useArtifact();
+  const { setArtifact } = useArtifact();
 
   const handleStreamPart = useCallback(
-    (delta: any) => {
+    (delta: DataUIPart<ChatDataTypes>) => {
       // Find artifact definition for custom onStreamPart handler
-      const artifactDefinition = artifactDefinitions.find(
-        (currentArtifactDefinition) =>
-          currentArtifactDefinition.kind === artifact.kind
-      );
-
-      if (artifactDefinition?.onStreamPart) {
-        artifactDefinition.onStreamPart({
-          streamPart: delta,
-          setArtifact,
-          setMetadata,
-        });
-      }
 
       // Handle standard artifact stream parts
       setArtifact((draftArtifact) => {
@@ -39,38 +39,53 @@ export function useArtifactStreaming() {
         }
 
         switch (delta.type) {
-          case "data-id":
+          case ARTIFACT_DATA_PART.id:
             return {
               ...draftArtifact,
               documentId: delta.data,
               status: "streaming",
             };
 
-          case "data-title":
+          case ARTIFACT_DATA_PART.title:
             return {
               ...draftArtifact,
               title: delta.data,
               status: "streaming",
             };
 
-          case "data-kind":
+          case ARTIFACT_DATA_PART.kind:
             return {
               ...draftArtifact,
               kind: delta.data,
               status: "streaming",
             };
 
-          case "data-clear":
+          case ARTIFACT_DATA_PART.clear:
             return {
               ...draftArtifact,
               content: "",
               status: "streaming",
             };
 
-          case "data-finish":
+          case ARTIFACT_DATA_PART.finish:
             return {
               ...draftArtifact,
               status: "idle",
+            };
+
+          case ARTIFACT_DATA_PART.textDelta:
+          case ARTIFACT_DATA_PART.sheetDelta:
+          case ARTIFACT_DATA_PART.codeDelta:
+            return {
+              ...draftArtifact,
+              status: "streaming",
+              content: draftArtifact.content + delta.data,
+              isVisible:
+                draftArtifact.status === "streaming" &&
+                draftArtifact.content.length > 400 &&
+                draftArtifact.content.length < 450
+                  ? true
+                  : draftArtifact.isVisible,
             };
 
           default:
@@ -78,12 +93,15 @@ export function useArtifactStreaming() {
         }
       });
     },
-    [artifact.kind, setArtifact, setMetadata]
+    [setArtifact]
   );
 
   // Subscribe to artifact-related stream parts
-  useDataStreamSubscription(
-    (part) => part.type.startsWith("data-"),
-    handleStreamPart
+  const filter = useCallback(
+    (part: DataUIPart<ChatDataTypes>) =>
+      (Object.values(ARTIFACT_DATA_PART) as string[]).includes(part.type),
+    []
   );
+
+  useDataStreamSubscription(filter, handleStreamPart);
 }

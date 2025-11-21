@@ -2,7 +2,6 @@ import type { UseChatHelpers } from "@ai-sdk/react";
 import type { DataUIPart } from "ai";
 import type { ComponentType, Dispatch, ReactNode, SetStateAction } from "react";
 import type { UIArtifact } from "@/components/chat/artifact";
-import type { Suggestion } from "@/lib/db/schema";
 import type { ChatDataTypes, ChatMessage } from "@/lib/types";
 
 export type ArtifactActionContext<M = any> = {
@@ -40,7 +39,6 @@ type ArtifactContent<M = any> = {
   isCurrentVersion: boolean;
   currentVersionIndex: number;
   status: "streaming" | "idle";
-  suggestions: Suggestion[];
   onSaveContent: (updatedContent: string, debounce: boolean) => void;
   isInline: boolean;
   getDocumentContentById: (index: number) => string;

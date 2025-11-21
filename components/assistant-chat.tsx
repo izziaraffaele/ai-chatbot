@@ -1,6 +1,5 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { useWindowSize } from "usehooks-ts";
@@ -16,7 +15,7 @@ import {
   ChatComposerTool,
   ChatInput,
 } from "./chat/composer";
-import { useChatRuntime } from "./chat/context";
+import { useChatContext, useChatMessages } from "./chat/context";
 import { ChatAutoResume, ChatRouteParamsHandler } from "./chat/effects";
 import { ChatGreeting } from "./chat/empty";
 import { MessageIterator } from "./chat/iterators";
@@ -32,7 +31,6 @@ import {
   ChatThreadContent,
   ChatThreadHeader,
 } from "./chat/thread";
-import { ChatContextUsage } from "./chat/usage";
 import { AssistantMessage } from "./messages/assistant-message";
 import { UserMessage } from "./messages/user-message";
 import { SidebarToggle } from "./sidebar-toggle";
@@ -82,9 +80,10 @@ export function AssistantChat({
   const t = useTranslations();
   const { open } = useSidebar();
   const { width: windowWidth } = useWindowSize();
-  const { chat } = useChatRuntime();
-  const { messages, status } = useChat({ chat });
+  const { chat, status } = useChatContext();
+  const { messages } = useChatMessages();
   const { artifact } = useArtifact();
+
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId: chat.id,
   });
@@ -118,6 +117,7 @@ export function AssistantChat({
         );
       }}
       placeholder={t("chat.input.placeholder", "Send a message...")}
+      showUsage
       tools={
         <>
           <ChatComposerTool.AttachmentMenu />
@@ -172,7 +172,6 @@ export function AssistantChat({
       }}
     </MessageIterator>
   );
-
   return (
     <ActivityToolProvider>
       <ChatSuggestionProvider
@@ -215,9 +214,6 @@ export function AssistantChat({
             <ChatThreadComposer>
               {messages.length === 0 && <ChatSuggestions mode="default" />}
               {chatInput}
-              <div className="absolute top-4 right-4">
-                <ChatContextUsage />
-              </div>
             </ChatThreadComposer>
           )}
         </ChatThread>
@@ -239,11 +235,7 @@ export function AssistantChat({
           {/* Artifact display */}
           <ChatCanvasMain boundingBox={artifact.boundingBox}>
             {isDocumentArtifact(artifact.kind) && (
-              <DocumentArtifact
-                documentId={artifact.documentId}
-                kind={artifact.kind}
-                title={artifact.title || "Untitled"}
-              />
+              <DocumentArtifact artifact={artifact} isReadonly={isReadonly} />
             )}
             {isMediaArtifact(artifact.kind) && (
               <MediaArtifact

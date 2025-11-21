@@ -1,13 +1,17 @@
 "use client";
 
 import type { ChatStatus } from "ai";
+import { useEffect, useState } from "react";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/elements/conversation";
+import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { cn } from "@/lib/utils";
+import { VisibilitySelector } from "../visibility-selector";
 import { ChatComposer } from "./composer";
+import { useChatContext } from "./context";
 
 /**
  * Chat interface container with full-height layout.
@@ -131,5 +135,29 @@ export const ChatThreadComposer = ({
     >
       <ChatComposer>{children}</ChatComposer>
     </div>
+  );
+};
+
+export const ChatThreadVisibilitySelector = ({
+  ...others
+}: React.ComponentProps<typeof VisibilitySelector>) => {
+  const { chatId } = useChatContext();
+  const { visibilityType, setVisibilityType } = useChatVisibility({ chatId });
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
+  return (
+    <VisibilitySelector
+      onValueChange={setVisibilityType}
+      value={visibilityType}
+      {...others}
+    />
   );
 };

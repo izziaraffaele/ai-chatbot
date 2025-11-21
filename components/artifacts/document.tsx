@@ -1,6 +1,5 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
 import { formatDistance } from "date-fns";
 import {
   ChevronLeftIcon,
@@ -9,7 +8,8 @@ import {
   DownloadIcon,
   EyeIcon,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import type React from "react";
+import { useCallback, useMemo } from "react";
 import { codeArtifact } from "@/artifacts/code/client";
 import { sheetArtifact } from "@/artifacts/sheet/client";
 import { textArtifact } from "@/artifacts/text/client";
@@ -22,11 +22,10 @@ import {
   ChatArtifactBody,
   ChatArtifactFooter,
   ChatArtifactHeader,
+  type UIArtifact,
   useArtifactDraft,
   useArtifactVersion,
 } from "@/components/chat/artifact";
-import { useChatRuntime } from "@/components/chat/context";
-import { Toolbar } from "@/components/toolbar";
 import { VersionFooter } from "@/components/version-footer";
 import { useArtifact } from "@/hooks/use-artifact";
 import { useChatDocument } from "@/hooks/use-chat-document";
@@ -48,9 +47,7 @@ export const isDocumentArtifact = (
 ): kind is DocumentArtifactKind => ["text", "code", "sheet"].includes(kind);
 
 export type DocumentArtifactProps = {
-  documentId: string;
-  kind: DocumentArtifactKind;
-  title: string;
+  artifact: UIArtifact<string, string>;
   isReadonly?: boolean;
   className?: string;
 };
@@ -61,48 +58,40 @@ export type DocumentArtifactProps = {
  * Supports text, code, and sheet documents with versioning and auto-save
  */
 export function DocumentArtifact({
-  documentId,
-  kind,
-  title,
+  artifact,
   className,
+  isReadonly = false,
 }: DocumentArtifactProps) {
-  const [isToolbarVisible, setIsToolbarVisible] = useState(false);
-
-  const runtime = useChatRuntime();
-  const chat = useChat({ chat: runtime.chat });
-  const { artifact, metadata, setMetadata, setArtifact } = useArtifact();
-  const chatDocument = useChatDocument(documentId);
-
-  // Find artifact definition (text, code, or sheet)
-  const artifactDefinition = documentArtifactDefinitions.find(
-    (def) => def.kind === kind
+  const { metadata, setMetadata, setArtifact } = useArtifact();
+  const {
+    entries: documents,
+    mutate,
+    isLoading,
+  } = useChatDocument(
+    artifact.status === "streaming" ? null : artifact.documentId
   );
 
-  if (!artifactDefinition) {
-    throw new Error(`Artifact definition not found for kind: ${kind}`);
-  }
+  const savedDocument = useMemo(() => {
+    return documents.find((d) => d.id === artifact.documentId);
+  }, [documents, artifact.documentId]);
+
+  const handleClose = () => {
+    setArtifact((v) => ({ ...v, isVisible: false }));
+  };
 
   // Convert Document[] to ArtifactVersion[]
   const versions = useMemo<ArtifactVersion<string>[]>(() => {
-    if (!Array.isArray(chatDocument.entries)) {
+    if (!Array.isArray(documents)) {
       return [];
     }
-    return chatDocument.entries.map((doc: Document) => ({
+    return documents.map((doc: Document) => ({
       id: doc.id,
       title: doc.title,
       content: doc.content || "",
       createdAt: doc.createdAt,
       metadata: {},
     }));
-  }, [chatDocument.entries]);
-
-  // Handle close
-  const handleClose = useCallback(() => {
-    setArtifact((current) => ({
-      ...current,
-      isVisible: false,
-    }));
-  }, [setArtifact]);
+  }, [documents]);
 
   // Save handler
   const handleSave = useCallback(
@@ -112,62 +101,48 @@ export function DocumentArtifact({
       }
 
       try {
-        const response = await fetch(`/api/document?id=${documentId}`, {
-          method: "POST",
-          body: JSON.stringify({
-            title,
-            content,
-            kind,
-          }),
-        });
+        const response = await fetch(
+          `/api/document?id=${artifact.documentId}`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              title: artifact.title,
+              content,
+              kind: artifact.kind,
+            }),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to save document");
         }
 
         // Revalidate the data to get the latest version
-        await chatDocument.mutate();
+        await mutate();
       } catch (error) {
         console.error("Error saving document:", error);
         // Optionally show error message to user
       }
     },
-    [artifact, chatDocument, documentId, title, kind]
+    [artifact, mutate]
   );
 
-  // Get initial content for draft provider
-  // Use the latest version from documents if available, otherwise fallback to artifact.content
-  const latestDocument =
-    chatDocument.entries?.[chatDocument.entries.length - 1];
-  const initialContent = latestDocument?.content || artifact.content || "";
-
-  // Set initial index to the latest version (last item in versions array)
-  const initialVersionIndex = Math.max(0, versions.length - 1);
-
   return (
-    <ArtifactVersionProvider
-      initialIndex={initialVersionIndex}
-      initialMode="edit"
-      versions={versions}
-    >
+    <ArtifactVersionProvider initialMode="edit" versions={versions}>
       <ArtifactDraftProvider
-        initialContent={initialContent}
+        initialContent={artifact.content}
         onSaveAction={handleSave}
       >
         <DocumentArtifactContent
-          artifactDefinition={artifactDefinition}
-          chatDocument={chatDocument}
+          artifact={artifact}
           className={className}
-          isToolbarVisible={isToolbarVisible}
+          isLoading={isLoading}
+          isReadonly={isReadonly}
+          lastUpdatedAt={savedDocument?.createdAt}
           metadata={metadata}
           onClose={handleClose}
-          sendMessage={chat.sendMessage}
-          setIsToolbarVisible={setIsToolbarVisible}
-          setMessages={chat.setMessages}
           setMetadata={setMetadata}
-          status={chat.status}
-          stop={chat.stop}
-          title={title}
+          versions={versions}
         />
       </ArtifactDraftProvider>
     </ArtifactVersionProvider>
@@ -175,58 +150,64 @@ export function DocumentArtifact({
 }
 
 type DocumentArtifactContentProps = {
-  artifactDefinition: any;
-  chatDocument: ReturnType<typeof useChatDocument>;
-  title: string;
-  isToolbarVisible: boolean;
-  setIsToolbarVisible: (visible: boolean) => void;
+  artifact: UIArtifact<string, string>;
+  versions: ArtifactVersion<string>[];
+  lastUpdatedAt?: string | Date;
   onClose: () => void;
-  sendMessage: any;
-  setMessages: any;
-  status: any;
-  stop: any;
   className?: string;
-  metadata: Record<string, any>;
-  setMetadata: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  metadata?: any;
+  isLoading?: boolean;
+  isReadonly?: boolean;
+  setMetadata: React.Dispatch<React.SetStateAction<any>>;
 };
 
 function DocumentArtifactContent({
-  artifactDefinition,
-  chatDocument,
-  title,
-  isToolbarVisible,
-  setIsToolbarVisible,
+  artifact,
+  versions,
+  lastUpdatedAt,
   onClose,
-  sendMessage,
-  setMessages,
-  status,
-  stop,
   className,
   metadata,
+  isLoading = false,
+  isReadonly,
   setMetadata,
 }: DocumentArtifactContentProps) {
-  const { artifact } = useArtifact();
   const { currentIndex, isLatest, mode, navigateVersion } =
     useArtifactVersion();
+
   const {
     isDirty,
     content: draftContent,
     setContent,
   } = useArtifactDraft<string>();
 
-  const currentEntry = Array.isArray(chatDocument.entries)
-    ? chatDocument.entries[currentIndex]
-    : undefined;
+  const artifactDefinition = documentArtifactDefinitions.find(
+    (def) => def.kind === artifact.kind
+  );
+
+  if (!artifactDefinition) {
+    throw new Error(`Artifact definition not found for kind: ${artifact.kind}`);
+  }
+
+  let displayContent = versions[currentIndex]?.content || artifact.content;
+
+  if (isDirty && !isReadonly) {
+    displayContent = draftContent;
+  }
 
   // Calculate updated time
-  const updatedAt = useMemo(() => {
-    if (!currentEntry) {
-      return null;
-    }
-    return formatDistance(new Date(currentEntry.createdAt), new Date(), {
-      addSuffix: true,
-    });
-  }, [currentEntry]);
+  const formattedLastUpdate = useMemo(() => {
+    return (
+      lastUpdatedAt &&
+      formatDistance(lastUpdatedAt, new Date(), {
+        addSuffix: true,
+      })
+    );
+  }, [lastUpdatedAt]);
+
+  const subtitle = isDirty
+    ? "Saving changes..."
+    : formattedLastUpdate && `Updated ${formattedLastUpdate}`;
 
   return (
     <ChatArtifact className={cn("h-full rounded-none border-none", className)}>
@@ -245,13 +226,13 @@ function DocumentArtifactContent({
               icon={<EyeIcon className="size-4" />}
             />
             <ChatArtifactAction.Copy
-              content={draftContent}
+              content={displayContent}
               icon={<CopyIcon className="size-4" />}
               tooltip="Copy content"
             />
             <ChatArtifactAction.Download
-              content={draftContent}
-              filename={`${title}.txt`}
+              content={displayContent}
+              filename={`${artifact.title}.txt`}
               icon={<DownloadIcon className="size-4" />}
               tooltip="Download"
             />
@@ -259,62 +240,38 @@ function DocumentArtifactContent({
         }
         onClose={onClose}
         subtitle={
-          isDirty ? (
-            "Saving changes..."
-          ) : updatedAt ? (
-            `Updated ${updatedAt}`
-          ) : (
+          subtitle || (
             <span className="mt-2 inline-block h-3 w-32 animate-pulse rounded-md bg-muted-foreground/20" />
           )
         }
-        title={title}
+        title={artifact.title}
       />
 
-      <ChatArtifactBody
-        toolbar={
-          isLatest ? (
-            <Toolbar
-              artifactKind={artifactDefinition.kind}
-              isToolbarVisible={isToolbarVisible}
-              sendMessage={sendMessage}
-              setIsToolbarVisible={setIsToolbarVisible}
-              setMessages={setMessages}
-              status={status}
-              stop={stop}
-            />
-          ) : null
-        }
-      >
+      <ChatArtifactBody>
         <artifactDefinition.content
-          content={draftContent}
+          content={displayContent}
           currentVersionIndex={currentIndex}
           getDocumentContentById={(versionIndex: number) => {
             // Ensure versionIndex is within bounds
-            if (
-              versionIndex >= 0 &&
-              versionIndex < (chatDocument.entries?.length || 0)
-            ) {
-              return chatDocument.entries[versionIndex]?.content || "";
-            }
-            return "";
+            return (
+              versions[versionIndex <= 0 ? 0 : versionIndex]?.content || ""
+            );
           }}
           isCurrentVersion={isLatest}
           isInline={false}
-          isLoading={chatDocument.isLoading && !artifact.content}
+          isLoading={displayContent.length === 0 && isLoading}
           metadata={metadata}
-          mode={mode}
+          mode={mode === "view" ? "edit" : mode}
           onSaveContent={setContent}
           setMetadata={setMetadata}
           status={artifact.status}
-          suggestions={[]}
-          title={title}
+          title={artifact.title}
         />
       </ChatArtifactBody>
 
       <ChatArtifactFooter visible={!isLatest}>
         <VersionFooter
           currentVersionIndex={currentIndex}
-          documents={chatDocument.entries}
           handleVersionChange={(type) => {
             if (type === "toggle") {
               // Toggle between edit and diff modes when viewing old versions

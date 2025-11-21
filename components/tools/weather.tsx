@@ -41,7 +41,9 @@ function PureWeather({ part }: WeatherToolProps) {
 export const Weather = memo(PureWeather, (prevProps, nextProps) => {
   return (
     equal(prevProps.part, nextProps.part) &&
-    prevProps.isReadonly === nextProps.isReadonly
+    prevProps.isReadonly === nextProps.isReadonly &&
+    prevProps.isLastPart === nextProps.isLastPart &&
+    prevProps.isStreaming === nextProps.isStreaming
   );
 });
 

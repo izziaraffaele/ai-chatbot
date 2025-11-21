@@ -1,8 +1,10 @@
 "use client";
 
+import equal from "fast-deep-equal";
 import { motion } from "framer-motion";
 import {
   createContext,
+  memo,
   type ReactNode,
   useCallback,
   useContext,
@@ -10,10 +12,9 @@ import {
   useMemo,
   useState,
 } from "react";
-import { usePromptInputController } from "@/components/elements/prompt-input";
 import { Suggestion, Suggestions } from "@/components/elements/suggestion";
 import { cn } from "@/lib/utils";
-import { useChatRuntime } from "./context";
+import { useChatContext } from "./context";
 
 /**
  * Auto-apply behavior modes for suggestions
@@ -89,7 +90,7 @@ const ChatSuggestionContext = createContext<ChatSuggestionContext | null>(null);
  * </ChatProvider>
  * ```
  */
-export function ChatSuggestionProvider({
+function PureChatSuggestionProvider({
   initialSuggestions = [],
   suggestions,
   autoApply = "input",
@@ -97,8 +98,7 @@ export function ChatSuggestionProvider({
   children,
 }: ChatSuggestionProviderProps) {
   // Get runtime access for auto-apply functionality
-  const runtime = useChatRuntime();
-  const composer = usePromptInputController();
+  const { setInput, sendMessage } = useChatContext();
 
   // Use suggestions prop if provided, otherwise use initialSuggestions
   const [currentSuggestions, setCurrentSuggestions] = useState(() =>
@@ -117,7 +117,7 @@ export function ChatSuggestionProvider({
         switch (autoApply) {
           case "input": {
             // Populate prompt input and focus
-            composer.textInput.setInput(suggestion);
+            setInput(suggestion);
             // Focus the textarea
             const textareaElement = document.querySelector(
               "textarea"
@@ -128,10 +128,7 @@ export function ChatSuggestionProvider({
 
           case "message": {
             // Send as new message immediately
-            runtime.chat.sendMessage({
-              role: "user",
-              parts: [{ type: "text", text: suggestion }],
-            });
+            sendMessage({ text: suggestion, files: [] });
             break;
           }
 
@@ -144,7 +141,7 @@ export function ChatSuggestionProvider({
         console.error("Failed to apply suggestion:", error);
       }
     },
-    [autoApply, composer, runtime]
+    [autoApply, sendMessage, setInput]
   );
 
   // Use custom handler if provided, otherwise use default
@@ -174,6 +171,18 @@ export function ChatSuggestionProvider({
     </ChatSuggestionContext.Provider>
   );
 }
+
+export const ChatSuggestionProvider = memo(
+  PureChatSuggestionProvider,
+  (prevProps, nextProps) => {
+    return (
+      equal(prevProps.suggestions, nextProps.suggestions) &&
+      prevProps.autoApply === nextProps.autoApply &&
+      prevProps.onApply === nextProps.onApply &&
+      prevProps.children === nextProps.children
+    );
+  }
+);
 
 /**
  * useChatSuggestions Hook
@@ -241,10 +250,19 @@ export function ChatSuggestions({
 }: ChatSuggestionsProps) {
   // Get provider context
   const context = useChatSuggestions();
+  const [isMounted, setIsMounted] = useState(false);
 
   // Props always override context
   const suggestions = propsSuggestions || context.suggestions;
   const onApply = propsOnApply || context.onApply;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   // Don't render if no suggestions
   if (suggestions.length === 0) {

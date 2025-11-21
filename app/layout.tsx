@@ -15,16 +15,16 @@ import { isSupportedLocale, loadTranslations } from "@/lib/i18n/utils";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://chat.vercel.ai"
+    process.env.NEXT_PUBLIC_APP_URL || "https://www.memoraiz.com"
   ),
   title:
     process.env.NEXT_PUBLIC_METADATA_TITLE ||
     process.env.NEXT_PUBLIC_APP_NAME ||
-    "Next.js Chatbot Template",
+    "MemorAIz Assistant Demo",
   description:
     process.env.NEXT_PUBLIC_METADATA_DESCRIPTION ||
     process.env.NEXT_PUBLIC_APP_DESCRIPTION ||
-    "Next.js chatbot template using the AI SDK.",
+    "MemorAIz assistant demo for Mondadori",
 };
 
 export const viewport = {

@@ -23,7 +23,6 @@ export function ChatCanvas({
   const isMobile = useIsMobile();
   const { open: isSidebarOpen } = useSidebar();
   const { width: windowWidth } = useWindowSize();
-
   return (
     <AnimatePresence>
       {isVisible && (

@@ -99,12 +99,11 @@ export type PromptInputControllerProps = {
   ) => void;
 };
 
-const PromptInputController = createContext<PromptInputControllerProps | null>(
-  null
-);
-const ProviderAttachmentsContext = createContext<AttachmentsContext | null>(
-  null
-);
+export const PromptInputController =
+  createContext<PromptInputControllerProps | null>(null);
+
+export const ProviderAttachmentsContext =
+  createContext<AttachmentsContext | null>(null);
 
 export const usePromptInputController = () => {
   const ctx = useContext(PromptInputController);

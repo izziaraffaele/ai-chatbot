@@ -59,7 +59,9 @@ function PureFallback(props: FallbackProps) {
 export const Fallback = memo(PureFallback, (prevProps, nextProps) => {
   return (
     equal(prevProps.part, nextProps.part) &&
-    prevProps.isReadonly === nextProps.isReadonly
+    prevProps.isReadonly === nextProps.isReadonly &&
+    prevProps.isLastPart === nextProps.isLastPart &&
+    prevProps.isStreaming === nextProps.isStreaming
   );
 });
 

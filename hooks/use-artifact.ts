@@ -48,6 +48,8 @@ export function useArtifact<T extends UIArtifact<any, any> = UIArtifact>() {
     UIArtifact<any, any>
   >("artifact", null, {
     fallbackData: initialArtifactData,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
   });
 
   const artifact = useMemo(() => {
