@@ -1062,7 +1062,28 @@ const FIELD_NAME_PATTERNS: Record<string, RegExp> = {
 };
 ```
 
-### 7. Multiple Document Widgets Accumulation Fix
+### 7. Assistant Avatar Image Not Displaying Fix
+
+**File**: `components/messages/assistant-message.tsx`
+
+**Issue**: The Faenza logo (`/images/logo-faenza.jpg`) was not displaying next to assistant messages. The terminal showed the error: `The requested resource isn't a valid image for /images/logo-faenza.jpg received null`.
+
+**Cause**: Next.js's image optimization was failing to process the local JPG image, returning `null` during the optimization process.
+
+**Fix**: Added the `unoptimized` prop to the Next.js `Image` component to bypass the image optimizer:
+
+```tsx
+<Image
+  alt="Assistente Comune di Faenza"
+  className="size-8 rounded-full object-cover"
+  height={32}
+  src="/images/logo-faenza.jpg"
+  unoptimized  // Added to bypass failing optimization
+  width={32}
+/>
+```
+
+### 8. Multiple Document Widgets Accumulation Fix
 
 **File**: `components/tools/load-invoice.tsx`
 

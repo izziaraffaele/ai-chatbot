@@ -54,6 +54,7 @@ export function AssistantMessage({
       className="size-8 rounded-full object-cover"
       height={32}
       src="/images/logo-faenza.jpg"
+      unoptimized
       width={32}
     />
   );
