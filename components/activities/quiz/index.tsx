@@ -167,7 +167,11 @@ function QuizActivityContent({
               {quiz.currentQuestion.choices?.map(
                 (choice: { value: unknown; label: string }) => (
                   <Quiz.Choice
-                    disabled={quiz.isAnswerValidated || (quiz.selectedAnswer !== null && !quiz.config.requireConfirm)}
+                    disabled={
+                      quiz.isAnswerValidated ||
+                      (quiz.selectedAnswer !== null &&
+                        !quiz.config.requireConfirm)
+                    }
                     isCorrect={
                       quiz.isAnswerValidated &&
                       choice.value === quiz.currentQuestion?.correctAnswer

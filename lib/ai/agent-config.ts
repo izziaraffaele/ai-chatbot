@@ -21,7 +21,8 @@ export const AGENT_CONFIGS: Record<string, AgentConfig> = {
   assistente: {
     id: "assistente",
     name: "Assistente comune",
-    description: "Assistente ufficiale del Comune di Faenza per la gestione documenti",
+    description:
+      "Assistente ufficiale del Comune di Faenza per la gestione documenti",
     avatar: "🏛️",
     color: "green",
     registryId: "chatAgent",

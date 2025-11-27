@@ -123,4 +123,3 @@ Procedi con l'analisi sistematica del documento. Per ogni campo mancante:
     return new ChatSDKError("offline:chat").toResponse();
   }
 }
-

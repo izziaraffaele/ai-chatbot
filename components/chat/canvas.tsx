@@ -1,14 +1,15 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useWindowSize } from "usehooks-ts";
-import { useSidebar } from "@/components/ui/sidebar";
+import { GripVertical } from "lucide-react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 /**
  * ChatCanvas Root Container
  * Full-screen overlay for split-view layout (thread + main panel)
+ * Now uses resizable panels for adjustable column widths
  */
 export type ChatCanvasProps = React.ComponentProps<typeof motion.div> & {
   isVisible: boolean;
@@ -21,8 +22,6 @@ export function ChatCanvas({
   ...others
 }: ChatCanvasProps) {
   const isMobile = useIsMobile();
-  const { open: isSidebarOpen } = useSidebar();
-  const { width: windowWidth } = useWindowSize();
 
   return (
     <AnimatePresence>
@@ -30,29 +29,27 @@ export function ChatCanvas({
         <motion.div
           animate={{ opacity: 1 }}
           className={cn(
-            "grpup/canvas fixed top-0 left-0 z-50 flex h-dvh w-dvw flex-row bg-transparent",
+            "group/canvas fixed top-0 left-0 z-50 flex h-dvh w-dvw flex-row bg-background",
             className
           )}
           data-slot="chat-canvas"
-          exit={{ opacity: 0, transition: { delay: 0.4 } }}
-          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { delay: 0.2 } }}
+          initial={{ opacity: 0 }}
           {...others}
         >
-          {!isMobile && (
-            <motion.div
-              animate={{ width: windowWidth, right: 0 }}
-              className="fixed h-dvh bg-background"
-              exit={{
-                width: isSidebarOpen ? windowWidth - 256 : windowWidth,
-                right: 0,
-              }}
-              initial={{
-                width: isSidebarOpen ? windowWidth - 256 : windowWidth,
-                right: 0,
-              }}
-            />
+          {isMobile ? (
+            // Mobile: Stack panels vertically, no resize
+            <div className="flex h-full w-full flex-col">{children}</div>
+          ) : (
+            // Desktop: Resizable horizontal panels
+            <PanelGroup
+              autoSaveId="chat-canvas-panels"
+              className="h-full w-full"
+              direction="horizontal"
+            >
+              {children}
+            </PanelGroup>
           )}
-          {children as React.ReactNode}
         </motion.div>
       )}
     </AnimatePresence>
@@ -61,10 +58,10 @@ export function ChatCanvas({
 
 /**
  * ChatCanvasThread
- * 400px sidebar with slide-in animation
- * Shows messages alongside the main canvas content
+ * Resizable left panel for chat messages
+ * Default: 60% width, min: 30%, max: 80%
  */
-export type ChatCanvasThreadProps = React.ComponentProps<typeof motion.div> & {
+export type ChatCanvasThreadProps = React.ComponentProps<"div"> & {
   isCurrentVersion?: boolean;
 };
 
@@ -74,55 +71,67 @@ export function ChatCanvasThread({
   children,
   ...others
 }: ChatCanvasThreadProps) {
-  return (
-    <motion.div
-      animate={{
-        opacity: 1,
-        x: 0,
-        scale: 1,
-        transition: {
-          delay: 0.1,
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-        },
-      }}
-      className={cn(
-        "relative flex h-dvh w-[400px] min-w-0 shrink-0 flex-col overflow-hidden bg-muted dark:bg-background",
-        className
-      )}
-      data-slot="chat-canvas-thread"
-      exit={{
-        opacity: 0,
-        x: 0,
-        scale: 1,
-        transition: { duration: 0 },
-      }}
-      initial={{ opacity: 0, x: 10, scale: 1 }}
-      {...others}
-    >
-      <AnimatePresence>
-        {!isCurrentVersion && (
-          <motion.div
-            animate={{ opacity: 1 }}
-            className="absolute top-0 left-0 z-50 h-dvh w-[400px] bg-zinc-900/50"
-            exit={{ opacity: 0 }}
-            initial={{ opacity: 0 }}
-          />
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    // Mobile: Full width, no resize
+    return (
+      <div
+        className={cn(
+          "relative flex h-dvh w-full flex-col overflow-hidden bg-muted dark:bg-background",
+          className
         )}
-      </AnimatePresence>
-      {children as React.ReactNode}
-    </motion.div>
+        data-slot="chat-canvas-thread"
+        {...others}
+      >
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Panel
+        className={cn(
+          "relative flex h-dvh min-w-0 flex-col overflow-hidden bg-muted dark:bg-background",
+          className
+        )}
+        data-slot="chat-canvas-thread"
+        defaultSize={60}
+        maxSize={80}
+        minSize={30}
+        order={1}
+      >
+        <AnimatePresence>
+          {!isCurrentVersion && (
+            <motion.div
+              animate={{ opacity: 1 }}
+              className="absolute top-0 left-0 z-50 size-full bg-zinc-900/50"
+              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+            />
+          )}
+        </AnimatePresence>
+        {children}
+      </Panel>
+
+      {/* Resize Handle */}
+      <PanelResizeHandle className="group relative flex w-2 items-center justify-center bg-border transition-colors hover:bg-primary/20 active:bg-primary/30">
+        <div className="flex h-8 w-4 items-center justify-center rounded-sm bg-border group-hover:bg-primary/50 group-active:bg-primary">
+          <GripVertical className="size-3 text-muted-foreground group-hover:text-primary-foreground" />
+        </div>
+      </PanelResizeHandle>
+    </>
   );
 }
 
 /**
  * ChatCanvasMain
- * Main panel with expanding animation from bounding box
- * Responsive width (full on mobile, minus thread on desktop)
+ * Resizable right panel for artifact display
+ * Default: 40% width, min: 20%, max: 70%
  */
-export type ChatCanvasMainProps = React.ComponentProps<typeof motion.div> & {
-  boundingBox: {
+export type ChatCanvasMainProps = React.ComponentProps<"div"> & {
+  boundingBox?: {
     top: number;
     left: number;
     width: number;
@@ -137,56 +146,46 @@ export function ChatCanvasMain({
   ...others
 }: ChatCanvasMainProps) {
   const isMobile = useIsMobile();
-  const { width: windowWidth, height: windowHeight } = useWindowSize();
+
+  if (isMobile) {
+    // Mobile: Full width panel
+    return (
+      <div
+        className={cn(
+          "flex h-dvh w-full flex-col overflow-y-auto bg-background dark:bg-muted",
+          className
+        )}
+        data-slot="chat-canvas-main"
+        {...others}
+      >
+        {children}
+      </div>
+    );
+  }
 
   return (
-    <motion.div
-      animate={{
-        opacity: 1,
-        x: 0,
-        y: 0,
-        height: windowHeight,
-        width: windowWidth || "calc(100dvw)",
-        borderRadius: 0,
-        transition: {
-          delay: 0,
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-          duration: 0.8,
-        },
-        ...(!isMobile && {
-          x: 400,
-          width: windowWidth ? windowWidth - 400 : "calc(100dvw-400px)",
-        }),
-      }}
+    <Panel
       className={cn(
-        "fixed flex h-dvh flex-col overflow-y-scroll border-zinc-200 bg-background md:border-l dark:border-zinc-700 dark:bg-muted",
+        "flex h-dvh min-w-0 flex-col overflow-y-auto border-zinc-200 bg-background md:border-l dark:border-zinc-700 dark:bg-muted",
         className
       )}
       data-slot="chat-canvas-main"
-      exit={{
-        opacity: 0,
-        scale: 0.5,
-        transition: {
-          delay: 0.1,
-          type: "spring",
-          stiffness: 600,
-          damping: 30,
-        },
-      }}
-      initial={{
-        opacity: 1,
-        x: boundingBox.left,
-        y: boundingBox.top,
-        height: boundingBox.height,
-        width: boundingBox.width,
-        borderRadius: 50,
-      }}
+      defaultSize={40}
+      maxSize={70}
+      minSize={20}
+      order={2}
       {...others}
     >
-      {children}
-    </motion.div>
+      <motion.div
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex h-full w-full flex-col"
+        exit={{ opacity: 0, scale: 0.98 }}
+        initial={{ opacity: 0, scale: 0.98 }}
+        transition={{ duration: 0.2 }}
+      >
+        {children}
+      </motion.div>
+    </Panel>
   );
 }
 

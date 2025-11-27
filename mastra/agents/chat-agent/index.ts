@@ -3,8 +3,8 @@ import { LibSQLStore } from "@mastra/libsql";
 import { Memory } from "@mastra/memory";
 import { mastraTools } from "../../tools";
 import { getGeoHints, getRuntimeConfig } from "../../utils/runtime-utils";
-import { chatAgentSystemPrompt } from "./system-prompt";
 import { invoiceAnalyzerAgent } from "../invoice-analyzer-agent";
+import { chatAgentSystemPrompt } from "./system-prompt";
 /**
  * Assistente Comune di Faenza
  *
@@ -35,7 +35,7 @@ export const chatAgent = new Agent({
     return prompt;
   },
   model: "google/gemini-2.5-flash",
-  agents: {invoiceAnalyzerAgent},
+  agents: { invoiceAnalyzerAgent },
   tools: {
     createDocument: mastraTools.createDocument,
     updateDocument: mastraTools.updateDocument,

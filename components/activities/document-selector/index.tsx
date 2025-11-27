@@ -1,18 +1,18 @@
 "use client";
 
 import {
-  FileText,
-  Search,
-  SlidersHorizontal,
-  LayoutGrid,
-  List,
   CheckCircle2,
   Files,
+  FileText,
+  LayoutGrid,
+  List,
+  Search,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useChatRuntime } from "@/components/chat/context";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import type { UIDocumentSelectorActivity, DocumentStatus } from "./schema";
+import type { DocumentStatus, UIDocumentSelectorActivity } from "./schema";
 
 /**
  * DocumentSelectorActivity Props
@@ -33,7 +33,9 @@ export type DocumentSelectorActivityProps = {
 
 /** Format bytes to human readable size */
 function formatFileSize(bytes?: number): string {
-  if (!bytes) return "--";
+  if (!bytes) {
+    return "--";
+  }
   const units = ["B", "KB", "MB", "GB"];
   let size = bytes;
   let unitIndex = 0;
@@ -46,7 +48,9 @@ function formatFileSize(bytes?: number): string {
 
 /** Format date to display format */
 function formatDate(dateStr?: string): string {
-  if (!dateStr) return "--";
+  if (!dateStr) {
+    return "--";
+  }
   try {
     const date = new Date(dateStr);
     return date.toLocaleDateString("it-IT", {
@@ -150,12 +154,12 @@ export function DocumentSelectorActivity({
       data-slot="document-selector-activity"
     >
       {/* Header */}
-      <div className="flex flex-col gap-4 border-b border-border px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 border-border border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="font-semibold text-foreground text-lg">
             {activity.title || "Documenti Disponibili"}
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Gestisci e visualizza tutti i tuoi documenti
           </p>
         </div>
@@ -172,29 +176,29 @@ export function DocumentSelectorActivity({
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col gap-3 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-border border-b px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative max-w-md flex-1">
+          <Search className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
           <Input
             className="pl-9"
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cerca documenti..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
         {/* Filters */}
         <div className="flex items-center gap-2">
           <button
-            type="button"
             className="flex size-9 items-center justify-center rounded-md border border-input bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             title="Filtri"
+            type="button"
           >
             <SlidersHorizontal className="size-4" />
           </button>
 
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select onValueChange={setStatusFilter} value={statusFilter}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Tutti gli stati" />
             </SelectTrigger>
@@ -209,7 +213,6 @@ export function DocumentSelectorActivity({
           {/* View Toggle */}
           <div className="flex rounded-md border border-input">
             <button
-              type="button"
               className={cn(
                 "flex size-9 items-center justify-center rounded-l-md transition-colors",
                 viewMode === "grid"
@@ -218,19 +221,20 @@ export function DocumentSelectorActivity({
               )}
               onClick={() => setViewMode("grid")}
               title="Vista griglia"
+              type="button"
             >
               <LayoutGrid className="size-4" />
             </button>
             <button
-              type="button"
               className={cn(
-                "flex size-9 items-center justify-center rounded-r-md border-l border-input transition-colors",
+                "flex size-9 items-center justify-center rounded-r-md border-input border-l transition-colors",
                 viewMode === "list"
                   ? "bg-primary text-primary-foreground"
                   : "bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )}
               onClick={() => setViewMode("list")}
               title="Vista lista"
+              type="button"
             >
               <List className="size-4" />
             </button>
@@ -254,35 +258,35 @@ export function DocumentSelectorActivity({
           if (viewMode === "list") {
             return (
               <button
-                key={doc.fileId}
-                type="button"
-                onClick={() => handleDocumentSelect(doc.fileId)}
-                disabled={isSelected}
                 className={cn(
                   "flex items-center gap-4 rounded-lg border border-border bg-card p-3 text-left transition-all hover:bg-accent/50 hover:shadow-sm",
-                  isSelected && "ring-2 ring-primary bg-accent/30"
+                  isSelected && "bg-accent/30 ring-2 ring-primary"
                 )}
+                disabled={isSelected}
+                key={doc.fileId}
+                onClick={() => handleDocumentSelect(doc.fileId)}
+                type="button"
               >
                 <div className="flex size-10 items-center justify-center rounded-lg bg-blue-50 text-blue-500 dark:bg-blue-950 dark:text-blue-400">
                   <FileText className="size-5" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium text-sm">
                     {doc.displayName}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="truncate text-muted-foreground text-xs">
                     {doc.code}
                   </p>
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-muted-foreground text-xs">
                   {formatFileSize(doc.size)}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-muted-foreground text-xs">
                   {formatDate(doc.date)}
                 </div>
                 <Badge
-                  variant="outline"
                   className={cn("text-xs", statusConfig.className)}
+                  variant="outline"
                 >
                   {statusConfig.label}
                 </Badge>
@@ -292,32 +296,32 @@ export function DocumentSelectorActivity({
 
           return (
             <button
-              key={doc.fileId}
-              type="button"
-              onClick={() => handleDocumentSelect(doc.fileId)}
-              disabled={isSelected}
               className={cn(
                 "flex flex-col rounded-xl border border-border bg-card p-4 text-left transition-all hover:bg-accent/50 hover:shadow-md",
-                isSelected && "ring-2 ring-primary bg-accent/30"
+                isSelected && "bg-accent/30 ring-2 ring-primary"
               )}
+              disabled={isSelected}
+              key={doc.fileId}
+              onClick={() => handleDocumentSelect(doc.fileId)}
+              type="button"
             >
               {/* Card Header */}
               <div className="flex items-start gap-3">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500 dark:bg-blue-950 dark:text-blue-400">
                   <FileText className="size-5" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate leading-tight">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold text-sm leading-tight">
                     {doc.displayName}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                  <p className="mt-0.5 truncate text-muted-foreground text-xs">
                     {doc.code}
                   </p>
                 </div>
               </div>
 
               {/* Card Metadata */}
-              <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="mt-3 flex items-center gap-2 text-muted-foreground text-xs">
                 <span>{formatFileSize(doc.size)}</span>
                 <span>•</span>
                 <span>{formatDate(doc.date)}</span>
@@ -326,11 +330,8 @@ export function DocumentSelectorActivity({
               {/* Status Badge */}
               <div className="mt-3">
                 <Badge
+                  className={cn("font-medium text-xs", statusConfig.className)}
                   variant="outline"
-                  className={cn(
-                    "text-xs font-medium",
-                    statusConfig.className
-                  )}
                 >
                   ✓ {statusConfig.label}
                 </Badge>
@@ -342,18 +343,17 @@ export function DocumentSelectorActivity({
 
       {/* Empty filtered state */}
       {filteredDocuments.length === 0 && documents.length > 0 && (
-        <div className="px-6 pb-6 text-center text-sm text-muted-foreground">
+        <div className="px-6 pb-6 text-center text-muted-foreground text-sm">
           Nessun documento trovato con i filtri applicati
         </div>
       )}
 
       {/* Loading indicator */}
       {selectedId && (
-        <div className="border-t border-border px-6 py-3 text-sm text-muted-foreground">
+        <div className="border-border border-t px-6 py-3 text-muted-foreground text-sm">
           Caricamento documento in corso...
         </div>
       )}
     </div>
   );
 }
-

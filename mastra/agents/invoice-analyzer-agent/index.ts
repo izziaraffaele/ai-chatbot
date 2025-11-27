@@ -72,4 +72,3 @@ export const invoiceAnalyzerAgent = new Agent({
   model: "google/gemini-2.5-flash",
   tools: invoiceValidationTools,
 });
-

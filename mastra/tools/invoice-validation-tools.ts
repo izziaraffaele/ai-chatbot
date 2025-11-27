@@ -14,9 +14,9 @@ import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 import {
   isValidCIG,
-  isValidCUP,
-  isValidCodiceFiscale,
   isValidCodiceDestinatario,
+  isValidCodiceFiscale,
+  isValidCUP,
   isValidIBAN,
 } from "../utils/knowledge-base-loader";
 
@@ -71,7 +71,7 @@ Use this tool after extracting a potential IBAN from the invoice XML.`,
       .describe("The XML path/location where this value was found"),
   }),
   outputSchema: validationOutputSchema,
-  execute: async ({ context }) => {
+  execute: ({ context }) => {
     const { value, xmlLocation } = context;
     const cleaned = cleanValue(value);
     const isValid = isValidIBAN(value);
@@ -106,7 +106,7 @@ Use this tool after extracting a potential CIG from the invoice XML.`,
       .describe("The XML path/location where this value was found"),
   }),
   outputSchema: validationOutputSchema,
-  execute: async ({ context }) => {
+  execute: ({ context }) => {
     const { value, xmlLocation } = context;
     const cleaned = cleanValue(value);
     const isValid = isValidCIG(value);
@@ -141,7 +141,7 @@ Use this tool after extracting a potential CUP from the invoice XML.`,
       .describe("The XML path/location where this value was found"),
   }),
   outputSchema: validationOutputSchema,
-  execute: async ({ context }) => {
+  execute: ({ context }) => {
     const { value, xmlLocation } = context;
     const cleaned = cleanValue(value);
     const isValid = isValidCUP(value);
@@ -173,14 +173,16 @@ Codice Fiscale can be:
 - For individuals: 16 alphanumeric characters (SSSSSS00A00A000A pattern)
 Use this tool after extracting a potential Codice Fiscale from the invoice XML.`,
   inputSchema: z.object({
-    value: z.string().describe("The extracted Codice Fiscale value to validate"),
+    value: z
+      .string()
+      .describe("The extracted Codice Fiscale value to validate"),
     xmlLocation: z
       .string()
       .optional()
       .describe("The XML path/location where this value was found"),
   }),
   outputSchema: validationOutputSchema,
-  execute: async ({ context }) => {
+  execute: ({ context }) => {
     const { value, xmlLocation } = context;
     const cleaned = cleanValue(value);
     const isValid = isValidCodiceFiscale(value);
@@ -215,7 +217,7 @@ Use this tool after extracting a potential PA code from the invoice XML.`,
       .describe("The XML path/location where this value was found"),
   }),
   outputSchema: validationOutputSchema,
-  execute: async ({ context }) => {
+  execute: ({ context }) => {
     const { value, xmlLocation } = context;
     const cleaned = cleanValue(value);
     const isValid = isValidCodiceDestinatario(value);
@@ -251,4 +253,3 @@ export const invoiceValidationTools = {
  * Type for the validation tools map
  */
 export type InvoiceValidationTools = typeof invoiceValidationTools;
-

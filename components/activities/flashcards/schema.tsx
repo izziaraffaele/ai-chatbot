@@ -58,9 +58,8 @@ export function toUIFlashcardActivity({
   ...source
 }: ModelFlashcardActivity): UIFlashcardActivity {
   // Filter out incomplete items during streaming
-  const validItems = (payload || []).filter(
-    (item): item is ModelFlashcard =>
-      Boolean(item?.id && item?.front && item?.back)
+  const validItems = (payload || []).filter((item): item is ModelFlashcard =>
+    Boolean(item?.id && item?.front && item?.back)
   );
 
   return {

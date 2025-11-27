@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import { useChatRuntime } from "@/components/chat/context";
 import { useChatVotes } from "@/hooks/use-chat-votes";
 import type { Vote } from "@/lib/db/schema";
@@ -42,6 +42,11 @@ export type MessageIteratorProps = {
   empty?: React.ReactNode;
   displayUser?: { displayName?: string; avatar?: React.ReactNode };
   displayAssistant?: { displayName?: string; avatar?: React.ReactNode };
+  /**
+   * Optional prefix to add to message keys to avoid duplicate key warnings
+   * when the same messages are rendered in multiple places (e.g., main thread and canvas)
+   */
+  keyPrefix?: string;
   children: (props: MessageIteratorRenderProps) => React.ReactNode;
 };
 
@@ -54,20 +59,31 @@ export function MessageIterator({
   children: renderMessage,
   displayUser,
   displayAssistant,
+  keyPrefix = "",
 }: MessageIteratorProps) {
   const runtime = useChatRuntime();
   const { id: chatId, messages, status } = useChat({ chat: runtime.chat });
   const { value: votes, voteMessage } = useChatVotes({ chatId });
 
-  const senders: Record<
-    string,
-    { displayName?: string; avatar?: React.ReactNode } | undefined
-  > = { user: displayUser, assistant: displayAssistant };
+  // Memoize senders to prevent unnecessary re-renders of message components
+  const senders = useMemo<
+    Record<
+      string,
+      { displayName?: string; avatar?: React.ReactNode } | undefined
+    >
+  >(
+    () => ({ user: displayUser, assistant: displayAssistant }),
+    [displayUser, displayAssistant]
+  );
 
   // Show empty state if no messages
   if (messages.length === 0) {
     return <>{empty}</>;
   }
+
+  // Build the key with optional prefix to avoid duplicates when rendered in multiple places
+  const getMessageKey = (messageId: string) =>
+    keyPrefix ? `${keyPrefix}-${messageId}` : messageId;
 
   // Render messages
   return (
@@ -78,7 +94,7 @@ export function MessageIterator({
         const isLastMessage = index === messages.length - 1;
 
         return (
-          <Fragment key={message.id}>
+          <Fragment key={getMessageKey(message.id)}>
             {renderMessage({
               message,
               isLastMessage,

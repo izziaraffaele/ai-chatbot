@@ -162,4 +162,3 @@ Procedi con l'analisi del documento XML fornito.`);
 
   return sections.join("\n\n");
 }
-

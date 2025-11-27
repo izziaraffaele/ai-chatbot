@@ -1,0 +1,1316 @@
+"use client";
+
+import {
+  ArrowLeft,
+  Building2,
+  CheckCircle2,
+  CreditCard,
+  Files,
+  FileText,
+  Hash,
+  LayoutGrid,
+  List,
+  MapPin,
+  Package,
+  Receipt,
+  Search,
+  Sparkles,
+  User,
+  XCircle,
+} from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import {
+  ChatArtifact,
+  ChatArtifactBody,
+  ChatArtifactHeader,
+} from "@/components/chat/artifact";
+import { useChatRuntime } from "@/components/chat/context";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useArtifact } from "@/hooks/use-artifact";
+import { cn } from "@/lib/utils";
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+/**
+ * File validation info - matches the type from load-invoice tool
+ */
+export type FileValidation = {
+  fileId: string;
+  fatturaValida: boolean;
+  campiMancanti: string[];
+  campiNonValidi: string[];
+};
+
+/**
+ * Invoice metadata from the knowledge base
+ */
+type InvoiceMetadata = {
+  fileId: string;
+  fileName: string;
+  supplier?: string;
+  supplierVatId?: string;
+  buyer?: string;
+  buyerVatId?: string;
+  date?: string;
+  invoiceNumber?: string;
+  documentType?: string;
+  totalAmount?: number;
+  currency?: string;
+};
+
+/**
+ * Invoice validation result
+ */
+type InvoiceValidationResult = {
+  iban: string | null;
+  cig: string | null;
+  cup: string | null;
+  codiceFornitore: string | null;
+  importoSpesa: number | null;
+  descrizioneSpesa: string | null;
+  codicePA: string | null;
+  codiceFiscale: string | null;
+  fatturaValida: boolean;
+  campiMancanti: string[];
+  campiNonValidi: string[];
+};
+
+/**
+ * Full invoice data loaded from API
+ */
+type InvoiceData = {
+  metadata: InvoiceMetadata;
+  content: string;
+  validation: InvoiceValidationResult;
+};
+
+/**
+ * View mode for the artifact
+ */
+type ViewMode = "list" | "detail";
+
+/**
+ * Status of an extracted field for color coding
+ */
+type FieldStatus = "valid" | "invalid_format" | "missing";
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+// Regex patterns extracted to top-level to avoid recreation on every render
+const VAT_MATCH_REGEX = /IT\d+/;
+const FILE_ID_PARTS_REGEX = /\[([^\]]+)\]/;
+
+export const DOCUMENT_SELECTOR_KIND = "document-selector" as const;
+
+export type DocumentSelectorArtifactKind = typeof DOCUMENT_SELECTOR_KIND;
+
+export const isDocumentSelectorArtifact = (
+  kind: string
+): kind is DocumentSelectorArtifactKind => kind === DOCUMENT_SELECTOR_KIND;
+
+export type DocumentSelectorUIArtifact = {
+  title: string;
+  documentId: string;
+  kind: DocumentSelectorArtifactKind;
+  content: FileValidation[];
+  isVisible: boolean;
+  status: "streaming" | "idle";
+  boundingBox: {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  };
+};
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+function getDisplayName(fileId: string): string {
+  const vatMatch = fileId.match(VAT_MATCH_REGEX);
+  if (vatMatch) {
+    return vatMatch[0];
+  }
+  const parts = fileId.split("_");
+  if (parts.length > 1) {
+    return parts.slice(0, 2).join("_");
+  }
+  return fileId.slice(0, 20);
+}
+
+function getCodeFromFileId(fileId: string): string {
+  const bracketMatch = fileId.match(FILE_ID_PARTS_REGEX);
+  if (bracketMatch) {
+    return `A-[${bracketMatch[1]}]`;
+  }
+  return fileId.slice(-12);
+}
+
+/**
+ * Mapping from UI field keys to the exact validation field name patterns.
+ * Keys are the UI field identifiers, values are regex patterns that match
+ * the human-readable Italian field names from campiMancanti/campiNonValidi.
+ */
+const FIELD_NAME_PATTERNS: Record<string, RegExp> = {
+  iban: /^IBAN$/i,
+  cig: /^CIG\b/i, // "CIG" or "CIG (Codice..."
+  cup: /^CUP\b/i, // "CUP" or "CUP (Codice..."
+  importo: /^Importo\s+Spesa$/i,
+  descrizione: /^Descrizione\s+Spesa$/i,
+  codicefornitore: /^Codice\s+Fornitore/i,
+  codicefiscale: /^Codice\s+Fiscale/i,
+  codicepa: /^Codice\s+Destinatario\s+PA$/i,
+};
+
+/**
+ * Determines the status of a field based on validation data
+ */
+function getFieldStatus(
+  fieldName: string,
+  value: string | number | null | undefined,
+  campiMancanti: string[],
+  campiNonValidi: string[]
+): FieldStatus {
+  // Get the pattern for this field, or create a fallback exact-match pattern
+  const pattern =
+    FIELD_NAME_PATTERNS[fieldName.toLowerCase()] ??
+    new RegExp(`^${fieldName}$`, "i");
+
+  // Check if field is in missing fields list using pattern matching
+  if (campiMancanti.some((f) => pattern.test(f))) {
+    return "missing";
+  }
+  // Check if field is in invalid format list using pattern matching
+  if (campiNonValidi.some((f) => pattern.test(f))) {
+    return "invalid_format";
+  }
+  // If value exists and not in invalid lists, it's valid
+  if (value !== null && value !== undefined && value !== "") {
+    return "valid";
+  }
+  // Default to missing if no value
+  return "missing";
+}
+
+/**
+ * Get styles for field status
+ */
+function getFieldStatusStyles(status: FieldStatus) {
+  switch (status) {
+    case "valid":
+      return {
+        bg: "bg-emerald-50 dark:bg-emerald-950/50",
+        border: "border-emerald-200 dark:border-emerald-800",
+        label: "text-emerald-700 dark:text-emerald-400",
+        value: "text-emerald-900 dark:text-emerald-100",
+      };
+    case "invalid_format":
+      return {
+        bg: "bg-amber-50 dark:bg-amber-950/50",
+        border: "border-amber-200 dark:border-amber-800",
+        label: "text-amber-700 dark:text-amber-400",
+        value: "text-amber-900 dark:text-amber-100",
+      };
+    default:
+      return {
+        bg: "bg-red-50 dark:bg-red-950/50",
+        border: "border-red-200 dark:border-red-800",
+        label: "text-red-700 dark:text-red-400",
+        value: "text-red-900 dark:text-red-100",
+      };
+  }
+}
+
+// ============================================================================
+// COMPONENTS
+// ============================================================================
+
+export type DocumentSelectorArtifactProps = {
+  className?: string;
+};
+
+/**
+ * DocumentSelectorArtifact
+ * Displays available documents in a side panel with search, filters, and validation status.
+ * When a document is clicked, switches to a detail view showing extracted data and original invoice.
+ */
+export function DocumentSelectorArtifact({
+  className,
+}: DocumentSelectorArtifactProps) {
+  const { chat } = useChatRuntime();
+  const { artifact, setArtifact } = useArtifact<DocumentSelectorUIArtifact>();
+
+  // View state
+  const [panelViewMode, setPanelViewMode] = useState<ViewMode>("list");
+  const [listViewMode, setListViewMode] = useState<"grid" | "list">("grid");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Selected document data
+  const [selectedDocument, setSelectedDocument] = useState<InvoiceData | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Get files from artifact content
+  const filesWithValidation = useMemo(() => {
+    if (!artifact.content || !Array.isArray(artifact.content)) {
+      return [];
+    }
+    return artifact.content as FileValidation[];
+  }, [artifact.content]);
+
+  // Filter files by search query
+  const filteredFiles = useMemo(() => {
+    if (!searchQuery) {
+      return filesWithValidation;
+    }
+    const query = searchQuery.toLowerCase();
+    return filesWithValidation.filter(
+      (f) =>
+        f.fileId.toLowerCase().includes(query) ||
+        getDisplayName(f.fileId).toLowerCase().includes(query)
+    );
+  }, [filesWithValidation, searchQuery]);
+
+  // Calculate stats
+  const validCount = useMemo(
+    () => filesWithValidation.filter((f) => f.fatturaValida).length,
+    [filesWithValidation]
+  );
+  const invalidCount = filesWithValidation.length - validCount;
+
+  // Handle close
+  const handleClose = useCallback(() => {
+    setArtifact((current) => ({
+      ...current,
+      isVisible: false,
+    }));
+  }, [setArtifact]);
+
+  // Handle document selection - loads invoice data first, then switches to detail view and sends chat message
+  const handleDocumentSelect = useCallback(
+    async (fileId: string) => {
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        // Fetch invoice data first to ensure it's available before committing to UI changes
+        const response = await fetch(
+          `/api/invoice?fileId=${encodeURIComponent(fileId)}`
+        );
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(
+            error.message || "Errore nel caricamento del documento"
+          );
+        }
+
+        const data = await response.json();
+
+        // Only proceed with UI updates and chat message if fetch succeeded
+        setSelectedDocument(data);
+        setPanelViewMode("detail");
+
+        // Send message to chat so the AI can analyze the document
+        // This triggers the loadInvoice tool and shows the "Analizza Fattura" button for invalid invoices
+        chat.sendMessage({
+          role: "user",
+          parts: [{ type: "text", text: `Carica il documento ${fileId}` }],
+        });
+      } catch (error) {
+        setLoadError(
+          error instanceof Error ? error.message : "Errore sconosciuto"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [chat]
+  );
+
+  // Handle back to list
+  const handleBackToList = useCallback(() => {
+    setPanelViewMode("list");
+    setSelectedDocument(null);
+    setLoadError(null);
+  }, []);
+
+  // Render based on view mode
+  if (panelViewMode === "detail" && selectedDocument) {
+    return (
+      <InvoiceDetailView
+        className={className}
+        invoiceData={selectedDocument}
+        onBack={handleBackToList}
+        onClose={handleClose}
+      />
+    );
+  }
+
+  return (
+    <ChatArtifact className={cn("h-full rounded-none border-none", className)}>
+      <ChatArtifactHeader
+        actions={
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-4" />
+              <span className="font-medium">{validCount} valide</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+              <XCircle className="size-4" />
+              <span className="font-medium">{invalidCount} non valide</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Files className="size-4" />
+              <span className="font-medium">
+                {filesWithValidation.length} totali
+              </span>
+            </div>
+          </div>
+        }
+        onClose={handleClose}
+        subtitle="Seleziona un documento per visualizzarlo"
+        title={artifact.title || "Documenti Disponibili"}
+      />
+
+      <ChatArtifactBody>
+        <div className="flex h-full flex-col">
+          {/* Search and View Toggle */}
+          <div className="flex flex-col gap-3 border-border border-b px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative max-w-md flex-1">
+              <Search className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cerca documenti..."
+                value={searchQuery}
+              />
+            </div>
+
+            {/* View Toggle */}
+            <div className="flex rounded-md border border-input">
+              <button
+                className={cn(
+                  "flex size-9 items-center justify-center rounded-l-md transition-colors",
+                  listViewMode === "grid"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+                onClick={() => setListViewMode("grid")}
+                title="Vista griglia"
+                type="button"
+              >
+                <LayoutGrid className="size-4" />
+              </button>
+              <button
+                className={cn(
+                  "flex size-9 items-center justify-center rounded-r-md border-input border-l transition-colors",
+                  listViewMode === "list"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+                onClick={() => setListViewMode("list")}
+                title="Vista lista"
+                type="button"
+              >
+                <List className="size-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex items-center justify-center p-8">
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <div
+                  aria-hidden="true"
+                  className="size-5 animate-spin rounded-full border-2 border-current border-t-transparent"
+                />
+                <output>Caricamento documento...</output>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {loadError && (
+            <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+              {loadError}
+            </div>
+          )}
+
+          {/* Document Grid/List */}
+          {!isLoading && (
+            <div
+              className={cn(
+                "flex-1 overflow-y-auto p-4",
+                listViewMode === "grid"
+                  ? "grid auto-rows-min grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                  : "flex flex-col gap-2"
+              )}
+            >
+              {filteredFiles.map((file) => {
+                const displayName = getDisplayName(file.fileId);
+                const code = getCodeFromFileId(file.fileId);
+                const isValid = file.fatturaValida;
+
+                if (listViewMode === "list") {
+                  return (
+                    <button
+                      className="flex items-center gap-4 rounded-lg border border-border bg-card p-3 text-left transition-all hover:bg-accent/50 hover:shadow-sm"
+                      key={file.fileId}
+                      onClick={() => handleDocumentSelect(file.fileId)}
+                      type="button"
+                    >
+                      <div
+                        className={cn(
+                          "flex size-10 items-center justify-center rounded-lg",
+                          isValid
+                            ? "bg-blue-50 text-blue-500 dark:bg-blue-950 dark:text-blue-400"
+                            : "bg-red-50 text-red-500 dark:bg-red-950 dark:text-red-400"
+                        )}
+                      >
+                        <FileText className="size-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-sm">
+                          {displayName}
+                        </p>
+                        <p className="truncate text-muted-foreground text-xs">
+                          {code}
+                        </p>
+                      </div>
+                      <ValidationBadge isValid={isValid} />
+                    </button>
+                  );
+                }
+
+                return (
+                  <button
+                    className="flex flex-col rounded-xl border border-border bg-card p-4 text-left transition-all hover:bg-accent/50 hover:shadow-md"
+                    key={file.fileId}
+                    onClick={() => handleDocumentSelect(file.fileId)}
+                    type="button"
+                  >
+                    {/* Card Header */}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={cn(
+                          "flex size-11 shrink-0 items-center justify-center rounded-lg",
+                          isValid
+                            ? "bg-blue-50 text-blue-500 dark:bg-blue-950 dark:text-blue-400"
+                            : "bg-red-50 text-red-500 dark:bg-red-950 dark:text-red-400"
+                        )}
+                      >
+                        <FileText className="size-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-sm leading-tight">
+                          {displayName}
+                        </p>
+                        <p className="mt-0.5 truncate text-muted-foreground text-xs">
+                          {code}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div className="mt-3">
+                      <ValidationBadge isValid={isValid} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Empty filtered state */}
+          {filteredFiles.length === 0 &&
+            filesWithValidation.length > 0 &&
+            !isLoading && (
+              <div className="px-6 pb-6 text-center text-muted-foreground text-sm">
+                Nessun documento trovato con i filtri applicati
+              </div>
+            )}
+        </div>
+      </ChatArtifactBody>
+    </ChatArtifact>
+  );
+}
+
+// ============================================================================
+// VALIDATION BADGE
+// ============================================================================
+
+function ValidationBadge({ isValid }: { isValid: boolean }) {
+  if (isValid) {
+    return (
+      <Badge
+        aria-label="Stato: Fattura valida"
+        className="border-emerald-200 bg-emerald-50 font-medium text-emerald-700 text-xs dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+        variant="outline"
+      >
+        ✓ Fattura valida
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge
+      aria-label="Stato: Fattura non valida"
+      className="border-red-200 bg-red-50 font-medium text-red-700 text-xs dark:border-red-800 dark:bg-red-950 dark:text-red-300"
+      variant="outline"
+    >
+      ✗ Fattura non valida
+    </Badge>
+  );
+}
+
+// ============================================================================
+// EXTRACTED DATA CARD
+// ============================================================================
+
+type ExtractedDataCardProps = {
+  label: string;
+  value: string | number | null | undefined;
+  status: FieldStatus;
+  editable?: boolean;
+  onValueChange?: (newValue: string) => void;
+};
+
+function ExtractedDataCard({
+  label,
+  value,
+  status,
+  editable = false,
+  onValueChange,
+}: ExtractedDataCardProps) {
+  const styles = getFieldStatusStyles(status);
+  const displayValue =
+    value !== null && value !== undefined ? String(value) : "N/A";
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(displayValue);
+
+  const handleSave = () => {
+    onValueChange?.(editValue);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditValue(displayValue);
+    setIsEditing(false);
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col rounded-lg border p-3 transition-all",
+        styles.bg,
+        styles.border
+      )}
+    >
+      <span
+        className={cn(
+          "font-medium text-xs uppercase tracking-wide",
+          styles.label
+        )}
+      >
+        {label}
+      </span>
+      {isEditing ? (
+        <div className="mt-1 flex items-center gap-2">
+          <Input
+            autoFocus
+            className="h-7 text-sm"
+            onChange={(e) => setEditValue(e.target.value)}
+            value={editValue}
+          />
+          <Button
+            className="h-7 px-2"
+            onClick={handleSave}
+            size="sm"
+            variant="ghost"
+          >
+            ✓
+          </Button>
+          <Button
+            className="h-7 px-2"
+            onClick={handleCancel}
+            size="sm"
+            variant="ghost"
+          >
+            ✗
+          </Button>
+        </div>
+      ) : (
+        <div className="mt-1 flex items-center justify-between gap-2">
+          <span className={cn("truncate font-semibold text-sm", styles.value)}>
+            {displayValue}
+          </span>
+          {editable && (
+            <Button
+              className="h-6 px-2 text-xs opacity-60 hover:opacity-100"
+              onClick={() => setIsEditing(true)}
+              size="sm"
+              variant="ghost"
+            >
+              Modifica
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// INVOICE DETAIL VIEW
+// ============================================================================
+
+type InvoiceDetailViewProps = {
+  className?: string;
+  invoiceData: InvoiceData;
+  onBack: () => void;
+  onClose: () => void;
+};
+
+function InvoiceDetailView({
+  className,
+  invoiceData,
+  onBack,
+  onClose,
+}: InvoiceDetailViewProps) {
+  const { metadata, validation } = invoiceData;
+
+  // Local state for editable fields
+  const [editedFields, setEditedFields] = useState<Record<string, string>>({});
+
+  const handleFieldChange = (fieldName: string, value: string) => {
+    setEditedFields((prev) => ({ ...prev, [fieldName]: value }));
+  };
+
+  const getFieldValue = (
+    fieldName: string,
+    originalValue: string | number | null | undefined
+  ) => {
+    return editedFields[fieldName] ?? originalValue;
+  };
+
+  // Format currency
+  const formatCurrency = (
+    amount: number | null | undefined,
+    currency = "EUR"
+  ) => {
+    if (amount === null || amount === undefined) {
+      return null;
+    }
+    return `${amount.toLocaleString("it-IT", { minimumFractionDigits: 2 })} ${currency === "EUR" ? "€" : currency}`;
+  };
+
+  return (
+    <ChatArtifact className={cn("h-full rounded-none border-none", className)}>
+      {/* Header with Back Button */}
+      <div className="flex items-center gap-3 border-border border-b px-4 py-3">
+        <Button className="gap-2" onClick={onBack} size="sm" variant="ghost">
+          <ArrowLeft className="size-4" />
+          Indietro
+        </Button>
+        <div className="flex-1">
+          <h2 className="font-semibold text-sm">Dettaglio Documento</h2>
+          <p className="text-muted-foreground text-xs">{metadata.fileName}</p>
+        </div>
+        <ValidationBadge isValid={validation.fatturaValida} />
+        <Button
+          className="size-8"
+          onClick={onClose}
+          size="icon"
+          variant="ghost"
+        >
+          <XCircle className="size-4" />
+        </Button>
+      </div>
+
+      <ChatArtifactBody>
+        <div className="flex h-full flex-col overflow-y-auto">
+          {/* Extracted Data Section */}
+          <div className="border-border border-b bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-5 dark:from-emerald-950/30 dark:to-teal-950/30">
+            <div className="mb-4 flex items-center gap-2">
+              <Sparkles className="size-5 text-emerald-600 dark:text-emerald-400" />
+              <h3 className="font-semibold text-emerald-800 dark:text-emerald-200">
+                Dati estratti dall'AI
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <ExtractedDataCard
+                editable
+                label="IBAN"
+                onValueChange={(v) => handleFieldChange("iban", v)}
+                status={getFieldStatus(
+                  "iban",
+                  validation.iban,
+                  validation.campiMancanti,
+                  validation.campiNonValidi
+                )}
+                value={getFieldValue("iban", validation.iban)}
+              />
+              <ExtractedDataCard
+                editable
+                label="Costo Totale"
+                onValueChange={(v) => handleFieldChange("importoSpesa", v)}
+                status={getFieldStatus(
+                  "importo",
+                  validation.importoSpesa,
+                  validation.campiMancanti,
+                  validation.campiNonValidi
+                )}
+                value={formatCurrency(
+                  validation.importoSpesa,
+                  metadata.currency
+                )}
+              />
+              <ExtractedDataCard
+                editable
+                label="CIG"
+                onValueChange={(v) => handleFieldChange("cig", v)}
+                status={getFieldStatus(
+                  "cig",
+                  validation.cig,
+                  validation.campiMancanti,
+                  validation.campiNonValidi
+                )}
+                value={getFieldValue("cig", validation.cig)}
+              />
+              <ExtractedDataCard
+                editable
+                label="CUP"
+                onValueChange={(v) => handleFieldChange("cup", v)}
+                status={getFieldStatus(
+                  "cup",
+                  validation.cup,
+                  validation.campiMancanti,
+                  validation.campiNonValidi
+                )}
+                value={getFieldValue("cup", validation.cup)}
+              />
+            </div>
+          </div>
+
+          {/* Original Invoice Section */}
+          <div className="flex-1 px-6 py-5">
+            <div className="mb-4 flex items-center gap-2">
+              <FileText className="size-5 text-muted-foreground" />
+              <h3 className="font-semibold text-foreground">
+                Fattura originale
+              </h3>
+            </div>
+
+            <ParsedInvoiceRenderer
+              content={invoiceData.content}
+              metadata={metadata}
+              validation={validation}
+            />
+          </div>
+        </div>
+      </ChatArtifactBody>
+    </ChatArtifact>
+  );
+}
+
+// ============================================================================
+// PARSED INVOICE RENDERER
+// ============================================================================
+
+import { parseInvoice } from "@/lib/invoice-parser";
+
+type ParsedInvoiceRendererProps = {
+  metadata: InvoiceMetadata;
+  validation: InvoiceValidationResult;
+  content: string;
+};
+
+function ParsedInvoiceRenderer({
+  metadata,
+  validation,
+  content,
+}: ParsedInvoiceRendererProps) {
+  // Parse additional data from XML content
+  const parsedData = useMemo(() => parseInvoice(content), [content]);
+
+  // Format date
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) {
+      return;
+    }
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("it-IT");
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const formatAmount = (amountStr?: string) => {
+    if (!amountStr) {
+      return;
+    }
+    const num = Number.parseFloat(amountStr);
+    return Number.isNaN(num)
+      ? amountStr
+      : `${num.toLocaleString("it-IT", { minimumFractionDigits: 2 })} €`;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Electronic Invoice Header */}
+      <div className="rounded-xl border border-border bg-card">
+        <div className="flex items-center gap-3 border-border border-b px-4 py-3">
+          <Receipt className="size-5 text-blue-500" />
+          <h4 className="font-semibold">Fattura Elettronica</h4>
+          <div className="ml-auto flex items-center gap-2">
+            <Badge
+              className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+              variant="outline"
+            >
+              Numero: {metadata.invoiceNumber}
+            </Badge>
+            <Badge
+              className="bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300"
+              variant="outline"
+            >
+              Data: {formatDate(metadata.date)}
+            </Badge>
+            <Badge
+              className="bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+              variant="outline"
+            >
+              Tipo: {metadata.documentType}
+            </Badge>
+            <Badge
+              className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+              variant="outline"
+            >
+              Stato: {metadata.currency || "EUR"}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Transmission Data */}
+        <div className="border-border border-b px-4 py-3">
+          <div className="mb-2 flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">
+            <Hash className="size-3" />
+            Dati Trasmissione
+          </div>
+          <div className="grid grid-cols-4 gap-4 text-sm">
+            <div>
+              <span className="text-muted-foreground">ID Paese:</span>{" "}
+              <span className="font-medium">IT</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">ID Codice:</span>{" "}
+              <span className="font-medium">{metadata.supplierVatId}</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Progressivo Invio:</span>{" "}
+              <span className="font-medium">
+                {parsedData.trasmissione.progressivo}
+              </span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">
+                Codice Destinatario:
+              </span>{" "}
+              <span className="font-medium">
+                {parsedData.trasmissione.codiceDestinatario}
+              </span>
+            </div>
+          </div>
+          <div className="mt-2 text-sm">
+            <span className="text-muted-foreground">Formato Trasmissione:</span>{" "}
+            <span className="font-medium">
+              {parsedData.trasmissione.formatoTrasmissione}
+            </span>
+          </div>
+        </div>
+
+        {/* Supplier and Buyer */}
+        <div className="grid grid-cols-2 divide-x divide-border">
+          {/* Supplier */}
+          <div className="p-4">
+            <div className="mb-3 flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+              <Building2 className="size-4" />
+              <span className="font-semibold text-sm">Cedente/Prestatore</span>
+            </div>
+            <div className="space-y-2 text-sm">
+              <p className="font-semibold text-base">{metadata.supplier}</p>
+              <p className="text-muted-foreground">
+                Codice Fiscale: {validation.codiceFiscale || "N/A"}
+              </p>
+              <p className="text-muted-foreground">
+                P.IVA: IT{metadata.supplierVatId}
+              </p>
+              <p className="text-muted-foreground">Regime Fiscale: RF01</p>
+
+              {parsedData.supplierAddress.indirizzo && (
+                <div className="mt-3 flex items-start gap-2 border-border border-t pt-2">
+                  <MapPin className="mt-0.5 size-4 text-muted-foreground" />
+                  <div>
+                    <p>{parsedData.supplierAddress.indirizzo}</p>
+                    <p>
+                      {parsedData.supplierAddress.cap}{" "}
+                      {parsedData.supplierAddress.comune} (
+                      {parsedData.supplierAddress.provincia})
+                    </p>
+                    <p>{parsedData.supplierAddress.nazione}</p>
+                  </div>
+                </div>
+              )}
+
+              {parsedData.reaData.ufficio && (
+                <div className="mt-3 border-border border-t pt-2">
+                  <p className="font-medium text-muted-foreground">
+                    Iscrizione REA
+                  </p>
+                  <p>Ufficio: {parsedData.reaData.ufficio}</p>
+                  <p>Numero REA: {parsedData.reaData.numero}</p>
+                  <p>
+                    Capitale Sociale:{" "}
+                    {formatAmount(parsedData.reaData.capitale)}
+                  </p>
+                  <p>Socio Unico: {parsedData.reaData.socioUnico}</p>
+                  <p>
+                    Stato Liquidazione: {parsedData.reaData.statoLiquidazione}
+                  </p>
+                </div>
+              )}
+
+              {(parsedData.contatti.telefono || parsedData.contatti.email) && (
+                <div className="mt-3 border-border border-t pt-2">
+                  {parsedData.contatti.telefono && (
+                    <p>📞 {parsedData.contatti.telefono}</p>
+                  )}
+                  {parsedData.contatti.fax && (
+                    <p>📠 Fax: {parsedData.contatti.fax}</p>
+                  )}
+                  {parsedData.contatti.email && (
+                    <p>✉️ {parsedData.contatti.email}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Buyer */}
+          <div className="p-4">
+            <div className="mb-3 flex items-center gap-2 text-amber-600 dark:text-amber-400">
+              <User className="size-4" />
+              <span className="font-semibold text-sm">
+                Cessionario/Committente
+              </span>
+            </div>
+            <div className="space-y-2 text-sm">
+              <p className="font-semibold text-base">{metadata.buyer}</p>
+              <p className="text-muted-foreground">
+                P.IVA: IT{metadata.buyerVatId}
+              </p>
+
+              {parsedData.buyerAddress.indirizzo && (
+                <div className="mt-3 flex items-start gap-2 border-border border-t pt-2">
+                  <MapPin className="mt-0.5 size-4 text-muted-foreground" />
+                  <div>
+                    <p>{parsedData.buyerAddress.indirizzo}</p>
+                    <p>
+                      {parsedData.buyerAddress.cap}{" "}
+                      {parsedData.buyerAddress.comune} (
+                      {parsedData.buyerAddress.provincia})
+                    </p>
+                    <p>{parsedData.buyerAddress.nazione}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Order Data */}
+      {parsedData.ordineData.idDocumento && (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
+            <div className="mb-2 flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+              <Package className="size-4" />
+              <span className="font-semibold text-sm">
+                Dati Ordine Acquisto
+              </span>
+            </div>
+            <div className="space-y-1 text-sm">
+              <p>
+                <span className="text-muted-foreground">ID Documento:</span>{" "}
+                {parsedData.ordineData.idDocumento}
+              </p>
+              {parsedData.ordineData.numItem && (
+                <p>
+                  <span className="text-muted-foreground">Numero Item:</span>{" "}
+                  {parsedData.ordineData.numItem}
+                </p>
+              )}
+              <p>
+                <span className="text-muted-foreground">Codice CIG:</span>{" "}
+                <span className="font-semibold">
+                  {parsedData.ordineData.codiceCIG || validation.cig || "N/A"}
+                </span>
+              </p>
+              {parsedData.ordineData.codiceCUP && (
+                <p>
+                  <span className="text-muted-foreground">Codice CUP:</span>{" "}
+                  <span className="font-semibold">
+                    {parsedData.ordineData.codiceCUP}
+                  </span>
+                </p>
+              )}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
+                <Badge
+                  className="bg-white text-xs dark:bg-background"
+                  key={`cig-badge-${num}`}
+                  variant="outline"
+                >
+                  {num}
+                </Badge>
+              ))}
+              <Badge
+                className="bg-emerald-200 text-emerald-800 text-xs dark:bg-emerald-800 dark:text-emerald-200"
+                variant="outline"
+              >
+                N
+              </Badge>
+            </div>
+          </div>
+
+          {parsedData.salData.riferimentoFase && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30">
+              <div className="mb-2 flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                <Hash className="size-4" />
+                <span className="font-semibold text-sm">Dati SAL</span>
+              </div>
+              <div className="text-sm">
+                <p>
+                  <span className="text-muted-foreground">Numero SAL:</span>{" "}
+                  {parsedData.salData.riferimentoFase}
+                </p>
+                {parsedData.ddtData.numeroDDT && (
+                  <p className="mt-2">
+                    <span className="text-muted-foreground">Data DDT:</span>{" "}
+                    {formatDate(parsedData.ddtData.dataDDT)}
+                  </p>
+                )}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
+                  <Badge
+                    className="bg-white text-xs dark:bg-background"
+                    key={`sal-badge-${num}`}
+                    variant="outline"
+                  >
+                    {num}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Causale */}
+      {parsedData.causale && (
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="mb-2 flex items-center gap-2 text-muted-foreground">
+            <FileText className="size-4" />
+            <span className="font-semibold text-sm">Causale</span>
+          </div>
+          <p className="text-sm">{parsedData.causale}</p>
+        </div>
+      )}
+
+      {/* Line Items */}
+      {parsedData.lineItems.length > 0 && (
+        <div className="rounded-xl border border-border bg-card">
+          <div className="flex items-center gap-2 border-border border-b px-4 py-3">
+            <Package className="size-4 text-muted-foreground" />
+            <span className="font-semibold text-sm">Dettaglio Linee</span>
+          </div>
+          <div className="divide-y divide-border">
+            {parsedData.lineItems.map((item, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: items don't have stable unique IDs
+              <div className="p-4" key={`line-${index}`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Badge
+                      className={cn(
+                        "shrink-0",
+                        index % 2 === 0
+                          ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                          : "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300"
+                      )}
+                      variant="outline"
+                    >
+                      {item.numero}
+                    </Badge>
+                    <span className="font-medium text-sm">
+                      {item.descrizione}
+                    </span>
+                  </div>
+                  <Badge
+                    className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                    variant="outline"
+                  >
+                    Totale: {formatAmount(item.prezzoTotale)}
+                  </Badge>
+                </div>
+                <div className="mt-2 grid grid-cols-4 gap-4 text-muted-foreground text-xs">
+                  <div>
+                    <span className="font-medium">Quantità:</span>{" "}
+                    {item.quantita || "1"}
+                  </div>
+                  <div>
+                    <span className="font-medium">Prezzo Unitario:</span>{" "}
+                    {formatAmount(item.prezzoUnitario)}
+                  </div>
+                  {item.sconto && (
+                    <div>
+                      <span className="font-medium">% Sconto:</span>{" "}
+                      <span className="text-orange-600 dark:text-orange-400">
+                        {item.sconto}%
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium">IVA:</span> {item.aliquotaIVA}
+                    %
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* VAT Summary */}
+      {parsedData.ivaRiepilogo.length > 0 && (
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/30">
+          <div className="mb-3 flex items-center gap-2 text-blue-700 dark:text-blue-300">
+            <Receipt className="size-4" />
+            <span className="font-semibold text-sm">Riepilogo IVA</span>
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            <div className="rounded-lg bg-white p-3 dark:bg-background">
+              <p className="text-muted-foreground text-xs uppercase">
+                Aliquota IVA
+              </p>
+              <p className="font-semibold text-blue-700 dark:text-blue-300">
+                {parsedData.ivaRiepilogo[0]?.aliquota}%
+              </p>
+            </div>
+            <div className="rounded-lg bg-white p-3 dark:bg-background">
+              <p className="text-muted-foreground text-xs uppercase">
+                Imponibile
+              </p>
+              <p className="font-semibold text-emerald-700 dark:text-emerald-300">
+                {formatAmount(parsedData.ivaRiepilogo[0]?.imponibile)}
+              </p>
+            </div>
+            <div className="rounded-lg bg-white p-3 dark:bg-background">
+              <p className="text-muted-foreground text-xs uppercase">Imposta</p>
+              <p className="font-semibold text-amber-700 dark:text-amber-300">
+                {formatAmount(parsedData.ivaRiepilogo[0]?.imposta)}
+              </p>
+            </div>
+            <div className="rounded-lg bg-white p-3 dark:bg-background">
+              <p className="text-muted-foreground text-xs uppercase">
+                Totale Documento
+              </p>
+              <p className="font-semibold text-purple-700 dark:text-purple-300">
+                {formatAmount(String(metadata.totalAmount))}
+              </p>
+            </div>
+          </div>
+          {parsedData.ivaRiepilogo[0]?.esigibilita && (
+            <p className="mt-3 text-muted-foreground text-sm">
+              Esigibilità IVA:{" "}
+              <span className="font-medium">
+                {parsedData.ivaRiepilogo[0].esigibilita === "I"
+                  ? "Immediata"
+                  : parsedData.ivaRiepilogo[0].esigibilita}
+              </span>
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Payment Data */}
+      {parsedData.pagamento.modalita && (
+        <div className="rounded-xl border border-border bg-card">
+          <div className="flex items-center gap-2 border-border border-b px-4 py-3">
+            <CreditCard className="size-4 text-muted-foreground" />
+            <span className="font-semibold text-sm">Dati Pagamento</span>
+          </div>
+          <div className="grid grid-cols-2 divide-x divide-border">
+            <div className="space-y-2 p-4 text-sm">
+              <p>
+                <span className="text-muted-foreground">
+                  Condizioni Pagamento:
+                </span>{" "}
+                {parsedData.pagamento.condizioni}
+              </p>
+              <p>
+                <span className="text-muted-foreground">
+                  Modalità Pagamento:
+                </span>{" "}
+                {parsedData.pagamento.modalita}
+              </p>
+              {parsedData.pagamento.dataScadenza && (
+                <p>
+                  <span className="text-muted-foreground">Data Scadenza:</span>{" "}
+                  {formatDate(parsedData.pagamento.dataScadenza)}
+                </p>
+              )}
+            </div>
+            <div className="space-y-2 p-4 text-sm">
+              <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950/30">
+                <p className="text-muted-foreground text-xs uppercase">
+                  Importo Pagamento
+                </p>
+                <p className="font-semibold text-blue-700 text-lg dark:text-blue-300">
+                  {formatAmount(parsedData.pagamento.importo)}
+                </p>
+              </div>
+              {parsedData.pagamento.istituto && (
+                <p>
+                  <span className="text-muted-foreground">
+                    Istituto Finanziario:
+                  </span>{" "}
+                  {parsedData.pagamento.istituto}
+                </p>
+              )}
+              {parsedData.pagamento.iban && (
+                <p>
+                  <span className="text-muted-foreground">IBAN:</span>{" "}
+                  <span className="font-mono">{parsedData.pagamento.iban}</span>
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

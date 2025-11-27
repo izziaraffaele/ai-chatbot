@@ -1,6 +1,7 @@
 "use client";
 
 import { Link2, Upload, X } from "lucide-react";
+import Image from "next/image";
 import type React from "react";
 import { useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -138,12 +139,12 @@ export const ImageUpload = (props: ImageUploadProps) => {
       {value ? (
         <div className="relative inline-block">
           <div className="overflow-hidden rounded-lg border border-border">
-            <img
+            <Image
               alt="Preview"
               className="h-32 w-32 object-cover"
-              height={32}
+              height={128}
               src={value}
-              width={32}
+              width={128}
             />
           </div>
           <Button
@@ -185,7 +186,7 @@ export const ImageUpload = (props: ImageUploadProps) => {
         </div>
       ) : (
         <>
-          <div
+          <button
             className={cn(
               "flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-border border-dashed transition-colors hover:border-primary",
               isDragging && "border-primary bg-primary/5",
@@ -195,13 +196,7 @@ export const ImageUpload = (props: ImageUploadProps) => {
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                handleClick();
-              }
-            }}
-            role="button"
-            tabIndex={0}
+            type="button"
           >
             <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
             <p className="text-muted-foreground text-sm">
@@ -210,7 +205,7 @@ export const ImageUpload = (props: ImageUploadProps) => {
             <p className="mt-1 text-muted-foreground text-xs">
               Max size: {maxSizeMB}MB
             </p>
-          </div>
+          </button>
           <Button
             className="w-full"
             onClick={handleToggleUrlInput}

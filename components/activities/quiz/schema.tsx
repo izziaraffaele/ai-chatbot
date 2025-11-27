@@ -58,15 +58,14 @@ export function toUIQuizActivity({
   ...source
 }: ModelQuizActivity): UIQuizActivity {
   // Filter out incomplete items during streaming
-  const validItems = (payload || []).filter(
-    (item): item is ModelQuizQuestion =>
-      Boolean(
-        item?.id &&
-          item?.question &&
-          Array.isArray(item?.choices) &&
-          item.choices.length >= 2 &&
-          typeof item?.correctAnswerIndex === "number"
-      )
+  const validItems = (payload || []).filter((item): item is ModelQuizQuestion =>
+    Boolean(
+      item?.id &&
+        item?.question &&
+        Array.isArray(item?.choices) &&
+        item.choices.length >= 2 &&
+        typeof item?.correctAnswerIndex === "number"
+    )
   );
 
   return {

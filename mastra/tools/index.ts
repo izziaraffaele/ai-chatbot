@@ -9,16 +9,6 @@
  */
 
 import { createDocumentTool } from "./create-document-tool";
-import {
-  invoiceValidationTools,
-  type InvoiceValidationTools,
-  type ValidationOutput,
-  validateCigTool,
-  validateCodiceFiscaleTool,
-  validateCodicePaTool,
-  validateCupTool,
-  validateIbanTool,
-} from "./invoice-validation-tools";
 import { loadInvoiceTool } from "./load-invoice-tool";
 import { requestSuggestionsTool } from "./request-suggestions-tool";
 import { updateDocumentTool } from "./update-document-tool";
@@ -35,7 +25,10 @@ export type RequestSuggestionsTool = typeof requestSuggestionsTool;
 export type LoadInvoiceTool = typeof loadInvoiceTool;
 
 // Invoice validation tool types
-export type { InvoiceValidationTools, ValidationOutput };
+export type {
+  InvoiceValidationTools,
+  ValidationOutput,
+} from "./invoice-validation-tools";
 
 /**
  * All Mastra Tools Union Type
@@ -70,7 +63,7 @@ export {
   validateCodicePaTool,
   validateCupTool,
   validateIbanTool,
-};
+} from "./invoice-validation-tools";
 
 /**
  * Tool names for easy reference

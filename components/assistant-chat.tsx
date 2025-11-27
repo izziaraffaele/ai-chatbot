@@ -9,6 +9,10 @@ import { useArtifactStreaming } from "@/hooks/use-artifact-streaming";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import { DocumentArtifact, isDocumentArtifact } from "./artifacts/document";
+import {
+  DocumentSelectorArtifact,
+  isDocumentSelectorArtifact,
+} from "./artifacts/document-selector";
 import { isMediaArtifact, MediaArtifact } from "./artifacts/media";
 import { ChatCanvas, ChatCanvasMain, ChatCanvasThread } from "./chat/canvas";
 import {
@@ -134,8 +138,9 @@ export function AssistantChat({
     />
   );
 
-  const chatMessages = (
-    <MessageIterator empty={chatEmpty}>
+  // Render function for messages (reused in both thread locations)
+  const renderMessages = (keyPrefix?: string) => (
+    <MessageIterator empty={chatEmpty} keyPrefix={keyPrefix}>
       {({ message, isLastMessage, sender, vote, onVote, isStreaming }) => {
         const baseProps = {
           message,
@@ -209,7 +214,7 @@ export function AssistantChat({
             )}
           </ChatThreadHeader>
 
-          <ChatThreadContent>{chatMessages}</ChatThreadContent>
+          <ChatThreadContent>{renderMessages("main")}</ChatThreadContent>
 
           {!isReadonly && (
             <ChatThreadComposer>
@@ -227,7 +232,7 @@ export function AssistantChat({
           {/* Message thread sidebar */}
           <ChatCanvasThread isCurrentVersion={true}>
             <ChatThreadContent className="pt-20">
-              {chatMessages}
+              {renderMessages("canvas")}
             </ChatThreadContent>
 
             {/* Composer in canvas thread */}
@@ -251,6 +256,9 @@ export function AssistantChat({
                 kind={artifact.kind}
                 title={artifact.title || "Untitled"}
               />
+            )}
+            {isDocumentSelectorArtifact(artifact.kind) && (
+              <DocumentSelectorArtifact />
             )}
           </ChatCanvasMain>
         </ChatCanvas>

@@ -3,6 +3,7 @@ import {
   type DocumentArtifactKind,
   documentArtifactDefinitions,
 } from "./document";
+import type { DocumentSelectorArtifactKind } from "./document-selector";
 import { type MediaArtifactKind, mediaArtifactDefinitions } from "./media";
 
 /**
@@ -14,8 +15,17 @@ export const artifactDefinitions = [
 ];
 
 // All artifact kinds
-export type ArtifactKind = DocumentArtifactKind | MediaArtifactKind;
+export type ArtifactKind =
+  | DocumentArtifactKind
+  | MediaArtifactKind
+  | DocumentSelectorArtifactKind;
 
 // UIArtifact types for different categories
 export type DocumentUIArtifact = UIArtifact<DocumentArtifactKind, string>;
 export type MediaUIArtifact = UIArtifact<MediaArtifactKind, string>;
+
+// Re-export document selector types
+export type {
+  DocumentSelectorUIArtifact,
+  FileValidation,
+} from "./document-selector";

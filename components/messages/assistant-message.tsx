@@ -1,6 +1,7 @@
 "use client";
 
 import { isToolUIPart } from "ai";
+import Image from "next/image";
 import type React from "react";
 import { useState } from "react";
 import { MessagePartIterator } from "@/components/chat/iterators";
@@ -12,7 +13,6 @@ import {
   ChatMessageToolbar,
 } from "@/components/chat/message";
 import { ChatMessagePart } from "@/components/chat/message-parts";
-import { SparklesIcon } from "@/components/icons";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage as ChatMessageType } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -48,7 +48,15 @@ export function AssistantMessage({
 }: AssistantMessageProps) {
   const [mode, setMode] = useState<ChatMessageMode>("view");
 
-  const avatar = sender?.avatar || <SparklesIcon />;
+  const avatar = sender?.avatar || (
+    <Image
+      alt="Assistente Comune di Faenza"
+      className="size-8 rounded-full object-cover"
+      height={32}
+      src="/images/logo-faenza.jpg"
+      width={32}
+    />
+  );
 
   const hasText = message.parts?.some(
     (p) => p.type === "text" && p.text?.trim()

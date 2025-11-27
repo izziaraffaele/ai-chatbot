@@ -55,13 +55,16 @@ export type ModelDocumentSelectorActivity = ModelActivity<
   ModelDocument[]
 >;
 
+const VAT_MATCH_REGEX = /IT\d+/;
+const FILE_ID_PARTS_REGEX = /\[([^\]]+)\]/;
+
 /**
  * Extracts a display-friendly name from a file ID
  * E.g., "CSB_IT00185240397_00IS8-[1796150500]" -> "IT00185240397"
  */
 function getDisplayName(fileId: string): string {
   // Try to extract the VAT number portion (IT followed by digits)
-  const vatMatch = fileId.match(/IT\d+/);
+  const vatMatch = fileId.match(VAT_MATCH_REGEX);
   if (vatMatch) {
     return vatMatch[0];
   }
@@ -80,7 +83,7 @@ function getDisplayName(fileId: string): string {
  * E.g., "CSB_IT00185240397_00IS8-[1796150500]" -> "A-[1796150500]"
  */
 function getCodeFromFileId(fileId: string): string {
-  const bracketMatch = fileId.match(/\[([^\]]+)\]/);
+  const bracketMatch = fileId.match(FILE_ID_PARTS_REGEX);
   if (bracketMatch) {
     return `A-[${bracketMatch[1]}]`;
   }
@@ -93,8 +96,8 @@ export function toUIDocumentSelectorActivity({
   ...source
 }: ModelDocumentSelectorActivity): UIDocumentSelectorActivity {
   // Filter out incomplete items during streaming
-  const validItems = (payload || []).filter(
-    (item): item is ModelDocument => Boolean(item?.fileId)
+  const validItems = (payload || []).filter((item): item is ModelDocument =>
+    Boolean(item?.fileId)
   );
 
   return {
@@ -111,4 +114,3 @@ export function toUIDocumentSelectorActivity({
     ...source,
   };
 }
-
