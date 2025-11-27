@@ -3,40 +3,44 @@ import { LibSQLStore } from "@mastra/libsql";
 import { Memory } from "@mastra/memory";
 import { mastraTools } from "../../tools";
 import { getGeoHints, getRuntimeConfig } from "../../utils/runtime-utils";
-import { researchAgent } from "../research-agent";
 import { chatAgentSystemPrompt } from "./system-prompt";
-
+import { invoiceAnalyzerAgent } from "../invoice-analyzer-agent";
 /**
- * Mastra Chat Agent
+ * Assistente Comune di Faenza
+ *
+ * Official AI assistant for Comune di Faenza, developed by MemorAIz.
+ *
+ * Purpose:
+ * - List available documents in the knowledge base
+ * - Load and display specific documents when requested
+ * - Help users understand and work with invoice documents
+ * - Create new documents (text, code, spreadsheets)
+ * - Update existing documents
  *
  * Configuration:
- * - System prompt dynamically built from runtime config (identity, capabilities, features)
- * - Geolocation hints integrated for contextual responses
- * - All 4 tools registered for real-time document and weather operations
- * - Memory configured with LibSQL for within-session conversation history
- * - Model can be overridden in agent.generate() call during Phase 2 integration
+ * - Tools: createDocument, updateDocument, requestSuggestions, loadInvoice
+ * - Memory configured with LibSQL for conversation history
+ * - System prompt in Italian, supporting document management and creation
  */
 export const chatAgent = new Agent({
-  name: "Chat Agent",
+  name: "Assistente Comune",
   instructions: ({ runtimeContext }) => {
     // Extract runtime configuration and geolocation hints
     const config = getRuntimeConfig(runtimeContext);
     const geoHints = getGeoHints(runtimeContext);
 
-    // Build comprehensive system prompt from configuration
+    // Build system prompt for Comune di Faenza assistant
     const prompt = chatAgentSystemPrompt(config, geoHints);
 
     return prompt;
   },
-  model: "google/gemini-2.5-flash", // Default, overridden at runtime
+  model: "google/gemini-2.5-flash",
+  agents: {invoiceAnalyzerAgent},
   tools: {
-    getWeather: mastraTools.getWeather,
     createDocument: mastraTools.createDocument,
     updateDocument: mastraTools.updateDocument,
     requestSuggestions: mastraTools.requestSuggestions,
-  },
-  agents: {
-    researchAgent,
+    loadInvoice: mastraTools.loadInvoice,
   },
   memory: new Memory({
     storage: new LibSQLStore({

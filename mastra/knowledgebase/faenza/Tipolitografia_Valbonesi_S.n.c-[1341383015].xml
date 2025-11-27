@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/xsl" href="fatturapa_v1.2.xsl" ?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>08620470966</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>07017</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>NLJ1FA</CodiceDestinatario>
+      <ContattiTrasmittente/>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00206130403</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>Tipolitografia Valbonesi S.n.c. </Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via Rio Becca, 2B</Indirizzo>
+        <CAP>47121</CAP>
+        <Comune>Forlì </Comune>
+        <Provincia>FC</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <Contatti>
+        <Telefono>0543754093</Telefono>
+        <Email>info@tipovalbonesi.it</Email>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA </Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL POPOLO 31</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>08620470966</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>Software Hub System</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+    <SoggettoEmittente>TZ</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-01-30</Data>
+        <Numero>100050</Numero>
+        <ImportoTotaleDocumento>439.20</ImportoTotaleDocumento>
+        <Art73>SI</Art73>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <IdDocumento>50</IdDocumento>
+        <Data>2025-01-30</Data>
+        <CodiceCommessaConvenzione>DET.DIRIG.4460/2024 CAP.5041/328</CodiceCommessaConvenzione>
+        <CodiceCIG>B4A8A0F4F3</CodiceCIG>
+      </DatiOrdineAcquisto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>SERVIZIO DI COMPOSIZIONE</Descrizione>
+        <Quantita>1.00</Quantita>
+        <UnitaMisura>NU</UnitaMisura>
+        <PrezzoUnitario>360.000</PrezzoUnitario>
+        <PrezzoTotale>360.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>360.00</ImponibileImporto>
+        <Imposta>79.20</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <Beneficiario>TIPOLITOGRAFIA VALBONESI SNC</Beneficiario>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataRiferimentoTerminiPagamento>2025-01-30</DataRiferimentoTerminiPagamento>
+        <GiorniTerminiPagamento>30</GiorniTerminiPagamento>
+        <DataScadenzaPagamento>2025-02-28</DataScadenzaPagamento>
+        <ImportoPagamento>360.00</ImportoPagamento>
+        <IBAN>IT59Q0854213209000000234373</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

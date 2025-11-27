@@ -9,6 +9,17 @@
  */
 
 import { createDocumentTool } from "./create-document-tool";
+import {
+  invoiceValidationTools,
+  type InvoiceValidationTools,
+  type ValidationOutput,
+  validateCigTool,
+  validateCodiceFiscaleTool,
+  validateCodicePaTool,
+  validateCupTool,
+  validateIbanTool,
+} from "./invoice-validation-tools";
+import { loadInvoiceTool } from "./load-invoice-tool";
 import { requestSuggestionsTool } from "./request-suggestions-tool";
 import { updateDocumentTool } from "./update-document-tool";
 import { getWeatherTool } from "./weather-tool";
@@ -21,6 +32,10 @@ export type GetWeatherTool = typeof getWeatherTool;
 export type CreateDocumentTool = typeof createDocumentTool;
 export type UpdateDocumentTool = typeof updateDocumentTool;
 export type RequestSuggestionsTool = typeof requestSuggestionsTool;
+export type LoadInvoiceTool = typeof loadInvoiceTool;
+
+// Invoice validation tool types
+export type { InvoiceValidationTools, ValidationOutput };
 
 /**
  * All Mastra Tools Union Type
@@ -29,7 +44,8 @@ export type MastraToolTypes =
   | GetWeatherTool
   | CreateDocumentTool
   | UpdateDocumentTool
-  | RequestSuggestionsTool;
+  | RequestSuggestionsTool
+  | LoadInvoiceTool;
 
 /**
  * Tools Map
@@ -40,6 +56,20 @@ export const mastraTools = {
   createDocument: createDocumentTool,
   updateDocument: updateDocumentTool,
   requestSuggestions: requestSuggestionsTool,
+  loadInvoice: loadInvoiceTool,
+};
+
+/**
+ * Invoice Validation Tools
+ * Used by the Invoice Analyzer Agent
+ */
+export {
+  invoiceValidationTools,
+  validateCigTool,
+  validateCodiceFiscaleTool,
+  validateCodicePaTool,
+  validateCupTool,
+  validateIbanTool,
 };
 
 /**
@@ -50,4 +80,11 @@ export const TOOL_NAMES = {
   CREATE_DOCUMENT: "createDocument",
   UPDATE_DOCUMENT: "updateDocument",
   REQUEST_SUGGESTIONS: "requestSuggestions",
+  LOAD_INVOICE: "loadInvoice",
+  // Invoice validation tools
+  VALIDATE_IBAN: "validateIban",
+  VALIDATE_CIG: "validateCig",
+  VALIDATE_CUP: "validateCup",
+  VALIDATE_CODICE_FISCALE: "validateCodiceFiscale",
+  VALIDATE_CODICE_PA: "validateCodicePa",
 } as const;

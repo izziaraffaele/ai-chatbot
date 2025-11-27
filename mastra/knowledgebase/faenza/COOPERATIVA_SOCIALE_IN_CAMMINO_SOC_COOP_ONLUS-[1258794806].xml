@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>02046570426</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>74569</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>5M4QXO</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00915090393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00915090393</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>COOPERATIVA SOCIALE IN CAMMINO SOC COOP ONLUS</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via Degli Insorti, 2</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA VILLA STACCHINI</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL POPOLO 31</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02046570426</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>Namirial S.p.A</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+    <SoggettoEmittente>TZ</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-02-03</Data>
+        <Numero>52/EPA</Numero>
+        <ImportoTotaleDocumento>1037.70</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+      <DatiConvenzione>
+        <IdDocumento>DD 3611/2024 IMP.351</IdDocumento>
+        <CodiceCommessaConvenzione>DD 3611/2024 IMP.3514/2024</CodiceCommessaConvenzione>
+        <CodiceCIG>B410CA9760</CodiceCIG>
+      </DatiConvenzione>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>EMERGENZA ALLUVIONE EMILIA ROMAGNA  18 SETTEMBRE 2024-25 SETTEMBRE 2024</Descrizione>
+        <Quantita>1.000</Quantita>
+        <UnitaMisura>GG</UnitaMisura>
+        <DataInizioPeriodo>2024-09-01</DataInizioPeriodo>
+        <DataFinePeriodo>2024-09-30</DataFinePeriodo>
+        <PrezzoUnitario>988.28570000</PrezzoUnitario>
+        <PrezzoTotale>988.29000000</PrezzoTotale>
+        <AliquotaIVA>5.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>5.00</AliquotaIVA>
+        <ImponibileImporto>988.29</ImponibileImporto>
+        <Imposta>49.41</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-05-31</DataScadenzaPagamento>
+        <ImportoPagamento>988.29</ImportoPagamento>
+        <IBAN>IT96O0627023700CC0300004220</IBAN>
+        <ABI>06270</ABI>
+        <CAB>23700</CAB>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

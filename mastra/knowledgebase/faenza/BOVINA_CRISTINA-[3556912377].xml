@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type='text/xsl' href='fatturapa_v1.2.xsl'?>
+<p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>05006900962</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>fprsacmkfs</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>TR85NZ</CodiceDestinatario>
+      <ContattiTrasmittente>
+			</ContattiTrasmittente>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>03722600370</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>BVNCST65M52I191J</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>BOVINA CRISTINA</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA PUNTA</Indirizzo>
+        <NumeroCivico>17</NumeroCivico>
+        <CAP>40132</CAP>
+        <Comune>BOLOGNA</Comune>
+        <Provincia>BO</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <Contatti>
+			</Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL POPOLO</Indirizzo>
+        <NumeroCivico>31</NumeroCivico>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02235980378</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>02235980378</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>CNA SERVIZI BOLOGNA SCRL</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+    <SoggettoEmittente>TZ</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-01-02</Data>
+        <Numero>9</Numero>
+        <ImportoTotaleDocumento>158.60</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>10</RiferimentoNumeroLinea>
+        <IdDocumento>3121/2024</IdDocumento>
+        <CodiceCommessaConvenzione>capitolo 1010/399</CodiceCommessaConvenzione>
+        <CodiceCIG>B2F2E13609</CodiceCIG>
+      </DatiOrdineAcquisto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>10</NumeroLinea>
+        <Descrizione>SERVIZIO FORNITO IN DATA 18/11/2024 C/O COMUNE DI BRISIGHELLA</Descrizione>
+        <Quantita>1.00000000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>130.00000000</PrezzoUnitario>
+        <PrezzoTotale>130.00000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>130.00</ImponibileImporto>
+        <Imposta>28.60</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataRiferimentoTerminiPagamento>2025-01-02</DataRiferimentoTerminiPagamento>
+        <GiorniTerminiPagamento>30</GiorniTerminiPagamento>
+        <DataScadenzaPagamento>2025-02-01</DataScadenzaPagamento>
+        <ImportoPagamento>130.00</ImportoPagamento>
+        <IBAN>IT46F0538702403000001180834</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

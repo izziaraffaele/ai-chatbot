@@ -57,10 +57,16 @@ export function toUIFlashcardActivity({
   payload,
   ...source
 }: ModelFlashcardActivity): UIFlashcardActivity {
+  // Filter out incomplete items during streaming
+  const validItems = (payload || []).filter(
+    (item): item is ModelFlashcard =>
+      Boolean(item?.id && item?.front && item?.back)
+  );
+
   return {
     id: generateUUID(),
     objectives: [],
-    payload: payload.map((item) => ({
+    payload: validItems.map((item) => ({
       id: item.id,
       front: item.front,
       back: item.back,

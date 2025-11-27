@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>08245660017</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>0000011</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>NLJ1FA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>03800060273</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>03800060273</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>PIANOFORTI S.A.S. DI LIBERALON FLAVIO &amp; C.</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA ENRICO BERLINGUER n. 120</Indirizzo>
+        <CAP>48025</CAP>
+        <Comune>RIOLO TERME</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <Contatti>
+        <Email>flavio@liberalon.it</Email>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Piazza del Popolo 31</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>Faenza</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>08245660017</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>Sistemi S.P.A.</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+    <SoggettoEmittente>TZ</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2024-12-31</Data>
+        <Numero>217</Numero>
+        <ImportoTotaleDocumento>427.00</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+        <IdDocumento>4108/2024</IdDocumento>
+        <NumItem>Impegno 3767/2024</NumItem>
+        <CodiceCommessaConvenzione>CAP 5058/399</CodiceCommessaConvenzione>
+        <CodiceCIG>B42DA9CDC8</CodiceCIG>
+      </DatiOrdineAcquisto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Servizio concerto con pianoforte 1/2 coda Yamaha C3 comprensivo di trasporto e accordatura in data 29/12/2024  Riolo Terme</Descrizione>
+        <Quantita>1.00000000</Quantita>
+        <PrezzoUnitario>350.00000000</PrezzoUnitario>
+        <PrezzoTotale>350.00000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>350.00</ImponibileImporto>
+        <Imposta>77.00</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+        <RiferimentoNormativo>22 - 22% - GENERICO</RiferimentoNormativo>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2024-12-31</DataScadenzaPagamento>
+        <ImportoPagamento>350.00</ImportoPagamento>
+        <IBAN>IT70Y0846267580000005044792</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

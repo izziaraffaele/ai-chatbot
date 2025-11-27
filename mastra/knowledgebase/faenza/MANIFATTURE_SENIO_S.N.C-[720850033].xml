@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>08245660017</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>0001277</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>6LVYHE</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00847350394</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00847350394</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>MANIFATTURE SENIO S.N.C.</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA SERRAGLIO 65/72</Indirizzo>
+        <CAP>48014</CAP>
+        <Comune>CASTEL BOLOGNESE</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <Contatti>
+        <Email>manifatture.senio.cb@gmail.com</Email>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Piazza del Popolo 31</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>08245660017</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>Sistemi S.P.A.</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+    <SoggettoEmittente>TZ</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2024-12-30</Data>
+        <Numero>849/001</Numero>
+        <ImportoTotaleDocumento>62.98</ImportoTotaleDocumento>
+        <Causale>DETERMINA 4282 DEL 05-12-2024 IMPEGNO 3871 CIG.B49A572C95</Causale>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>FORNITURA MATERIALI VARI  DI CONSUMO  (PIATTI,TOVAGLIA)                                                                                            </Descrizione>
+        <Quantita>1.00000000</Quantita>
+        <PrezzoUnitario>33.80000000</PrezzoUnitario>
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          <Percentuale>10.00</Percentuale>
+        </ScontoMaggiorazione>
+        <PrezzoTotale>30.42000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>ROTOLONI CARTA ASCIUGATUTTO</Descrizione>
+        <Quantita>2.00000000</Quantita>
+        <PrezzoUnitario>9.00000000</PrezzoUnitario>
+        <PrezzoTotale>18.00000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>3</NumeroLinea>
+        <Descrizione>VITI </Descrizione>
+        <Quantita>80.00000000</Quantita>
+        <PrezzoUnitario>0.04000000</PrezzoUnitario>
+        <PrezzoTotale>3.20000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>51.62</ImponibileImporto>
+        <Imposta>11.36</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+        <RiferimentoNormativo>22 - 22% - GENERICO</RiferimentoNormativo>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2024-12-30</DataScadenzaPagamento>
+        <ImportoPagamento>51.62</ImportoPagamento>
+        <IBAN>IT67G0846267530000003000902</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

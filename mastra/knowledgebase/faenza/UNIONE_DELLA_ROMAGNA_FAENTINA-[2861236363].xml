@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>08245660017</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>0000078</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>4EHK4G</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02589400395</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>GHTDVD64L28D458C</CodiceFiscale>
+        <Anagrafica>
+          <Nome>DAVIDE</Nome>
+          <Cognome>GHETTI</Cognome>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA PISTOCCHI 13</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <Contatti>
+        <Email>d.ghetti@alice.it</Email>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL POPOLO 31</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>08245660017</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>Sistemi S.P.A.</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+    <SoggettoEmittente>TZ</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-01-31</Data>
+        <Numero>2/001</Numero>
+        <ImportoTotaleDocumento>9577.85</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+        <IdDocumento>4471</IdDocumento>
+        <Data>2024-01-01</Data>
+        <CodiceCommessaConvenzione>IMPEGNO N.2221/2024</CodiceCommessaConvenzione>
+        <CodiceCIG>B4BEF98113</CodiceCIG>
+      </DatiOrdineAcquisto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Interventi edili su diversi edifici del Comune di Faenza</Descrizione>
+        <Quantita>1.00000000</Quantita>
+        <PrezzoUnitario>7850.70000000</PrezzoUnitario>
+        <PrezzoTotale>7850.70000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>7850.70</ImponibileImporto>
+        <Imposta>1727.15</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+        <RiferimentoNormativo>22 - 22% - GENERICO</RiferimentoNormativo>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-03-03</DataScadenzaPagamento>
+        <ImportoPagamento>7850.70</ImportoPagamento>
+        <IBAN>IT11D0303223701010000637026</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

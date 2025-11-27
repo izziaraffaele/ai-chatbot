@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>02060730401</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>0000065852</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>NCILJS</CodiceDestinatario>
+      <ContattiTrasmittente>
+        <Email>DAVIDERAGIZI@EUROPASYSTEMS.IT</Email>
+      </ContattiTrasmittente>
+      <PECDestinatario>pec@cert.romagnafaentina.it</PECDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02060730401</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>02060730401</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>EUROPA SYSTEMS SRL</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA MAESTRI DEL LAVORO D'ITALIA</Indirizzo>
+        <NumeroCivico>200</NumeroCivico>
+        <CAP>47034</CAP>
+        <Comune>FORLIMPOPOLI</Comune>
+        <Provincia>FC</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>FC</Ufficio>
+        <NumeroREA>237315</NumeroREA>
+        <CapitaleSociale>36600.00</CapitaleSociale>
+        <SocioUnico>SM</SocioUnico>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA RAMPI 1</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-01-20</Data>
+        <Numero>1/2025/SP</Numero>
+        <ImportoTotaleDocumento>544.85</ImportoTotaleDocumento>
+        <Arrotondamento>0.00</Arrotondamento>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>30</RiferimentoNumeroLinea>
+        <IdDocumento>C.A. SIG.RA RITA LIV</IdDocumento>
+        <Data>2024-12-10</Data>
+        <NumItem>0</NumItem>
+        <CodiceCIG>A037171444</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>50</RiferimentoNumeroLinea>
+        <IdDocumento>C.A. SIG.RA RITA LIV</IdDocumento>
+        <Data>2024-12-10</Data>
+        <NumItem>0</NumItem>
+        <CodiceCIG>A037171444</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>70</RiferimentoNumeroLinea>
+        <IdDocumento>C.A. SIG.RA RITA LIV</IdDocumento>
+        <Data>2024-12-10</Data>
+        <NumItem>0</NumItem>
+        <CodiceCIG>A037171444</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiDDT>
+        <NumeroDDT>DDT25/0782</NumeroDDT>
+        <DataDDT>2025-01-17</DataDDT>
+        <RiferimentoNumeroLinea>30</RiferimentoNumeroLinea>
+      </DatiDDT>
+      <DatiDDT>
+        <NumeroDDT>DDT25/0782</NumeroDDT>
+        <DataDDT>2025-01-17</DataDDT>
+        <RiferimentoNumeroLinea>50</RiferimentoNumeroLinea>
+      </DatiDDT>
+      <DatiDDT>
+        <NumeroDDT>DDT25/0782</NumeroDDT>
+        <DataDDT>2025-01-17</DataDDT>
+        <RiferimentoNumeroLinea>70</RiferimentoNumeroLinea>
+      </DatiDDT>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>30</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>Cod. Art. Forn.</CodiceTipo>
+          <CodiceValore>ZOSPEC</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>MANIFESTI ISCRIZIONI ALLE SCUOLE DELL'INFANZIA
+DETERMINAZIONE DIRIGENZIALE N 4198 2024 MANIFESTI RELATIVI AL COMUNE DI FAENZA</Descrizione>
+        <Quantita>85.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>1.76000000</PrezzoUnitario>
+        <PrezzoTotale>149.60000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>50</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>Cod. Art. Forn.</CodiceTipo>
+          <CodiceValore>ZOSPEC</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>MANIFESTI ISCRIZIONI ALLE SCUOLE PRIMARIE
+DETERMINAZIONE DIRIGENZIALE N 4198 2024 MANIFESTI RELATIVI AL COMUNE DI FAENZA</Descrizione>
+        <Quantita>75.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>1.98000000</PrezzoUnitario>
+        <PrezzoTotale>148.50000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>70</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>Cod. Art. Forn.</CodiceTipo>
+          <CodiceValore>ZOSPEC</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>MANIFESTI ISCRIZIONI ALLE SCUOLE SECONDARIE DI I GRADO
+DETERMINAZIONE DIRIGENZIALE N 4198 2024 MANIFESTI RELATIVI AL COMUNE DI FAENZA</Descrizione>
+        <Quantita>75.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>1.98000000</PrezzoUnitario>
+        <PrezzoTotale>148.50000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <SpeseAccessorie>0.00</SpeseAccessorie>
+        <Arrotondamento>0.00</Arrotondamento>
+        <ImponibileImporto>446.60</ImponibileImporto>
+        <Imposta>98.25</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-02-28</DataScadenzaPagamento>
+        <ImportoPagamento>446.60</ImportoPagamento>
+        <IBAN>IT85Y0200813220000030038511</IBAN>
+        <ABI>02008</ABI>
+        <CAB>13220</CAB>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

@@ -15,9 +15,17 @@ export type AgentConfig = {
 
 /**
  * Available agent configurations
- * Currently supports the Research agent for web search and synthesis
+ * Supports the Research agent for web search and the Comune di Faenza assistant
  */
 export const AGENT_CONFIGS: Record<string, AgentConfig> = {
+  assistente: {
+    id: "assistente",
+    name: "Assistente comune",
+    description: "Assistente ufficiale del Comune di Faenza per la gestione documenti",
+    avatar: "🏛️",
+    color: "green",
+    registryId: "chatAgent",
+  },
   researcher: {
     id: "researcher",
     name: "Researcher",

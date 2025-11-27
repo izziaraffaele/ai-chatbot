@@ -12,6 +12,7 @@ import z from "zod";
 import {
   getActivityComponent,
   getActivitySchema,
+  isValidActivityType,
   toChatActivity,
 } from "@/components/activities";
 import { Player, usePlayer } from "@/components/player";
@@ -26,6 +27,7 @@ import type { ChatToolProps } from "./types";
 
 /**
  * The core schema used for generation.
+ * NOTE: document-selector was removed - use loadInvoice tool instead for document listing
  */
 export const ActivityToolInputSchema = z.object({
   type: z.enum(["flashcard", "quiz"]),
@@ -142,7 +144,7 @@ export function ActivityToolProvider({ children }: React.PropsWithChildren) {
   useAssistantAction({
     id: "createActivity",
     description:
-      "Create interactive learning activities like quizzes and flashcards for the user. When an activity is created is immediately displayed to the user and the result will be returend by this tool",
+      "Create interactive learning activities like quizzes and flashcards for the user. When an activity is created it is immediately displayed to the user. Do NOT use this for document listing - use loadInvoice tool instead.",
     inputSchema: ActivityToolInputSchema,
     execute: async (_, opts) => {
       const activityId = generateUUID();
@@ -193,7 +195,8 @@ export function useActivityTool(): ActivityToolContextValue {
 // ============================================================================
 
 /**
- * Tool UI component for rendering activities
+ * Tool UI component for rendering activities (quiz, flashcard)
+ * NOTE: Document listing is handled by loadInvoice tool, not createActivity
  */
 export function ActivityTool(props: ChatToolProps) {
   const { part } = props;
@@ -202,7 +205,7 @@ export function ActivityTool(props: ChatToolProps) {
     ? (part.input as z.infer<typeof ActivityToolInputSchema>)
     : undefined;
 
-  // Create store for the activity
+  // Create store for activities (quiz, flashcard)
   const store = useMemo(() => {
     if (!input?.type) {
       return null;
@@ -211,12 +214,10 @@ export function ActivityTool(props: ChatToolProps) {
   }, [input?.type, part.toolCallId]);
 
   // TODO: handle loading state better maybe with a skeleton
-  // TODO: wrap the loader in a Tool component
   if (!store || !input) {
     return <div>Loading...</div>;
   }
 
-  // TODO: wrap the palyer in a Tool component
   return (
     <Player store={store}>
       <ActivityToolPlayer {...props} />
@@ -235,7 +236,7 @@ export function ActivityToolPlayer({ part }: ChatToolProps) {
     : undefined;
 
   const activity = useMemo(() => {
-    if (!input) {
+    if (!input || !input.content) {
       return;
     }
 
@@ -270,6 +271,15 @@ export function ActivityToolPlayer({ part }: ChatToolProps) {
     }
   }, [state, isResolved, resolveActivity, toolCallId]);
 
-  const Component = input && getActivityComponent(input.type);
+  if (!input || !isValidActivityType(input.type)) {
+    return null;
+  }
+
+  // Show loading state while streaming (no activity or empty payload)
+  if (!activity || !activity.payload || activity.payload.length === 0) {
+    return <div className="text-muted-foreground text-sm">Caricamento...</div>;
+  }
+
+  const Component = getActivityComponent(input.type);
   return Component ? <Component activity={activity} /> : null;
 }

@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<nm:FatturaElettronica xmlns:nm="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:prx="urn:sap.com:proxy:PR1:/1SAI/TAS34E96A2AC5E40CADB2DF:731" xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>02221101203</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>j2ORs</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>TEWKC9</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>03819031208</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>02221101203</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>HERA COMM S.p.A.</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via Molino Rosso, 8</Indirizzo>
+        <CAP>40026</CAP>
+        <Comune>Imola</Comune>
+        <Provincia>BO</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00202300398</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00202300398</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>COMUNE DI BRISIGHELLA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA NALDI, 9</Indirizzo>
+        <CAP>48013</CAP>
+        <Comune>BRISIGHELLA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-02-11</Data>
+        <Numero>412504265530</Numero>
+        <ImportoTotaleDocumento>1220.52</ImportoTotaleDocumento>
+        <Causale>FORNITURA SERVIZIO GAS</Causale>
+      </DatiGeneraliDocumento>
+      <DatiContratto>
+        <IdDocumento>3031791453</IdDocumento>
+      </DatiContratto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>FORNITURA SERVIZIO GAS</Descrizione>
+        <PrezzoUnitario>562.06</PrezzoUnitario>
+        <PrezzoTotale>562.06</PrezzoTotale>
+        <AliquotaIVA>10.00</AliquotaIVA>
+        <AltriDatiGestionali>
+          <TipoDato>Pod/Pdr</TipoDato>
+          <RiferimentoTesto>03081000824033</RiferimentoTesto>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>FORNITURA SERVIZIO GAS</Descrizione>
+        <PrezzoUnitario>493.65</PrezzoUnitario>
+        <PrezzoTotale>493.65</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali>
+          <TipoDato>Pod/Pdr</TipoDato>
+          <RiferimentoTesto>03081000824033</RiferimentoTesto>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>10.00</AliquotaIVA>
+        <ImponibileImporto>562.06</ImponibileImporto>
+        <Imposta>56.21</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+        <RiferimentoNormativo>scissione dei pagamenti-art.17 ter DPR 633/72</RiferimentoNormativo>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>493.65</ImponibileImporto>
+        <Imposta>108.60</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+        <RiferimentoNormativo>scissione dei pagamenti-art.17 ter DPR 633/72</RiferimentoNormativo>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <Beneficiario>HERA SPA</Beneficiario>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-03-31</DataScadenzaPagamento>
+        <ImportoPagamento>1055.71</ImportoPagamento>
+        <IBAN>IT10Q0200809292V00833915617</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</nm:FatturaElettronica>

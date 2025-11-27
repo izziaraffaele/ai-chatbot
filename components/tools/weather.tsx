@@ -10,12 +10,13 @@ import {
   ToolOutput,
 } from "@/components/elements/tool";
 import { Weather as WeatherDisplay } from "@/components/weather";
-import type { ChatTools } from "@/lib/types";
 import type { ChatToolProps } from "./types";
 
-export type WeatherToolProps = ChatToolProps<{
-  getWeather: ChatTools["getWeather"];
-}>;
+/**
+ * Weather Tool Props
+ * Uses generic type since weather tool may not be available on all agents
+ */
+export type WeatherToolProps = ChatToolProps;
 
 /**
  * Weather Tool UI Component

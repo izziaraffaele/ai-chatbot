@@ -1,0 +1,248 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>02060730401</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>0000065943</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>L0W2Q5</CodiceDestinatario>
+      <ContattiTrasmittente>
+        <Email>DAVIDERAGIZI@EUROPASYSTEMS.IT</Email>
+      </ContattiTrasmittente>
+      <PECDestinatario>pec@cert.romagnafaentina.it</PECDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02060730401</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>02060730401</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>EUROPA SYSTEMS SRL</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA MAESTRI DEL LAVORO D'ITALIA</Indirizzo>
+        <NumeroCivico>200</NumeroCivico>
+        <CAP>47034</CAP>
+        <Comune>FORLIMPOPOLI</Comune>
+        <Provincia>FC</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>FC</Ufficio>
+        <NumeroREA>237315</NumeroREA>
+        <CapitaleSociale>36600.00</CapitaleSociale>
+        <SocioUnico>SM</SocioUnico>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA RAMPI 1</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-01-30</Data>
+        <Numero>4/2025/SP</Numero>
+        <ImportoTotaleDocumento>358.80</ImportoTotaleDocumento>
+        <Arrotondamento>0.00</Arrotondamento>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>20</RiferimentoNumeroLinea>
+        <IdDocumento>BUONO N 12</IdDocumento>
+        <Data>2025-01-20</Data>
+        <NumItem>0</NumItem>
+        <CodiceCIG>B46A811045</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>30</RiferimentoNumeroLinea>
+        <IdDocumento>BUONO N 12</IdDocumento>
+        <Data>2025-01-21</Data>
+        <NumItem>0</NumItem>
+        <CodiceCIG>B46A811045</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>40</RiferimentoNumeroLinea>
+        <IdDocumento>BUONO N12</IdDocumento>
+        <Data>2025-01-21</Data>
+        <NumItem>0</NumItem>
+        <CodiceCIG>B46A811045</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>50</RiferimentoNumeroLinea>
+        <IdDocumento>BUONO N 12</IdDocumento>
+        <Data>2025-01-21</Data>
+        <NumItem>0</NumItem>
+        <CodiceCIG>B46A811045</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>60</RiferimentoNumeroLinea>
+        <IdDocumento>BUONO N 12</IdDocumento>
+        <Data>2025-01-21</Data>
+        <NumItem>0</NumItem>
+        <CodiceCIG>B46A811045</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>70</RiferimentoNumeroLinea>
+        <IdDocumento>BUONO N 12</IdDocumento>
+        <Data>2025-01-29</Data>
+        <NumItem>0</NumItem>
+        <CodiceCIG>B46A811045</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiDDT>
+        <NumeroDDT>DDT25/0889</NumeroDDT>
+        <DataDDT>2025-01-21</DataDDT>
+        <RiferimentoNumeroLinea>20</RiferimentoNumeroLinea>
+      </DatiDDT>
+      <DatiDDT>
+        <NumeroDDT>DDT25/0891</NumeroDDT>
+        <DataDDT>2025-01-21</DataDDT>
+        <RiferimentoNumeroLinea>30</RiferimentoNumeroLinea>
+      </DatiDDT>
+      <DatiDDT>
+        <NumeroDDT>DDT25/0932</NumeroDDT>
+        <DataDDT>2025-01-21</DataDDT>
+        <RiferimentoNumeroLinea>40</RiferimentoNumeroLinea>
+      </DatiDDT>
+      <DatiDDT>
+        <NumeroDDT>DDT25/0933</NumeroDDT>
+        <DataDDT>2025-01-21</DataDDT>
+        <RiferimentoNumeroLinea>50</RiferimentoNumeroLinea>
+      </DatiDDT>
+      <DatiDDT>
+        <NumeroDDT>DDT25/0933</NumeroDDT>
+        <DataDDT>2025-01-21</DataDDT>
+        <RiferimentoNumeroLinea>60</RiferimentoNumeroLinea>
+      </DatiDDT>
+      <DatiDDT>
+        <NumeroDDT>DDT25/1351</NumeroDDT>
+        <DataDDT>2025-01-29</DataDDT>
+        <RiferimentoNumeroLinea>70</RiferimentoNumeroLinea>
+      </DatiDDT>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>20</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>Cod. Art. Forn.</CodiceTipo>
+          <CodiceValore>SX2PGC005BIO100B</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>BICCHIERE PER DISTRIBUTORI AUTOMATICI IN CARTONCINO 180ML 100PZ</Descrizione>
+        <Quantita>20.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>4.40000000</PrezzoUnitario>
+        <PrezzoTotale>88.00000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>30</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>Cod. Art. Forn.</CodiceTipo>
+          <CodiceValore>PEV1</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>COLLA VINILICA VINAVIL 1KG. 1869962</Descrizione>
+        <Quantita>2.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>5.80000000</PrezzoUnitario>
+        <PrezzoTotale>11.60000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>40</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>Cod. Art. Forn.</CodiceTipo>
+          <CodiceValore>MEOP</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>CONF. SILICONE COLORE BIANCO PER MURO</Descrizione>
+        <Quantita>2.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>15.00000000</PrezzoUnitario>
+        <PrezzoTotale>30.00000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>50</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>Cod. Art. Forn.</CodiceTipo>
+          <CodiceValore>MEOP</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>LAMPADINE E27 A SFERA</Descrizione>
+        <Quantita>4.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>13.00000000</PrezzoUnitario>
+        <PrezzoTotale>52.00000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>60</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>Cod. Art. Forn.</CodiceTipo>
+          <CodiceValore>MEOP</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>KIT POSATE IMBUSTATE</Descrizione>
+        <Quantita>100.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>0.75000000</PrezzoUnitario>
+        <PrezzoTotale>75.00000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>70</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>Cod. Art. Forn.</CodiceTipo>
+          <CodiceValore>TM341915B12</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>NASTRO BIADESIVO TRASPARENTE CARTA SILICONATA SCOTCH MM.19X1.5MT. EXTRAFORTE 4910C-1915-P</Descrizione>
+        <Quantita>5.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>7.50000000</PrezzoUnitario>
+        <PrezzoTotale>37.50000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <SpeseAccessorie>0.00</SpeseAccessorie>
+        <Arrotondamento>0.00</Arrotondamento>
+        <ImponibileImporto>294.10</ImponibileImporto>
+        <Imposta>64.70</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-02-28</DataScadenzaPagamento>
+        <ImportoPagamento>294.10</ImportoPagamento>
+        <IBAN>IT85Y0200813220000030038511</IBAN>
+        <ABI>02008</ABI>
+        <CAB>13220</CAB>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

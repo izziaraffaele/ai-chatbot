@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type='text/xsl' href='fatturapr_v1.8.xsl'?>
+<p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>05006900962</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>nwpdb94552</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>5M4QXO</CodiceDestinatario>
+      <ContattiTrasmittente>
+        <Telefono>044247613</Telefono>
+        <Email>promo.amministrazione@pec.net</Email>
+      </ContattiTrasmittente>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01843260231</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>01843260231</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>Coop. Soc. di Solid. Promozione Lavoro</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA MAZZINI, 15</Indirizzo>
+        <NumeroCivico>15</NumeroCivico>
+        <CAP>37047</CAP>
+        <Comune>SAN BONIFACIO</Comune>
+        <Provincia>VR</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>VR</Ufficio>
+        <NumeroREA>200625</NumeroREA>
+        <CapitaleSociale>0.00</CapitaleSociale>
+        <SocioUnico>SM</SocioUnico>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via San Giovanni Bosco, 1</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-01-31</Data>
+        <Numero>234/PA</Numero>
+        <ImportoTotaleDocumento>153.98</ImportoTotaleDocumento>
+        <Causale>FATTURA DI VENDITA P.A.</Causale>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <IdDocumento>234/PA</IdDocumento>
+        <Data>2025-01-31</Data>
+        <CodiceCommessaConvenzione>Determinazione. n. 3000/2024 -           Impegno n. 3148/2024</CodiceCommessaConvenzione>
+        <CodiceCIG>B306D1AB12</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiTrasporto/>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>10</NumeroLinea>
+        <Descrizione>SERVIZIO A FAVORE DI B.M. - OSS NEL MESE DI DICEMBRE</Descrizione>
+        <Quantita>7.0000000</Quantita>
+        <UnitaMisura>ore</UnitaMisura>
+        <DataInizioPeriodo>2024-12-01</DataInizioPeriodo>
+        <DataFinePeriodo>2024-12-31</DataFinePeriodo>
+        <PrezzoUnitario>20.9500000</PrezzoUnitario>
+        <PrezzoTotale>146.6500000</PrezzoTotale>
+        <AliquotaIVA>5.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>5.00</AliquotaIVA>
+        <ImponibileImporto>146.65</ImponibileImporto>
+        <Imposta>7.33</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-01-31</DataScadenzaPagamento>
+        <ImportoPagamento>146.65</ImportoPagamento>
+        <IstitutoFinanziario>BCC VENETA</IstitutoFinanziario>
+        <IBAN>IT28X0880762690000000875782</IBAN>
+        <ABI>08807</ABI>
+        <CAB>62690</CAB>
+        <ScontoPagamentoAnticipato>0.00</ScontoPagamentoAnticipato>
+        <PenalitaPagamentiRitardati>0.00</PenalitaPagamentiRitardati>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

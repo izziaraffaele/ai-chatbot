@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<FatturaElettronica xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12">
+  <FatturaElettronicaHeader xmlns="">
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>10209790152</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>154</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>NLJ1FA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01367440391</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>PNTVNI70E54D458Z</CodiceFiscale>
+        <Anagrafica>
+          <Nome>IVANA</Nome>
+          <Cognome>PANTIERI</Cognome>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>CORSO matteotti</Indirizzo>
+        <NumeroCivico>58</NumeroCivico>
+        <CAP>48018</CAP>
+        <Comune>Faenza</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <Contatti>
+        <Telefono>0546668322</Telefono>
+        <Email>iv@pantieridesign.com</Email>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL POPOLO</Indirizzo>
+        <NumeroCivico>31</NumeroCivico>
+        <CAP>48018</CAP>
+        <Comune>Faenza</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody xmlns="">
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD04</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-02-03</Data>
+        <Numero>2/E</Numero>
+        <DatiRitenuta>
+          <TipoRitenuta>RT01</TipoRitenuta>
+          <ImportoRitenuta>196.72</ImportoRitenuta>
+          <AliquotaRitenuta>20.00</AliquotaRitenuta>
+          <CausalePagamento>A</CausalePagamento>
+        </DatiRitenuta>
+        <DatiCassaPrevidenziale>
+          <TipoCassa>TC22</TipoCassa>
+          <AlCassa>4.00</AlCassa>
+          <ImportoContributoCassa>37.83</ImportoContributoCassa>
+          <ImponibileCassa>945.78</ImponibileCassa>
+          <AliquotaIVA>22.00</AliquotaIVA>
+          <Ritenuta>SI</Ritenuta>
+        </DatiCassaPrevidenziale>
+        <ImportoTotaleDocumento>1200.00</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Servizi di progettazione ed elaborazione grafica di materiali per la Pinacoteca Comunale di Faenza. CIG: B4BFF41D64</Descrizione>
+        <PrezzoUnitario>945.78</PrezzoUnitario>
+        <PrezzoTotale>945.78</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <Ritenuta>SI</Ritenuta>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>·                    CONTRATTO: D.D. N. 4463/2024
+·                    CAP.: 5480/302
+·                    IMPEGNO: N. 3997/2024</Descrizione>
+        <PrezzoUnitario>0.00</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <Ritenuta>SI</Ritenuta>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>983.61</ImponibileImporto>
+        <Imposta>216.39</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-02-03</DataScadenzaPagamento>
+        <ImportoPagamento>786.89</ImportoPagamento>
+        <IstitutoFinanziario>Unicredit Spa</IstitutoFinanziario>
+        <IBAN>IT32F0200823708000105210072</IBAN>
+        <ABI>02008</ABI>
+        <CAB>23708</CAB>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</FatturaElettronica>

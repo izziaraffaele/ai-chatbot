@@ -57,10 +57,22 @@ export function toUIQuizActivity({
   payload,
   ...source
 }: ModelQuizActivity): UIQuizActivity {
+  // Filter out incomplete items during streaming
+  const validItems = (payload || []).filter(
+    (item): item is ModelQuizQuestion =>
+      Boolean(
+        item?.id &&
+          item?.question &&
+          Array.isArray(item?.choices) &&
+          item.choices.length >= 2 &&
+          typeof item?.correctAnswerIndex === "number"
+      )
+  );
+
   return {
     id: generateUUID(),
     objectives: [],
-    payload: payload.map((item) => ({
+    payload: validItems.map((item) => ({
       id: item.id,
       question: item.question,
       choices: item.choices.map((choice) => ({

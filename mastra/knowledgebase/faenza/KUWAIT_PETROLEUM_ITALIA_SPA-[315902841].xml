@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.1a.xsd">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>05262890014</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>PJ09328919</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>L0W2Q5</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00891951006</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00435970587</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>KUWAIT PETROLEUM ITALIA SPA</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo> VIA DELL'OCEANO INDIANO</Indirizzo>
+        <NumeroCivico>13</NumeroCivico>
+        <CAP>00144</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>RM</Ufficio>
+        <NumeroREA>73832</NumeroREA>
+        <CapitaleSociale>130000000.00</CapitaleSociale>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+      <Contatti>
+        <Telefono>06 5208 81 </Telefono>
+        <Fax>06 5208 8655</Fax>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>FINANZIARIO</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL POPOLO 31</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>05262890014</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>Intesa S.p.A.</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2024-12-31</Data>
+        <Numero>PJ09328919</Numero>
+        <ImportoTotaleDocumento>44.51</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+      <DatiConvenzione>
+        <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+        <IdDocumento>CIG</IdDocumento>
+        <CodiceCIG>Z8235A4DBB</CodiceCIG>
+      </DatiConvenzione>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>SSP</CodiceTipo>
+          <CodiceValore>1.75814</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>SUPER SENZA PB</Descrizione>
+        <Quantita>25.61</Quantita>
+        <UnitaMisura>L</UnitaMisura>
+        <DataInizioPeriodo>2024-12-02</DataInizioPeriodo>
+        <DataFinePeriodo>2024-12-02</DataFinePeriodo>
+        <PrezzoUnitario>1.44458440</PrezzoUnitario>
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          <Importo>0.02</Importo>
+        </ScontoMaggiorazione>
+        <PrezzoTotale>36.48360656</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>36.48</ImponibileImporto>
+        <Imposta>8.03</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <Beneficiario>KUWAIT PETROLEUM ITALIA S.P.A.</Beneficiario>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataRiferimentoTerminiPagamento>2024-12-31</DataRiferimentoTerminiPagamento>
+        <GiorniTerminiPagamento>35</GiorniTerminiPagamento>
+        <DataScadenzaPagamento>2025-02-04</DataScadenzaPagamento>
+        <ImportoPagamento>36.48</ImportoPagamento>
+        <IstitutoFinanziario>BANCA INTESA SANPAOLO SPA </IstitutoFinanziario>
+        <IBAN>IT43V0306903207100000068829</IBAN>
+        <ABI>03069</ABI>
+        <CAB>03207</CAB>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

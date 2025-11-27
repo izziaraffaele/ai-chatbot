@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type='text/xsl' href='fatturapa_v1.2.xsl'?>
+<p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>05006900962</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>kgatctbynr</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>NLJ1FA</CodiceDestinatario>
+      <ContattiTrasmittente>
+			</ContattiTrasmittente>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02163550169</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>CMNMSM65M09A246A</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>CUMINETTI MASSIMO</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA CALZECCHI ONESTI</Indirizzo>
+        <NumeroCivico>8</NumeroCivico>
+        <CAP>24124</CAP>
+        <Comune>BERGAMO</Comune>
+        <Provincia>BG</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <Contatti>
+			</Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLAROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Piazza del Popolo</Indirizzo>
+        <NumeroCivico>31</NumeroCivico>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-01-30</Data>
+        <Numero>3/PA</Numero>
+        <ImportoTotaleDocumento>2318.00</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>10</NumeroLinea>
+        <Descrizione>MOVIMENTAZIONE OPERE FELICE GIANI - Trasporto Opere Felice Giani
+Capitolo 6095/399
+Impegno n. 3989/2024
+D.D. n.4457/2024
+CIG B4A228A7A1</Descrizione>
+        <Quantita>1.00000000</Quantita>
+        <UnitaMisura>N</UnitaMisura>
+        <PrezzoUnitario>1900.00000000</PrezzoUnitario>
+        <PrezzoTotale>1900.00000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>1900.00</ImponibileImporto>
+        <Imposta>418.00</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataRiferimentoTerminiPagamento>2025-01-30</DataRiferimentoTerminiPagamento>
+        <GiorniTerminiPagamento>1</GiorniTerminiPagamento>
+        <DataScadenzaPagamento>2025-01-31</DataScadenzaPagamento>
+        <ImportoPagamento>2318.00</ImportoPagamento>
+        <IBAN>IT66H0845353150000000000481</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

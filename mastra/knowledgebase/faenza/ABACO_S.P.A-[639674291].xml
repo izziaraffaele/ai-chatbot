@@ -1,0 +1,234 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/xsl" href="FoglioStileAssoSoftware.xsl"?>
+<p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 https://www.fatturapa.gov.it/export/documenti/fatturapa/v1.2.1/Schema_del_file_xml_FatturaPA_versione_1.2.1a.xsd ">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>04228480408</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>1A620</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>L3G9UO</CodiceDestinatario>
+      <ContattiTrasmittente/>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02391510266</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>02391510266</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>ABACO S.P.A.</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA F.LLI CERVI, 6</Indirizzo>
+        <CAP>35129</CAP>
+        <Comune>PADOVA</Comune>
+        <Provincia>PD</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>PD</Ufficio>
+        <NumeroREA>384026</NumeroREA>
+        <CapitaleSociale>10000000.00</CapitaleSociale>
+        <SocioUnico>SM</SocioUnico>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+      <Contatti>
+        <Telefono>0423 601755</Telefono>
+        <Fax>0423 602900</Fax>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00357850395</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>COMUNE DI FAENZA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL POPOLO, 31</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>04228480408</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>BLUENEXT SRL</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+    <SoggettoEmittente>TZ</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-01-02</Data>
+        <Numero>2025140000001</Numero>
+        <ImportoTotaleDocumento>32467.98</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <IdDocumento>DET 2954/2023</IdDocumento>
+      </DatiOrdineAcquisto>
+      <DatiContratto>
+        <IdDocumento>DD 3489/22 IMP 84/23</IdDocumento>
+        <CodiceCUP>J29E12000560004</CodiceCUP>
+        <CodiceCIG>46620540AB</CodiceCIG>
+      </DatiContratto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Nostre competenze per il servi zio di:</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>PERIODO DAL 01/12/2024 AL 31/1 2/2024</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>3</NumeroLinea>
+        <Descrizione>SUPPORTO ALLA GESTIONE PARCHEG GI E AREE DI SOSTA.  CIG</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>4</NumeroLinea>
+        <Descrizione>46620540AB - CUP J29E120005600 04</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>5</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>AswArtFor</CodiceTipo>
+          <CodiceValore>8060</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>SERVIZIO GESTIONE PARCHEGGI E AREE SOSTA</Descrizione>
+        <Quantita>1.000000</Quantita>
+        <UnitaMisura>n</UnitaMisura>
+        <PrezzoUnitario>26341.100000</PrezzoUnitario>
+        <PrezzoTotale>26341.10</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <RiferimentoAmministrazione>DD 3489/22 IMP 84/23</RiferimentoAmministrazione>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>6</NumeroLinea>
+        <Descrizione>SUPPORTO ALLA GESTIONE PARCHEG GI E AREE DI SOSTA. CIG</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>7</NumeroLinea>
+        <Descrizione>46620540AB - CUP J29E120005600 04 RECUPERO SPESE</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>8</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>AswArtFor</CodiceTipo>
+          <CodiceValore>8060</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>SERVIZIO GESTIONE PARCHEGGI E AREE SOSTA</Descrizione>
+        <Quantita>1.000000</Quantita>
+        <UnitaMisura>n</UnitaMisura>
+        <PrezzoUnitario>272.000000</PrezzoUnitario>
+        <PrezzoTotale>272.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <RiferimentoAmministrazione>DD 3489/22 IMP 84/23</RiferimentoAmministrazione>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>9</NumeroLinea>
+        <Descrizione>Codice C.I.G. 46620540AB</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>10</NumeroLinea>
+        <Descrizione>Codice C.U.P. J29E12000560004</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>11</NumeroLinea>
+        <Descrizione>CONTRIBUTO CONAI ASSOLTO</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>12</NumeroLinea>
+        <Descrizione>SCISSIONE DEI PAGAMENTI: IVA VERSATA DAL COMMITTENTE AI</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>13</NumeroLinea>
+        <Descrizione>SENSI DELL'ART. 17 ter D.P.R. 633/72, COME MODIFICATO</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>14</NumeroLinea>
+        <Descrizione>DALL' ART.1 comma 629 b) DELLA  LEGGE DI STABILITA' 190/2014</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>15</NumeroLinea>
+        <Descrizione>E ART. 2 DECRETO M.E.F. DEL 23/01/15.</Descrizione>
+        <PrezzoUnitario>0.000000</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>26613.10</ImponibileImporto>
+        <Imposta>5854.88</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-02-02</DataScadenzaPagamento>
+        <ImportoPagamento>26613.10</ImportoPagamento>
+        <IBAN>IT21S0839961821000000356285</IBAN>
+        <ABI>08399</ABI>
+        <CAB>61821</CAB>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

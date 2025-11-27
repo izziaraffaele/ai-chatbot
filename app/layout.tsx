@@ -20,11 +20,11 @@ export const metadata: Metadata = {
   title:
     process.env.NEXT_PUBLIC_METADATA_TITLE ||
     process.env.NEXT_PUBLIC_APP_NAME ||
-    "Next.js Chatbot Template",
+    "Comune Faenza",
   description:
     process.env.NEXT_PUBLIC_METADATA_DESCRIPTION ||
     process.env.NEXT_PUBLIC_APP_DESCRIPTION ||
-    "Next.js chatbot template using the AI SDK.",
+    "Assistente virtuale del Comune di Faenza",
 };
 
 export const viewport = {

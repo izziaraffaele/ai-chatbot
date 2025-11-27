@@ -1,0 +1,154 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>08245660017</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>424383</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>5M4QXO</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02355080397</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>02355080397</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>FARE COMUNITÀ SOC.COOP. CONSORTILE SOCIALE</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA DI ROMA 108</Indirizzo>
+        <CAP>48121</CAP>
+        <Comune>RAVENNA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>RA</Ufficio>
+        <NumeroREA>194414</NumeroREA>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>90028320399</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL POPOLO 31</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-01-31</Data>
+        <Numero>4 PA</Numero>
+        <ImportoTotaleDocumento>9646.28</ImportoTotaleDocumento>
+        <Causale>FATTURA</Causale>
+      </DatiGeneraliDocumento>
+      <DatiContratto>
+        <IdDocumento>DET. 1958/2024</IdDocumento>
+        <CodiceCUP>F11H22000230001</CodiceCUP>
+        <CodiceCIG>B204DB41A0</CodiceCIG>
+      </DatiContratto>
+      <DatiTrasporto>
+        <IndirizzoResa>
+          <Indirizzo>PIAZZA DEL POPOLO 31</Indirizzo>
+          <CAP>48018</CAP>
+          <Comune>FAENZA</Comune>
+          <Provincia>RA</Provincia>
+          <Nazione>IT</Nazione>
+        </IndirizzoResa>
+      </DatiTrasporto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>"Affidamento della realizzazione dei PUC (Progetti Utili alla collettività) nel territorio dell'Unione della Romagna Faentina a valere su Quota Servizi Fondo Povertà annualità 2022"</Descrizione>
+        <PrezzoUnitario>0.00</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>Attività svolta dal 01/10/2024 al 31/12/2024</Descrizione>
+        <PrezzoUnitario>0.00</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>3</NumeroLinea>
+        <Descrizione>Servizio</Descrizione>
+        <PrezzoUnitario>7906.79</PrezzoUnitario>
+        <PrezzoTotale>7906.79</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali>
+          <TipoDato>CIG</TipoDato>
+          <RiferimentoTesto>B204DB41A0</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CUP</TipoDato>
+          <RiferimentoTesto>F11H22000230001</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>IMPEGNO</TipoDato>
+          <RiferimentoTesto>1241/2024</RiferimentoTesto>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>4</NumeroLinea>
+        <Descrizione>Determina Dirigenziale n. 1958/2024 Contratto Rep 1247/2024</Descrizione>
+        <PrezzoUnitario>0.00</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>5</NumeroLinea>
+        <Descrizione>Impegno n. 1241/2024 cap. 12149 art. 378</Descrizione>
+        <PrezzoUnitario>0.00</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>7906.79</ImponibileImporto>
+        <Imposta>1739.49</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+        <RiferimentoNormativo>22% - GENERICO</RiferimentoNormativo>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataRiferimentoTerminiPagamento>2025-01-31</DataRiferimentoTerminiPagamento>
+        <GiorniTerminiPagamento>60</GiorniTerminiPagamento>
+        <DataScadenzaPagamento>2025-04-01</DataScadenzaPagamento>
+        <ImportoPagamento>7906.79</ImportoPagamento>
+        <IstitutoFinanziario>CREDITO COOPERATIVO RAVENNATE FORLIVESE E IMOLESE</IstitutoFinanziario>
+        <IBAN>IT61K0854213103000000176155</IBAN>
+        <ABI>08542</ABI>
+        <CAB>13103</CAB>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

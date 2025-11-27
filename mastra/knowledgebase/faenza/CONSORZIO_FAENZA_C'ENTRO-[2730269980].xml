@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>08245660017</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>772164</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>XJUUMH</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02518200395</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>02518200395</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>CONSORZIO FAENZA C'ENTRO</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA LEONARDO BETTISI 6</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>RA</Ufficio>
+        <NumeroREA>208966</NumeroREA>
+        <CapitaleSociale>860.00</CapitaleSociale>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+      <Contatti>
+        <Email>ammfacentro@confesercentiravennacesena.it</Email>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00357850395</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00357850395</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>COMUNE DI FAENZA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL POPOLO 31</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00829180397</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00829180397</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>SICOT SRL</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+    <SoggettoEmittente>TZ</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2024-12-30</Data>
+        <Numero>192</Numero>
+        <ImportoTotaleDocumento>1900.76</ImportoTotaleDocumento>
+        <Causale>Fattura di vendita</Causale>
+      </DatiGeneraliDocumento>
+      <DatiContratto>
+        <IdDocumento>DETERMINA 4538/2024</IdDocumento>
+        <CodiceCommessaConvenzione>IMPEGNO 2208/2024</CodiceCommessaConvenzione>
+        <CodiceCIG>B4D3716261</CodiceCIG>
+      </DatiContratto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>Articolo</CodiceTipo>
+          <CodiceValore>11</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>ALLESTIMENTO CON DECORAZIONI NATALILZIE DELLE AREE VICINO ALLE ATTIVITA PRODUTTIVE PRESENTI NEL CENTRO STORICO. DETERMINA N. 4538/2024 IMPEGNO DI SPESA 2208/2024  CIG B4D3716261</Descrizione>
+        <PrezzoUnitario>1558.00</PrezzoUnitario>
+        <PrezzoTotale>1558.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>1558.00</ImponibileImporto>
+        <Imposta>342.76</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+        <RiferimentoNormativo>22% - GENERICO</RiferimentoNormativo>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataRiferimentoTerminiPagamento>2024-12-30</DataRiferimentoTerminiPagamento>
+        <GiorniTerminiPagamento>30</GiorniTerminiPagamento>
+        <DataScadenzaPagamento>2025-01-29</DataScadenzaPagamento>
+        <ImportoPagamento>1900.76</ImportoPagamento>
+        <IstitutoFinanziario>CREDITO COOPERATIVO RAVENNATE</IstitutoFinanziario>
+        <IBAN>IT69W0854223700000000261423</IBAN>
+        <ABI>08542</ABI>
+        <CAB>23700</CAB>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

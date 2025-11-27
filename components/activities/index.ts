@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ModelActivity, UIActivity } from "@/lib/types";
 // Import activity components and schemas
+// NOTE: DocumentSelectorActivity is NOT used here - document listing uses loadInvoice tool instead
 import { FlashcardActivity } from "./flashcards";
 import {
   ModelFlashcardSchema,
@@ -41,6 +42,7 @@ function defineActivity<TYPE extends string, INPUT = unknown, DATA = unknown>(
 // ============================================================================
 /**
  * Registry of all available activity types with their components, schemas, and parsers
+ * NOTE: document-selector was removed - document listing is handled by loadInvoice tool
  */
 export const activities = {
   flashcard: defineActivity({
@@ -70,12 +72,25 @@ export type ChatActivityType =
   ChatActivityRegistry[keyof ChatActivityRegistry]["type"];
 
 /**
+ * Valid activity types for type checking
+ */
+const validActivityTypes = new Set(Object.keys(activities));
+
+/**
+ * Check if a type is a valid activity type
+ */
+export function isValidActivityType(type: string): type is ChatActivityType {
+  return validActivityTypes.has(type);
+}
+
+/**
  * Get component for a specific activity type
  */
 export function getActivityComponent<K extends ChatActivityType>(
   type: K
-): ChatActivityRegistry[K]["Component"] {
-  return activities[type].Component;
+): ChatActivityRegistry[K]["Component"] | undefined {
+  const activity = activities[type];
+  return activity?.Component;
 }
 
 /**

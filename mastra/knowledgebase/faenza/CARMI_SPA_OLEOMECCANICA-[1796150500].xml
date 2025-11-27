@@ -1,0 +1,301 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>00185240397</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>25C6000001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>5HSPPF</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00185240397</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00185240397</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>CARMI SPA OLEOMECCANICA</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via Emilia Ponente, 1425</Indirizzo>
+        <CAP>48014</CAP>
+        <Comune>CASTELBOLOGNESE</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>RA</Ufficio>
+        <NumeroREA>81093</NumeroREA>
+        <CapitaleSociale>2000000.00</CapitaleSociale>
+        <SocioUnico>SM</SocioUnico>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+      <Contatti>
+        <Telefono>0546 50099</Telefono>
+        <Fax>0546 54116</Fax>
+        <Email>info@carmispa.com</Email>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02517640393</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>UNIONE DELLA ROMAGNA FAENTINA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL POPOLO  31</Indirizzo>
+        <CAP>48018</CAP>
+        <Comune>FAENZA</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD24</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-01-28</Data>
+        <Numero>V6/000001/2025</Numero>
+        <ImportoTotaleDocumento>568.23</ImportoTotaleDocumento>
+        <Causale>CONTRIBUTO CONAI ASSOLTO</Causale>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>2</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>3</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>4</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>5</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>6</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>7</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>8</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>9</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>10</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>11</RiferimentoNumeroLinea>
+        <IdDocumento>PROT.</IdDocumento>
+        <CodiceCIG>B4D7E1158F</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiDDT>
+        <NumeroDDT>2</NumeroDDT>
+        <DataDDT>2025-01-28</DataDDT>
+        <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>2</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>3</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>4</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>5</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>6</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>7</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>8</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>9</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>10</RiferimentoNumeroLinea>
+        <RiferimentoNumeroLinea>11</RiferimentoNumeroLinea>
+      </DatiDDT>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>VOE15705206 FILTRO IDR.</Descrizione>
+        <Quantita>1.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>164.830000</PrezzoUnitario>
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          <Percentuale>15.00</Percentuale>
+        </ScontoMaggiorazione>
+        <PrezzoTotale>140.11</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>.</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>RIF. NS. DDT 165 DEL 17/01/25</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>LAVORI ESEGUITI SU VS. ECR18E MATR.30187:</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>-SOST.FILTRO OLIO IDRAULICO</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>-CONTROLLATO LIVELLI E FATTO RABBOCCO OLII</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>-PROVE DI FUNZIONAMENTO</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>.</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>MANUTENZIONE ESCAVATORE RIOLO TERME</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>DET.AFFIDAMENTO 4811 DEL 24/12/24</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>CIG.B4D7E1158F</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>IMP.AFFIDAMENTO 4092/2024</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>.</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>N.B.: TUBO + TANICA OLIO IDRAULICO RITIRATI AL</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>BANCO DEL MAGAZZINO DAL SIG. ALTAFINI MICHELANGELO</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>CO</TipoDato>
+          <RiferimentoTesto>.</RiferimentoTesto>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>TF2SN06 TUBO DIN 20022    2SN 3/8</Descrizione>
+        <Quantita>3.650</Quantita>
+        <UnitaMisura>MT</UnitaMisura>
+        <PrezzoUnitario>3.510000</PrezzoUnitario>
+        <PrezzoTotale>12.81</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>3</NumeroLinea>
+        <Descrizione>IPFFS10T06 FEMMINA DRITTA 11/16 ORFS-TUBO 3/8</Descrizione>
+        <Quantita>1.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>1.400000</PrezzoUnitario>
+        <PrezzoTotale>1.40</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>4</NumeroLinea>
+        <Descrizione>IP90FS10T06 INS.90 ORFS   11/16-16 T3/8</Descrizione>
+        <Quantita>1.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>1.990000</PrezzoUnitario>
+        <PrezzoTotale>1.99</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>5</NumeroLinea>
+        <Descrizione>BPNSK06 BOCC.NOSKIVE 3/8  2SC</Descrizione>
+        <Quantita>2.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>0.770000</PrezzoUnitario>
+        <PrezzoTotale>1.54</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>6</NumeroLinea>
+        <Descrizione>SPIR20X25 SPIRALE IN      PLASTICA</Descrizione>
+        <Quantita>3.800</Quantita>
+        <UnitaMisura>MT</UnitaMisura>
+        <PrezzoUnitario>8.320000</PrezzoUnitario>
+        <PrezzoTotale>31.62</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>7</NumeroLinea>
+        <Descrizione>MANODOPERA SEDE</Descrizione>
+        <Quantita>1.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>56.000000</PrezzoUnitario>
+        <PrezzoTotale>56.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>8</NumeroLinea>
+        <Descrizione>MP MONTAGGIO PRESSA</Descrizione>
+        <Quantita>2.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>4.000000</PrezzoUnitario>
+        <PrezzoTotale>8.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>9</NumeroLinea>
+        <Descrizione>001SF OLIO IDRAUL.SFUSO</Descrizione>
+        <Quantita>1.000</Quantita>
+        <UnitaMisura>LT</UnitaMisura>
+        <PrezzoUnitario>11.740000</PrezzoUnitario>
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          <Percentuale>15.00</Percentuale>
+        </ScontoMaggiorazione>
+        <PrezzoTotale>9.98</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>10</NumeroLinea>
+        <Descrizione>003SF OLIO MOT. VDS4      SFUSO</Descrizione>
+        <Quantita>1.000</Quantita>
+        <UnitaMisura>LT</UnitaMisura>
+        <PrezzoUnitario>6.730000</PrezzoUnitario>
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          <Percentuale>15.00</Percentuale>
+        </ScontoMaggiorazione>
+        <PrezzoTotale>5.72</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>11</NumeroLinea>
+        <Descrizione>VOE11706210 OLIO IDR.VOLV O</Descrizione>
+        <Quantita>1.000</Quantita>
+        <UnitaMisura>NR</UnitaMisura>
+        <PrezzoUnitario>245.740000</PrezzoUnitario>
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          <Percentuale>20.00</Percentuale>
+        </ScontoMaggiorazione>
+        <PrezzoTotale>196.59</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <SpeseAccessorie>0.00</SpeseAccessorie>
+        <ImponibileImporto>465.76</ImponibileImporto>
+        <Imposta>102.47</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+        <RiferimentoNormativo>Scissione dei pagamenti - Art.17ter del DPR 633/72</RiferimentoNormativo>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-03-31</DataScadenzaPagamento>
+        <ImportoPagamento>465.76</ImportoPagamento>
+        <IstitutoFinanziario>BANCA DI CREDITO COOPERATIVO D</IstitutoFinanziario>
+        <IBAN>IT55L0846267530000001005121</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>
