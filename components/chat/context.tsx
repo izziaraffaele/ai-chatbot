@@ -10,6 +10,7 @@ import {
 import type React from "react";
 import {
   createContext,
+  startTransition,
   useContext,
   useEffect,
   useMemo,
@@ -125,7 +126,12 @@ export function useChatController({
     generateId: generateUUID,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     onData(dataPart) {
-      setDataStream((ds) => (ds ? [...ds, dataPart] : [dataPart]));
+      // Wrap data stream updates in startTransition for non-blocking streaming
+      // This deprioritizes artifact streaming updates during rapid token delivery
+      startTransition(() => {
+        setDataStream((ds) => (ds ? [...ds, dataPart] : [dataPart]));
+      });
+      // Usage update stays synchronous (important for UI feedback)
       if (dataPart.type === "data-usage") {
         setUsage(dataPart.data);
       }

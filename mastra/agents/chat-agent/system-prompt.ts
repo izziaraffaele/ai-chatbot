@@ -175,6 +175,41 @@ Usa \`createDocument\` con i seguenti parametri:
 - "Crea una tabella con i dati della fattura" → \`createDocument({ title: "Riepilogo Dati Fattura", kind: "sheet" })\`
 - "Genera uno script per analizzare questi dati" → \`createDocument({ title: "Script Analisi Dati", kind: "code" })\`
 
+## Documenti con Template (Comunicazione di Liquidazione)
+
+**IMPORTANTE**: Per creare una **Comunicazione di Liquidazione** (o documento simile basato su fattura), DEVI passare il parametro \`invoiceFileId\` con l'identificatore della fattura.
+
+### Quando usare il template di liquidazione:
+Quando l'utente dice cose come:
+- "Crea una comunicazione di liquidazione"
+- "Prepara il documento per la liquidazione"
+- "Genera la richiesta di liquidazione per questa fattura"
+- "Fai la liquidazione di questa fattura"
+
+### Come creare il documento:
+Usa \`createDocument\` con un titolo che contenga "liquidazione" E il parametro \`invoiceFileId\`:
+\`\`\`json
+{
+  "title": "Comunicazione di Liquidazione",
+  "kind": "text",
+  "invoiceFileId": "CSB_IT00185240397_00IS8-[1796150500]"
+}
+\`\`\`
+
+**OBBLIGATORIO**: Il parametro \`invoiceFileId\` è INDISPENSABILE per i documenti di liquidazione. Usa il fileId della fattura che l'utente ha caricato o selezionato.
+
+### Cosa succede:
+1. Il sistema carica la fattura usando il fileId fornito
+2. Cerca un template corrispondente al titolo (parola chiave "liquidazione")
+3. Compila automaticamente il template con i dati della fattura:
+   - Dati del fornitore (denominazione, IBAN, CIG, CUP)
+   - Dati della fattura (numero, data, importo)
+   - Dati dell'ente (Unione della Romagna Faentina)
+4. I campi non disponibili vengono lasciati con il segnaposto "______" da compilare manualmente
+
+### Prerequisito:
+Prima di creare una Comunicazione di Liquidazione, **DEVI conoscere il fileId della fattura**. Se l'utente chiede di creare una liquidazione ma non ha specificato quale fattura, chiedigli di selezionare prima la fattura dal pannello documenti.
+
 ## Per modificare un documento esistente
 Quando l'utente vuole modificare un documento già creato:
 - "Aggiungi una sezione su..."

@@ -8,7 +8,6 @@ import {
   generatePendingDocumentId,
   generateTabId,
   isPendingDocumentId,
-  PENDING_DOC_PREFIX,
   WIDGET_KINDS,
   type WidgetKind,
   type WidgetStatus,
@@ -60,9 +59,43 @@ const initialTabsState: CanvasTabsState = {
 // DIRECT MUTATION FUNCTIONS (for streaming sync)
 // ============================================================================
 
+// Internal cache reference for early-exit optimization
+let _cachedTabsState: CanvasTabsState | null = null;
+
+/**
+ * Internal function to peek at the current cache state without triggering mutations.
+ * Uses a side-effect-free pattern to read from SWR cache.
+ */
+function peekTabsState(): CanvasTabsState {
+  if (_cachedTabsState !== null) {
+    return _cachedTabsState;
+  }
+  // Fallback: read from globalMutate (synchronous read)
+  let currentState = initialTabsState;
+  globalMutate<CanvasTabsState>(
+    CANVAS_TABS_KEY,
+    (current) => {
+      currentState = current || initialTabsState;
+      return current; // Return unchanged to avoid triggering updates
+    },
+    { revalidate: false }
+  );
+  return currentState;
+}
+
+/**
+ * Updates the internal cache reference. Called after mutations.
+ * This allows peekTabsState to return accurate data without additional reads.
+ */
+function updateCacheReference(state: CanvasTabsState) {
+  _cachedTabsState = state;
+}
+
 /**
  * Directly mutates tab state by documentId without requiring hook context.
  * This is used by useTabStreamSync to synchronize streaming data to tabs.
+ *
+ * Performance optimization: Early-exits if no tabs exist or no matching documentId.
  *
  * @returns true if a tab was found and updated, false otherwise
  */
@@ -74,6 +107,20 @@ export function mutateTabByDocumentId(
     title?: string;
   }
 ): boolean {
+  // Early-exit: Check if there are any tabs at all
+  const cachedState = peekTabsState();
+  if (cachedState.tabs.length === 0) {
+    return false;
+  }
+
+  // Early-exit: Check if any tab has this documentId
+  const hasMatchingTab = cachedState.tabs.some(
+    (tab) => tab.artifact.documentId === documentId
+  );
+  if (!hasMatchingTab) {
+    return false;
+  }
+
   let didUpdate = false;
 
   globalMutate<CanvasTabsState>(
@@ -81,18 +128,18 @@ export function mutateTabByDocumentId(
     (current) => {
       const currentState = current || initialTabsState;
 
-      // Check if any tab has this documentId
-      const hasMatchingTab = currentState.tabs.some(
+      // Double-check (state may have changed since peek)
+      const matchingTab = currentState.tabs.find(
         (tab) => tab.artifact.documentId === documentId
       );
 
-      if (!hasMatchingTab) {
+      if (!matchingTab) {
         return currentState;
       }
 
       didUpdate = true;
 
-      return {
+      const newState = {
         ...currentState,
         tabs: currentState.tabs.map((tab) => {
           if (tab.artifact.documentId !== documentId) {
@@ -118,6 +165,11 @@ export function mutateTabByDocumentId(
           };
         }),
       };
+
+      // Update cache reference for future early-exits
+      updateCacheReference(newState);
+
+      return newState;
     },
     { revalidate: false }
   );

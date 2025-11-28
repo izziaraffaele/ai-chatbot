@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import equal from "fast-deep-equal";
+import { memo, useState } from "react";
 import { MessagePartIterator } from "@/components/chat/iterators";
 import {
   ChatMessage,
@@ -24,7 +25,7 @@ export type UserMessageProps = {
   className?: string;
 };
 
-export function UserMessage({
+function PureUserMessage({
   message,
   sender,
   isReadonly = true,
@@ -93,3 +94,15 @@ export function UserMessage({
     </ChatMessage>
   );
 }
+
+/**
+ * Memoized UserMessage component to prevent unnecessary re-renders
+ * during streaming updates. Uses deep equality for message comparison.
+ */
+export const UserMessage = memo(PureUserMessage, (prevProps, nextProps) => {
+  return (
+    equal(prevProps.message, nextProps.message) &&
+    prevProps.isLastMessage === nextProps.isLastMessage &&
+    prevProps.isReadonly === nextProps.isReadonly
+  );
+});

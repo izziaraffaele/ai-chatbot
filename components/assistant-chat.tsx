@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useWindowSize } from "usehooks-ts";
 import {
   useArtifactStreaming,
@@ -11,7 +11,7 @@ import {
 } from "@/hooks/use-artifact-streaming";
 import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import { type CanvasTabData, getWidgetCategory } from "@/lib/canvas";
+import { getWidgetCategory } from "@/lib/canvas";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import { DocumentArtifact, isDocumentArtifact } from "./artifacts/document";
 import {
@@ -51,6 +51,24 @@ import { ActivityToolProvider } from "./tools/activity";
 import { Button } from "./ui/button";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector } from "./visibility-selector";
+
+/**
+ * Memoized placeholder for the canvas thread when not active.
+ * Only re-renders when message count changes, not on every streaming update.
+ * This significantly improves performance during sub-agent text streaming.
+ */
+const CanvasThreadPlaceholder = memo(
+  function CanvasThreadPlaceholder({ messageCount }: { messageCount: number }) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-muted-foreground opacity-50">
+        <span className="text-sm">
+          {messageCount} message{messageCount !== 1 ? "s" : ""}
+        </span>
+      </div>
+    );
+  },
+  (prevProps, nextProps) => prevProps.messageCount === nextProps.messageCount
+);
 
 /**
  * AssistantChat Component Props
@@ -99,14 +117,27 @@ export function AssistantChat({
     activeTab,
     activeTabData,
     isCanvasVisible,
-    updateTabArtifact,
     updateTabContent,
     updateTabStatus,
     closeTab,
   } = useCanvasTabs();
+
+  // Track if the canvas thread should render full messages
+  // We defer rendering until the user has interacted with the canvas thread
+  // This prevents double-rendering during streaming
+  const [canvasThreadActive, setCanvasThreadActive] = useState(false);
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId: chat.id,
   });
+
+  // Memoize event handlers to prevent re-renders of ChatThreadContent
+  const handleCanvasThreadFocus = useCallback(() => {
+    setCanvasThreadActive(true);
+  }, []);
+
+  const handleCanvasThreadMouseEnter = useCallback(() => {
+    setCanvasThreadActive(true);
+  }, []);
 
   // Subscribe to artifact streaming updates (updates global artifact state)
   useArtifactStreaming();
@@ -127,8 +158,8 @@ export function AssistantChat({
   );
 
   const handleStatusChange = useCallback(
-    (tabId: string, status: "idle" | "streaming" | "error") => {
-      updateTabStatus(tabId, status);
+    (tabId: string, newStatus: "idle" | "streaming" | "error") => {
+      updateTabStatus(tabId, newStatus);
     },
     [updateTabStatus]
   );
@@ -193,37 +224,40 @@ export function AssistantChat({
     />
   );
 
-  // Render function for messages (reused in both thread locations)
-  const renderMessages = (keyPrefix?: string) => (
-    <MessageIterator empty={chatEmpty} keyPrefix={keyPrefix}>
-      {({ message, isLastMessage, sender, vote, onVote, isStreaming }) => {
-        const baseProps = {
-          message,
-          isLastMessage,
-          sender,
-          isStreaming,
-        };
+  // Render function for messages in main thread (always renders)
+  const renderMainMessages = useMemo(
+    () => (
+      <MessageIterator empty={chatEmpty} keyPrefix="main">
+        {({ message, isLastMessage, sender, vote, onVote, isStreaming }) => {
+          const baseProps = {
+            message,
+            isLastMessage,
+            sender,
+            isStreaming,
+          };
 
-        // Render based on message role
-        if (message.role === "user") {
-          return <UserMessage {...baseProps} isReadonly={isReadonly} />;
-        }
+          // Render based on message role
+          if (message.role === "user") {
+            return <UserMessage {...baseProps} isReadonly={isReadonly} />;
+          }
 
-        if (message.role === "assistant") {
-          return (
-            <AssistantMessage
-              {...baseProps}
-              isReadonly={isReadonly}
-              onVoteAction={onVote}
-              vote={vote}
-            />
-          );
-        }
+          if (message.role === "assistant") {
+            return (
+              <AssistantMessage
+                {...baseProps}
+                isReadonly={isReadonly}
+                onVoteAction={onVote}
+                vote={vote}
+              />
+            );
+          }
 
-        // Skip other message types
-        return null;
-      }}
-    </MessageIterator>
+          // Skip other message types
+          return null;
+        }}
+      </MessageIterator>
+    ),
+    [chatEmpty, isReadonly]
   );
 
   // Render the active widget content
@@ -311,7 +345,7 @@ export function AssistantChat({
             )}
           </ChatThreadHeader>
 
-          <ChatThreadContent>{renderMessages("main")}</ChatThreadContent>
+          <ChatThreadContent>{renderMainMessages}</ChatThreadContent>
 
           {!isReadonly && (
             <ChatThreadComposer>
@@ -326,10 +360,55 @@ export function AssistantChat({
 
         {/* Artifact Canvas View with Tabs */}
         <ChatCanvas isVisible={isCanvasVisible}>
-          {/* Message thread sidebar */}
+          {/* Message thread sidebar - uses lazy rendering to avoid duplicate re-renders during streaming */}
           <ChatCanvasThread isCurrentVersion={true}>
-            <ChatThreadContent className="pt-20">
-              {renderMessages("canvas")}
+            <ChatThreadContent
+              className="pt-20"
+              onFocus={handleCanvasThreadFocus}
+              onMouseEnter={handleCanvasThreadMouseEnter}
+            >
+              {/* Only render messages when canvas thread is active to avoid double-rendering during streaming */}
+              {canvasThreadActive ? (
+                <MessageIterator empty={chatEmpty} keyPrefix="canvas">
+                  {({
+                    message,
+                    isLastMessage,
+                    sender,
+                    vote,
+                    onVote,
+                    isStreaming,
+                  }) => {
+                    const baseProps = {
+                      message,
+                      isLastMessage,
+                      sender,
+                      isStreaming,
+                    };
+
+                    if (message.role === "user") {
+                      return (
+                        <UserMessage {...baseProps} isReadonly={isReadonly} />
+                      );
+                    }
+
+                    if (message.role === "assistant") {
+                      return (
+                        <AssistantMessage
+                          {...baseProps}
+                          isReadonly={isReadonly}
+                          onVoteAction={onVote}
+                          vote={vote}
+                        />
+                      );
+                    }
+
+                    return null;
+                  }}
+                </MessageIterator>
+              ) : (
+                /* Lightweight placeholder - memoized to prevent re-renders during streaming */
+                <CanvasThreadPlaceholder messageCount={messages.length} />
+              )}
             </ChatThreadContent>
 
             {/* Composer in canvas thread */}

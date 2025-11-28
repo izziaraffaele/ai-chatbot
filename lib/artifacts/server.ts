@@ -6,6 +6,7 @@ import { sheetDocumentHandler } from "@/artifacts/sheet/server";
 import { textDocumentHandler } from "@/artifacts/text/server";
 import type { ArtifactKind } from "@/components/artifacts";
 import { mastra } from "@/mastra";
+import type { LoadedInvoiceContext } from "@/mastra/utils/runtime-utils";
 import { artifactSystemPrompt } from "../ai/prompts";
 import { saveDocument } from "../db/queries";
 import type { Document } from "../db/schema";
@@ -28,6 +29,8 @@ export type CreateDocumentCallbackProps = {
   session: Session;
   /** Mastra agent for generating document content */
   agent?: Agent;
+  /** Invoice context for template-based document generation */
+  invoiceContext?: LoadedInvoiceContext;
 };
 
 /** Props passed to document update handlers */
@@ -86,6 +89,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
         dataStream: args.dataStream,
         session: args.session,
         agent: getDocumentExpert(),
+        invoiceContext: args.invoiceContext,
       });
 
       if (args.session?.user?.id) {

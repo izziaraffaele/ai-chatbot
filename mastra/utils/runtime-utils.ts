@@ -10,6 +10,10 @@ import {
   RuntimeConfigSchema,
 } from "@/config/runtime.schema";
 import { deepMerge } from "@/lib/utils";
+import type {
+  InvoiceMetadata,
+  InvoiceValidation,
+} from "./knowledge-base-loader";
 
 /**
  * Runtime Context Utilities
@@ -17,6 +21,23 @@ import { deepMerge } from "@/lib/utils";
  * Provides functions for creating and extracting runtime context values
  * used by Mastra tools and agents.
  */
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+/**
+ * Data about the currently loaded invoice, stored in runtime context.
+ * Used by document templates to generate structured documents.
+ */
+export type LoadedInvoiceContext = {
+  /** Metadata extracted from the invoice */
+  metadata: InvoiceMetadata;
+  /** Validation results for the invoice */
+  validation: InvoiceValidation;
+  /** Raw XML content of the invoice */
+  content: string;
+};
 
 // ============================================================================
 // EXTRACTORS: Functions to extract values from RuntimeContext
@@ -43,6 +64,28 @@ export const getRuntimeConfig = (ctx: RuntimeContext): RuntimeConfig => {
     ctx.get("config") || {}
   );
   return RuntimeConfigSchema.parse(_runtimeConfig);
+};
+
+/**
+ * Get the currently loaded invoice from runtime context.
+ * Returns undefined if no invoice has been loaded in this conversation.
+ */
+export const getLoadedInvoice = (
+  ctx: RuntimeContext
+): LoadedInvoiceContext | undefined => {
+  return ctx.get("loadedInvoice") as LoadedInvoiceContext | undefined;
+};
+
+/**
+ * Store a loaded invoice in the runtime context.
+ * This makes the invoice available to other tools (like createDocument)
+ * for template-based document generation.
+ */
+export const setLoadedInvoice = (
+  ctx: RuntimeContext,
+  invoice: LoadedInvoiceContext
+): void => {
+  ctx.set("loadedInvoice", invoice);
 };
 
 // ============================================================================

@@ -7,11 +7,12 @@
 3. [Agents](#agents)
 4. [Knowledge Base System](#knowledge-base-system)
 5. [Invoice Validation System](#invoice-validation-system)
-6. [Tools Reference](#tools-reference)
-7. [Data Flow](#data-flow)
-8. [File Structure](#file-structure)
-9. [Adding New Features](#adding-new-features)
-10. [Troubleshooting](#troubleshooting)
+6. [Document Template System](#document-template-system)
+7. [Tools Reference](#tools-reference)
+8. [Data Flow](#data-flow)
+9. [File Structure](#file-structure)
+10. [Adding New Features](#adding-new-features)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -25,6 +26,7 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 - **Invoice Knowledge Base**: Access to 66 XML invoice files
 - **Intelligent Parsing**: Automatic extraction of invoice metadata
 - **Invoice Validation**: Automatic validation of required fields for invoice liquidation
+- **Document Templates**: Template-based generation for administrative documents (e.g., Comunicazione di Liquidazione)
 - **Italian Interface**: System prompt and interactions in Italian
 
 ### Key Technologies
@@ -378,6 +380,141 @@ When a user selects an invalid invoice, the agent automatically:
 2. Explains which fields are missing
 3. Explains which fields have invalid format
 4. Suggests the user verify the data with the supplier
+
+---
+
+## Document Template System
+
+### Overview
+
+The Document Template System allows generating structured documents (like "Comunicazione di Liquidazione") using data extracted from loaded invoices. When a user requests a document that matches a registered template, the system automatically populates the template with invoice data instead of using AI generation.
+
+### Key Components
+
+| Component | Path | Description |
+|-----------|------|-------------|
+| **Template Types** | `lib/templates/types.ts` | TypeScript interfaces for templates |
+| **Template Registry** | `lib/templates/index.ts` | Central registry and rendering functions |
+| **Liquidation Template** | `lib/templates/liquidation-communication.ts` | "Comunicazione di Liquidazione" template |
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    TEMPLATE SYSTEM FLOW                          │
+├─────────────────────────────────────────────────────────────────┤
+│  1. User loads invoice using loadInvoice tool                    │
+│     → Invoice stored in RuntimeContext                           │
+│                                                                  │
+│  2. User requests "Crea comunicazione di liquidazione"           │
+│     → Agent calls createDocument({ title: "...", kind: "text" }) │
+│                                                                  │
+│  3. textDocumentHandler checks for invoice context               │
+│     → Finds invoice in RuntimeContext                            │
+│                                                                  │
+│  4. Template Registry searches for matching template             │
+│     → Matches "liquidation-communication" by keywords            │
+│                                                                  │
+│  5. Template rendered with invoice data                          │
+│     → {{SUPPLIER_NAME}} → "CARMI SPA OLEOMECCANICA"              │
+│     → {{TOTAL_AMOUNT}} → "€ 568,23"                              │
+│     → {{MISSING_FIELD}} → "______" (placeholder)                 │
+│                                                                  │
+│  6. Rendered content streamed to client                          │
+│     → Document appears in canvas tab                             │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Template Context
+
+When a template is rendered, it receives a `TemplateContext` object with:
+
+```typescript
+type TemplateContext = {
+  metadata: InvoiceMetadata;    // Supplier, buyer, amount, dates, etc.
+  validation: InvoiceValidation; // IBAN, CIG, CUP, validation status
+  content?: string;              // Raw XML content (optional)
+  custom?: Record<string, unknown>; // Custom data (optional)
+};
+```
+
+### Available Templates
+
+| Template ID | Name | Trigger Keywords |
+|-------------|------|------------------|
+| `liquidation-communication` | Comunicazione di Liquidazione | liquidazione, liquidare, liquid, pagamento fattura |
+
+### Template Variable Mappings (Liquidation)
+
+| Variable | Source | Fallback |
+|----------|--------|----------|
+| `UNITA_PROPONENTE` | Invoice buyer name | "______" |
+| `ANNO_DETERMINA` | Invoice year | Current year |
+| `OGGETTO_DETERMINA` | Invoice description (Causale) | "______" |
+| `IMPORTO_TOTALE` | Invoice total amount | "______" |
+| `CREDITORE_DENOMINAZIONE` | Supplier name | "______" |
+| `CREDITORE_IBAN` | IBAN from validation | "______" |
+| `CREDITORE_CIG` | CIG from validation | "______" |
+| `CREDITORE_CUP` | CUP from validation | "______" |
+| `FATTURA_NUMERO` | Invoice number | "______" |
+| `FATTURA_DATA` | Invoice date (DD/MM/YYYY) | "______" |
+| `FATTURA_IMPORTO` | Invoice amount | "______" |
+| `DATA_DETERMINA` | Current date (DD/MM/YYYY) | "______" |
+| `FIRMATARIO` | - | "______" |
+
+### Invoice Context Integration
+
+The template system requires an invoice context to render templates. There are two ways to provide it:
+
+**Method 1: Explicit `invoiceFileId` parameter (RECOMMENDED)**
+
+The agent passes the invoice file ID directly to `createDocument`:
+
+```typescript
+// Agent calls createDocument with invoiceFileId
+createDocument({
+  title: "Comunicazione di Liquidazione",
+  kind: "text",
+  invoiceFileId: "CARMI_SPA_OLEOMECCANICA-[1796150500]"
+})
+```
+
+The tool then loads the invoice and passes it to the handler:
+
+```typescript
+// In createDocumentTool.execute()
+if (invoiceFileId) {
+  const invoice = loadKnowledgeBaseFile(invoiceFileId);
+  if (invoice) {
+    invoiceContext = {
+      metadata: invoice.metadata,
+      validation: validateInvoice(invoice.content),
+      content: invoice.content,
+    };
+  }
+}
+```
+
+**Method 2: RuntimeContext fallback**
+
+If no `invoiceFileId` is provided, the tool checks the runtime context (only works within the same agent turn):
+
+```typescript
+// Fallback to runtime context
+let invoiceContext = getLoadedInvoice(runtimeContext);
+```
+
+**textDocumentHandler** uses the invoice context for template rendering:
+
+```typescript
+if (invoiceContext) {
+  const template = templateRegistry.findTemplate(title, templateContext, "text");
+  if (template) {
+    const result = renderTemplate(template, templateContext);
+    // Stream rendered content...
+  }
+}
+```
 
 ---
 
@@ -817,9 +954,23 @@ app/
 │       └── analyze-invoice/
 │           └── route.ts       # Invoice analysis streaming endpoint
 
+artifacts/
+├── text/
+│   └── server.ts              # Text document handler (with template support)
+├── code/
+│   └── server.ts              # Code document handler
+└── sheet/
+    └── server.ts              # Sheet/CSV document handler
+
 lib/
 ├── ai/
 │   └── agent-config.ts        # UI agent configuration
+├── templates/
+│   ├── index.ts               # Template registry and rendering functions
+│   ├── types.ts               # TypeScript types for templates
+│   └── liquidation-communication.ts  # Comunicazione di Liquidazione template
+├── artifacts/
+│   └── server.ts              # Document handler factory (template integration)
 └── ...
 
 components/
@@ -892,6 +1043,133 @@ function extractMetadata(content: string, fileName: string): InvoiceMetadata {
   };
 }
 ```
+
+### Adding Document Templates
+
+The template system allows generating structured documents from invoice data. Templates are useful for standardized administrative documents like "Comunicazione di Liquidazione".
+
+#### 1. Create a New Template File
+
+Create a new file in `lib/templates/` (e.g., `my-template.ts`):
+
+```typescript
+import {
+  createKeywordCondition,
+  formatCurrencyItalian,
+  formatDateItalian,
+  templateRegistry,
+} from "./index";
+import type { DocumentTemplate, TemplateContext } from "./types";
+
+// Define the template content with {{variableName}} placeholders
+const MY_TEMPLATE = `# My Document Title
+
+**Date:** {{DOCUMENT_DATE}}
+**Amount:** {{TOTAL_AMOUNT}}
+
+## Supplier Information
+- Name: {{SUPPLIER_NAME}}
+- VAT ID: {{SUPPLIER_VAT}}
+`;
+
+// Map invoice data to template variables
+function mapInvoiceToMyTemplate(
+  context: TemplateContext
+): Record<string, string> {
+  const { metadata, validation } = context;
+  
+  return {
+    DOCUMENT_DATE: formatDateItalian(metadata.date),
+    TOTAL_AMOUNT: formatCurrencyItalian(metadata.totalAmount),
+    SUPPLIER_NAME: metadata.supplier ?? "",
+    SUPPLIER_VAT: metadata.supplierVatId ?? "",
+  };
+}
+
+// Define keywords that trigger this template
+const MY_TEMPLATE_KEYWORDS = ["my keyword", "another keyword"];
+
+// Create the template definition
+export const myTemplate: DocumentTemplate = {
+  id: "my-template",
+  name: "My Template Name",
+  description: "Description in Italian for the template",
+  kind: "text",
+  priority: 10, // Higher = more specific
+  condition: createKeywordCondition(MY_TEMPLATE_KEYWORDS, true),
+  template: MY_TEMPLATE,
+  dataMapper: mapInvoiceToMyTemplate,
+};
+
+// Register the template
+templateRegistry.register(myTemplate);
+```
+
+#### 2. Import the Template
+
+Add an import to `artifacts/text/server.ts` to ensure the template is registered:
+
+```typescript
+import "@/lib/templates/my-template";
+```
+
+#### 3. Template System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    TEMPLATE SYSTEM FLOW                          │
+├─────────────────────────────────────────────────────────────────┤
+│  User: "Create liquidazione document"                            │
+│                    │                                             │
+│                    ▼                                             │
+│  ┌──────────────────────────────────┐                           │
+│  │   textDocumentHandler            │                           │
+│  │   - Check for loaded invoice     │                           │
+│  │   - Search for matching template │                           │
+│  └──────────────┬───────────────────┘                           │
+│                 │                                                │
+│                 ▼                                                │
+│  ┌──────────────────────────────────┐                           │
+│  │   Template Registry              │                           │
+│  │   - findTemplate(title, context) │                           │
+│  │   - Match by keywords + priority │                           │
+│  └──────────────┬───────────────────┘                           │
+│                 │                                                │
+│                 ▼                                                │
+│  ┌──────────────────────────────────┐                           │
+│  │   renderTemplate()               │                           │
+│  │   - Replace {{placeholders}}     │                           │
+│  │   - Use "______" for missing     │                           │
+│  └──────────────────────────────────┘                           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### 4. Template Types Reference
+
+| Type | Description |
+|------|-------------|
+| `DocumentTemplate` | Main template definition with content and mapper |
+| `TemplateContext` | Invoice data available to templates |
+| `TemplateDataMapper` | Function mapping context to variables |
+| `TemplateCondition` | Function determining if template matches |
+| `RenderedTemplate` | Result with content and missing variables |
+
+#### 5. Helper Functions
+
+| Function | Description |
+|----------|-------------|
+| `createKeywordCondition()` | Create condition matching title keywords |
+| `formatDateItalian()` | Format dates as DD/MM/YYYY |
+| `formatCurrencyItalian()` | Format amounts as EUR currency |
+| `extractYear()` | Extract year from date string |
+| `renderTemplate()` | Render template with context |
+| `extractTemplateVariables()` | List all placeholders in template |
+
+#### 6. Existing Templates
+
+| Template ID | Name | Keywords |
+|-------------|------|----------|
+| `liquidation-communication` | Comunicazione di Liquidazione | liquidazione, liquidare, pagamento fattura |
 
 ---
 
@@ -1827,6 +2105,183 @@ To verify document streaming works correctly:
 6. **Rapid Document Requests** (tests timing fix):
    - Quickly request multiple documents in succession
    - Verify: All tabs open correctly, no stuck "Generating..." states, content streams properly
+
+### 15. Streaming Performance Optimization
+
+**Files**: `hooks/use-artifact-streaming.ts`, `hooks/use-canvas-tabs.ts`, `components/assistant-chat.tsx`
+
+**Issue**: When sub-agents started streaming, the page became unresponsive. This was caused by:
+1. Content updates triggering SWR mutations on every stream delta (multiple times per second)
+2. Double message rendering in both main thread and canvas thread
+3. Non-memoized filter functions causing re-subscriptions
+
+**Fixes Applied**:
+
+1. **Throttled Content Updates** (`hooks/use-artifact-streaming.ts`):
+   - Added 50ms throttle interval for tab content updates
+   - Content deltas are accumulated and flushed at a controlled rate
+   - Final content is always flushed on `data-finish`
+
+```typescript
+const CONTENT_UPDATE_THROTTLE_MS = 50;
+
+const scheduleContentUpdate = useCallback(() => {
+  const now = Date.now();
+  const timeSinceLastFlush = now - lastFlushTimeRef.current;
+
+  // If enough time has passed, flush immediately
+  if (timeSinceLastFlush >= CONTENT_UPDATE_THROTTLE_MS) {
+    flushContentUpdate();
+    return;
+  }
+
+  // Otherwise, schedule a flush
+  if (!flushPendingRef.current) {
+    flushPendingRef.current = true;
+    throttleTimerRef.current = setTimeout(flushContentUpdate, delay);
+  }
+}, [flushContentUpdate]);
+```
+
+2. **Memoized Filter Functions** (`hooks/use-artifact-streaming.ts`):
+   - Moved stream filter function outside component to prevent recreation on every render
+   - Both `useArtifactStreaming` and `useTabStreamSync` use the same stable filter reference
+
+```typescript
+// Stable filter function defined outside component
+const filterDataStreamParts = (part: { type: string }) =>
+  part.type.startsWith("data-");
+```
+
+3. **Early-Exit Optimization** (`hooks/use-canvas-tabs.ts`):
+   - Added cache-based early-exit to `mutateTabByDocumentId`
+   - Skips SWR mutation entirely if no tabs exist or no matching documentId
+   - Reduces unnecessary iterations during non-document streaming
+
+4. **Conditional Canvas Thread Rendering** (`components/assistant-chat.tsx`):
+   - Canvas thread messages are only rendered when user interacts with the canvas
+   - Uses `canvasThreadActive` state triggered by `onMouseEnter` or `onFocus`
+   - Shows lightweight placeholder until activated, preventing double-rendering during streaming
+
+```typescript
+const [canvasThreadActive, setCanvasThreadActive] = useState(false);
+
+// In canvas thread:
+<ChatThreadContent
+  onFocus={() => setCanvasThreadActive(true)}
+  onMouseEnter={() => setCanvasThreadActive(true)}
+>
+  {canvasThreadActive ? (
+    <MessageIterator ... />
+  ) : (
+    <div className="...">
+      {messages.length} messages
+    </div>
+  )}
+</ChatThreadContent>
+```
+
+5. **Memoized Canvas Thread Placeholder and Event Handlers** (`components/assistant-chat.tsx`):
+   - Event handlers (`onFocus`, `onMouseEnter`) are memoized with `useCallback` to prevent `ChatThreadContent` re-renders
+   - The placeholder component is memoized with `React.memo` and custom comparison to only re-render when `messageCount` changes
+   - This prevents the canvas thread from re-rendering on every text streaming update
+
+```typescript
+// Memoized event handlers
+const handleCanvasThreadFocus = useCallback(() => {
+  setCanvasThreadActive(true);
+}, []);
+
+const handleCanvasThreadMouseEnter = useCallback(() => {
+  setCanvasThreadActive(true);
+}, []);
+
+// Memoized placeholder component
+const CanvasThreadPlaceholder = memo(
+  function CanvasThreadPlaceholder({ messageCount }: { messageCount: number }) {
+    return (
+      <div className="...">
+        <span>{messageCount} message{messageCount !== 1 ? "s" : ""}</span>
+      </div>
+    );
+  },
+  (prevProps, nextProps) => prevProps.messageCount === nextProps.messageCount
+);
+```
+
+**Impact**: These optimizations significantly reduce re-renders during sub-agent streaming, preventing page unresponsiveness when invoice analysis or other sub-agent operations are in progress.
+
+### 16. Non-Blocking Invoice Analysis Streaming
+
+**Files**: `components/chat/context.tsx`, `components/chat/iterators.tsx`, `components/messages/assistant-message.tsx`, `components/messages/user-message.tsx`, `components/tools/load-invoice.tsx`
+
+**Issue**: When the Invoice Analyzer sub-agent streams a long answer token by token, each token caused:
+1. A state update in the chat layer
+2. A re-render of the entire chat tree
+3. Secondary re-renders of tools and canvas widgets
+
+This made the UI feel "blocked" during invoice analysis on larger screens (chat + canvas + tools).
+
+**Solution**: Combined React transitions with aggressive component memoization:
+
+1. **Low-Priority Streaming Updates** (`components/chat/context.tsx`):
+   - Wrapped `setDataStream` in `startTransition` to deprioritize artifact streaming updates
+   - Usage feedback (`data-usage`) stays synchronous for UI responsiveness
+
+```typescript
+import { startTransition } from "react";
+
+onData(dataPart) {
+  // Wrap data stream updates in startTransition for non-blocking streaming
+  startTransition(() => {
+    setDataStream((ds) => (ds ? [...ds, dataPart] : [dataPart]));
+  });
+  // Usage update stays synchronous (important for UI feedback)
+  if (dataPart.type === "data-usage") {
+    setUsage(dataPart.data);
+  }
+},
+```
+
+2. **Deferred Message Rendering** (`components/chat/iterators.tsx`):
+   - Added `useDeferredValue` for the messages array
+   - Allows React to skip intermediate states during rapid token delivery
+
+```typescript
+import { useDeferredValue } from "react";
+
+const { messages, status } = useChat({ chat: runtime.chat });
+const deferredMessages = useDeferredValue(messages);
+```
+
+3. **Memoized Message Components**:
+   - `AssistantMessage` (`components/messages/assistant-message.tsx`)
+   - `UserMessage` (`components/messages/user-message.tsx`)
+   - Both use `React.memo` with custom comparators and `fast-deep-equal` for deep message comparison
+
+```typescript
+import { memo } from "react";
+import equal from "fast-deep-equal";
+
+export const AssistantMessage = memo(PureAssistantMessage, (prev, next) => {
+  return (
+    equal(prev.message, next.message) &&
+    prev.isStreaming === next.isStreaming &&
+    prev.isLastMessage === next.isLastMessage &&
+    prev.isReadonly === next.isReadonly &&
+    prev.vote?.isUpvoted === next.vote?.isUpvoted
+  );
+});
+```
+
+4. **Memoized Tool Component** (`components/tools/load-invoice.tsx`):
+   - `LoadInvoiceTool` wrapped with `React.memo` and deep equality comparison for `part` prop
+
+**Impact**: During Invoice Analyzer streaming:
+- UI interactions (scroll, click, resize) remain snappy
+- React is allowed to deprioritize streaming updates
+- Only the streaming message component re-renders per token
+- Heavy components (`LoadInvoiceTool`, `DocumentSelectorArtifact`, canvas tabs) remain stable
 
 ---
 

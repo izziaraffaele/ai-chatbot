@@ -5,15 +5,25 @@ import {
   documentHandlersByArtifactKind,
 } from "@/lib/artifacts/server";
 import { generateUUID } from "@/lib/utils";
-import { getSession } from "../utils/runtime-utils";
+import {
+  loadKnowledgeBaseFile,
+  validateInvoice,
+} from "../utils/knowledge-base-loader";
+import { getLoadedInvoice, getSession } from "../utils/runtime-utils";
 
 export const createDocumentTool = createTool({
   id: "createDocument",
   description:
-    "Create a document for a writing or content creation activities. This tool will call other functions that will generate the contents of the document based on the title and kind.",
+    "Create a document for writing or content creation. When creating a document about an invoice (like a Comunicazione di Liquidazione), you MUST provide the invoiceFileId parameter to use the template system.",
   inputSchema: z.object({
     title: z.string(),
     kind: z.enum(artifactKinds),
+    invoiceFileId: z
+      .string()
+      .optional()
+      .describe(
+        "The file ID of the invoice to use for template-based document generation. Required for liquidation documents and any document that references a specific invoice."
+      ),
   }),
   outputSchema: z.object({
     id: z.string(),
@@ -22,7 +32,7 @@ export const createDocumentTool = createTool({
     content: z.string(),
   }),
   execute: async ({ context, runtimeContext, writer }) => {
-    const { title, kind } = context;
+    const { title, kind, invoiceFileId } = context;
     const session = getSession(runtimeContext);
     const id = generateUUID();
 
@@ -63,11 +73,44 @@ export const createDocumentTool = createTool({
       }
 
       if (writer && session) {
+        // Get invoice context - prefer explicit invoiceFileId, fall back to runtime context
+        let invoiceContext = runtimeContext
+          ? getLoadedInvoice(runtimeContext)
+          : undefined;
+
+        // If invoiceFileId is provided, load the invoice directly
+        if (invoiceFileId) {
+          console.log(
+            `[CreateDocument] Loading invoice from fileId: ${invoiceFileId}`
+          );
+          const invoice = loadKnowledgeBaseFile(invoiceFileId);
+          if (invoice) {
+            const validation = validateInvoice(invoice.content);
+            invoiceContext = {
+              metadata: invoice.metadata,
+              validation,
+              content: invoice.content,
+            };
+            console.log(
+              `[CreateDocument] Invoice loaded: ${invoice.metadata.supplier}, amount=${invoice.metadata.totalAmount}`
+            );
+          } else {
+            console.log(
+              `[CreateDocument] Warning: Invoice not found for fileId: ${invoiceFileId}`
+            );
+          }
+        }
+
+        console.log(
+          `[CreateDocument] title="${title}", kind="${kind}", hasInvoiceContext=${Boolean(invoiceContext)}`
+        );
+
         await documentHandler.onCreateDocument({
           id,
           title,
           dataStream: writer,
           session,
+          invoiceContext,
         });
       }
 

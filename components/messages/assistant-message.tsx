@@ -1,9 +1,10 @@
 "use client";
 
 import { isToolUIPart } from "ai";
+import equal from "fast-deep-equal";
 import Image from "next/image";
 import type React from "react";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { MessagePartIterator } from "@/components/chat/iterators";
 import {
   ChatMessage,
@@ -34,7 +35,7 @@ export type AssistantMessageProps = {
   fallbackTool?: React.ElementType<ChatToolProps>;
 };
 
-export function AssistantMessage({
+function PureAssistantMessage({
   message,
   sender,
   vote,
@@ -149,3 +150,20 @@ export function AssistantMessage({
     </ChatMessage>
   );
 }
+
+/**
+ * Memoized AssistantMessage component to prevent unnecessary re-renders
+ * during streaming updates. Uses deep equality for message comparison.
+ */
+export const AssistantMessage = memo(
+  PureAssistantMessage,
+  (prevProps, nextProps) => {
+    return (
+      equal(prevProps.message, nextProps.message) &&
+      prevProps.isStreaming === nextProps.isStreaming &&
+      prevProps.isLastMessage === nextProps.isLastMessage &&
+      prevProps.isReadonly === nextProps.isReadonly &&
+      prevProps.vote?.isUpvoted === nextProps.vote?.isUpvoted
+    );
+  }
+);

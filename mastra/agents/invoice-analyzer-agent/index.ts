@@ -39,7 +39,7 @@ export function createInvoiceAnalyzerAgent(missingFields: string[]): Agent {
   return new Agent({
     name: "Invoice Analyzer",
     instructions: invoiceAnalyzerSystemPrompt(missingFields),
-    model: "openai/gpt-4.1",
+    model: "openai/gpt-4.1-nano",
     tools: invoiceValidationTools,
     // No memory - this is a stateless analysis agent
   });

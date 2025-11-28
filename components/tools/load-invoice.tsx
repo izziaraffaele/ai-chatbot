@@ -1,5 +1,6 @@
 "use client";
 
+import equal from "fast-deep-equal";
 import {
   AlertCircle,
   CheckCircle2,
@@ -10,7 +11,7 @@ import {
   Sparkles,
   XCircle,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { DOCUMENT_SELECTOR_KIND } from "@/components/artifacts/document-selector";
 import { useChatRuntime } from "@/components/chat/context";
@@ -104,7 +105,7 @@ type LoadInvoiceOutput = {
  * - When availableFiles is returned: automatically opens document selector in side panel
  * - When metadata/content is returned: shows invoice details summary with validation
  */
-export function LoadInvoiceTool({ part }: ChatToolProps) {
+function PureLoadInvoiceTool({ part }: ChatToolProps) {
   const output = part.output as LoadInvoiceOutput | undefined;
   const { openTab } = useCanvasTabs();
   const hitboxRef = useRef<HTMLDivElement>(null);
@@ -292,6 +293,14 @@ export function LoadInvoiceTool({ part }: ChatToolProps) {
     </div>
   );
 }
+
+/**
+ * Memoized LoadInvoiceTool component to prevent unnecessary re-renders
+ * during streaming updates. Uses deep equality for part comparison.
+ */
+export const LoadInvoiceTool = memo(PureLoadInvoiceTool, (prev, next) => {
+  return equal(prev.part, next.part);
+});
 
 /**
  * Validation Badge Component

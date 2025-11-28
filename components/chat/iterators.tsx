@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { Fragment, useMemo } from "react";
+import { Fragment, useDeferredValue, useMemo } from "react";
 import { useChatRuntime } from "@/components/chat/context";
 import { useChatVotes } from "@/hooks/use-chat-votes";
 import type { Vote } from "@/lib/db/schema";
@@ -65,6 +65,10 @@ export function MessageIterator({
   const { id: chatId, messages, status } = useChat({ chat: runtime.chat });
   const { value: votes, voteMessage } = useChatVotes({ chatId });
 
+  // Defer messages to reduce priority of streaming updates
+  // This allows React to skip intermediate states during rapid token delivery
+  const deferredMessages = useDeferredValue(messages);
+
   // Memoize senders to prevent unnecessary re-renders of message components
   const senders = useMemo<
     Record<
@@ -78,16 +82,17 @@ export function MessageIterator({
 
   // Deduplicate messages by ID to prevent duplicate key errors
   // This handles cases where the AI SDK might provide duplicate messages during streaming
+  // Use deferredMessages for rendering to allow batched updates
   const uniqueMessages = useMemo(() => {
     const seen = new Set<string>();
-    return messages.filter((message) => {
+    return deferredMessages.filter((message) => {
       if (seen.has(message.id)) {
         return false;
       }
       seen.add(message.id);
       return true;
     });
-  }, [messages]);
+  }, [deferredMessages]);
 
   // Show empty state if no messages
   if (uniqueMessages.length === 0) {

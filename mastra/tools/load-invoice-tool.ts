@@ -15,6 +15,7 @@ import {
   VALIDATION_FIELD_NAMES,
   validateInvoice,
 } from "../utils/knowledge-base-loader";
+import { setLoadedInvoice } from "../utils/runtime-utils";
 
 /**
  * Maximum content size to return (in characters)
@@ -131,7 +132,7 @@ For invalid invoices, campiMancanti lists missing fields and campiNonValidi list
       ),
   }),
   outputSchema: invoiceOutputSchema,
-  execute: async ({ context }) => {
+  execute: async ({ context, runtimeContext }) => {
     const { fileId } = context as { fileId?: string };
 
     // Mastra requires async execute, await here to satisfy linter
@@ -195,6 +196,15 @@ For invalid invoices, campiMancanti lists missing fields and campiNonValidi list
 
     // Validate the invoice
     const validation = validateInvoice(invoice.content);
+
+    // Store the loaded invoice in runtime context for use by document templates
+    if (runtimeContext) {
+      setLoadedInvoice(runtimeContext, {
+        metadata: invoice.metadata,
+        validation,
+        content: invoice.content,
+      });
+    }
 
     // Check if content needs to be truncated to prevent agent stream errors
     const originalSize = invoice.content.length;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { artifactDefinitions } from "@/components/artifacts";
 import { useDataStreamSubscription } from "@/components/chat/streaming";
 import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
@@ -10,6 +10,16 @@ import {
   mutateTabByDocumentId,
   resetAllStreamingTabs,
 } from "@/hooks/use-canvas-tabs";
+
+// Throttle interval for content updates (ms)
+const CONTENT_UPDATE_THROTTLE_MS = 50;
+
+/**
+ * Stable filter function for data-* stream parts.
+ * Defined outside the component to avoid recreation on every render.
+ */
+const filterDataStreamParts = (part: { type: string }) =>
+  part.type.startsWith("data-");
 
 /**
  * useArtifactStreaming Hook
@@ -88,11 +98,8 @@ export function useArtifactStreaming() {
     [artifact.kind, setArtifact, setMetadata]
   );
 
-  // Subscribe to artifact-related stream parts
-  useDataStreamSubscription(
-    (part) => part.type.startsWith("data-"),
-    handleStreamPart
-  );
+  // Subscribe to artifact-related stream parts using stable filter
+  useDataStreamSubscription(filterDataStreamParts, handleStreamPart);
 }
 
 /**
@@ -128,6 +135,12 @@ export function useTabStreamSync() {
   const pendingTitleRef = useRef<string | null>(null);
   // Track if we've successfully bound a tab for this stream
   const tabBoundRef = useRef<boolean>(false);
+  // Track if a content flush is pending (for throttling)
+  const flushPendingRef = useRef<boolean>(false);
+  // Track the last flush time
+  const lastFlushTimeRef = useRef<number>(0);
+  // Track the throttle timer
+  const throttleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Attempts to bind a pending tab to the actual document ID.
@@ -177,6 +190,70 @@ export function useTabStreamSync() {
     [tryBindPendingTab]
   );
 
+  /**
+   * Flushes accumulated content to the tab immediately.
+   * Called by throttled updates and when stream finishes.
+   */
+  const flushContentUpdate = useCallback(() => {
+    if (!streamingDocumentIdRef.current) {
+      return;
+    }
+
+    flushPendingRef.current = false;
+    lastFlushTimeRef.current = Date.now();
+
+    updateTabWithRetry(streamingDocumentIdRef.current, {
+      content: accumulatedContentRef.current,
+      status: "streaming",
+    });
+  }, [updateTabWithRetry]);
+
+  /**
+   * Schedules a throttled content update.
+   * If enough time has passed since the last update, flushes immediately.
+   * Otherwise, schedules a flush for later.
+   */
+  const scheduleContentUpdate = useCallback(() => {
+    // If no document is streaming, skip
+    if (!streamingDocumentIdRef.current) {
+      return;
+    }
+
+    const now = Date.now();
+    const timeSinceLastFlush = now - lastFlushTimeRef.current;
+
+    // If enough time has passed, flush immediately
+    if (timeSinceLastFlush >= CONTENT_UPDATE_THROTTLE_MS) {
+      // Cancel any pending timer
+      if (throttleTimerRef.current) {
+        clearTimeout(throttleTimerRef.current);
+        throttleTimerRef.current = null;
+      }
+      flushContentUpdate();
+      return;
+    }
+
+    // Otherwise, schedule a flush if not already pending
+    if (!flushPendingRef.current) {
+      flushPendingRef.current = true;
+      const delay = CONTENT_UPDATE_THROTTLE_MS - timeSinceLastFlush;
+
+      throttleTimerRef.current = setTimeout(() => {
+        throttleTimerRef.current = null;
+        flushContentUpdate();
+      }, delay);
+    }
+  }, [flushContentUpdate]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (throttleTimerRef.current) {
+        clearTimeout(throttleTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleStreamPart = useCallback(
     (delta: any) => {
       switch (delta.type) {
@@ -186,6 +263,14 @@ export function useTabStreamSync() {
           streamingDocumentIdRef.current = actualDocId;
           accumulatedContentRef.current = "";
           tabBoundRef.current = false;
+          flushPendingRef.current = false;
+          lastFlushTimeRef.current = 0;
+
+          // Cancel any pending timer from previous stream
+          if (throttleTimerRef.current) {
+            clearTimeout(throttleTimerRef.current);
+            throttleTimerRef.current = null;
+          }
 
           // Attempt to bind pending tab (may fail if tab not created yet - that's OK)
           const didBind = tryBindPendingTab(actualDocId);
@@ -220,13 +305,8 @@ export function useTabStreamSync() {
           // Always accumulate content, even if we don't have a tab yet
           accumulatedContentRef.current += delta.data;
 
-          // Try to update tab (with retry logic for timing issues)
-          if (streamingDocumentIdRef.current) {
-            updateTabWithRetry(streamingDocumentIdRef.current, {
-              content: accumulatedContentRef.current,
-              status: "streaming",
-            });
-          }
+          // Schedule a throttled content update
+          scheduleContentUpdate();
           break;
         }
 
@@ -250,6 +330,17 @@ export function useTabStreamSync() {
           break;
 
         case "data-finish": {
+          // Cancel any pending throttle timer
+          if (throttleTimerRef.current) {
+            clearTimeout(throttleTimerRef.current);
+            throttleTimerRef.current = null;
+          }
+
+          // Flush any remaining content immediately
+          if (streamingDocumentIdRef.current && flushPendingRef.current) {
+            flushContentUpdate();
+          }
+
           // Stream finished - update status to idle
           if (streamingDocumentIdRef.current) {
             updateTabWithRetry(streamingDocumentIdRef.current, {
@@ -272,6 +363,8 @@ export function useTabStreamSync() {
           accumulatedContentRef.current = "";
           pendingTitleRef.current = null;
           tabBoundRef.current = false;
+          flushPendingRef.current = false;
+          lastFlushTimeRef.current = 0;
           break;
         }
 
@@ -280,12 +373,14 @@ export function useTabStreamSync() {
           break;
       }
     },
-    [tryBindPendingTab, updateTabWithRetry]
+    [
+      tryBindPendingTab,
+      updateTabWithRetry,
+      scheduleContentUpdate,
+      flushContentUpdate,
+    ]
   );
 
-  // Subscribe to artifact-related stream parts
-  useDataStreamSubscription(
-    (part) => part.type.startsWith("data-"),
-    handleStreamPart
-  );
+  // Subscribe to artifact-related stream parts using stable filter
+  useDataStreamSubscription(filterDataStreamParts, handleStreamPart);
 }
