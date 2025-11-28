@@ -10,8 +10,9 @@ import {
   mutateTabByDocumentId,
   openPendingTab,
   resetAllStreamingTabs,
+  wasDocumentClosedByUser,
 } from "@/hooks/use-canvas-tabs";
-import { generatePendingDocumentId } from "@/lib/canvas";
+import { generatePendingDocumentId, type WidgetKind } from "@/lib/canvas";
 
 // Throttle interval for content updates (ms)
 const CONTENT_UPDATE_THROTTLE_MS = 50;
@@ -266,6 +267,12 @@ export function useTabStreamSync() {
         case "data-kind":
           // Buffer kind metadata before document ID is known
           pendingKindRef.current = delta.data;
+          // If we already have a document ID, update the tab's kind immediately
+          if (streamingDocumentIdRef.current) {
+            mutateTabByDocumentId(streamingDocumentIdRef.current, {
+              kind: delta.data as WidgetKind,
+            });
+          }
           break;
 
         case "data-id": {
@@ -287,6 +294,15 @@ export function useTabStreamSync() {
           flushPendingRef.current = false;
           lastFlushTimeRef.current = 0;
 
+          // If user explicitly closed this document, don't auto-reopen it
+          // Still track the document ID so content updates work if tab is reopened
+          if (wasDocumentClosedByUser(actualDocId)) {
+            // Clear buffered metadata since we won't create a tab
+            pendingTitleRef.current = null;
+            pendingKindRef.current = null;
+            break;
+          }
+
           // Attempt to bind the most recent pending tab to this document ID
           const didBind = tryBindPendingTab(actualDocId);
 
@@ -297,6 +313,12 @@ export function useTabStreamSync() {
                 title: pendingTitleRef.current,
               });
               pendingTitleRef.current = null;
+            }
+            // Apply buffered kind (critical for CSV/sheet documents)
+            if (pendingKindRef.current) {
+              mutateTabByDocumentId(actualDocId, {
+                kind: pendingKindRef.current as WidgetKind,
+              });
             }
             // Set the tab to streaming status
             mutateTabByDocumentId(actualDocId, { status: "streaming" });

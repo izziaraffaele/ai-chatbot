@@ -42,6 +42,8 @@ export type CanvasTab = {
 export type CanvasTabsState = {
   tabs: CanvasTab[];
   activeTabId: string | null;
+  /** Tracks documents explicitly closed by the user to prevent auto-reopening */
+  closedDocuments?: Record<string, boolean>;
 };
 
 // ============================================================================
@@ -105,6 +107,7 @@ export function mutateTabByDocumentId(
     content?: unknown;
     status?: WidgetStatus;
     title?: string;
+    kind?: WidgetKind;
   }
 ): boolean {
   // Early-exit: Check if there are any tabs at all
@@ -157,10 +160,15 @@ export function mutateTabByDocumentId(
           if (updates.title !== undefined) {
             updatedArtifact.title = updates.title;
           }
+          if (updates.kind !== undefined) {
+            updatedArtifact.kind = updates.kind;
+          }
 
           return {
             ...tab,
             title: updates.title ?? tab.title,
+            // Update tab type if kind changed
+            type: updates.kind ? getTabTypeForArtifact(updates.kind) : tab.type,
             artifact: updatedArtifact,
           };
         }),
@@ -194,6 +202,50 @@ export function getTabsState(): CanvasTabsState {
     { revalidate: false }
   );
   return currentState;
+}
+
+/**
+ * Checks if a document was explicitly closed by the user.
+ * Used to prevent auto-reopening of tabs that the user intentionally closed.
+ *
+ * @param documentId - The document ID to check
+ * @returns true if the user explicitly closed this document's tab
+ */
+export function wasDocumentClosedByUser(documentId: string): boolean {
+  const state = getTabsState();
+  return !!state.closedDocuments?.[documentId];
+}
+
+/**
+ * Clears the "closed by user" flag for a document.
+ * Called when the user explicitly wants to reopen a document (e.g., clicking the chat widget).
+ *
+ * @param documentId - The document ID to clear the flag for
+ */
+export function clearDocumentClosedFlag(documentId: string): void {
+  globalMutate<CanvasTabsState>(
+    CANVAS_TABS_KEY,
+    (current) => {
+      if (!current) {
+        return current;
+      }
+      if (!current.closedDocuments?.[documentId]) {
+        return current;
+      }
+
+      const { [documentId]: _removed, ...rest } = current.closedDocuments;
+      const newState = {
+        ...current,
+        closedDocuments: Object.keys(rest).length > 0 ? rest : undefined,
+      };
+
+      // Update cache reference
+      updateCacheReference(newState);
+
+      return newState;
+    },
+    { revalidate: false }
+  );
 }
 
 // ============================================================================
@@ -754,6 +806,7 @@ export function useCanvasTabs() {
   /**
    * Closes a tab by ID
    * If the closed tab was active, activates an adjacent tab
+   * Marks the document as "closed by user" to prevent auto-reopening
    */
   const closeTab = useCallback(
     (tabId: string) => {
@@ -764,6 +817,10 @@ export function useCanvasTabs() {
         if (tabIndex === -1) {
           return currentState;
         }
+
+        // Get the documentId from the tab being closed
+        const tabToClose = currentState.tabs[tabIndex];
+        const documentId = tabToClose?.artifact.documentId;
 
         const newTabs = currentState.tabs.filter((tab) => tab.id !== tabId);
 
@@ -781,9 +838,19 @@ export function useCanvasTabs() {
           }
         }
 
+        // Mark this document as closed by user (if it has a documentId)
+        const closedDocuments = { ...(currentState.closedDocuments ?? {}) };
+        if (documentId) {
+          closedDocuments[documentId] = true;
+        }
+
         return {
           tabs: newTabs,
           activeTabId: newActiveTabId,
+          closedDocuments:
+            Object.keys(closedDocuments).length > 0
+              ? closedDocuments
+              : undefined,
         };
       });
     },

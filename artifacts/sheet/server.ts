@@ -22,11 +22,11 @@ export const sheetDocumentHandler = createDocumentHandler<"sheet">({
     for await (const chunk of stream.textStream) {
       draftContent += chunk;
 
-      await dataStream.write({
+      await dataStream.custom({
         type: "data-sheetDelta",
         data: chunk,
         transient: true,
-      });
+      } as any);
     }
 
     return draftContent;
@@ -48,11 +48,11 @@ export const sheetDocumentHandler = createDocumentHandler<"sheet">({
     for await (const chunk of stream.textStream) {
       draftContent += chunk;
 
-      await dataStream.write({
+      await dataStream.custom({
         type: "data-sheetDelta",
         data: chunk,
         transient: true,
-      });
+      } as any);
     }
 
     return draftContent;

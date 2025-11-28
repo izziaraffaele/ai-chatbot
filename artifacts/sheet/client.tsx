@@ -20,8 +20,13 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
     if (streamPart.type === "data-sheetDelta") {
       setArtifact((draftArtifact) => ({
         ...draftArtifact,
-        content: streamPart.data,
-        isVisible: true,
+        content: draftArtifact.content + streamPart.data,
+        isVisible:
+          draftArtifact.status === "streaming" &&
+          draftArtifact.content.length > 400 &&
+          draftArtifact.content.length < 450
+            ? true
+            : draftArtifact.isVisible,
         status: "streaming",
       }));
     }

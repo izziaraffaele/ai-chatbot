@@ -9,8 +9,10 @@ import { FileIcon, LoaderIcon } from "@/components/icons";
 import {
   activateTabForStreaming,
   bindPendingTabToDocument,
+  clearDocumentClosedFlag,
   openPendingTab,
   useCanvasTabs,
+  wasDocumentClosedByUser,
 } from "@/hooks/use-canvas-tabs";
 import { generatePendingDocumentId } from "@/lib/canvas";
 import type { ChatTools } from "@/lib/types";
@@ -155,6 +157,12 @@ function PureDocumentTool(props: DocumentToolProps) {
       pendingTabOpenedRef.current = toolCallId;
       openPendingTab(toolCallId, initialKind as any, initialTitle);
     } else if (isUpdateDocument && updateDocumentId) {
+      // Skip if user explicitly closed this document
+      if (wasDocumentClosedByUser(updateDocumentId)) {
+        pendingTabOpenedRef.current = toolCallId;
+        return;
+      }
+
       // For updateDocument: Activate existing tab and set to streaming
       pendingTabOpenedRef.current = toolCallId;
       const activated = activateTabForStreaming(updateDocumentId);
@@ -228,6 +236,11 @@ function PureDocumentTool(props: DocumentToolProps) {
       return;
     }
 
+    // Skip if user explicitly closed this document
+    if (wasDocumentClosedByUser(documentId)) {
+      return;
+    }
+
     // No tab exists for this document - create one directly with actual document ID
     const title =
       (part.output && "title" in part.output
@@ -283,6 +296,9 @@ function PureDocumentTool(props: DocumentToolProps) {
     if (!targetId) {
       return;
     }
+
+    // User explicitly wants to open this document - clear the "closed" flag
+    clearDocumentClosedFlag(targetId);
 
     const targetTitle =
       (part.output && "title" in part.output

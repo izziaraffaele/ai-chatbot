@@ -1417,23 +1417,65 @@ When a tab is closed:
 2. All tabs to the right shift left to fill the gap
 3. If the closed tab was active, the adjacent tab (preferring right, then left) becomes active
 4. Focus moves to the newly active tab if the user was navigating with keyboard
+5. The document ID is recorded in `closedDocuments` to prevent auto-reopening
+
+### Closed-by-User Tracking
+
+The tab system tracks which documents were explicitly closed by the user to prevent auto-reopening. This prevents a frustrating bug where closed tabs would immediately reopen due to streaming events or widget renders.
+
+**State Structure:**
+
+```typescript
+type CanvasTabsState = {
+  tabs: CanvasTab[];
+  activeTabId: string | null;
+  closedDocuments?: Record<string, boolean>;  // documentId -> closedByUser
+};
+```
+
+**Helper Functions:**
+
+| Function | Purpose |
+|----------|---------|
+| `wasDocumentClosedByUser(documentId)` | Check if user closed this document's tab |
+| `clearDocumentClosedFlag(documentId)` | Clear the flag to allow re-opening |
+
+**Behavior:**
+- When user closes a tab → `closedDocuments[documentId] = true`
+- When streaming `data-id` arrives → Skip tab creation if `wasDocumentClosedByUser(documentId)`
+- When user clicks chat widget → Call `clearDocumentClosedFlag(documentId)` then open tab
+
+**Example - Explicit Re-open:**
+
+```typescript
+import { clearDocumentClosedFlag, useCanvasTabs } from "@/hooks/use-canvas-tabs";
+
+const { openTab } = useCanvasTabs();
+
+const handleReopen = (documentId: string) => {
+  clearDocumentClosedFlag(documentId);  // Allow opening this document again
+  openTab({ documentId, kind: "text", ... }, "My Document");
+};
+```
 
 ### Auto-Opening Tabs During Document Streaming
 
 The canvas tab system uses a **"pending tab" pattern** that opens tabs IMMEDIATELY when a document tool starts executing—before the document ID is even known from the backend. This ensures users see the canvas open instantly without any delay.
 
+**Important:** All auto-open logic respects the closed-by-user flag. If the user has explicitly closed a document's tab, it will NOT auto-reopen from streaming events.
+
 **For `createDocument`:**
 1. Tool-call appears in chat → Tab opens immediately in "pending" state
 2. Tab shows "Preparing..." with a pulsing blue indicator
-3. When `data-id` arrives from stream → Tab is bound to actual document ID
+3. When `data-id` arrives from stream → Tab is bound to actual document ID (unless user closed it)
 4. Content streams in real-time as `data-textDelta` events arrive
 5. When `data-finish` arrives → Tab transitions to "idle" state
 
 **For `updateDocument`:**
 1. Tool-call appears → Existing tab is activated and set to "streaming"
-2. If tab was closed → New tab opens with the document ID
-3. Content streams directly to the existing tab
-4. Chat widget always shows (links to the updating tab)
+2. If tab was closed by user → Tab is NOT auto-reopened (respects user choice)
+3. Content streams directly to the existing tab (if open)
+4. Chat widget always shows (user can click to explicitly re-open)
 
 ### Widget Status Lifecycle
 
@@ -2403,6 +2445,136 @@ For each `createDocument` call:
 
 1. Ask the assistant to "Create 3 short documents: one about cats, one about dogs, and one about birds"
 2. Verify: Each document gets its own tab, all three stream live, no stuck states
+
+### 18. Document Streaming Visibility Fix (Sheet and Code)
+
+**Files**: `artifacts/sheet/server.ts`, `artifacts/code/server.ts`, `artifacts/sheet/client.tsx`, `artifacts/code/client.tsx`
+
+**Issue**: Only text documents showed streaming progress to the user. When creating sheet (CSV) or code documents, the document appeared to be created instantly at the end instead of streaming character-by-character like text documents.
+
+**Root Cause**: Two inconsistencies between the text document handler (which worked correctly) and the sheet/code handlers:
+
+1. **Server-side**: Sheet and Code handlers used `dataStream.write()` instead of `dataStream.custom()`:
+   ```typescript
+   // Broken (sheet/code)
+   await dataStream.write({ type: "data-sheetDelta", ... });
+   
+   // Working (text)
+   await dataStream.custom({ type: "data-textDelta", ... } as any);
+   ```
+
+2. **Client-side**: Sheet and Code handlers REPLACED content instead of APPENDING:
+   ```typescript
+   // Broken (sheet/code)
+   content: streamPart.data  // Replaces entire content
+   
+   // Working (text)
+   content: draftArtifact.content + streamPart.data  // Appends
+   ```
+
+**Fix Applied**:
+
+1. Updated `artifacts/sheet/server.ts` to use `dataStream.custom()`:
+   ```typescript
+   await dataStream.custom({
+     type: "data-sheetDelta",
+     data: chunk,
+     transient: true,
+   } as any);
+   ```
+
+2. Updated `artifacts/code/server.ts` to use `dataStream.custom()`:
+   ```typescript
+   await dataStream.custom({
+     type: "data-codeDelta",
+     data: chunk,
+     transient: true,
+   } as any);
+   ```
+
+3. Updated `artifacts/sheet/client.tsx` to append content:
+   ```typescript
+   setArtifact((draftArtifact) => ({
+     ...draftArtifact,
+     content: draftArtifact.content + streamPart.data,
+     isVisible:
+       draftArtifact.status === "streaming" &&
+       draftArtifact.content.length > 400 &&
+       draftArtifact.content.length < 450
+         ? true
+         : draftArtifact.isVisible,
+     status: "streaming",
+   }));
+   ```
+
+4. Updated `artifacts/code/client.tsx` to append content:
+   ```typescript
+   setArtifact((draftArtifact) => ({
+     ...draftArtifact,
+     content: draftArtifact.content + streamPart.data,
+     // ... same visibility logic as before
+   }));
+   ```
+
+**Pattern Reference**: All document handlers (text, code, sheet) now follow the same streaming pattern:
+- Server: Use `dataStream.custom()` with `{ type: "data-*Delta", data: chunk, transient: true } as any`
+- Client: Append content with `content: draftArtifact.content + streamPart.data`
+
+### 19. CSV/Sheet Grid Streaming View Fix
+
+**Files**: `hooks/use-canvas-tabs.ts`, `hooks/use-artifact-streaming.ts`
+
+**Issue**: When streaming CSV/sheet documents, the content was initially rendered as plain text instead of in the spreadsheet grid view. The grid only appeared after the user manually closed and reopened the tab.
+
+**Root Cause**: When a document tool call starts streaming, `DocumentTool` opens a pending tab immediately. However, at that moment, `part.input.kind` may not be available (tool inputs stream progressively), so `initialKind` defaults to `"text"`. The tab remains with `kind: "text"` even after `data-kind` event arrives with `"sheet"`, causing the wrong renderer (text editor) to be used.
+
+**Fix**:
+
+1. **Extended `mutateTabByDocumentId`** to support `kind` updates:
+   ```typescript
+   // hooks/use-canvas-tabs.ts
+   export function mutateTabByDocumentId(
+     documentId: string,
+     updates: {
+       content?: unknown;
+       status?: WidgetStatus;
+       title?: string;
+       kind?: WidgetKind;  // Added
+     }
+   ): boolean {
+     // ... also updates artifact.kind and tab.type when kind is provided
+   }
+   ```
+
+2. **Update tab kind when `data-kind` event arrives** in `useTabStreamSync`:
+   ```typescript
+   // hooks/use-artifact-streaming.ts
+   case "data-kind":
+     pendingKindRef.current = delta.data;
+     // If we already have a document ID, update the tab's kind immediately
+     if (streamingDocumentIdRef.current) {
+       mutateTabByDocumentId(streamingDocumentIdRef.current, {
+         kind: delta.data as WidgetKind,
+       });
+     }
+     break;
+   ```
+
+3. **Apply buffered kind when binding pending tab** to actual document ID:
+   ```typescript
+   // When data-id arrives and binding succeeds
+   if (pendingKindRef.current) {
+     mutateTabByDocumentId(actualDocId, {
+       kind: pendingKindRef.current as WidgetKind,
+     });
+   }
+   ```
+
+**Behavior After Fix**:
+- Tab opens with default kind (`"text"`) when tool call starts
+- When `data-kind` event arrives with actual kind (e.g., `"sheet"`), tab kind is updated
+- Correct renderer (spreadsheet grid) is used immediately during streaming
+- No need to close/reopen tab to see the grid view
 
 ---
 
