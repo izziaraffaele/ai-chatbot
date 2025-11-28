@@ -76,8 +76,21 @@ export function MessageIterator({
     [displayUser, displayAssistant]
   );
 
+  // Deduplicate messages by ID to prevent duplicate key errors
+  // This handles cases where the AI SDK might provide duplicate messages during streaming
+  const uniqueMessages = useMemo(() => {
+    const seen = new Set<string>();
+    return messages.filter((message) => {
+      if (seen.has(message.id)) {
+        return false;
+      }
+      seen.add(message.id);
+      return true;
+    });
+  }, [messages]);
+
   // Show empty state if no messages
-  if (messages.length === 0) {
+  if (uniqueMessages.length === 0) {
     return <>{empty}</>;
   }
 
@@ -88,10 +101,10 @@ export function MessageIterator({
   // Render messages
   return (
     <>
-      {messages.map((message, index) => {
+      {uniqueMessages.map((message, index) => {
         const messageSender = senders[message.role];
         const messageVote = votes.find((vote) => vote.messageId === message.id);
-        const isLastMessage = index === messages.length - 1;
+        const isLastMessage = index === uniqueMessages.length - 1;
 
         return (
           <Fragment key={getMessageKey(message.id)}>

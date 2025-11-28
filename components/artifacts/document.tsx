@@ -29,6 +29,7 @@ import { useChatRuntime } from "@/components/chat/context";
 import { Toolbar } from "@/components/toolbar";
 import { VersionFooter } from "@/components/version-footer";
 import { useArtifact } from "@/hooks/use-artifact";
+import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
 import { useChatDocument } from "@/hooks/use-chat-document";
 import type { Document } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
@@ -59,6 +60,9 @@ export type DocumentArtifactProps = {
  * DocumentArtifact
  * Complete document artifact composition using chat primitives
  * Supports text, code, and sheet documents with versioning and auto-save
+ *
+ * Note: Streaming content is now synchronized to the tab state via useTabStreamSync
+ * in the parent component. This component reads content from the tab directly.
  */
 export function DocumentArtifact({
   documentId,
@@ -70,7 +74,8 @@ export function DocumentArtifact({
 
   const runtime = useChatRuntime();
   const chat = useChat({ chat: runtime.chat });
-  const { artifact, metadata, setMetadata, setArtifact } = useArtifact();
+  const { metadata, setMetadata } = useArtifact();
+  const { activeTab, closeTab } = useCanvasTabs();
   const chatDocument = useChatDocument(documentId);
 
   // Find artifact definition (text, code, or sheet)
@@ -96,18 +101,17 @@ export function DocumentArtifact({
     }));
   }, [chatDocument.entries]);
 
-  // Handle close
+  // Handle close - closes the current tab
   const handleClose = useCallback(() => {
-    setArtifact((current) => ({
-      ...current,
-      isVisible: false,
-    }));
-  }, [setArtifact]);
+    if (activeTab) {
+      closeTab(activeTab.id);
+    }
+  }, [activeTab, closeTab]);
 
   // Save handler
   const handleSave = useCallback(
     async (content: string) => {
-      if (!artifact) {
+      if (!activeTab) {
         return;
       }
 
@@ -132,14 +136,25 @@ export function DocumentArtifact({
         // Optionally show error message to user
       }
     },
-    [artifact, chatDocument, documentId, title, kind]
+    [activeTab, chatDocument, documentId, title, kind]
   );
 
-  // Get initial content for draft provider
-  // Use the latest version from documents if available, otherwise fallback to artifact.content
+  // Get content for the document
+  // Priority: Tab artifact content (streaming via useTabStreamSync) > Latest saved version
+  const tabArtifact = activeTab?.artifact;
   const latestDocument =
     chatDocument.entries?.[chatDocument.entries.length - 1];
-  const initialContent = latestDocument?.content || artifact.content || "";
+
+  // Use tab content if available (this includes streaming content)
+  // Otherwise fall back to the latest saved document content
+  const currentContent = useMemo(() => {
+    // If tab has content (including streaming content), use it
+    if (tabArtifact?.content) {
+      return typeof tabArtifact.content === "string" ? tabArtifact.content : "";
+    }
+    // Fall back to latest saved document
+    return latestDocument?.content || "";
+  }, [tabArtifact?.content, latestDocument?.content]);
 
   // Set initial index to the latest version (last item in versions array)
   const initialVersionIndex = Math.max(0, versions.length - 1);
@@ -151,13 +166,15 @@ export function DocumentArtifact({
       versions={versions}
     >
       <ArtifactDraftProvider
-        initialContent={initialContent}
+        initialContent={currentContent}
+        key={`draft-${documentId}-${tabArtifact?.status}`}
         onSaveAction={handleSave}
       >
         <DocumentArtifactContent
           artifactDefinition={artifactDefinition}
           chatDocument={chatDocument}
           className={className}
+          currentContent={currentContent}
           isToolbarVisible={isToolbarVisible}
           metadata={metadata}
           onClose={handleClose}
@@ -188,6 +205,8 @@ type DocumentArtifactContentProps = {
   className?: string;
   metadata: Record<string, any>;
   setMetadata: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  /** Current content from tab (includes streaming content) */
+  currentContent: string;
 };
 
 function DocumentArtifactContent({
@@ -204,8 +223,9 @@ function DocumentArtifactContent({
   className,
   metadata,
   setMetadata,
+  currentContent,
 }: DocumentArtifactContentProps) {
-  const { artifact } = useArtifact();
+  const { activeTab } = useCanvasTabs();
   const { currentIndex, isLatest, mode, navigateVersion } =
     useArtifactVersion();
   const {
@@ -228,6 +248,13 @@ function DocumentArtifactContent({
     });
   }, [currentEntry]);
 
+  // Determine display content:
+  // - During streaming/pending: use currentContent from tab (updated by useTabStreamSync)
+  // - Otherwise: use draftContent (user edits)
+  const tabStatus = activeTab?.artifact.status;
+  const isStreaming = tabStatus === "streaming" || tabStatus === "pending";
+  const displayContent = isStreaming ? currentContent : draftContent;
+
   return (
     <ChatArtifact className={cn("h-full rounded-none border-none", className)}>
       <ChatArtifactHeader
@@ -245,12 +272,12 @@ function DocumentArtifactContent({
               icon={<EyeIcon className="size-4" />}
             />
             <ChatArtifactAction.Copy
-              content={draftContent}
+              content={displayContent}
               icon={<CopyIcon className="size-4" />}
               tooltip="Copy content"
             />
             <ChatArtifactAction.Download
-              content={draftContent}
+              content={displayContent}
               filename={`${title}.txt`}
               icon={<DownloadIcon className="size-4" />}
               tooltip="Download"
@@ -259,7 +286,12 @@ function DocumentArtifactContent({
         }
         onClose={onClose}
         subtitle={
-          isDirty ? (
+          isStreaming ? (
+            <span className="flex items-center gap-2">
+              <span className="size-2 animate-pulse rounded-full bg-amber-400" />
+              Generating...
+            </span>
+          ) : isDirty ? (
             "Saving changes..."
           ) : updatedAt ? (
             `Updated ${updatedAt}`
@@ -272,7 +304,7 @@ function DocumentArtifactContent({
 
       <ChatArtifactBody
         toolbar={
-          isLatest ? (
+          isLatest && !isStreaming ? (
             <Toolbar
               artifactKind={artifactDefinition.kind}
               isToolbarVisible={isToolbarVisible}
@@ -286,7 +318,7 @@ function DocumentArtifactContent({
         }
       >
         <artifactDefinition.content
-          content={draftContent}
+          content={displayContent}
           currentVersionIndex={currentIndex}
           getDocumentContentById={(versionIndex: number) => {
             // Ensure versionIndex is within bounds
@@ -300,12 +332,12 @@ function DocumentArtifactContent({
           }}
           isCurrentVersion={isLatest}
           isInline={false}
-          isLoading={chatDocument.isLoading && !artifact.content}
+          isLoading={chatDocument.isLoading && !activeTab?.artifact.content}
           metadata={metadata}
           mode={mode}
           onSaveContent={setContent}
           setMetadata={setMetadata}
-          status={artifact.status}
+          status={activeTab?.artifact.status || "idle"}
           suggestions={[]}
           title={title}
         />

@@ -12,14 +12,11 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
-import {
-  DOCUMENT_SELECTOR_KIND,
-  type DocumentSelectorUIArtifact,
-} from "@/components/artifacts/document-selector";
+import { DOCUMENT_SELECTOR_KIND } from "@/components/artifacts/document-selector";
 import { useChatRuntime } from "@/components/chat/context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useArtifact } from "@/hooks/use-artifact";
+import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
 import { cn } from "@/lib/utils";
 import type { ChatToolProps } from "./types";
 
@@ -104,16 +101,18 @@ type LoadInvoiceOutput = {
  * LoadInvoice Tool UI Component
  *
  * Renders the output of the loadInvoice tool:
- * - When availableFiles is returned: opens document selector in side panel
+ * - When availableFiles is returned: automatically opens document selector in side panel
  * - When metadata/content is returned: shows invoice details summary with validation
  */
 export function LoadInvoiceTool({ part }: ChatToolProps) {
   const output = part.output as LoadInvoiceOutput | undefined;
-  const { setArtifact } = useArtifact<DocumentSelectorUIArtifact>();
+  const { openTab } = useCanvasTabs();
   const hitboxRef = useRef<HTMLDivElement>(null);
 
-  // Track which file set we've already opened the panel for (by signature)
-  const openedForSignatureRef = useRef<string | null>(null);
+  // Track which file set we've already auto-opened the panel for
+  // Using a signature prevents re-opening on re-renders while allowing
+  // new file sets to trigger a fresh auto-open
+  const autoOpenedForSignatureRef = useRef<string | null>(null);
 
   // Get files for the selector (either with validation or legacy)
   const filesWithValidation = useMemo(() => {
@@ -131,14 +130,12 @@ export function LoadInvoiceTool({ part }: ChatToolProps) {
     return null;
   }, [output?.filesWithValidation, output?.availableFiles]);
 
-  // Create a stable signature for the files to track if we've opened the panel for this set
+  // Create a signature for the current file set to track auto-open state
   const filesSignature = useMemo(() => {
     if (!filesWithValidation) {
       return null;
     }
-    // Use count + first file ID as a simple stable signature
-    const firstFileId = filesWithValidation[0]?.fileId || "";
-    return `${filesWithValidation.length}:${firstFileId}`;
+    return `${filesWithValidation.length}:${filesWithValidation[0]?.fileId || ""}`;
   }, [filesWithValidation]);
 
   // Calculate stats for the collapsed view
@@ -156,47 +153,7 @@ export function LoadInvoiceTool({ part }: ChatToolProps) {
     };
   }, [filesWithValidation]);
 
-  // Auto-open the document selector panel when files are loaded
-  useEffect(() => {
-    // Skip if no files or we've already opened for this exact file set
-    if (!filesWithValidation || !filesSignature) {
-      return;
-    }
-
-    if (openedForSignatureRef.current === filesSignature) {
-      return;
-    }
-
-    // Mark this file set as opened
-    openedForSignatureRef.current = filesSignature;
-
-    // Get bounding box for animation
-    // Use a default center position if ref is not available
-    const boundingBox = hitboxRef.current?.getBoundingClientRect() ?? {
-      top: window.innerHeight / 4,
-      left: window.innerWidth / 2,
-      width: 300,
-      height: 200,
-    };
-
-    // Open the document selector in the side panel
-    setArtifact({
-      documentId: "document-selector",
-      kind: DOCUMENT_SELECTOR_KIND,
-      content: filesWithValidation,
-      title: "Documenti Disponibili",
-      isVisible: true,
-      status: "idle",
-      boundingBox: {
-        top: boundingBox.top,
-        left: boundingBox.left,
-        width: boundingBox.width,
-        height: boundingBox.height,
-      },
-    });
-  }, [filesWithValidation, filesSignature, setArtifact]);
-
-  // Handle click to re-open the panel
+  // Handle click to open the panel
   const handleOpenPanel = useCallback(() => {
     if (!filesWithValidation) {
       return;
@@ -209,21 +166,59 @@ export function LoadInvoiceTool({ part }: ChatToolProps) {
       height: 200,
     };
 
-    setArtifact({
-      documentId: "document-selector",
-      kind: DOCUMENT_SELECTOR_KIND,
-      content: filesWithValidation,
-      title: "Documenti Disponibili",
-      isVisible: true,
-      status: "idle",
-      boundingBox: {
-        top: boundingBox.top,
-        left: boundingBox.left,
-        width: boundingBox.width,
-        height: boundingBox.height,
+    openTab(
+      {
+        documentId: "document-selector",
+        kind: DOCUMENT_SELECTOR_KIND,
+        content: filesWithValidation,
+        title: "UI fatture",
+        isVisible: true,
+        status: "idle",
+        boundingBox: {
+          top: boundingBox.top,
+          left: boundingBox.left,
+          width: boundingBox.width,
+          height: boundingBox.height,
+        },
       },
-    });
-  }, [filesWithValidation, setArtifact]);
+      "UI fatture"
+    );
+  }, [filesWithValidation, openTab]);
+
+  // AUTO-OPEN: When files are available, automatically open the document selector panel
+  useEffect(() => {
+    // Only auto-open if we have files and haven't already opened for this signature
+    if (!filesWithValidation || !filesSignature) {
+      return;
+    }
+
+    // Skip if already opened for this file set
+    if (autoOpenedForSignatureRef.current === filesSignature) {
+      return;
+    }
+
+    // Mark as opened for this file set
+    autoOpenedForSignatureRef.current = filesSignature;
+
+    // Open the panel
+    openTab(
+      {
+        documentId: "document-selector",
+        kind: DOCUMENT_SELECTOR_KIND,
+        content: filesWithValidation,
+        title: "UI fatture",
+        isVisible: true,
+        status: "idle",
+        boundingBox: {
+          top: window.innerHeight / 4,
+          left: window.innerWidth / 2,
+          width: 300,
+          height: 200,
+        },
+      },
+      "UI fatture"
+    );
+  }, [filesWithValidation, filesSignature, openTab]);
 
   // If no output yet (streaming), show loading
   if (!output) {

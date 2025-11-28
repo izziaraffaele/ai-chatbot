@@ -33,37 +33,48 @@ export const updateDocumentTool = createTool({
       throw new Error("Document not found");
     }
 
+    // Emit data-id first so the frontend can identify which document is being updated
+    await writer?.write({
+      type: "data-id",
+      data: id,
+      transient: true,
+    });
+
     await writer?.write({
       type: "data-clear",
       data: null,
       transient: true,
     });
 
-    const documentHandler = documentHandlersByArtifactKind.find(
-      (documentHandlerByArtifactKind) =>
-        documentHandlerByArtifactKind.kind === document.kind
-    );
+    // Use try/finally to ensure data-finish is always emitted
+    try {
+      const documentHandler = documentHandlersByArtifactKind.find(
+        (documentHandlerByArtifactKind) =>
+          documentHandlerByArtifactKind.kind === document.kind
+      );
 
-    if (!documentHandler) {
-      throw new Error(`No document handler found for kind: ${document.kind}`);
+      if (!documentHandler) {
+        throw new Error(`No document handler found for kind: ${document.kind}`);
+      }
+
+      if (writer && session) {
+        await documentHandler.onUpdateDocument({
+          document,
+          description,
+          dataStream: writer,
+          session,
+        });
+      }
+
+      return {
+        id,
+        title: document.title,
+        kind: document.kind,
+        content: "The document has been updated successfully.",
+      };
+    } finally {
+      // Always emit data-finish to ensure the tab transitions to idle state
+      await writer?.write({ type: "data-finish", data: null, transient: true });
     }
-
-    if (writer && session) {
-      await documentHandler.onUpdateDocument({
-        document,
-        description,
-        dataStream: writer,
-        session,
-      });
-    }
-
-    await writer?.write({ type: "data-finish", data: null, transient: true });
-
-    return {
-      id,
-      title: document.title,
-      kind: document.kind,
-      content: "The document has been updated successfully.",
-    };
   },
 });

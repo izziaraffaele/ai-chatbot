@@ -34,7 +34,7 @@ export const chatAgent = new Agent({
 
     return prompt;
   },
-  model: "google/gemini-2.5-flash",
+  model: "openai/gpt-4.1",
   agents: { invoiceAnalyzerAgent },
   tools: {
     createDocument: mastraTools.createDocument,

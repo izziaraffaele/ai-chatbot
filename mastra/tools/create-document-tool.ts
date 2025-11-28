@@ -26,6 +26,7 @@ export const createDocumentTool = createTool({
     const session = getSession(runtimeContext);
     const id = generateUUID();
 
+    // Emit initial metadata events
     await writer?.custom({
       type: "data-kind",
       data: kind,
@@ -50,35 +51,39 @@ export const createDocumentTool = createTool({
       transient: true,
     } as any);
 
-    const documentHandler = documentHandlersByArtifactKind.find(
-      (documentHandlerByArtifactKind) =>
-        documentHandlerByArtifactKind.kind === kind
-    );
+    // Use try/finally to ensure data-finish is always emitted
+    try {
+      const documentHandler = documentHandlersByArtifactKind.find(
+        (documentHandlerByArtifactKind) =>
+          documentHandlerByArtifactKind.kind === kind
+      );
 
-    if (!documentHandler) {
-      throw new Error(`No document handler found for kind: ${kind}`);
-    }
+      if (!documentHandler) {
+        throw new Error(`No document handler found for kind: ${kind}`);
+      }
 
-    if (writer && session) {
-      await documentHandler.onCreateDocument({
+      if (writer && session) {
+        await documentHandler.onCreateDocument({
+          id,
+          title,
+          dataStream: writer,
+          session,
+        });
+      }
+
+      return {
         id,
         title,
-        dataStream: writer,
-        session,
-      });
+        kind,
+        content: "A document was created and is now visible to the user.",
+      };
+    } finally {
+      // Always emit data-finish to ensure the tab transitions to idle state
+      await writer?.custom({
+        type: "data-finish",
+        data: null,
+        transient: true,
+      } as any);
     }
-
-    await writer?.custom({
-      type: "data-finish",
-      data: null,
-      transient: true,
-    } as any);
-
-    return {
-      id,
-      title,
-      kind,
-      content: "A document was created and is now visible to the user.",
-    };
   },
 });

@@ -53,6 +53,7 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 │                                              │  HTTP Transport          │    │
 │                                              └──────────────────────────┘    │
 │                                                            │                 │
+│                                                            ▼                 │
 └────────────────────────────────────────────────────────────│─────────────────┘
                                                              │
                                                     HTTP POST /api/chat
@@ -121,7 +122,7 @@ export const chatAgent = new Agent({
     const geoHints = getGeoHints(runtimeContext);
     return chatAgentSystemPrompt(config, geoHints);
   },
-  model: "google/gemini-2.5-flash",
+  model: "openai/gpt-4.1",
   // Sub-agent for deep invoice analysis
   agents: { invoiceAnalyzerAgent },
   tools: {
@@ -171,7 +172,7 @@ export const invoiceAnalyzerAgent = new Agent({
     Usa questo agente quando l'utente chiede di "analizzare una fattura" per trovare
     campi mancanti come IBAN, CIG, CUP, Codice Fiscale, o Codice PA.`,
   instructions: invoiceAnalyzerSystemPrompt([...missingFields]),
-  model: "google/gemini-2.5-flash",
+  model: "openai/gpt-4.1",
   tools: invoiceValidationTools,
 });
 
@@ -363,7 +364,7 @@ The `LoadInvoiceTool` component (`components/tools/load-invoice.tsx`) displays:
 **Document List View:**
 - **Valid invoices**: Green badge "✓ Fattura valida"
 - **Invalid invoices**: Red badge "✗ Fattura non valida"
-- Header stats: Shows count of valid/invalid invoices
+- **Header stats**: Shows count of valid/invalid invoices
 
 **Document Details View:**
 - Validation badge (green/red)
@@ -431,12 +432,12 @@ const result = await validateCupTool.execute({
 
 The `loadInvoice` tool has a built-in UI component (`LoadInvoiceTool` in `components/tools/load-invoice.tsx`) that automatically renders:
 
-- **When listing documents** (called without `fileId`): Automatically opens a document selector panel on the right side of the screen (similar to how documents are displayed)
+- **When listing documents** (called without `fileId`): Shows a clickable widget card; user clicks to open the document selector panel on the right side
 - **When loading a specific document**: Shows invoice metadata summary (supplier, invoice number, date, amount) with **validation details**.
 
 ##### Document Selector Side Panel
 
-When the `loadInvoice` tool returns available files, the **Document Selector Artifact** (`components/artifacts/document-selector.tsx`) automatically opens in a side panel on the right side of the screen. This provides a better UX by:
+When the user clicks on the "Documenti Disponibili" widget in the chat, the **Document Selector Artifact** (`components/artifacts/document-selector.tsx`) opens in a side panel on the right side of the screen. This provides a better UX by:
 
 - Keeping the chat visible in a sidebar on the left
 - Displaying the document selector in a larger, dedicated panel
@@ -452,7 +453,7 @@ When the `loadInvoice` tool returns available files, the **Document Selector Art
 | `InvoiceDetailView` | `components/artifacts/document-selector.tsx` | Detail view with extracted data and invoice display |
 | `ExtractedDataCard` | `components/artifacts/document-selector.tsx` | Color-coded card for extracted field with edit support |
 | `ParsedInvoiceRenderer` | `components/artifacts/document-selector.tsx` | Formatted invoice display component |
-| `LoadInvoiceTool` | `components/tools/load-invoice.tsx` | Triggers the side panel when files are returned |
+| `LoadInvoiceTool` | `components/tools/load-invoice.tsx` | Shows clickable widget; opens side panel when clicked |
 | `ChatCanvas` | `components/chat/canvas.tsx` | Resizable panel container using `react-resizable-panels` |
 
 **Resizable Layout:**
@@ -639,11 +640,12 @@ const data = await response.json();
          │
          ▼
 5. LoadInvoiceTool UI component:
-   a. Calls setArtifact() to open DocumentSelectorArtifact in side panel
-   b. Shows collapsed widget in chat with summary stats
+   - Shows "Documenti Disponibili" card with stats (valid/invalid/total)
+   - AUTOMATICALLY opens the side panel (document-selector tab)
          │
          ▼
-6. Side panel (DocumentSelectorArtifact) opens on the right:
+6. Document Selector panel opens automatically:
+   - Side panel (DocumentSelectorArtifact) opens on the right
    - Chat thread on left (default 60%, resizable 30-80%)
    - Document selector on right (default 40%, resizable 20-70%)
    - User can drag the divider to resize panels
@@ -744,6 +746,7 @@ When an invoice is invalid and the user clicks "Analizza Fattura":
 3. Chat Agent (routing agent) receives the message
    - Recognizes analysis request based on message content
    - Has invoiceAnalyzerAgent registered as sub-agent
+   - Has invoiceAnalyzerAgent registered as sub-agent
          │
          ▼
 4. Chat Agent delegates to Invoice Analyzer sub-agent
@@ -827,9 +830,14 @@ components/
 │   └── index.ts               # Artifact exports and types
 ├── chat/
 │   ├── canvas.tsx             # Resizable canvas layout (react-resizable-panels)
+│   ├── canvas-tabs.tsx        # Tab bar component for multi-tab canvas
 │   └── agent-selector.tsx     # Agent selection UI
 └── tools/
-    └── load-invoice.tsx       # Invoice UI (auto-opens side panel, shows details)
+│   └── load-invoice.tsx       # Invoice UI (auto-opens side panel, shows details)
+
+hooks/
+├── use-canvas-tabs.ts         # Multi-tab state management hook
+└── ...                        # Other hooks
 ```
 
 ---
@@ -844,7 +852,7 @@ components/
 export const myAgent = new Agent({
   name: "My Agent",
   instructions: "...",
-  model: "google/gemini-2.5-flash",
+  model: "openai/gpt-4.1",
   tools: { ... },
 });
 ```
@@ -883,6 +891,457 @@ function extractMetadata(content: string, fileName: string): InvoiceMetadata {
     newField,
   };
 }
+```
+
+---
+
+## Canvas Tab System
+
+The canvas panel (right side of the application) supports a multi-tab system that allows users to work with multiple documents and widgets simultaneously. The system uses a **Widget Registry Pattern** for extensibility.
+
+### Widget Registry Architecture
+
+The tab system is built on a centralized widget registry that decouples tab management from widget rendering:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          WIDGET REGISTRY PATTERN                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   ┌──────────────────┐      ┌──────────────────┐      ┌────────────────┐   │
+│   │  Widget Registry │◄─────│  Widget Defs     │      │  CanvasInit    │   │
+│   │  (lib/canvas/)   │      │  (definitions)   │      │  (registers)   │   │
+│   └────────┬─────────┘      └──────────────────┘      └────────────────┘   │
+│            │                                                                │
+│            ▼                                                                │
+│   ┌──────────────────────────────────────────────────────────────────┐     │
+│   │                        CanvasWidgetContainer                      │     │
+│   │  - Looks up widget from registry                                  │     │
+│   │  - Wraps with WidgetContextProvider                               │     │
+│   │  - Renders the appropriate widget component                       │     │
+│   └──────────────────────────────────────────────────────────────────┘     │
+│            │                                                                │
+│            ▼                                                                │
+│   ┌────────────────────────────────────────────────────────────────────┐   │
+│   │                         Widget Renderers                            │   │
+│   │  DocumentArtifact │ MediaArtifact │ DocumentSelectorArtifact │ ... │   │
+│   └────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Key Components
+
+| Component | Path | Description |
+|-----------|------|-------------|
+| **Widget Registry** | `lib/canvas/widget-registry.ts` | Centralized registry for widget definitions |
+| **Widget Context** | `lib/canvas/widget-context.tsx` | Per-tab context provider for state/streaming |
+| **Widget Definitions** | `lib/canvas/widget-definitions.tsx` | Built-in widget registrations |
+| **CanvasWidgetContainer** | `components/chat/canvas-widget.tsx` | Generic widget container component |
+| **CanvasTabs** | `components/chat/canvas-tabs.tsx` | Tab bar UI with accessibility |
+| **useCanvasTabs** | `hooks/use-canvas-tabs.ts` | Tab state management hook |
+
+### Widget Kinds
+
+| Kind | Label | Multiple Allowed | Streaming | Icon |
+|------|-------|------------------|-----------|------|
+| `text` | Documento di testo | Yes | Yes | FileText |
+| `code` | Codice | Yes | Yes | Code2 |
+| `sheet` | Foglio di calcolo | Yes | Yes | FileSpreadsheet |
+| `image` | Immagine | Yes | No | Image |
+| `document-selector` | Selettore documenti | No | No | LayoutGrid |
+
+### Widget Definition Structure
+
+```typescript
+type WidgetDefinition<TKind, TContent, TMeta> = {
+  kind: TKind;                    // Unique identifier
+  label: string;                  // Human-readable label
+  icon: LucideIcon;               // Tab icon
+  renderer: ComponentType<...>;   // React component
+  allowMultiple: boolean;         // Can have multiple instances?
+  supportsStreaming: boolean;     // Supports content streaming?
+  defaultContent?: TContent;      // Default content for new instances
+  tabColor?: { ... };             // Tab styling overrides
+};
+```
+
+### Widget Context
+
+Each tab provides its own context for isolated state management:
+
+```typescript
+type WidgetContextValue<TContent, TMeta> = {
+  // Identity
+  tabId: string;
+  documentId: string;
+  kind: WidgetKind;
+  title: string;
+  
+  // Content state
+  content: TContent;
+  setContent: (content: TContent) => void;
+  
+  // Status
+  status: WidgetStatus;
+  setStatus: (status: WidgetStatus) => void;
+  isPending: boolean;
+  isStreaming: boolean;
+  isIdle: boolean;
+  isError: boolean;
+  
+  // Actions
+  onClose: () => void;
+  onTitleChange?: (title: string) => void;
+};
+```
+
+### Tab State Structure
+
+```typescript
+// New typed structure
+type CanvasTabData = {
+  id: string;           // Unique tab ID
+  kind: WidgetKind;     // Widget kind from registry
+  documentId: string;   // Document identifier
+  title: string;        // Tab title
+  content: unknown;     // Widget content
+  status: WidgetStatus; // pending | idle | streaming | error
+  createdAt: number;    // Creation timestamp
+  meta?: unknown;       // Optional metadata
+};
+
+// Legacy structure (for backward compatibility)
+type CanvasTab = {
+  id: string;
+  type: 'widget' | 'document' | 'csv';
+  title: string;
+  artifact: UIArtifact;
+  createdAt: number;
+};
+```
+
+### Usage Examples
+
+**Opening a Tab (Legacy API):**
+
+```typescript
+import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
+
+function MyComponent() {
+  const { openTab } = useCanvasTabs();
+
+  const handleOpenDocument = () => {
+    openTab(
+      {
+        documentId: "doc-123",
+        kind: "text",
+        content: "Document content",
+        title: "My Document",
+        isVisible: true,
+        status: "idle",
+        boundingBox: { top: 0, left: 0, width: 300, height: 200 },
+      },
+      "My Document"
+    );
+  };
+}
+```
+
+**Opening a Tab (New API):**
+
+```typescript
+import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
+
+function MyComponent() {
+  const { openTabWithData } = useCanvasTabs();
+
+  const handleOpenDocument = () => {
+    openTabWithData({
+      kind: "text",
+      documentId: "doc-123",
+      title: "My Document",
+      content: "Document content",
+      status: "idle",
+      
+    });
+  };
+}
+```
+
+**Closing a Tab:**
+
+```typescript
+const { closeTab, activeTab } = useCanvasTabs();
+
+if (activeTab) {
+  closeTab(activeTab.id);
+}
+```
+
+**Updating Tab Content:**
+
+```typescript
+const { updateTabContent, updateTabStatus } = useCanvasTabs();
+
+// Update content
+updateTabContent(tabId, newContent);
+
+// Update status
+updateTabStatus(tabId, "streaming");
+```
+
+### Registering a Custom Widget
+
+To add a new widget type:
+
+```typescript
+// 1. Create a widget renderer component
+function MyWidgetRenderer({ documentId, title, content, status, onContentChange }: WidgetRendererProps<MyContent>) {
+  return <div>My widget content</div>;
+}
+
+// 2. Define the widget
+const myWidgetDefinition: WidgetDefinition<"my-widget", MyContent> = {
+  kind: "my-widget",
+  label: "My Widget",
+  icon: MyIcon,
+  renderer: MyWidgetRenderer,
+  allowMultiple: true,
+  supportsStreaming: false,
+};
+
+// 3. Register in lib/canvas/widget-definitions.tsx
+widgetRegistry.register(myWidgetDefinition);
+```
+
+### Accessibility Features
+
+The tab system includes comprehensive accessibility support:
+
+- **ARIA roles**: `tablist`, `tab`, `tabpanel` with proper `aria-selected`, `aria-controls`, `aria-labelledby`
+- **Keyboard navigation**:
+  - `Arrow Left/Right`: Navigate between tabs
+  - `Home/End`: Jump to first/last tab
+  - `Delete/Backspace`: Close current tab
+  - `Enter/Space`: Activate tab
+- **Mouse interactions**:
+  - `Left click`: Select/activate tab
+  - `Middle click`: Close tab
+  - `Scroll wheel`: Horizontal scroll over tabs when there are many open tabs
+- **Focus management**: Focus moves to adjacent tab on close
+- **Screen reader support**: Status indicators and labels
+
+### Tab Closing Behavior
+
+When a tab is closed:
+1. The tab is removed from the list
+2. All tabs to the right shift left to fill the gap
+3. If the closed tab was active, the adjacent tab (preferring right, then left) becomes active
+4. Focus moves to the newly active tab if the user was navigating with keyboard
+
+### Auto-Opening Tabs During Document Streaming
+
+The canvas tab system uses a **"pending tab" pattern** that opens tabs IMMEDIATELY when a document tool starts executing—before the document ID is even known from the backend. This ensures users see the canvas open instantly without any delay.
+
+**For `createDocument`:**
+1. Tool-call appears in chat → Tab opens immediately in "pending" state
+2. Tab shows "Preparing..." with a pulsing blue indicator
+3. When `data-id` arrives from stream → Tab is bound to actual document ID
+4. Content streams in real-time as `data-textDelta` events arrive
+5. When `data-finish` arrives → Tab transitions to "idle" state
+
+**For `updateDocument`:**
+1. Tool-call appears → Existing tab is activated and set to "streaming"
+2. If tab was closed → New tab opens with the document ID
+3. Content streams directly to the existing tab
+4. Chat widget always shows (links to the updating tab)
+
+### Widget Status Lifecycle
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         Widget Status Lifecycle                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  "pending"          "streaming"           "idle"           "error"          │
+│  ┌───────┐          ┌─────────┐          ┌──────┐         ┌───────┐        │
+│  │ Blue  │  data-id │ Amber   │ data-    │ Ready │  error  │ Error │        │
+│  │ pulse ├─────────►│ pulse   ├──────────►│      │────────►│       │        │
+│  │       │          │         │  finish  │      │         │       │        │
+│  └───────┘          └─────────┘          └──────┘         └───────┘        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Streaming Content Architecture
+
+The streaming architecture uses a **single source of truth** pattern with SWR for state management and a **pending tab binding** mechanism for immediate feedback:
+
+```
+Immediate Tab Opening Flow:
+┌──────────────────────┐
+│  DocumentTool        │  (detects tool-call start before output)
+│  components/tools/   │
+│  document.tsx        │
+└──────────┬───────────┘
+           │ openPendingTab(toolCallId, kind, title)
+           ▼
+┌──────────────────────┐
+│  Tab State (SWR)     │  ← Tab created with "pending-{toolCallId}" documentId
+│  status: "pending"   │
+└──────────────────────┘
+
+Stream Binding Flow:
+┌──────────────────────┐
+│  DataStreamProvider  │  (receives stream parts from server)
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐    ┌──────────────────────┐
+│ useArtifactStreaming │    │   useTabStreamSync   │
+│  (global artifact)   │    │  (binds pending tab) │
+└──────────────────────┘    └──────────┬───────────┘
+                                       │
+                                       │ data-id → bindPendingTabToDocument()
+                                       │ data-*Delta → mutateTabByDocumentId()
+                                       │ (text, code, sheet)
+                                       ▼
+                           ┌──────────────────────┐
+                           │  Tab State (SWR)     │  ← Now has real documentId
+                           │  "canvas-tabs" key   │     status: "streaming"
+                           └──────────┬───────────┘
+                                      │
+                                      ▼
+                           ┌──────────────────────┐
+                           │ WidgetContextProvider│  (passes content as props)
+                           └──────────┬───────────┘
+                                      │
+                                      ▼
+                           ┌──────────────────────┐
+                           │  DocumentArtifact    │  (displays streaming content)
+                           └──────────────────────┘
+```
+
+**Key Components:**
+
+| Component | File | Responsibility |
+|-----------|------|----------------|
+| `openPendingTab` | `hooks/use-canvas-tabs.ts` | Creates tab with temporary `pending-{toolCallId}` ID |
+| `bindPendingTabToDocument` | `hooks/use-canvas-tabs.ts` | Binds pending tab to actual document ID when known |
+| `activateTabForStreaming` | `hooks/use-canvas-tabs.ts` | Activates existing tab and sets to streaming (for updates) |
+| `useTabStreamSync` | `hooks/use-artifact-streaming.ts` | Subscribes to stream parts, binds pending tabs, updates content |
+| `DocumentTool` | `components/tools/document.tsx` | Opens pending tab immediately when tool-call starts |
+| `mutateTabByDocumentId` | `hooks/use-canvas-tabs.ts` | Direct SWR mutation function for updating tabs by documentId |
+
+**Stream Events Handled:**
+
+| Event Type | Handler Action |
+|------------|----------------|
+| `data-id` | **Binds pending tab** to actual document ID, transitions to "streaming" |
+| `data-textDelta` | Appends text content and updates tab (for text documents) |
+| `data-codeDelta` | Appends code content and updates tab (for code documents) |
+| `data-sheetDelta` | Appends sheet/CSV content and updates tab (for sheet documents) |
+| `data-title` | Updates tab title |
+| `data-clear` | Clears content |
+| `data-finish` | Sets tab status to "idle" |
+
+**Note:** All content delta types (`data-textDelta`, `data-codeDelta`, `data-sheetDelta`) are handled uniformly by `useTabStreamSync`. This ensures that text, code, and sheet documents all stream correctly with the same incremental update behavior.
+
+**Guaranteed Status Transitions:**
+
+Both `createDocumentTool` and `updateDocumentTool` use `try/finally` blocks to ensure `data-finish` is always emitted, even if an error occurs during document generation. This guarantees that:
+- Tabs never get stuck in "streaming" or "pending" status
+- The UI always transitions from "Generating..." to a completed state
+- Users don't need to manually close and reopen tabs to see the final content
+
+This architecture ensures:
+- **Instant feedback**: Tab opens immediately when user requests a document (no waiting for backend)
+- **Real-time streaming**: Content appears character-by-character as it streams
+- **Visible updates**: `updateDocument` streams to existing tab without requiring manual re-open
+- **No race conditions**: Direct SWR mutations avoid useEffect sync issues
+- **Consistent state**: Tab state is always the source of truth
+- **Proper status**: Pending → Streaming → Idle transitions are visually distinct
+- **Reliable completion**: `data-finish` is always emitted via try/finally pattern
+
+### Pending Document ID Handling
+
+Pending document IDs (format: `pending-{toolCallId}`) are temporary placeholders used during the streaming phase before the real document ID arrives from the backend. These IDs are handled specially throughout the system:
+
+**Frontend Safeguards:**
+
+1. **`useChatDocument` hook** (`hooks/use-chat-document.ts`): Skips API fetches for pending IDs using `isPendingDocumentId()` from `lib/canvas`. This prevents unnecessary `/api/document?id=pending-*` requests that would fail.
+
+2. **`DocumentTool` component** (`components/tools/document.tsx`): Includes a fallback binding mechanism that calls `bindPendingTabToDocument()` once the tool output contains the real document ID. This handles edge cases where the `data-id` stream event was processed before the pending tab existed.
+
+3. **`useTabStreamSync` hook** (`hooks/use-artifact-streaming.ts`): Primary binding mechanism that listens for `data-id` events and binds pending tabs to real document IDs during streaming.
+
+**Backend Safeguards:**
+
+The `/api/document` GET endpoint (`app/(chat)/api/document/route.ts`) validates document IDs before querying the database:
+
+1. **UUID validation**: Only valid UUID v4 format IDs are accepted. Pending IDs (which don't match UUID format) are rejected with a `400 Bad Request` response.
+
+2. **Error handling**: Database errors from `getDocumentsById` are caught and converted to structured `ChatSDKError` responses instead of surfacing as 500 errors.
+
+```typescript
+// UUID v4 validation regex
+const UUID_REGEX = /^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i;
+
+// Invalid IDs return 400 instead of hitting the database
+if (!isValidUUID(id)) {
+  return new ChatSDKError("bad_request:document", "Invalid document id format").toResponse();
+}
+```
+
+**Flow Summary:**
+
+```
+1. Tool starts → DocumentTool opens pending tab with "pending-{toolCallId}"
+2. Stream starts → useTabStreamSync receives "data-id" with real UUID
+3. Binding occurs → pendingTab.documentId changes from "pending-xxx" to real UUID
+4. Fallback → DocumentTool also attempts binding when tool output arrives (idempotent)
+5. Content streams → useChatDocument starts fetching with real UUID
+6. Finish → Tab status transitions to "idle"
+```
+
+This multi-layered approach ensures:
+- No database errors from invalid pending IDs
+- Tabs always get bound to real document IDs
+- Content displays correctly without manual refresh
+
+### File Structure
+
+```
+lib/canvas/
+├── index.ts                    # Public exports
+├── widget-registry.ts          # Registry singleton, types, and pending ID helpers
+│   ├── WidgetStatus            # "pending" | "idle" | "streaming" | "error"
+│   ├── isPendingDocumentId()   # Check if ID is a pending ID
+│   └── generatePendingDocumentId() # Create pending-{toolCallId} ID
+├── widget-context.tsx          # Per-tab context provider (props-based, no local state)
+└── widget-definitions.tsx      # Built-in widget definitions
+
+hooks/
+├── use-canvas-tabs.ts          # Tab state management (SWR-based)
+│   ├── useCanvasTabs()         # Main hook
+│   ├── openPendingTab()        # Open tab before document ID is known
+│   ├── bindPendingTabToDocument() # Bind pending tab to actual ID
+│   ├── activateTabForStreaming() # Activate existing tab for updates
+│   ├── findPendingTab()        # Find any pending tab
+│   ├── mutateTabByDocumentId() # Direct mutation for streaming
+│   └── getTabsState()          # Get current state synchronously
+└── use-artifact-streaming.ts   # Streaming handlers
+    ├── useArtifactStreaming()  # Global artifact state updates
+    └── useTabStreamSync()      # Binds pending tabs and syncs content
+
+components/chat/
+├── canvas.tsx                  # Resizable panel layout
+├── canvas-tabs.tsx             # Tab bar component (with pending state UI)
+└── canvas-widget.tsx           # Generic widget container
+
+components/
+└── canvas-init.tsx             # Widget registration initializer
 ```
 
 ---
@@ -933,17 +1392,17 @@ console.log("[ToolUI] Resolving tool:", toolName, "Found:", toolName in ToolUI);
 
 #### Duplicate Key React Error in Chat
 
-**Symptom**: Console error "Encountered two children with the same key" when switching documents in the side panel.
+**Symptom**: Console error "Encountered two children with the same key" when switching documents in the side panel, or multiple instances of the same widget appearing in chat.
 
-**Cause**: The same `MessageIterator` component was rendered in two places (main thread and canvas thread) with identical message keys.
+**Causes and Fixes**:
 
-**Fix**: The `MessageIterator` component (`components/chat/iterators.tsx`) now accepts an optional `keyPrefix` prop. When rendering messages in multiple locations, use different prefixes:
+1. **Same MessageIterator in multiple places**: The `MessageIterator` component accepts an optional `keyPrefix` prop. Use different prefixes when rendering messages in multiple locations:
 
 ```typescript
 // In assistant-chat.tsx
 const renderMessages = (keyPrefix?: string) => (
   <MessageIterator empty={chatEmpty} keyPrefix={keyPrefix}>
-    {/* ... render props ... */}
+    {/* ... render props - do NOT add key prop to child components */}
   </MessageIterator>
 );
 
@@ -953,6 +1412,22 @@ const renderMessages = (keyPrefix?: string) => (
 // Canvas thread
 <ChatThreadContent>{renderMessages("canvas")}</ChatThreadContent>
 ```
+
+2. **Duplicate messages in the AI SDK stream**: The `MessageIterator` now includes automatic deduplication by message ID to handle cases where the AI SDK provides duplicate messages during streaming:
+
+```typescript
+// In iterators.tsx - messages are deduplicated before rendering
+const uniqueMessages = useMemo(() => {
+  const seen = new Set<string>();
+  return messages.filter((message) => {
+    if (seen.has(message.id)) return false;
+    seen.add(message.id);
+    return true;
+  });
+}, [messages]);
+```
+
+3. **Redundant key props on child components**: Do NOT add `key={message.id}` to `UserMessage` or `AssistantMessage` inside the `MessageIterator` render function - the parent Fragment already provides a unique key.
 
 ### Debug Logging
 
@@ -1125,6 +1600,257 @@ if (!showFullDetails) {
 - Collapsed widgets can be expanded by clicking them
 - Only current document shows "Analizza Fattura" button
 - Previous documents show hint: "Seleziona questo documento dal pannello per analizzarlo"
+
+### 9. Canvas Tab System Fixes
+
+**Files**: `components/chat/canvas-tabs.tsx`, `components/tools/document.tsx`, `hooks/use-artifact-streaming.ts`
+
+**Issues Fixed**:
+
+1. **Active Tab Color Not Green**: Document and CSV tabs showed grey background when active instead of green.
+   - **Fix**: Updated `TAB_TYPE_COLORS` to use `bg-emerald-500` for active state on all tab types.
+
+2. **Space Between Tabs After Close**: When closing a tab and opening a new one, there was a ghost space where the closed tab used to be.
+   - **Fix**: Changed `AnimatePresence` mode from `"popLayout"` to `"sync"` and removed `layoutId` from tab motion elements to prevent animation conflicts.
+
+3. **Documents Not Auto-Opening in Tab**: When requesting a document, users had to manually click to open it in a tab.
+   - **Fix**: Added auto-open logic to the `DocumentTool` component using a `useEffect` hook. This approach is more reliable than the streaming hook because it has direct access to the tool state and streaming status.
+
+```typescript
+// In components/tools/document.tsx
+const autoOpenedRef = useRef<string | null>(null);
+
+useEffect(() => {
+  if (
+    isStreaming &&
+    isLastPart &&
+    documentId &&
+    part.output &&
+    "id" in part.output &&
+    !isDocumentInTab &&
+    autoOpenedRef.current !== documentId
+  ) {
+    autoOpenedRef.current = documentId;
+    openTab({ documentId, kind, content: "", title, status: "streaming", ... }, title);
+  }
+}, [isStreaming, isLastPart, documentId, part.output, isDocumentInTab, openTab]);
+```
+
+4. **Duplicate Document Widgets in Chat**: When AI calls both `createDocument` and `updateDocument`, both tool widgets showed as full-size cards.
+   - **Fix**: Changed `isDocumentInTab` to check if the document exists in ANY tab, not just the active tab:
+
+```typescript
+// Before
+const isDocumentInTab = hasOpenTabs && activeTab?.artifact.documentId === documentId;
+
+// After
+const isDocumentInTab = useMemo(
+  () => tabs.some((tab) => tab.artifact.documentId === documentId),
+  [tabs, documentId]
+);
+```
+
+### 10. Update Document Streaming Fix
+
+**File**: `mastra/tools/update-document-tool.ts`
+
+**Issue**: The "Update Document" tool caused infinite loading indicators in the UI because it failed to emit `data-id` events. Without the document ID, the client-side streaming synchronization (`useTabStreamSync`) couldn't route the `data-finish` event to the correct tab, leaving the tab status stuck in "streaming".
+
+**Fix**: Added `data-id` emission to `updateDocumentTool`:
+
+```typescript
+await writer?.write({
+  type: "data-id",
+  data: id,
+  transient: true,
+});
+```
+
+### 11. Duplicate Widget Prevention
+
+**File**: `components/tools/document.tsx`
+
+**Issue**: When the AI agent called both `createDocument` and `updateDocument` in sequence, duplicate widgets appeared in the chat. The user would see "Creating document..." followed by "Updating document..." which was redundant since the document was already visible in the side panel.
+
+**Fix**: Modified `DocumentTool` to hide the widget if the tool is `updateDocument` AND the document is already open in a tab. This "Show, don't tell" approach relies on the visible side panel updating in real-time instead of cluttering the chat.
+
+```typescript
+const toolName = getToolName(part);
+if (toolName === "updateDocument" && isDocumentInTab) {
+  return null;
+}
+```
+
+### 12. Document Streaming UI Persistence Fix
+
+**File**: `components/tools/document.tsx`
+
+**Issue**: The streaming UI (loading spinner, "Generating content..." text, pulsing blue dot) in the document chat widget persisted even after the document was fully generated. This happened because `isGenerating` relied on the chat-level `isStreaming` prop (from `useChat` status), which remains `true` as long as the overall chat is streaming—including any text the AI generates after the tool call completes.
+
+**Fix**: Updated the `isGenerating` calculation to use the tab's actual `status` (which is correctly set to `"idle"` by `useTabStreamSync` when `data-finish` is received) once the tool has completed (i.e., when `part.output` exists).
+
+```typescript
+// Before: Always relied on chat-level isStreaming
+const isGenerating =
+  isStreaming ||
+  (activeTab?.artifact.documentId === documentId &&
+    activeTab?.artifact.status === "streaming");
+
+// After: Use tab's actual status once tool completes
+const documentTab = useMemo(
+  () => tabs.find((tab) => tab.artifact.documentId === documentId),
+  [tabs, documentId]
+);
+
+const hasToolOutput = Boolean(part.output);
+const isTabStreaming = documentTab?.artifact.status === "streaming";
+
+const isGenerating = hasToolOutput
+  ? isTabStreaming  // After tool completes, use tab's actual status
+  : isStreaming;    // Before tool completes, use chat streaming status
+```
+
+**Important**: All hooks must be called before any conditional returns to comply with React's Rules of Hooks. The component uses a `shouldHideWidget` flag that is computed after all hooks, and the conditional `return null` happens after all `useEffect` and `useCallback` hooks are called. This prevents the "Rendered fewer hooks than expected" error.
+
+### 13. Document Selector Auto-Open Fix
+
+**File**: `components/tools/load-invoice.tsx`
+
+**Issue**: When requesting to see all available documents, the document selector canvas tab did not open automatically. Users had to manually click the "Documenti Disponibili" widget to open the panel.
+
+**Fix**: Added a `useEffect` hook that automatically opens the document selector panel when files are returned from the `loadInvoice` tool. Uses a signature-based tracking system to prevent re-opening on re-renders while allowing new file sets to trigger a fresh auto-open.
+
+```typescript
+// Track which file set we've already auto-opened the panel for
+const autoOpenedForSignatureRef = useRef<string | null>(null);
+
+// Create a signature for the current file set
+const filesSignature = useMemo(() => {
+  if (!filesWithValidation) return null;
+  return `${filesWithValidation.length}:${filesWithValidation[0]?.fileId || ""}`;
+}, [filesWithValidation]);
+
+// AUTO-OPEN: When files are available, automatically open the document selector panel
+useEffect(() => {
+  if (!filesWithValidation || !filesSignature) return;
+  if (autoOpenedForSignatureRef.current === filesSignature) return;
+  
+  autoOpenedForSignatureRef.current = filesSignature;
+  openTab({ ... }, "UI fatture");
+}, [filesWithValidation, filesSignature, openTab]);
+```
+
+**UX Behavior**:
+- When user asks to see documents, the panel opens automatically
+- The widget in chat remains as a fallback to re-open if panel is closed
+- Signature-based tracking prevents duplicate openings on re-renders
+
+### 14. Document Streaming and Status Transition Fix
+
+**Files**: `hooks/use-artifact-streaming.ts`, `hooks/use-canvas-tabs.ts`, `mastra/tools/create-document-tool.ts`, `mastra/tools/update-document-tool.ts`, `components/artifacts/document.tsx`
+
+**Issues Fixed**:
+
+1. **Content not streaming incrementally**: Documents (especially code and sheet types) showed all content at once instead of streaming character-by-character.
+   - **Cause**: `useTabStreamSync` only handled `data-textDelta` events, ignoring `data-codeDelta` and `data-sheetDelta`.
+   - **Fix**: Updated `useTabStreamSync` to handle all three delta types uniformly.
+
+2. **Documents stuck in "Generating" state**: After document generation completed, the UI continued showing "Generating..." indefinitely.
+   - **Cause**: If `data-finish` wasn't emitted (due to errors) or wasn't properly routed to the tab, the status never transitioned to "idle".
+   - **Fix**: 
+     - Wrapped document handler calls in `try/finally` blocks to guarantee `data-finish` emission
+     - Added defensive fallback in `useTabStreamSync` to reset pending tabs on `data-finish` even without a known documentId
+
+3. **Timing race condition between tab creation and stream events**: Stream events (`data-id`, `data-textDelta`) could arrive BEFORE the pending tab was created by `DocumentTool`'s useEffect.
+   - **Cause**: The `DocumentTool` component opens pending tabs in a `useEffect`, which runs after the component renders. However, stream events from the backend can arrive before React's useEffect phase completes.
+   - **Fix**: Implemented retry logic in `useTabStreamSync`:
+     - `mutateTabByDocumentId` now returns `boolean` indicating if a tab was found
+     - On content delta events, if the update fails (no tab found), the hook attempts to bind any pending tab first, then retries
+     - Added `resetAllStreamingTabs()` helper that resets ALL tabs with "streaming" or "pending" status to "idle"
+     - On `data-finish`, this helper is called as a defensive fallback to ensure no tabs get stuck
+
+**Key Changes:**
+
+```typescript
+// hooks/use-canvas-tabs.ts - mutateTabByDocumentId now returns success status
+export function mutateTabByDocumentId(...): boolean {
+  let didUpdate = false;
+  // ... mutation logic sets didUpdate = true if tab found
+  return didUpdate;
+}
+
+// hooks/use-canvas-tabs.ts - new helper to reset stuck tabs
+export function resetAllStreamingTabs(): number {
+  // Finds all tabs with status "streaming" or "pending"
+  // Resets them to "idle"
+  // Returns count of tabs reset
+}
+
+// hooks/use-artifact-streaming.ts - retry logic in useTabStreamSync
+const updateTabWithRetry = (docId, updates) => {
+  let success = mutateTabByDocumentId(docId, updates);
+  if (!success && !tabBoundRef.current) {
+    // Try binding pending tab first, then retry
+    const didBind = tryBindPendingTab(docId);
+    if (didBind) {
+      success = mutateTabByDocumentId(docId, updates);
+    }
+  }
+  return success;
+};
+```
+
+**Manual Testing Steps:**
+
+To verify document streaming works correctly:
+
+1. **Text Document Creation**:
+   - Ask the assistant to "Write a short article about climate change"
+   - Verify: Tab opens immediately, content streams in character-by-character, "Generating..." indicator clears when done
+
+2. **Code Document Creation**:
+   - Ask the assistant to "Create a Python function to calculate fibonacci numbers"
+   - Verify: Same streaming behavior as text documents
+
+3. **Sheet Document Creation**:
+   - Ask the assistant to "Create a spreadsheet with monthly sales data"
+   - Verify: Same streaming behavior as text documents
+
+4. **Document Update**:
+   - After creating a document, ask "Add more details to the document"
+   - Verify: Existing tab activates, content updates with streaming, status transitions correctly
+
+5. **Tab Status Indicators**:
+   - During streaming: Blue pulsing dot in chat widget, "Generating..." in tab header
+   - After completion: Static file icon in chat widget, "Updated X ago" in tab header
+
+6. **Rapid Document Requests** (tests timing fix):
+   - Quickly request multiple documents in succession
+   - Verify: All tabs open correctly, no stuck "Generating..." states, content streams properly
+
+---
+
+## Temporary Testing Configuration
+
+### ⚠️ Unlimited Requests (Rate Limiting Disabled)
+
+**File**: `lib/ai/entitlements.ts`
+
+Rate limiting has been **temporarily disabled** for testing purposes. Both guest and regular users now have unlimited message requests.
+
+**Original values:**
+```typescript
+guest: { maxMessagesPerDay: 20, ... }
+regular: { maxMessagesPerDay: 100, ... }
+```
+
+**Current (testing) values:**
+```typescript
+guest: { maxMessagesPerDay: Number.POSITIVE_INFINITY, ... }
+regular: { maxMessagesPerDay: Number.POSITIVE_INFINITY, ... }
+```
+
+**To restore rate limiting**, change `Number.POSITIVE_INFINITY` back to the original values (20 for guest, 100 for regular).
 
 ---
 

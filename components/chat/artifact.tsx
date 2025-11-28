@@ -28,6 +28,10 @@ import { cn } from "@/lib/utils";
 
 /**
  * Generic UI artifact state for any artifact type
+ * Status can be:
+ * - "pending": Tab opened before document ID is known (waiting for stream to start)
+ * - "streaming": Content is being streamed to the tab
+ * - "idle": Tab is ready and not actively streaming
  */
 export type UIArtifact<TKind = string, TContent = any> = {
   title: string;
@@ -35,7 +39,7 @@ export type UIArtifact<TKind = string, TContent = any> = {
   kind: TKind;
   content: TContent;
   isVisible: boolean;
-  status: "streaming" | "idle";
+  status: "pending" | "streaming" | "idle";
   boundingBox: {
     top: number;
     left: number;

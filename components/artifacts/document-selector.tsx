@@ -28,7 +28,7 @@ import { useChatRuntime } from "@/components/chat/context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useArtifact } from "@/hooks/use-artifact";
+import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
 import { cn } from "@/lib/utils";
 
 // ============================================================================
@@ -245,7 +245,7 @@ export function DocumentSelectorArtifact({
   className,
 }: DocumentSelectorArtifactProps) {
   const { chat } = useChatRuntime();
-  const { artifact, setArtifact } = useArtifact<DocumentSelectorUIArtifact>();
+  const { activeTab, closeTab } = useCanvasTabs();
 
   // View state
   const [panelViewMode, setPanelViewMode] = useState<ViewMode>("list");
@@ -259,13 +259,14 @@ export function DocumentSelectorArtifact({
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Get files from artifact content
+  // Get files from active tab artifact content
   const filesWithValidation = useMemo(() => {
-    if (!artifact.content || !Array.isArray(artifact.content)) {
+    const content = activeTab?.artifact.content;
+    if (!content || !Array.isArray(content)) {
       return [];
     }
-    return artifact.content as FileValidation[];
-  }, [artifact.content]);
+    return content as FileValidation[];
+  }, [activeTab?.artifact.content]);
 
   // Filter files by search query
   const filteredFiles = useMemo(() => {
@@ -287,13 +288,12 @@ export function DocumentSelectorArtifact({
   );
   const invalidCount = filesWithValidation.length - validCount;
 
-  // Handle close
+  // Handle close - closes the current tab
   const handleClose = useCallback(() => {
-    setArtifact((current) => ({
-      ...current,
-      isVisible: false,
-    }));
-  }, [setArtifact]);
+    if (activeTab) {
+      closeTab(activeTab.id);
+    }
+  }, [activeTab, closeTab]);
 
   // Handle document selection - loads invoice data first, then switches to detail view and sends chat message
   const handleDocumentSelect = useCallback(
@@ -379,7 +379,7 @@ export function DocumentSelectorArtifact({
         }
         onClose={handleClose}
         subtitle="Seleziona un documento per visualizzarlo"
-        title={artifact.title || "Documenti Disponibili"}
+        title={activeTab?.title || "Documenti Disponibili"}
       />
 
       <ChatArtifactBody>

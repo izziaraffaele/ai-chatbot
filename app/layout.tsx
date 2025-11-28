@@ -8,6 +8,7 @@ import "./globals.css";
 import { cookies } from "next/headers";
 import { SessionProvider } from "next-auth/react";
 import { BrandingProvider } from "@/components/branding-provider";
+import { CanvasInit } from "@/components/canvas-init";
 import { DemoConfig } from "@/components/demo-config";
 import { getBrandingInjectScript } from "@/lib/branding/inject-script";
 import type { Locale } from "@/lib/i18n/types";
@@ -112,6 +113,7 @@ export default async function RootLayout({
             <BrandingProvider>
               <Toaster position="top-center" />
               <SessionProvider>
+                <CanvasInit />
                 {children}
                 {/* <BrandConfig /> */}
                 <DemoConfig />

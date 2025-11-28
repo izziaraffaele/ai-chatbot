@@ -2,24 +2,18 @@
 
 import { getToolName } from "ai";
 import equal from "fast-deep-equal";
-import { memo, useCallback, useMemo, useRef } from "react";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
-import { CodeEditor } from "@/components/code-editor";
-import { InlineDocumentSkeleton } from "@/components/document-skeleton";
+import { FileIcon, LoaderIcon } from "@/components/icons";
 import {
-  FileIcon,
-  FullscreenIcon,
-  LoaderIcon,
-  MessageIcon,
-  PencilEditIcon,
-} from "@/components/icons";
-import { Editor } from "@/components/text-editor";
-import { useArtifact } from "@/hooks/use-artifact";
-import { useChatDocument } from "@/hooks/use-chat-document";
-import type { Document } from "@/lib/db/schema";
+  activateTabForStreaming,
+  bindPendingTabToDocument,
+  openPendingTab,
+  useCanvasTabs,
+} from "@/hooks/use-canvas-tabs";
+import { generatePendingDocumentId } from "@/lib/canvas";
 import type { ChatTools } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { SpreadsheetEditor } from "../sheet-editor";
 import type { ChatToolProps } from "./types";
 
 type DocumentTools = Pick<
@@ -41,134 +35,302 @@ const getToolError = (type: string, errorText?: string) => {
 
 /**
  * Unified Document Tool UI Component
- * Handles both document creation and update tool invocations using custom document layout
+ *
+ * Refactored to:
+ * 1. Open pending tabs IMMEDIATELY when tool-call starts (before document ID is known)
+ * 2. Show a minimal placeholder widget in chat that links to the tab
+ * 3. Delegate content rendering to the canvas tab
+ * 4. For updates, always show widget and activate/stream to existing tab
  */
 function PureDocumentTool(props: DocumentToolProps) {
-  const { part, isReadonly = false, isLastPart, isStreaming } = props;
-  const { artifact, setArtifact } = useArtifact();
+  const { part, isReadonly = false, isStreaming } = props;
+  const { openTab, tabs, switchTab } = useCanvasTabs();
   const hitboxRef = useRef<HTMLDivElement>(null);
 
-  const documentId = part.output && "id" in part.output ? part.output.id : null;
+  // Track which pending tab we opened (by toolCallId)
+  const pendingTabOpenedRef = useRef<string | null>(null);
 
-  const documents = useChatDocument(documentId);
-  const previewDocument = useMemo<Document>(
-    () => documents.entries[0],
-    [documents]
-  );
+  // Extract tool call ID for pending tab creation
+  const toolCallId = part.toolCallId;
 
-  const isStreamingArtifact =
-    ((isStreaming && isLastPart) || artifact.status === "streaming") &&
-    documentId === artifact.documentId;
+  // Extract ID from tool output if available
+  const documentId =
+    part.output && "id" in part.output ? (part.output.id as string) : null;
 
-  // Handle click to open document in canvas
+  // For updateDocument, the document ID comes from input
+  const updateDocumentId =
+    part.input && "id" in part.input ? (part.input.id as string) : null;
+
+  // Get tool name for conditional logic
+  const toolName = getToolName(part);
+  const isCreateDocument = toolName === "createDocument";
+  const isUpdateDocument = toolName === "updateDocument";
+
+  // Check if tool output is available (tool execution completed)
+  const hasToolOutput = Boolean(part.output);
+
+  // Find the pending tab we created (if any)
+  const pendingDocId = toolCallId
+    ? generatePendingDocumentId(toolCallId)
+    : null;
+
+  // Find any tab related to this document (pending or actual)
+  const relatedTab = useMemo(() => {
+    // First check for the actual document ID
+    if (documentId) {
+      const actualTab = tabs.find(
+        (tab) => tab.artifact.documentId === documentId
+      );
+      if (actualTab) {
+        return actualTab;
+      }
+    }
+    // For updateDocument, check the input document ID
+    if (updateDocumentId) {
+      const updateTab = tabs.find(
+        (tab) => tab.artifact.documentId === updateDocumentId
+      );
+      if (updateTab) {
+        return updateTab;
+      }
+    }
+    // Check for pending tab
+    if (pendingDocId) {
+      const pendingTab = tabs.find(
+        (tab) => tab.artifact.documentId === pendingDocId
+      );
+      if (pendingTab) {
+        return pendingTab;
+      }
+    }
+    return null;
+  }, [tabs, documentId, updateDocumentId, pendingDocId]);
+
+  // Track whether we've already attempted to bind the pending tab to the real ID
+  const pendingTabBoundRef = useRef<string | null>(null);
+
+  // ============================================================================
+  // EFFECT: Open pending tab IMMEDIATELY when tool-call starts
+  // ============================================================================
+  useEffect(() => {
+    // Only trigger when we have a tool name but no output yet (tool is starting)
+    if (!toolName || hasToolOutput || !toolCallId) {
+      return;
+    }
+
+    // Skip if we already opened a pending tab for this tool call
+    if (pendingTabOpenedRef.current === toolCallId) {
+      return;
+    }
+
+    // Get initial metadata from tool input
+    const initialKind =
+      part.input && "kind" in part.input ? (part.input.kind as string) : "text";
+    const initialTitle =
+      part.input && "title" in part.input
+        ? (part.input.title as string)
+        : isUpdateDocument
+          ? "Updating document..."
+          : "Creating document...";
+
+    if (isCreateDocument) {
+      // For createDocument: Open a pending tab immediately
+      pendingTabOpenedRef.current = toolCallId;
+      openPendingTab(toolCallId, initialKind as any, initialTitle);
+    } else if (isUpdateDocument && updateDocumentId) {
+      // For updateDocument: Activate existing tab and set to streaming
+      pendingTabOpenedRef.current = toolCallId;
+      const activated = activateTabForStreaming(updateDocumentId);
+
+      // If tab doesn't exist (was closed), open a new one with the document ID
+      if (!activated) {
+        openTab(
+          {
+            documentId: updateDocumentId,
+            kind: initialKind as any,
+            content: "",
+            title: initialTitle,
+            isVisible: true,
+            status: "streaming",
+            boundingBox: { top: 0, left: 0, width: 0, height: 0 },
+          },
+          initialTitle
+        );
+      }
+    }
+  }, [
+    toolName,
+    hasToolOutput,
+    toolCallId,
+    isCreateDocument,
+    isUpdateDocument,
+    updateDocumentId,
+    part.input,
+    openTab,
+  ]);
+
+  // ============================================================================
+  // EFFECT: Fallback binding of pending tab to real document ID
+  // This handles cases where the data-id stream event was processed before
+  // the pending tab was created, or if the stream sync missed the event.
+  // ============================================================================
+  useEffect(() => {
+    // Only for createDocument when we have the real document ID from output
+    if (!isCreateDocument || !documentId || !toolCallId) {
+      return;
+    }
+
+    // Skip if we've already bound this pending tab
+    if (pendingTabBoundRef.current === documentId) {
+      return;
+    }
+
+    const pendingId = generatePendingDocumentId(toolCallId);
+
+    // Attempt to bind - this is idempotent (no-op if already bound or tab doesn't exist)
+    const didBind = bindPendingTabToDocument(pendingId, documentId);
+
+    if (didBind) {
+      pendingTabBoundRef.current = documentId;
+    }
+  }, [isCreateDocument, documentId, toolCallId]);
+
+  // Handle click to focus the document tab
   const handleOpen = useCallback(() => {
     if (isReadonly) {
       toast.error("Viewing files in shared chats is currently not supported.");
       return;
     }
 
-    const boundingBox = hitboxRef.current?.getBoundingClientRect();
-    if (!boundingBox || !part.output) {
+    // If we have a related tab, switch to it
+    if (relatedTab) {
+      switchTab(relatedTab.id);
       return;
     }
 
-    setArtifact((currentArtifact) =>
-      "id" in part.output
-        ? {
-            documentId: part.output.id,
-            kind: part.output.kind,
-            content: previewDocument.content,
-            title: part.output.title,
-            isVisible: true,
-            status: "idle",
-            boundingBox: {
+    // Fallback: try to open with available ID
+    const targetId = documentId || updateDocumentId;
+    if (!targetId) {
+      return;
+    }
+
+    const targetTitle =
+      (part.output && "title" in part.output
+        ? (part.output.title as string)
+        : null) ||
+      (part.input && "title" in part.input
+        ? (part.input.title as string)
+        : "Document");
+
+    const targetKind =
+      part.output && "kind" in part.output ? (part.output.kind as any) : "text";
+
+    const boundingBox = hitboxRef.current?.getBoundingClientRect();
+
+    openTab(
+      {
+        documentId: targetId,
+        kind: targetKind,
+        content: "",
+        title: targetTitle,
+        isVisible: true,
+        status: isStreaming ? "streaming" : "idle",
+        boundingBox: boundingBox
+          ? {
               top: boundingBox.top,
               left: boundingBox.left,
               width: boundingBox.width,
               height: boundingBox.height,
-            },
-          }
-        : currentArtifact
+            }
+          : { top: 0, left: 0, width: 0, height: 0 },
+      },
+      targetTitle
     );
-  }, [part.output, previewDocument, isReadonly, setArtifact]);
+  }, [
+    part.output,
+    part.input,
+    documentId,
+    updateDocumentId,
+    isReadonly,
+    openTab,
+    switchTab,
+    isStreaming,
+    relatedTab,
+  ]);
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   // Check if output contains an error
   if (part.output && "error" in part.output) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50">
-        {getToolError(getToolName(part), String(part.output.error))}
+        {getToolError(toolName, String(part.output.error))}
       </div>
     );
   }
 
-  if (artifact.isVisible) {
-    const Comp = part.output ? DocumentToolResult : DocumentToolCall;
-    return (
-      <Comp {...props} isStreaming={isStreamingArtifact} onOpen={handleOpen} />
-    );
-  }
+  // Determine display title
+  const displayTitle =
+    (part.output && "title" in part.output
+      ? (part.output.title as string)
+      : null) ||
+    (part.input && "title" in part.input
+      ? (part.input.title as string)
+      : isUpdateDocument
+        ? "Updating document..."
+        : "Creating document...");
 
-  // Loading state
-  if (documents.isLoading || isStreamingArtifact) {
-    return <LoadingDocumentSkeleton />;
-  }
-
-  // Determine document to display
-  const document: Document =
-    previewDocument ||
-    (artifact.status === "streaming"
-      ? {
-          title: artifact.title,
-          kind: artifact.kind,
-          content: artifact.content,
-          id: artifact.documentId,
-          createdAt: new Date(),
-          userId: "noop",
-        }
-      : null);
-
-  if (!document) {
-    return <LoadingDocumentSkeleton />;
-  }
+  // Determine if we're currently streaming
+  // Check both the tab status and the pending status
+  const isTabStreaming = relatedTab?.artifact.status === "streaming";
+  const isTabPending = relatedTab?.artifact.status === "pending";
+  const isGenerating =
+    isTabStreaming || isTabPending || (!hasToolOutput && isStreaming);
 
   return (
-    <div className="relative w-full cursor-pointer">
-      {!isReadonly && (
-        <div
-          aria-hidden="true"
-          className="absolute top-0 left-0 z-10 size-full cursor-pointer rounded-xl"
-          onClick={handleOpen}
-          ref={hitboxRef}
-          role="presentation"
-        />
-      )}
-
-      <DocumentToolHeader
-        isReadonly={isReadonly}
-        isStreaming={isStreaming}
-        title={document.title}
+    <div className="w-full max-w-md" ref={hitboxRef}>
+      <SimpleDocumentWidget
+        isStreaming={isGenerating}
+        isUpdate={isUpdateDocument}
+        onClick={handleOpen}
+        title={displayTitle}
       />
-
-      <DocumentContent document={document} />
     </div>
   );
 }
 
 /**
- * Custom document header with specific styling for document tools
+ * Minimal placeholder widget for chat interface
+ * Matches the style of "Documenti disponibili" widget
  */
-const DocumentToolHeader = ({
+function SimpleDocumentWidget({
   title,
   isStreaming,
-  isReadonly,
+  isUpdate = false,
+  onClick,
 }: {
   title: string;
   isStreaming: boolean;
-  isReadonly: boolean;
-}) => (
-  <div className="flex flex-row items-start justify-between gap-2 rounded-t-2xl border border-b-0 p-4 sm:items-center dark:border-zinc-700 dark:bg-muted">
-    <div className="flex flex-row items-start gap-3 sm:items-center">
-      <div className="text-muted-foreground">
+  isUpdate?: boolean;
+  onClick: () => void;
+}) {
+  const statusText = isStreaming
+    ? isUpdate
+      ? "Updating in canvas..."
+      : "Generating content..."
+    : isUpdate
+      ? "Document updated"
+      : "Click to view document";
+
+  return (
+    <button
+      className="flex w-full cursor-pointer items-center gap-3 rounded-xl border border-border bg-background p-3 text-left shadow-sm transition-all hover:bg-muted/50"
+      onClick={onClick}
+      type="button"
+    >
+      <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
         {isStreaming ? (
           <div className="animate-spin">
             <LoaderIcon />
@@ -177,146 +339,35 @@ const DocumentToolHeader = ({
           <FileIcon />
         )}
       </div>
-      <div className="-translate-y-1 font-medium sm:translate-y-0">{title}</div>
-    </div>
-    {!isReadonly && (
-      <div className="w-8">
-        <FullscreenIcon />
+      <div className="min-w-0 flex-1">
+        <h3 className="truncate font-medium text-foreground text-sm">
+          {title}
+        </h3>
+        <p className="truncate text-muted-foreground text-xs">{statusText}</p>
       </div>
-    )}
-  </div>
-);
-
-/**
- * Loading skeleton with document-specific layout
- */
-const LoadingDocumentSkeleton = () => (
-  <div className="w-full">
-    <div className="flex h-[57px] flex-row items-center justify-between gap-2 rounded-t-2xl border border-b-0 p-4 dark:border-zinc-700 dark:bg-muted">
-      <div className="flex flex-row items-center gap-3">
-        <div className="text-muted-foreground">
-          <div className="size-4 animate-pulse rounded-md bg-muted-foreground/20" />
-        </div>
-        <div className="h-4 w-24 animate-pulse rounded-lg bg-muted-foreground/20" />
+      <div className="flex items-center gap-2">
+        {isStreaming && (
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-500" />
+          </span>
+        )}
+        {isUpdate && isStreaming ? (
+          <ArrowRight className="size-4 text-primary" />
+        ) : (
+          <ChevronRight className="size-4 text-muted-foreground" />
+        )}
       </div>
-      <div>
-        <FullscreenIcon />
-      </div>
-    </div>
-    <div className="overflow-y-scroll rounded-b-2xl border border-t-0 bg-muted p-8 pt-4 dark:border-zinc-700">
-      <InlineDocumentSkeleton />
-    </div>
-  </div>
-);
+    </button>
+  );
+}
 
 export const DocumentTool = memo(PureDocumentTool, (prevProps, nextProps) => {
   return (
     equal(prevProps.part, nextProps.part) &&
-    prevProps.isReadonly === nextProps.isReadonly
+    prevProps.isReadonly === nextProps.isReadonly &&
+    prevProps.isStreaming === nextProps.isStreaming
   );
 });
 
 DocumentTool.displayName = "DocumentTool";
-
-const DOCUMENT_TOOL_ICON_MAP = {
-  createDocument: FileIcon,
-  updateDocument: PencilEditIcon,
-  requestSuggestions: MessageIcon,
-};
-
-/**
- * Document content renderer based on document kind
- */
-const DocumentContent = ({ document }: { document: Document }) => {
-  const content = document.content ?? "";
-  // Common props for both editors
-  const commonEditorProps = {
-    content,
-    isCurrentVersion: true,
-    currentVersionIndex: 0,
-    status: "idle" as const,
-    onSaveContent: () => {
-      return;
-    }, // No-op for preview
-    suggestions: [],
-  };
-
-  const renderEditor = () => {
-    switch (document.kind) {
-      case "text":
-        return <Editor {...commonEditorProps} />;
-      case "code":
-        return <CodeEditor {...commonEditorProps} />;
-      case "sheet":
-        return <SpreadsheetEditor {...commonEditorProps} />;
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div
-      className={cn(
-        "h-[257px] overflow-y-scroll rounded-b-2xl border border-t-0 dark:border-zinc-700 dark:bg-muted",
-        {
-          "p-4 sm:px-14 sm:py-16": document.kind === "text",
-          "p-0": document.kind === "code",
-        }
-      )}
-    >
-      {renderEditor()}
-    </div>
-  );
-};
-
-function DocumentToolResult({
-  part,
-  onOpen,
-}: DocumentToolProps & { onOpen?: () => void }) {
-  const toolName = getToolName(part);
-  const DocumentToolIcon = DOCUMENT_TOOL_ICON_MAP[toolName];
-
-  return (
-    <button
-      className="flex w-fit cursor-pointer flex-row items-start gap-3 rounded-xl border bg-background px-3 py-2"
-      onClick={() => onOpen?.()}
-      type="button"
-    >
-      <div className="mt-1 text-muted-foreground">
-        <DocumentToolIcon />
-      </div>
-      <div className="text-left">
-        {part.output && "title" in part.output ? part.output.title : ""}
-      </div>
-    </button>
-  );
-}
-
-function DocumentToolCall({
-  part,
-  onOpen,
-}: DocumentToolProps & { onOpen?: () => void }) {
-  const toolName = getToolName(part);
-
-  const DocumentToolIcon = DOCUMENT_TOOL_ICON_MAP[toolName];
-
-  return (
-    <button
-      className="cursor pointer flex w-fit flex-row items-start justify-between gap-3 rounded-xl border px-3 py-2"
-      onClick={() => onOpen?.()}
-      type="button"
-    >
-      <div className="flex flex-row items-start gap-3">
-        <div className="mt-1 text-zinc-500">
-          <DocumentToolIcon />
-        </div>
-
-        <div className="text-left">
-          {part.input && "title" in part.input ? part.input.title : ""}
-        </div>
-      </div>
-
-      <div className="mt-1 animate-spin">{<LoaderIcon />}</div>
-    </button>
-  );
-}

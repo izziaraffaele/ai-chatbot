@@ -129,6 +129,7 @@ export function ChatCanvasThread({
  * ChatCanvasMain
  * Resizable right panel for artifact display
  * Default: 40% width, min: 20%, max: 70%
+ * Supports an optional tab bar slot for multi-tab functionality
  */
 export type ChatCanvasMainProps = React.ComponentProps<"div"> & {
   boundingBox?: {
@@ -137,10 +138,13 @@ export type ChatCanvasMainProps = React.ComponentProps<"div"> & {
     width: number;
     height: number;
   };
+  /** Optional tab bar component rendered above the content */
+  tabBar?: React.ReactNode;
 };
 
 export function ChatCanvasMain({
   boundingBox,
+  tabBar,
   className,
   children,
   ...others
@@ -152,13 +156,14 @@ export function ChatCanvasMain({
     return (
       <div
         className={cn(
-          "flex h-dvh w-full flex-col overflow-y-auto bg-background dark:bg-muted",
+          "flex h-dvh w-full flex-col overflow-hidden bg-background dark:bg-muted",
           className
         )}
         data-slot="chat-canvas-main"
         {...others}
       >
-        {children}
+        {tabBar}
+        <div className="flex-1 overflow-y-auto">{children}</div>
       </div>
     );
   }
@@ -166,7 +171,7 @@ export function ChatCanvasMain({
   return (
     <Panel
       className={cn(
-        "flex h-dvh min-w-0 flex-col overflow-y-auto border-zinc-200 bg-background md:border-l dark:border-zinc-700 dark:bg-muted",
+        "flex h-dvh min-w-0 flex-col overflow-hidden border-zinc-200 bg-background md:border-l dark:border-zinc-700 dark:bg-muted",
         className
       )}
       data-slot="chat-canvas-main"
@@ -176,9 +181,10 @@ export function ChatCanvasMain({
       order={2}
       {...others}
     >
+      {tabBar}
       <motion.div
         animate={{ opacity: 1, scale: 1 }}
-        className="flex h-full w-full flex-col"
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto"
         exit={{ opacity: 0, scale: 0.98 }}
         initial={{ opacity: 0, scale: 0.98 }}
         transition={{ duration: 0.2 }}

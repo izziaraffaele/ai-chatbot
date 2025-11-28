@@ -39,7 +39,7 @@ export function createInvoiceAnalyzerAgent(missingFields: string[]): Agent {
   return new Agent({
     name: "Invoice Analyzer",
     instructions: invoiceAnalyzerSystemPrompt(missingFields),
-    model: "google/gemini-2.5-flash",
+    model: "openai/gpt-4.1",
     tools: invoiceValidationTools,
     // No memory - this is a stateless analysis agent
   });
@@ -69,6 +69,6 @@ export const invoiceAnalyzerAgent = new Agent({
     "Codice Fiscale Fornitore",
     "Codice Destinatario PA",
   ]),
-  model: "google/gemini-2.5-flash",
+  model: "openai/gpt-4.1",
   tools: invoiceValidationTools,
 });

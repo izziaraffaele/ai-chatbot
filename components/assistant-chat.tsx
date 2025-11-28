@@ -3,10 +3,15 @@
 import { useChat } from "@ai-sdk/react";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
+import { useCallback, useMemo } from "react";
 import { useWindowSize } from "usehooks-ts";
-import { useArtifact } from "@/hooks/use-artifact";
-import { useArtifactStreaming } from "@/hooks/use-artifact-streaming";
+import {
+  useArtifactStreaming,
+  useTabStreamSync,
+} from "@/hooks/use-artifact-streaming";
+import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import { type CanvasTabData, getWidgetCategory } from "@/lib/canvas";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import { DocumentArtifact, isDocumentArtifact } from "./artifacts/document";
 import {
@@ -15,6 +20,8 @@ import {
 } from "./artifacts/document-selector";
 import { isMediaArtifact, MediaArtifact } from "./artifacts/media";
 import { ChatCanvas, ChatCanvasMain, ChatCanvasThread } from "./chat/canvas";
+import { CanvasTabs } from "./chat/canvas-tabs";
+import { CanvasTabPanel, CanvasWidgetContainer } from "./chat/canvas-widget";
 import {
   ChatComposerAction,
   ChatComposerTool,
@@ -88,13 +95,61 @@ export function AssistantChat({
   const { width: windowWidth } = useWindowSize();
   const { chat } = useChatRuntime();
   const { messages, status } = useChat({ chat });
-  const { artifact } = useArtifact();
+  const {
+    activeTab,
+    activeTabData,
+    isCanvasVisible,
+    updateTabArtifact,
+    updateTabContent,
+    updateTabStatus,
+    closeTab,
+  } = useCanvasTabs();
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId: chat.id,
   });
 
-  // Subscribe to artifact streaming
+  // Subscribe to artifact streaming updates (updates global artifact state)
   useArtifactStreaming();
+
+  // Subscribe to tab streaming sync (updates tab state directly from stream)
+  // This replaces the problematic useEffect sync pattern
+  useTabStreamSync();
+
+  // Get the active artifact from the active tab
+  const activeArtifact = activeTab?.artifact;
+
+  // Handlers for CanvasWidgetContainer
+  const handleContentChange = useCallback(
+    (tabId: string, content: unknown) => {
+      updateTabContent(tabId, content);
+    },
+    [updateTabContent]
+  );
+
+  const handleStatusChange = useCallback(
+    (tabId: string, status: "idle" | "streaming" | "error") => {
+      updateTabStatus(tabId, status);
+    },
+    [updateTabStatus]
+  );
+
+  const handleTabClose = useCallback(
+    (tabId: string) => {
+      closeTab(tabId);
+    },
+    [closeTab]
+  );
+
+  // Check if widget is registered for the current artifact
+  const useRegistryRenderer = useMemo(() => {
+    if (!activeTabData) {
+      return false;
+    }
+    // For now, use registry for selector widgets only
+    // Document and media widgets will continue using their existing renderers
+    // until they are fully migrated to the registry pattern
+    return getWidgetCategory(activeTabData.kind) === "selector";
+  }, [activeTabData]);
 
   const chatInput = (
     <ChatInput
@@ -151,13 +206,7 @@ export function AssistantChat({
 
         // Render based on message role
         if (message.role === "user") {
-          return (
-            <UserMessage
-              {...baseProps}
-              isReadonly={isReadonly}
-              key={message.id}
-            />
-          );
+          return <UserMessage {...baseProps} isReadonly={isReadonly} />;
         }
 
         if (message.role === "assistant") {
@@ -165,7 +214,6 @@ export function AssistantChat({
             <AssistantMessage
               {...baseProps}
               isReadonly={isReadonly}
-              key={message.id}
               onVoteAction={onVote}
               vote={vote}
             />
@@ -177,6 +225,55 @@ export function AssistantChat({
       }}
     </MessageIterator>
   );
+
+  // Render the active widget content
+  const renderActiveWidget = () => {
+    if (!activeArtifact || !activeTabData) {
+      return null;
+    }
+
+    // Use the new CanvasWidgetContainer for registered widgets
+    if (useRegistryRenderer) {
+      return (
+        <CanvasTabPanel isActive={true} tabId={activeTabData.id}>
+          <CanvasWidgetContainer
+            onClose={handleTabClose}
+            onContentChange={handleContentChange}
+            onStatusChange={handleStatusChange}
+            tab={activeTabData}
+          />
+        </CanvasTabPanel>
+      );
+    }
+
+    // Fallback to legacy rendering for document/media artifacts
+    // These will be migrated to registry in a future iteration
+    if (isDocumentArtifact(activeArtifact.kind)) {
+      return (
+        <DocumentArtifact
+          documentId={activeArtifact.documentId}
+          kind={activeArtifact.kind}
+          title={activeArtifact.title || "Untitled"}
+        />
+      );
+    }
+
+    if (isMediaArtifact(activeArtifact.kind)) {
+      return (
+        <MediaArtifact
+          documentId={activeArtifact.documentId}
+          kind={activeArtifact.kind}
+          title={activeArtifact.title || "Untitled"}
+        />
+      );
+    }
+
+    if (isDocumentSelectorArtifact(activeArtifact.kind)) {
+      return <DocumentSelectorArtifact />;
+    }
+
+    return null;
+  };
 
   return (
     <ActivityToolProvider>
@@ -227,8 +324,8 @@ export function AssistantChat({
           )}
         </ChatThread>
 
-        {/* Artifact Canvas View */}
-        <ChatCanvas isVisible={artifact.isVisible}>
+        {/* Artifact Canvas View with Tabs */}
+        <ChatCanvas isVisible={isCanvasVisible}>
           {/* Message thread sidebar */}
           <ChatCanvasThread isCurrentVersion={true}>
             <ChatThreadContent className="pt-20">
@@ -241,25 +338,12 @@ export function AssistantChat({
             </ChatThreadComposer>
           </ChatCanvasThread>
 
-          {/* Artifact display */}
-          <ChatCanvasMain boundingBox={artifact.boundingBox}>
-            {isDocumentArtifact(artifact.kind) && (
-              <DocumentArtifact
-                documentId={artifact.documentId}
-                kind={artifact.kind}
-                title={artifact.title || "Untitled"}
-              />
-            )}
-            {isMediaArtifact(artifact.kind) && (
-              <MediaArtifact
-                documentId={artifact.documentId}
-                kind={artifact.kind}
-                title={artifact.title || "Untitled"}
-              />
-            )}
-            {isDocumentSelectorArtifact(artifact.kind) && (
-              <DocumentSelectorArtifact />
-            )}
+          {/* Artifact display with tabs */}
+          <ChatCanvasMain
+            boundingBox={activeArtifact?.boundingBox}
+            tabBar={<CanvasTabs />}
+          >
+            {renderActiveWidget()}
           </ChatCanvasMain>
         </ChatCanvas>
 

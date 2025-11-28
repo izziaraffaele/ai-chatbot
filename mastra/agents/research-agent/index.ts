@@ -32,7 +32,7 @@ import { researchAgentSystemPrompt } from "./system-prompt";
 export const researchAgent = new Agent({
   name: "Researcher",
   instructions: researchAgentSystemPrompt(),
-  model: "google/gemini-2.5-flash", // Default, can be overridden at runtime
+  model: "openai/gpt-4.1", // Default, can be overridden at runtime
   tools: {
     googleSearch: google.tools.googleSearch({}),
   },

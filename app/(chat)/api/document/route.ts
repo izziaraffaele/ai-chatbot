@@ -7,6 +7,17 @@ import {
 } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 
+/**
+ * UUID v4 regex pattern for validating document IDs.
+ * Rejects temporary/pending IDs (like "pending-call_xxx") before hitting the database.
+ */
+const UUID_REGEX =
+  /^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i;
+
+function isValidUUID(id: string): boolean {
+  return UUID_REGEX.test(id);
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
@@ -18,13 +29,32 @@ export async function GET(request: Request) {
     ).toResponse();
   }
 
+  // Validate that id is a proper UUID before querying the database.
+  // This prevents errors from temporary "pending-{toolCallId}" IDs.
+  if (!isValidUUID(id)) {
+    return new ChatSDKError(
+      "bad_request:document",
+      "Invalid document id format"
+    ).toResponse();
+  }
+
   const session = await auth();
 
   if (!session?.user) {
     return new ChatSDKError("unauthorized:document").toResponse();
   }
 
-  const documents = await getDocumentsById({ id });
+  let documents;
+  try {
+    documents = await getDocumentsById({ id });
+  } catch (error) {
+    // Convert ChatSDKError from queries.ts into a proper HTTP response
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
+    // Re-throw unexpected errors
+    throw error;
+  }
 
   const [document] = documents;
 
