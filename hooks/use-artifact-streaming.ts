@@ -6,10 +6,12 @@ import { useDataStreamSubscription } from "@/components/chat/streaming";
 import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
 import {
   bindPendingTabToDocument,
-  findPendingTab,
+  findMostRecentPendingTab,
   mutateTabByDocumentId,
+  openPendingTab,
   resetAllStreamingTabs,
 } from "@/hooks/use-canvas-tabs";
+import { generatePendingDocumentId } from "@/lib/canvas";
 
 // Throttle interval for content updates (ms)
 const CONTENT_UPDATE_THROTTLE_MS = 50;
@@ -110,21 +112,17 @@ export function useArtifactStreaming() {
  * tab's content via SWR mutate, ensuring the tab displays streaming content
  * in real-time without race conditions.
  *
+ * CRITICAL: Each `data-id` event starts a completely fresh streaming session.
+ * This ensures that creating multiple documents in sequence works correctly -
+ * each document gets its own independent binding and content routing.
+ *
  * Key responsibilities:
- * - Bind pending tabs to actual document IDs when `data-id` arrives
+ * - Treat each `data-id` as a NEW streaming session (reset all state)
+ * - Bind pending tabs to actual document IDs using most-recently-created tab
  * - Update tab content on `data-textDelta`, `data-codeDelta`, `data-sheetDelta` events
  * - Update tab status to "idle" on `data-finish` events
- * - Track current streaming documentId to target correct tab
- * - Retry binding on content deltas if initial binding failed (timing resilience)
+ * - Always retry binding on content deltas if update fails
  * - Defensive fallback: reset ALL streaming/pending tabs on `data-finish`
- *
- * Timing Resilience:
- * The DocumentTool component opens pending tabs in a useEffect, but stream events
- * can arrive BEFORE the useEffect runs. This hook handles this by:
- * 1. Always storing the document ID from `data-id` immediately
- * 2. Accumulating content even if no tab is found yet
- * 3. Retrying binding on each content delta if the tab update fails
- * 4. Resetting ALL streaming tabs on finish as a safety net
  */
 export function useTabStreamSync() {
   // Track the current streaming document ID (actual ID, not pending)
@@ -133,8 +131,8 @@ export function useTabStreamSync() {
   const accumulatedContentRef = useRef<string>("");
   // Track pending metadata before document ID is known
   const pendingTitleRef = useRef<string | null>(null);
-  // Track if we've successfully bound a tab for this stream
-  const tabBoundRef = useRef<boolean>(false);
+  // Track pending kind before document ID is known
+  const pendingKindRef = useRef<string | null>(null);
   // Track if a content flush is pending (for throttling)
   const flushPendingRef = useRef<boolean>(false);
   // Track the last flush time
@@ -143,14 +141,20 @@ export function useTabStreamSync() {
   const throttleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
-   * Attempts to bind a pending tab to the actual document ID.
+   * Attempts to bind the most recent pending tab to the actual document ID.
    * Returns true if binding succeeded, false otherwise.
+   *
+   * Uses findMostRecentPendingTab() to get the newest pending tab,
+   * which is important when multiple documents are being created.
    */
   const tryBindPendingTab = useCallback((actualDocId: string): boolean => {
-    const pendingTab = findPendingTab();
+    const pendingTab = findMostRecentPendingTab();
     if (pendingTab) {
-      bindPendingTabToDocument(pendingTab.artifact.documentId, actualDocId);
-      return true;
+      const didBind = bindPendingTabToDocument(
+        pendingTab.artifact.documentId,
+        actualDocId
+      );
+      return didBind;
     }
     return false;
   }, []);
@@ -158,6 +162,11 @@ export function useTabStreamSync() {
   /**
    * Attempts to update a tab's content. If update fails (no tab found),
    * tries to bind a pending tab first, then retries the update.
+   *
+   * IMPORTANT: Always retries binding if the initial update fails,
+   * regardless of previous binding state. This handles cases where:
+   * - Stream events arrive before DocumentTool creates the pending tab
+   * - SWR cache hasn't propagated yet after binding
    */
   const updateTabWithRetry = useCallback(
     (
@@ -167,13 +176,10 @@ export function useTabStreamSync() {
       // First attempt
       let success = mutateTabByDocumentId(docId, updates);
 
-      if (!success && !tabBoundRef.current) {
-        // Tab not found - maybe pending tab wasn't bound yet due to timing
-        // Try to bind now
+      // If failed, always try to bind and retry (no early-exit based on previous state)
+      if (!success) {
         const didBind = tryBindPendingTab(docId);
         if (didBind) {
-          tabBoundRef.current = true;
-
           // Apply any pending title
           if (pendingTitleRef.current) {
             mutateTabByDocumentId(docId, { title: pendingTitleRef.current });
@@ -257,34 +263,66 @@ export function useTabStreamSync() {
   const handleStreamPart = useCallback(
     (delta: any) => {
       switch (delta.type) {
-        case "data-id": {
-          // New document stream starting - store the documentId immediately
-          const actualDocId = delta.data;
-          streamingDocumentIdRef.current = actualDocId;
-          accumulatedContentRef.current = "";
-          tabBoundRef.current = false;
-          flushPendingRef.current = false;
-          lastFlushTimeRef.current = 0;
+        case "data-kind":
+          // Buffer kind metadata before document ID is known
+          pendingKindRef.current = delta.data;
+          break;
 
-          // Cancel any pending timer from previous stream
+        case "data-id": {
+          // ================================================================
+          // NEW STREAMING SESSION - Reset ALL state for fresh start
+          // This is critical for multiple document creation to work correctly
+          // ================================================================
+          const actualDocId = delta.data;
+
+          // Cancel any pending timer from previous stream FIRST
           if (throttleTimerRef.current) {
             clearTimeout(throttleTimerRef.current);
             throttleTimerRef.current = null;
           }
 
-          // Attempt to bind pending tab (may fail if tab not created yet - that's OK)
-          const didBind = tryBindPendingTab(actualDocId);
-          if (didBind) {
-            tabBoundRef.current = true;
+          // Reset all session state
+          streamingDocumentIdRef.current = actualDocId;
+          accumulatedContentRef.current = "";
+          flushPendingRef.current = false;
+          lastFlushTimeRef.current = 0;
 
-            // If we had pending metadata, apply it now
+          // Attempt to bind the most recent pending tab to this document ID
+          const didBind = tryBindPendingTab(actualDocId);
+
+          if (didBind) {
+            // Binding succeeded - apply any buffered metadata
             if (pendingTitleRef.current) {
               mutateTabByDocumentId(actualDocId, {
                 title: pendingTitleRef.current,
               });
               pendingTitleRef.current = null;
             }
+            // Set the tab to streaming status
+            mutateTabByDocumentId(actualDocId, { status: "streaming" });
+          } else {
+            // No pending tab exists - create one directly with buffered metadata
+            // This handles the case where stream events arrive before DocumentTool renders
+            const kind = pendingKindRef.current || "text";
+            const title = pendingTitleRef.current || "Document";
+
+            // Create a tab directly with the actual document ID (no pending->bind dance)
+            openPendingTab(
+              `direct-${actualDocId.slice(0, 8)}`,
+              kind as any,
+              title
+            );
+            const pendingId = generatePendingDocumentId(
+              `direct-${actualDocId.slice(0, 8)}`
+            );
+            bindPendingTabToDocument(pendingId, actualDocId);
+
+            // Clear buffered metadata
+            pendingTitleRef.current = null;
           }
+
+          // Clear kind buffer after use
+          pendingKindRef.current = null;
           break;
         }
 
@@ -358,18 +396,21 @@ export function useTabStreamSync() {
             );
           }
 
-          // Reset refs for next stream
+          // ================================================================
+          // FULLY RESET session state for next document
+          // This ensures the next data-id starts completely fresh
+          // ================================================================
           streamingDocumentIdRef.current = null;
           accumulatedContentRef.current = "";
           pendingTitleRef.current = null;
-          tabBoundRef.current = false;
+          pendingKindRef.current = null;
           flushPendingRef.current = false;
           lastFlushTimeRef.current = 0;
           break;
         }
 
         default:
-          // Ignore other data-* events (data-kind, data-usage, etc.)
+          // Ignore other data-* events (data-usage, etc.)
           break;
       }
     },

@@ -36,11 +36,17 @@ const getToolError = (type: string, errorText?: string) => {
 /**
  * Unified Document Tool UI Component
  *
- * Refactored to:
+ * Supports multiple document creation in sequence:
  * 1. Open pending tabs IMMEDIATELY when tool-call starts (before document ID is known)
- * 2. Show a minimal placeholder widget in chat that links to the tab
- * 3. Delegate content rendering to the canvas tab
- * 4. For updates, always show widget and activate/stream to existing tab
+ * 2. Each tool call is tracked independently via toolCallId
+ * 3. Show a minimal placeholder widget in chat that links to the tab
+ * 4. Delegate content rendering to the canvas tab
+ * 5. For updates, always show widget and activate/stream to existing tab
+ *
+ * The pending tab pattern ensures that:
+ * - Tabs open instantly without waiting for backend response
+ * - Each createDocument call gets its own tab
+ * - Content streams directly into the correct tab via useTabStreamSync
  */
 function PureDocumentTool(props: DocumentToolProps) {
   const { part, isReadonly = false, isStreaming } = props;
@@ -48,10 +54,21 @@ function PureDocumentTool(props: DocumentToolProps) {
   const hitboxRef = useRef<HTMLDivElement>(null);
 
   // Track which pending tab we opened (by toolCallId)
+  // This ensures each tool call gets its own pending tab
   const pendingTabOpenedRef = useRef<string | null>(null);
+
+  // Track previous toolCallId to detect when we get a new tool call
+  const prevToolCallIdRef = useRef<string | null>(null);
 
   // Extract tool call ID for pending tab creation
   const toolCallId = part.toolCallId;
+
+  // Reset refs when toolCallId changes (new tool call)
+  if (toolCallId !== prevToolCallIdRef.current) {
+    prevToolCallIdRef.current = toolCallId;
+    // Don't reset pendingTabOpenedRef here - let the effect handle it
+    // This prevents issues with strict mode double-rendering
+  }
 
   // Extract ID from tool output if available
   const documentId =
@@ -194,6 +211,59 @@ function PureDocumentTool(props: DocumentToolProps) {
       pendingTabBoundRef.current = documentId;
     }
   }, [isCreateDocument, documentId, toolCallId]);
+
+  // ============================================================================
+  // EFFECT 3: Fallback - create tab if tool completed before pending tab was bound
+  // This handles fast-completing tools where by the time DocumentTool renders,
+  // the tool output already exists, so EFFECT 1 doesn't run.
+  // ============================================================================
+  useEffect(() => {
+    // Only for createDocument when we have the document ID from output
+    if (!isCreateDocument || !documentId || !toolCallId) {
+      return;
+    }
+
+    // Skip if we already have a tab for this document (either pending was bound, or tab exists)
+    if (relatedTab?.artifact.documentId === documentId) {
+      return;
+    }
+
+    // No tab exists for this document - create one directly with actual document ID
+    const title =
+      (part.output && "title" in part.output
+        ? (part.output.title as string)
+        : null) ||
+      (part.input && "title" in part.input
+        ? (part.input.title as string)
+        : "Document");
+    const kind =
+      part.output && "kind" in part.output
+        ? (part.output.kind as string)
+        : part.input && "kind" in part.input
+          ? (part.input.kind as string)
+          : "text";
+
+    openTab(
+      {
+        documentId,
+        kind: kind as any,
+        content: "",
+        title,
+        isVisible: true,
+        status: "idle",
+        boundingBox: { top: 0, left: 0, width: 0, height: 0 },
+      },
+      title
+    );
+  }, [
+    isCreateDocument,
+    documentId,
+    toolCallId,
+    relatedTab?.artifact.documentId,
+    part.output,
+    part.input,
+    openTab,
+  ]);
 
   // Handle click to focus the document tab
   const handleOpen = useCallback(() => {

@@ -229,10 +229,12 @@ export function openPendingTab(
 
       if (existingPendingTab) {
         // Just activate it
-        return {
+        const newState = {
           ...currentState,
           activeTabId: existingPendingTab.id,
         };
+        updateCacheReference(newState);
+        return newState;
       }
 
       // Create new pending tab
@@ -252,10 +254,15 @@ export function openPendingTab(
         createdAt: Date.now(),
       };
 
-      return {
+      const newState = {
         tabs: [...currentState.tabs, newTab],
         activeTabId: newTab.id,
       };
+
+      // Update cache reference for immediate visibility
+      updateCacheReference(newState);
+
+      return newState;
     },
     { revalidate: false }
   );
@@ -266,6 +273,10 @@ export function openPendingTab(
 /**
  * Binds a pending tab to an actual document ID.
  * Called when the data-id stream event arrives with the real document ID.
+ *
+ * IMPORTANT: This function updates the cache reference after mutation
+ * to ensure subsequent calls to peekTabsState() and mutateTabByDocumentId()
+ * see the updated documentId. This is critical for multiple document streaming.
  *
  * @param pendingDocId - The pending document ID (pending-{toolCallId})
  * @param actualDocId - The real document ID from the backend
@@ -304,10 +315,16 @@ export function bindPendingTabToDocument(
         },
       };
 
-      return {
+      const newState = {
         ...currentState,
         tabs: updatedTabs,
       };
+
+      // Update cache reference so subsequent peekTabsState() calls
+      // see the updated documentId immediately
+      updateCacheReference(newState);
+
+      return newState;
     },
     { revalidate: false }
   );
@@ -320,12 +337,37 @@ export function bindPendingTabToDocument(
  * Used to check if there's a pending tab waiting for a document ID.
  *
  * @returns The pending tab or null if none exists
+ * @deprecated Use findMostRecentPendingTab for better multi-document support
  */
 export function findPendingTab(): CanvasTab | null {
   const state = getTabsState();
   return (
     state.tabs.find((tab) => isPendingDocumentId(tab.artifact.documentId)) ||
     null
+  );
+}
+
+/**
+ * Finds the most recently created pending tab in the current state.
+ * This is critical for multiple document streaming - when creating
+ * documents in sequence, we need to bind the NEWEST pending tab,
+ * not just any pending tab.
+ *
+ * @returns The most recently created pending tab, or null if none exists
+ */
+export function findMostRecentPendingTab(): CanvasTab | null {
+  const state = getTabsState();
+  const pendingTabs = state.tabs.filter((tab) =>
+    isPendingDocumentId(tab.artifact.documentId)
+  );
+
+  if (pendingTabs.length === 0) {
+    return null;
+  }
+
+  // Sort by createdAt descending (newest first) and return the first one
+  return pendingTabs.reduce((newest, tab) =>
+    tab.createdAt > newest.createdAt ? tab : newest
   );
 }
 

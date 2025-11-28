@@ -2040,12 +2040,14 @@ useEffect(() => {
      - Added defensive fallback in `useTabStreamSync` to reset pending tabs on `data-finish` even without a known documentId
 
 3. **Timing race condition between tab creation and stream events**: Stream events (`data-id`, `data-textDelta`) could arrive BEFORE the pending tab was created by `DocumentTool`'s useEffect.
-   - **Cause**: The `DocumentTool` component opens pending tabs in a `useEffect`, which runs after the component renders. However, stream events from the backend can arrive before React's useEffect phase completes.
-   - **Fix**: Implemented retry logic in `useTabStreamSync`:
+   - **Cause**: The `DocumentTool` component opens pending tabs in a `useEffect`, which runs after the component renders. However, stream events from the backend can arrive before React's useEffect phase completes. Additionally, for fast-completing tools, by the time `DocumentTool` renders, `part.output` already exists, causing the pending tab creation effect to be skipped entirely.
+   - **Fix**: Implemented multi-layered timing resilience:
      - `mutateTabByDocumentId` now returns `boolean` indicating if a tab was found
      - On content delta events, if the update fails (no tab found), the hook attempts to bind any pending tab first, then retries
      - Added `resetAllStreamingTabs()` helper that resets ALL tabs with "streaming" or "pending" status to "idle"
      - On `data-finish`, this helper is called as a defensive fallback to ensure no tabs get stuck
+     - **Direct tab creation in `useTabStreamSync`**: When `data-id` arrives and no pending tab exists, creates a tab directly with buffered metadata (`data-kind`, `data-title`)
+     - **Fallback tab creation in `DocumentTool`**: Third effect creates a tab when tool output arrives but no tab exists for that document yet
 
 **Key Changes:**
 
@@ -2076,6 +2078,28 @@ const updateTabWithRetry = (docId, updates) => {
   }
   return success;
 };
+
+// hooks/use-artifact-streaming.ts - direct tab creation when no pending tab exists
+case "data-id": {
+  const actualDocId = delta.data;
+  const didBind = tryBindPendingTab(actualDocId);
+  if (!didBind) {
+    // No pending tab - create one directly with buffered metadata
+    const kind = pendingKindRef.current || "text";
+    const title = pendingTitleRef.current || "Document";
+    openPendingTab(`stream-${actualDocId.slice(0, 8)}`, kind, title);
+    bindPendingTabToDocument(pendingId, actualDocId);
+  }
+  break;
+}
+
+// components/tools/document.tsx - fallback effect for fast-completing tools
+useEffect(() => {
+  if (!isCreateDocument || !documentId) return;
+  if (relatedTab?.artifact.documentId === documentId) return;
+  // No tab exists - create one directly with actual document ID
+  openTab({ documentId, kind, ... }, title);
+}, [documentId, relatedTab, ...]);
 ```
 
 **Manual Testing Steps:**
@@ -2282,6 +2306,103 @@ export const AssistantMessage = memo(PureAssistantMessage, (prev, next) => {
 - React is allowed to deprioritize streaming updates
 - Only the streaming message component re-renders per token
 - Heavy components (`LoadInvoiceTool`, `DocumentSelectorArtifact`, canvas tabs) remain stable
+
+### 17. Multiple Document Streaming Fix
+
+**Files**: `hooks/use-artifact-streaming.ts`, `hooks/use-canvas-tabs.ts`, `components/tools/document.tsx`
+
+**Issue**: When creating multiple documents in sequence, only the first document streamed live into the canvas tab. For subsequent documents, a new tab opened but content didn't stream in real-time - it only appeared at the end or after manually interacting with the chat widget.
+
+**Root Cause**: The streaming pipeline treated each `createDocument` call as part of a continuous session rather than independent sessions:
+
+1. `findPendingTab()` returned any pending tab, not the one for the current stream
+2. Session state (refs) could carry over between document sessions
+3. Fallback tab creation used synthetic IDs that didn't match `DocumentTool`'s expected pending IDs
+4. SWR cache wasn't always updated synchronously after binding operations
+
+**Key Changes:**
+
+1. **New `findMostRecentPendingTab()` function** (`hooks/use-canvas-tabs.ts`):
+   - Returns the most recently created pending tab (based on `createdAt`)
+   - Critical for multi-document streaming where multiple pending tabs may exist briefly
+
+```typescript
+export function findMostRecentPendingTab(): CanvasTab | null {
+  const state = getTabsState();
+  const pendingTabs = state.tabs.filter((tab) =>
+    isPendingDocumentId(tab.artifact.documentId)
+  );
+
+  if (pendingTabs.length === 0) return null;
+
+  // Return the newest pending tab
+  return pendingTabs.reduce((newest, tab) =>
+    tab.createdAt > newest.createdAt ? tab : newest
+  );
+}
+```
+
+2. **Refactored `useTabStreamSync`** (`hooks/use-artifact-streaming.ts`):
+   - Each `data-id` event starts a completely fresh streaming session
+   - Removed `tabBoundRef` guard that prevented retry attempts
+   - Always retries binding on content delta failures
+
+```typescript
+// Each data-id resets ALL session state
+case "data-id": {
+  const actualDocId = delta.data;
+
+  // Cancel previous timers
+  if (throttleTimerRef.current) {
+    clearTimeout(throttleTimerRef.current);
+    throttleTimerRef.current = null;
+  }
+
+  // Fresh session state
+  streamingDocumentIdRef.current = actualDocId;
+  accumulatedContentRef.current = "";
+  flushPendingRef.current = false;
+  lastFlushTimeRef.current = 0;
+
+  // Bind most recent pending tab
+  const didBind = tryBindPendingTab(actualDocId);
+  // ... handle binding or create fallback tab
+}
+```
+
+3. **Cache synchronization in `bindPendingTabToDocument`** (`hooks/use-canvas-tabs.ts`):
+   - Now calls `updateCacheReference()` after mutation
+   - Ensures subsequent `peekTabsState()` calls see updated documentId immediately
+
+```typescript
+export function bindPendingTabToDocument(pendingDocId, actualDocId): boolean {
+  globalMutate<CanvasTabsState>(CANVAS_TABS_KEY, (current) => {
+    // ... update tab ...
+    const newState = { ...currentState, tabs: updatedTabs };
+    updateCacheReference(newState);  // Critical for cache sync
+    return newState;
+  }, { revalidate: false });
+  return didBind;
+}
+```
+
+4. **Enhanced `DocumentTool` component** (`components/tools/document.tsx`):
+   - Tracks toolCallId changes to ensure clean state
+   - Three-layer fallback system for tab creation
+
+**Behavior After Fix:**
+
+For each `createDocument` call:
+1. `DocumentTool` opens pending tab (`pending-{toolCallId}`) immediately
+2. `data-id` event resets session state and binds the most recent pending tab
+3. `data-textDelta` events stream content to the correct tab
+4. `data-finish` marks tab as idle and fully resets for next document
+5. Next `data-id` starts completely fresh - no interference from previous sessions
+
+**Manual Testing:**
+
+1. Ask the assistant to "Create 3 short documents: one about cats, one about dogs, and one about birds"
+2. Verify: Each document gets its own tab, all three stream live, no stuck states
 
 ---
 
