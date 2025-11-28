@@ -71,13 +71,13 @@ export const ArtifactTitle = ({ className, ...props }: ArtifactTitleProps) => (
   />
 );
 
-export type ArtifactDescriptionProps = HTMLAttributes<HTMLParagraphElement>;
+export type ArtifactDescriptionProps = HTMLAttributes<HTMLSpanElement>;
 
 export const ArtifactDescription = ({
   className,
   ...props
 }: ArtifactDescriptionProps) => (
-  <p className={cn("text-muted-foreground text-sm", className)} {...props} />
+  <span className={cn("text-muted-foreground text-sm", className)} {...props} />
 );
 
 export type ArtifactActionsProps = HTMLAttributes<HTMLDivElement>;

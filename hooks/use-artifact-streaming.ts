@@ -5,11 +5,13 @@ import { artifactDefinitions } from "@/components/artifacts";
 import { useDataStreamSubscription } from "@/components/chat/streaming";
 import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
 import {
+  activateTabForStreaming,
   bindPendingTabToDocument,
   findMostRecentPendingTab,
   mutateTabByDocumentId,
   openPendingTab,
   resetAllStreamingTabs,
+  snapshotDocumentVersion,
   wasDocumentClosedByUser,
 } from "@/hooks/use-canvas-tabs";
 import { generatePendingDocumentId, type WidgetKind } from "@/lib/canvas";
@@ -323,24 +325,31 @@ export function useTabStreamSync() {
             // Set the tab to streaming status
             mutateTabByDocumentId(actualDocId, { status: "streaming" });
           } else {
-            // No pending tab exists - create one directly with buffered metadata
-            // This handles the case where stream events arrive before DocumentTool renders
-            const kind = pendingKindRef.current || "text";
-            const title = pendingTitleRef.current || "Document";
+            // Try to activate existing tab (for updateDocument)
+            // First snapshot the current content before it gets cleared
+            snapshotDocumentVersion(actualDocId);
+            const didActivate = activateTabForStreaming(actualDocId);
 
-            // Create a tab directly with the actual document ID (no pending->bind dance)
-            openPendingTab(
-              `direct-${actualDocId.slice(0, 8)}`,
-              kind as any,
-              title
-            );
-            const pendingId = generatePendingDocumentId(
-              `direct-${actualDocId.slice(0, 8)}`
-            );
-            bindPendingTabToDocument(pendingId, actualDocId);
+            if (!didActivate) {
+              // No existing tab - create new pending tab (original fallback)
+              // This handles the case where stream events arrive before DocumentTool renders
+              const kind = pendingKindRef.current || "text";
+              const title = pendingTitleRef.current || "Document";
 
-            // Clear buffered metadata
-            pendingTitleRef.current = null;
+              // Create a tab directly with the actual document ID (no pending->bind dance)
+              openPendingTab(
+                `direct-${actualDocId.slice(0, 8)}`,
+                kind as any,
+                title
+              );
+              const pendingId = generatePendingDocumentId(
+                `direct-${actualDocId.slice(0, 8)}`
+              );
+              bindPendingTabToDocument(pendingId, actualDocId);
+
+              // Clear buffered metadata
+              pendingTitleRef.current = null;
+            }
           }
 
           // Clear kind buffer after use

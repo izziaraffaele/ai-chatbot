@@ -34,17 +34,18 @@ export const updateDocumentTool = createTool({
     }
 
     // Emit data-id first so the frontend can identify which document is being updated
-    await writer?.write({
+    // NOTE: Must use writer.custom() not writer.write() for events to be received by client
+    await writer?.custom({
       type: "data-id",
       data: id,
       transient: true,
-    });
+    } as any);
 
-    await writer?.write({
+    await writer?.custom({
       type: "data-clear",
       data: null,
       transient: true,
-    });
+    } as any);
 
     // Use try/finally to ensure data-finish is always emitted
     try {
@@ -74,7 +75,12 @@ export const updateDocumentTool = createTool({
       };
     } finally {
       // Always emit data-finish to ensure the tab transitions to idle state
-      await writer?.write({ type: "data-finish", data: null, transient: true });
+      // NOTE: Must use writer.custom() not writer.write() for events to be received by client
+      await writer?.custom({
+        type: "data-finish",
+        data: null,
+        transient: true,
+      } as any);
     }
   },
 });

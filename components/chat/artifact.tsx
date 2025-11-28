@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
  * - "streaming": Content is being streamed to the tab
  * - "idle": Tab is ready and not actively streaming
  */
-export type UIArtifact<TKind = string, TContent = any> = {
+export type UIArtifact<TKind = string, TContent = any, TMeta = unknown> = {
   title: string;
   documentId: string;
   kind: TKind;
@@ -46,6 +46,8 @@ export type UIArtifact<TKind = string, TContent = any> = {
     width: number;
     height: number;
   };
+  /** Optional metadata for version history and other purposes */
+  meta?: TMeta;
 };
 
 export type ArtifactVersion<T = any> = {

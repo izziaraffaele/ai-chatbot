@@ -8,6 +8,7 @@ import {
   CopyIcon,
   DownloadIcon,
   EyeIcon,
+  HistoryIcon,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { codeArtifact } from "@/artifacts/code/client";
@@ -29,7 +30,11 @@ import { useChatRuntime } from "@/components/chat/context";
 import { Toolbar } from "@/components/toolbar";
 import { VersionFooter } from "@/components/version-footer";
 import { useArtifact } from "@/hooks/use-artifact";
-import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
+import {
+  type DocumentMeta,
+  type DocumentVersion,
+  useCanvasTabs,
+} from "@/hooks/use-canvas-tabs";
 import { useChatDocument } from "@/hooks/use-chat-document";
 import type { Document } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
@@ -148,8 +153,9 @@ export function DocumentArtifact({
   // Use tab content if available (this includes streaming content)
   // Otherwise fall back to the latest saved document content
   const currentContent = useMemo(() => {
-    // If tab has content (including streaming content), use it
-    if (tabArtifact?.content) {
+    // If tab has content defined (including empty string during streaming), use it
+    // Check for undefined/null explicitly, NOT truthiness, because "" is valid streaming content
+    if (tabArtifact?.content !== undefined && tabArtifact?.content !== null) {
       return typeof tabArtifact.content === "string" ? tabArtifact.content : "";
     }
     // Fall back to latest saved document
@@ -234,6 +240,25 @@ function DocumentArtifactContent({
     setContent,
   } = useArtifactDraft<string>();
 
+  // Session-scoped version history from tab meta
+  const [viewingSessionVersionId, setViewingSessionVersionId] = useState<
+    string | null
+  >(null);
+
+  // Get session versions from tab meta
+  const sessionVersions = useMemo<DocumentVersion[]>(() => {
+    const meta = activeTab?.artifact.meta as DocumentMeta | undefined;
+    return meta?.versions ?? [];
+  }, [activeTab?.artifact.meta]);
+
+  // Find the selected session version content
+  const selectedSessionVersion = useMemo(() => {
+    if (!viewingSessionVersionId) {
+      return null;
+    }
+    return sessionVersions.find((v) => v.id === viewingSessionVersionId);
+  }, [viewingSessionVersionId, sessionVersions]);
+
   const currentEntry = Array.isArray(chatDocument.entries)
     ? chatDocument.entries[currentIndex]
     : undefined;
@@ -249,11 +274,19 @@ function DocumentArtifactContent({
   }, [currentEntry]);
 
   // Determine display content:
+  // - If viewing a session version: show that version's content
   // - During streaming/pending: use currentContent from tab (updated by useTabStreamSync)
   // - Otherwise: use draftContent (user edits)
   const tabStatus = activeTab?.artifact.status;
   const isStreaming = tabStatus === "streaming" || tabStatus === "pending";
-  const displayContent = isStreaming ? currentContent : draftContent;
+  const displayContent = selectedSessionVersion
+    ? selectedSessionVersion.content
+    : isStreaming
+      ? currentContent
+      : draftContent;
+
+  // Check if we're viewing an old session version
+  const isViewingSessionVersion = Boolean(selectedSessionVersion);
 
   return (
     <ChatArtifact className={cn("h-full rounded-none border-none", className)}>
@@ -291,8 +324,22 @@ function DocumentArtifactContent({
               <span className="size-2 animate-pulse rounded-full bg-amber-400" />
               Generating...
             </span>
+          ) : isViewingSessionVersion ? (
+            <span className="flex items-center gap-2">
+              <HistoryIcon className="size-3" />
+              Viewing {selectedSessionVersion?.label}
+            </span>
           ) : isDirty ? (
             "Saving changes..."
+          ) : sessionVersions.length > 0 ? (
+            <div className="flex items-center gap-2">
+              <span>{updatedAt ? `Updated ${updatedAt}` : ""}</span>
+              <SessionVersionSelector
+                onSelect={setViewingSessionVersionId}
+                selectedVersionId={viewingSessionVersionId}
+                versions={sessionVersions}
+              />
+            </div>
           ) : updatedAt ? (
             `Updated ${updatedAt}`
           ) : (
@@ -343,21 +390,103 @@ function DocumentArtifactContent({
         />
       </ChatArtifactBody>
 
-      <ChatArtifactFooter visible={!isLatest}>
-        <VersionFooter
-          currentVersionIndex={currentIndex}
-          documents={chatDocument.entries}
-          handleVersionChange={(type) => {
-            if (type === "toggle") {
-              // Toggle between edit and diff modes when viewing old versions
-              // For now, just navigate to latest
-              navigateVersion("latest");
-            } else {
-              navigateVersion(type);
-            }
-          }}
-        />
+      <ChatArtifactFooter visible={!isLatest || isViewingSessionVersion}>
+        {isViewingSessionVersion ? (
+          <SessionVersionFooter
+            onRestoreToLatest={() => setViewingSessionVersionId(null)}
+            versionLabel={selectedSessionVersion?.label || ""}
+          />
+        ) : (
+          <VersionFooter
+            currentVersionIndex={currentIndex}
+            documents={chatDocument.entries}
+            handleVersionChange={(type) => {
+              if (type === "toggle") {
+                // Toggle between edit and diff modes when viewing old versions
+                // For now, just navigate to latest
+                navigateVersion("latest");
+              } else {
+                navigateVersion(type);
+              }
+            }}
+          />
+        )}
       </ChatArtifactFooter>
     </ChatArtifact>
+  );
+}
+
+// ============================================================================
+// Session Version Components
+// ============================================================================
+
+type SessionVersionSelectorProps = {
+  versions: DocumentVersion[];
+  selectedVersionId: string | null;
+  onSelect: (versionId: string | null) => void;
+};
+
+/**
+ * Dropdown selector for session-scoped document versions.
+ * Allows users to view previous versions created during the current session.
+ */
+function SessionVersionSelector({
+  versions,
+  selectedVersionId,
+  onSelect,
+}: SessionVersionSelectorProps) {
+  if (versions.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <HistoryIcon className="size-3 text-muted-foreground" />
+      <select
+        aria-label="Select version"
+        className="cursor-pointer rounded border-none bg-transparent px-1 py-0.5 text-muted-foreground text-xs transition-colors hover:text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+        onChange={(e) => onSelect(e.target.value || null)}
+        value={selectedVersionId || ""}
+      >
+        <option value="">Versione corrente</option>
+        {versions
+          .slice()
+          .reverse()
+          .map((v) => (
+            <option key={v.id} value={v.id}>
+              {v.label} – {new Date(v.createdAt).toLocaleTimeString("it-IT")}
+            </option>
+          ))}
+      </select>
+    </div>
+  );
+}
+
+type SessionVersionFooterProps = {
+  versionLabel: string;
+  onRestoreToLatest: () => void;
+};
+
+/**
+ * Footer shown when viewing a historical session version.
+ * Provides a button to return to the current version.
+ */
+function SessionVersionFooter({
+  versionLabel,
+  onRestoreToLatest,
+}: SessionVersionFooterProps) {
+  return (
+    <div className="flex items-center justify-between gap-4 px-4 py-2">
+      <span className="text-muted-foreground text-sm">
+        Viewing {versionLabel} (session history)
+      </span>
+      <button
+        className="rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+        onClick={onRestoreToLatest}
+        type="button"
+      >
+        Back to current
+      </button>
+    </div>
   );
 }

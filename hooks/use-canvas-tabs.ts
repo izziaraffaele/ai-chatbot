@@ -25,6 +25,30 @@ import {
 export type CanvasTabType = "widget" | "document" | "csv";
 
 /**
+ * Represents a single version snapshot of a document's content.
+ * Used for UI-only (session-scoped) version history.
+ */
+export type DocumentVersion = {
+  /** Unique version identifier */
+  id: string;
+  /** Human-readable label (e.g., "Versione 1") */
+  label: string;
+  /** Timestamp when this version was created */
+  createdAt: number;
+  /** The content at this version */
+  content: string;
+};
+
+/**
+ * Metadata stored in a document tab for version history.
+ * This enables users to navigate between versions during a session.
+ */
+export type DocumentMeta = {
+  /** Array of version snapshots, oldest first */
+  versions?: DocumentVersion[];
+};
+
+/**
  * Individual tab data structure
  * Now uses the new CanvasTabData from widget registry internally
  */
@@ -533,6 +557,84 @@ export function activateTabForStreaming(documentId: string): boolean {
   );
 
   return didActivate;
+}
+
+/**
+ * Snapshots the current content of a document tab as a new version.
+ * Called before updateDocument clears the tab content, preserving the old version.
+ *
+ * The version is stored in the tab's `meta.versions` array for session-scoped
+ * version history. Users can navigate between versions in the UI.
+ *
+ * @param documentId - The document ID to snapshot
+ * @returns true if a version was created, false if tab not found or empty content
+ */
+export function snapshotDocumentVersion(documentId: string): boolean {
+  let didSnapshot = false;
+
+  globalMutate<CanvasTabsState>(
+    CANVAS_TABS_KEY,
+    (current) => {
+      const currentState = current || initialTabsState;
+
+      // Find the tab with this documentId
+      const tabIndex = currentState.tabs.findIndex(
+        (t) => t.artifact.documentId === documentId
+      );
+
+      if (tabIndex === -1) {
+        return currentState;
+      }
+
+      const targetTab = currentState.tabs[tabIndex];
+      const currentContent = targetTab.artifact.content;
+
+      // Skip if content is empty or not a string
+      if (!currentContent || typeof currentContent !== "string") {
+        return currentState;
+      }
+
+      didSnapshot = true;
+
+      // Get existing meta and versions
+      const meta = (targetTab.artifact.meta ?? {}) as DocumentMeta;
+      const versions = meta.versions ?? [];
+
+      // Create new version
+      const newVersion: DocumentVersion = {
+        id: `v${versions.length + 1}`,
+        label: `Versione ${versions.length + 1}`,
+        createdAt: Date.now(),
+        content: currentContent,
+      };
+
+      // Update the tab with the new version in meta
+      const updatedTabs = [...currentState.tabs];
+      updatedTabs[tabIndex] = {
+        ...targetTab,
+        artifact: {
+          ...targetTab.artifact,
+          meta: {
+            ...meta,
+            versions: [...versions, newVersion],
+          },
+        },
+      };
+
+      const newState = {
+        ...currentState,
+        tabs: updatedTabs,
+      };
+
+      // Update cache reference
+      updateCacheReference(newState);
+
+      return newState;
+    },
+    { revalidate: false }
+  );
+
+  return didSnapshot;
 }
 
 /**

@@ -1558,7 +1558,7 @@ Stream Binding Flow:
 
 | Event Type | Handler Action |
 |------------|----------------|
-| `data-id` | **Binds pending tab** to actual document ID, transitions to "streaming" |
+| `data-id` | **For createDocument:** binds pending tab to actual document ID. **For updateDocument:** activates existing tab via `activateTabForStreaming()`. Both transition to "streaming" |
 | `data-textDelta` | Appends text content and updates tab (for text documents) |
 | `data-codeDelta` | Appends code content and updates tab (for code documents) |
 | `data-sheetDelta` | Appends sheet/CSV content and updates tab (for sheet documents) |
@@ -2575,6 +2575,190 @@ For each `createDocument` call:
 - When `data-kind` event arrives with actual kind (e.g., `"sheet"`), tab kind is updated
 - Correct renderer (spreadsheet grid) is used immediately during streaming
 - No need to close/reopen tab to see the grid view
+
+### 20. Live Update Bugfix for Document Edits
+
+**File**: `hooks/use-artifact-streaming.ts`
+
+**Issue**: When the AI agent modifies an existing document via `updateDocument`, the backend correctly updates the document, but the user did not see the changes in the open tab in real time. The updated content only appeared after the user manually closed and reopened the document.
+
+**Root Cause**: In `useTabStreamSync`, when `data-id` arrived for `updateDocument`:
+1. `tryBindPendingTab()` returned `false` (no pending tab to bind since the tab already exists)
+2. The code then incorrectly created a NEW pending tab instead of activating the existing tab
+
+**Fix**: Modified the `data-id` handler to call `activateTabForStreaming()` before creating a new pending tab:
+
+```typescript
+// Import activateTabForStreaming
+import {
+  activateTabForStreaming,
+  // ... other imports
+} from "@/hooks/use-canvas-tabs";
+
+// In handleStreamPart, data-id case:
+const didBind = tryBindPendingTab(actualDocId);
+
+if (didBind) {
+  // ... existing binding logic (for createDocument)
+} else {
+  // Try to activate existing tab (for updateDocument)
+  const didActivate = activateTabForStreaming(actualDocId);
+
+  if (!didActivate) {
+    // No existing tab - create new pending tab (original fallback)
+    // ... existing pending tab creation logic
+  }
+}
+```
+
+**Behavior After Fix**:
+- `updateDocument` → `data-id` arrives → `activateTabForStreaming()` finds existing tab
+- Tab status transitions to "streaming" → content deltas update tab in real-time
+- `data-finish` sets tab status to "idle"
+- User sees changes immediately in the already-open tab without manual refresh
+
+### 21. Session-Scoped Document Version History
+
+**Files**: `hooks/use-canvas-tabs.ts`, `hooks/use-artifact-streaming.ts`, `components/artifacts/document.tsx`, `components/chat/artifact.tsx`
+
+**Feature**: When the AI agent updates an existing document, the previous content is automatically saved as a "session version" that users can view during the current session. This allows users to easily compare and navigate between document revisions without losing their work.
+
+**Architecture**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                  Document Version History Flow                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│   1. updateDocument called                                               │
+│              │                                                           │
+│              ▼                                                           │
+│   ┌──────────────────────────────────────────────────────────────────┐  │
+│   │  useTabStreamSync receives data-id event                          │  │
+│   │  - Calls snapshotDocumentVersion(docId) BEFORE activating tab    │  │
+│   │  - Saves current content to tab.artifact.meta.versions           │  │
+│   └────────────────────────────────────────────────────────────────────┘│
+│              │                                                           │
+│              ▼                                                           │
+│   ┌──────────────────────────────────────────────────────────────────┐  │
+│   │  activateTabForStreaming(docId)                                   │  │
+│   │  - Sets tab to streaming mode                                     │  │
+│   └────────────────────────────────────────────────────────────────────┘│
+│              │                                                           │
+│              ▼                                                           │
+│   ┌──────────────────────────────────────────────────────────────────┐  │
+│   │  data-clear + data-textDelta events                               │  │
+│   │  - Tab content is cleared and new content streams in             │  │
+│   └────────────────────────────────────────────────────────────────────┘│
+│              │                                                           │
+│              ▼                                                           │
+│   ┌──────────────────────────────────────────────────────────────────┐  │
+│   │  User navigates versions in DocumentArtifact UI                   │  │
+│   │  - SessionVersionSelector dropdown shows available versions       │  │
+│   │  - User can view old content without modifying current document  │  │
+│   └────────────────────────────────────────────────────────────────────┘│
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Types Added** (`hooks/use-canvas-tabs.ts`):
+
+```typescript
+export type DocumentVersion = {
+  id: string;           // Unique version identifier (e.g., "v1", "v2")
+  label: string;        // Human-readable label (e.g., "Versione 1")
+  createdAt: number;    // Timestamp when version was created
+  content: string;      // The content at this version
+};
+
+export type DocumentMeta = {
+  versions?: DocumentVersion[];  // Array of version snapshots
+};
+```
+
+**Key Functions**:
+
+| Function | File | Description |
+|----------|------|-------------|
+| `snapshotDocumentVersion` | `hooks/use-canvas-tabs.ts` | Creates a new version from current tab content and appends to `meta.versions` |
+| `SessionVersionSelector` | `components/artifacts/document.tsx` | Dropdown UI for selecting which version to view |
+| `SessionVersionFooter` | `components/artifacts/document.tsx` | Footer shown when viewing an old version with "Back to current" button |
+
+**UIArtifact Type Update** (`components/chat/artifact.tsx`):
+
+Added `meta?: TMeta` field to support arbitrary metadata including version history:
+
+```typescript
+export type UIArtifact<TKind = string, TContent = any, TMeta = unknown> = {
+  title: string;
+  documentId: string;
+  kind: TKind;
+  content: TContent;
+  isVisible: boolean;
+  status: "pending" | "streaming" | "idle";
+  boundingBox: { ... };
+  meta?: TMeta;  // NEW: Optional metadata for version history
+};
+```
+
+**User Experience**:
+
+1. User asks AI to modify an existing document
+2. Previous content is automatically saved as "Versione 1" (or next available number)
+3. Tab clears and new content streams in
+4. User sees a version selector dropdown in the header (when versions exist)
+5. User can select any version to view its content
+6. A footer appears when viewing old versions with "Back to current" button
+7. Selecting "Versione corrente" returns to the live document
+
+**Note**: This is session-scoped version history stored in memory (`tab.artifact.meta`). Versions are lost when the page is refreshed. For persistent version history, see the database-backed version system using `useChatDocument` which loads from the `documents` table.
+
+### 22. Document Update Streaming Event Fix
+
+**File**: `mastra/tools/update-document-tool.ts`
+
+**Issue**: Document updates were not streaming to the existing tab. Users had to manually close and reopen the document multiple times to see updates. The streaming content was not visible during the update process.
+
+**Root Cause**: The `updateDocumentTool` was using `writer.write()` instead of `writer.custom()` to emit stream events (`data-id`, `data-clear`, `data-finish`). The `writer.write()` method doesn't properly format events for the client-side `useDataStreamSubscription` hook, causing the events to never be received.
+
+**Fix**: Changed all stream event emissions from `writer.write()` to `writer.custom()`:
+
+```typescript
+// BEFORE (broken):
+await writer?.write({
+  type: "data-id",
+  data: id,
+  transient: true,
+});
+
+// AFTER (working):
+await writer?.custom({
+  type: "data-id",
+  data: id,
+  transient: true,
+} as any);
+```
+
+**Additional Fix** (`components/artifacts/document.tsx`):
+
+The `currentContent` calculation was using truthiness check for content, which caused empty strings from `data-clear` to fall back to old saved content:
+
+```typescript
+// BEFORE (broken - "" is falsy):
+if (tabArtifact?.content) {
+  return typeof tabArtifact.content === "string" ? tabArtifact.content : "";
+}
+
+// AFTER (working - explicit undefined check):
+if (tabArtifact?.content !== undefined && tabArtifact?.content !== null) {
+  return typeof tabArtifact.content === "string" ? tabArtifact.content : "";
+}
+```
+
+**Key Insight**: When working with Mastra tool streams:
+- Use `writer.custom()` for data events that need to reach `useDataStreamSubscription`
+- Use `writer.write()` only for standard Mastra stream events
+- Always check for `undefined`/`null` explicitly, not truthiness, when dealing with content that can be empty strings
 
 ---
 
