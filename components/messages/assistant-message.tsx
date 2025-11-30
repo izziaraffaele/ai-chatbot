@@ -23,6 +23,7 @@ export type AssistantMessageProps = {
   sender?: {
     displayName?: string;
     avatar?: React.ReactNode;
+    avatarColor?: string;
   } | null;
   vote?: Vote;
   isReadonly?: boolean;
@@ -49,6 +50,7 @@ export function AssistantMessage({
   const [mode, setMode] = useState<ChatMessageMode>("view");
 
   const avatar = sender?.avatar || <SparklesIcon />;
+  const avatarColor = sender?.avatarColor;
 
   const hasText = message.parts?.some(
     (p) => p.type === "text" && p.text?.trim()
@@ -69,7 +71,10 @@ export function AssistantMessage({
             "pb-9": !isMessageStreaming && hasText,
           })}
         >
-          <ChatMessageAvatar className="text-[#FFBE2C]">
+          <ChatMessageAvatar
+            className={avatarColor ? "" : "text-[#FFBE2C]"}
+            style={avatarColor ? { color: avatarColor } : undefined}
+          >
             {avatar}
           </ChatMessageAvatar>
         </div>

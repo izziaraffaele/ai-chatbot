@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
         hostname: "api.dicebear.com",
       },
       {
+        hostname: "schoolr.net",
+      },
+      {
         protocol: "https",
         //https://nextjs.org/docs/messages/next-image-unconfigured-host
         hostname: "*.public.blob.vercel-storage.com",

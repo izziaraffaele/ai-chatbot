@@ -137,13 +137,13 @@ export const DemoConfigMemorySchema = z.object({
         .string()
         .optional()
         .describe(
-          "System instructions that define how the assistant should behave, respond, and handle various situations."
+          `Create a clear and concise set of instructions for an AI to respond effectively, adapting to the user's needs and preferences while ensuring clarity, engagement, and ethical behavior in every interaction.`
         ),
       guidelines: z
         .string()
         .optional()
         .describe(
-          "Guidelines and policies that the assistant should follow when interacting with users."
+          "Generate a brief set of guidelines for an AI, emphasizing clear communication, adaptability, empathy, ethical behavior, and responsiveness to user feedback, ensuring relevant and respectful interactions."
         ),
     })
     .optional()
@@ -187,7 +187,7 @@ export const DemoConfigMemorySchema = z.object({
             .string()
             .optional()
             .describe(
-              "A brief description of the organization and its mission."
+              "Provide a detailed overview of the organization deploying the AI assistant, including its history, mission, values, key products or services, and market position. Ensure the assistant is equipped to explain the organization’s goals, culture, customer approach, and any current strategic initiatives."
             ),
           websiteUrl: z
             .string()
@@ -207,7 +207,7 @@ export const DemoConfigMemorySchema = z.object({
             .string()
             .optional()
             .describe(
-              "A brief description of what the application does and its purpose."
+              "Provide a detailed description of the app, including its core purpose, target audience, key features, and user flows. Outline how the AI assistant should support the app’s goals, enhance user experience, and adapt to different user needs, preferences, and contexts. Include potential challenges, use cases, and any ethical or privacy considerations that the assistant should be mindful of while interacting with users."
             ),
         })
         .optional()

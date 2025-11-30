@@ -72,7 +72,7 @@ export const ChatMessageAvatar = ({
 }: React.ComponentProps<"div">) => (
   <div
     className={cn(
-      "flex size-8 shrink-0 items-center justify-center rounded-full border-current bg-border/20 ring-1 ring-border dark:bg-background",
+      "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border-current bg-border/20 ring-1 ring-border dark:bg-background",
       className
     )}
     data-slot="chat-message-avatar"

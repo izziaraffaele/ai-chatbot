@@ -85,14 +85,14 @@ export function SuggestionListControl(
       {value?.map((item: string, i) => {
         return (
           <div
-            className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2"
+            className="flex items-center gap-2 rounded-md border border-input bg-background px-2 py-0.5"
             key={item}
           >
             <span className="flex-1 truncate text-sm">{item}</span>
             <Button
-              className="h-8 w-8"
+              className="-mr-1 h-8 w-8"
               onClick={() => remove(i)}
-              size="icon"
+              size="icon-sm"
               type="button"
               variant="ghost"
             >

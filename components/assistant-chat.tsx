@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useWindowSize } from "usehooks-ts";
 import { useArtifact } from "@/hooks/use-artifact";
 import { useArtifactStreaming } from "@/hooks/use-artifact-streaming";
+import { useAssistant } from "@/hooks/use-assistant";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import { DocumentArtifact, isDocumentArtifact } from "./artifacts/document";
@@ -83,6 +84,7 @@ export function AssistantChat({
   const { chat, status } = useChatContext();
   const { messages } = useChatMessages();
   const { artifact } = useArtifact();
+  const assistant = useAssistant();
 
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId: chat.id,
@@ -135,7 +137,7 @@ export function AssistantChat({
   );
 
   const chatMessages = (
-    <MessageIterator empty={chatEmpty}>
+    <MessageIterator displayAssistant={assistant} empty={chatEmpty}>
       {({ message, isLastMessage, sender, vote, onVote, isStreaming }) => {
         const baseProps = {
           message,

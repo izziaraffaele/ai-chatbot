@@ -160,7 +160,7 @@ export function ChatCanvasMain({
         }),
       }}
       className={cn(
-        "fixed flex h-dvh flex-col overflow-y-scroll border-zinc-200 bg-background md:border-l dark:border-zinc-700 dark:bg-muted",
+        "fixed flex h-dvh max-w-full flex-col overflow-y-scroll border-zinc-200 bg-background md:border-l dark:border-zinc-700 dark:bg-muted",
         className
       )}
       data-slot="chat-canvas-main"

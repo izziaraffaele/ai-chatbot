@@ -155,7 +155,10 @@ export function ChatContextUsage(props: ChatContextUsageProps) {
       usedTokens={usedTokens}
     >
       <ContextTrigger>
-        <div className="cursor-pointer hover:text-accent-foreground">
+        <div
+          className="cursor-pointer hover:text-accent-foreground"
+          data-slot="chat-usage-context"
+        >
           <ContextIcon />
         </div>
       </ContextTrigger>

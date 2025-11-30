@@ -303,13 +303,13 @@ export async function POST(request: Request) {
     }
 
     // 3. Check rate limits
-    const rateLimitResponse = await checkRateLimits(
-      session.user.id,
-      session.user.type
-    );
-    if (rateLimitResponse) {
-      return rateLimitResponse;
-    }
+    // const rateLimitResponse = await checkRateLimits(
+    //   session.user.id,
+    //   session.user.type
+    // );
+    // if (rateLimitResponse) {
+    //   return rateLimitResponse;
+    // }
 
     // 4. Setup agents and context
     const { longitude, latitude, city, country } = geolocation(request);
