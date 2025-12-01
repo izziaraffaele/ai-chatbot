@@ -1,6 +1,6 @@
 import type { InferUITools } from "@mastra/core/tools";
-import { chatAgent } from "./chat-agent";
-import { invoiceAnalyzerAgent } from "./invoice-analyzer-agent";
+import { chatAgent } from "./faenza/invoices-manager";
+import { invoiceAnalyzerAgent } from "./faenza/invoice-analyzer-agent";
 import { researchAgent } from "./research-agent";
 
 export type ChatAgent = typeof chatAgent;
@@ -16,6 +16,6 @@ export type InvoiceAnalyzerAgentTools = InferUITools<
   InvoiceAnalyzerAgent["tools"]
 >;
 
-export { createInvoiceAnalyzerAgent } from "./invoice-analyzer-agent";
+export { createInvoiceAnalyzerAgent } from "./faenza/invoice-analyzer-agent";
 
 export const mastraAgents = { chatAgent, researchAgent, invoiceAnalyzerAgent };

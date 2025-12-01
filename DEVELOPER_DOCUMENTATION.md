@@ -76,7 +76,7 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 │                                       ▼                                      │
 │  ┌──────────────────────────────────────────────────────────────────────┐   │
 │  │                    Assistente Comune Agent                            │   │
-│  │  mastra/agents/chat-agent/                                            │   │
+│  │  mastra/agents/faenza/invoices-manager/                               │   │
 │  │  - Identity: Comune di Faenza official assistant                      │   │
 │  │  - Tool: loadInvoice (document access)                                │   │
 │  │  - Memory: LibSQL for conversation history                            │   │
@@ -105,7 +105,7 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 | **Researcher** | `researcher` | Web research and synthesis specialist | 🔍 |
 | **Invoice Analyzer** | `invoiceAnalyzerAgent` | Specialized sub-agent for deep invoice analysis | 🔬 |
 
-### Assistente Comune (`mastra/agents/chat-agent/`)
+### Assistente Comune (`mastra/agents/faenza/invoices-manager/`)
 
 The primary agent for Comune di Faenza, developed by MemorAIz.
 
@@ -148,7 +148,7 @@ The chat agent acts as a "routing agent" that can delegate invoice analysis task
 5. **Communication Style**: Professional Italian
 6. **Greeting**: Welcome message template
 
-### Invoice Analyzer Agent (`mastra/agents/invoice-analyzer-agent/`)
+### Invoice Analyzer Agent (`mastra/agents/faenza/invoice-analyzer-agent/`)
 
 A specialized sub-agent for deep analysis of invoice XML documents. This agent is **called by the chat agent** when users click "Analizza Fattura" on an invalid invoice. The button sends an automatic message to the chat, and the chat agent delegates to this sub-agent to search for missing fields in non-standard XML locations.
 
@@ -922,12 +922,13 @@ When an invoice is invalid and the user clicks "Analizza Fattura":
 ```
 mastra/
 ├── agents/
-│   ├── chat-agent/
-│   │   ├── index.ts           # Assistente Comune configuration
-│   │   └── system-prompt.ts   # Italian system prompt
-│   ├── invoice-analyzer-agent/
-│   │   ├── index.ts           # Invoice Analyzer Agent + factory function
-│   │   └── system-prompt.ts   # Analysis-focused Italian prompt
+│   ├── faenza/
+│   │   ├── invoices-manager/
+│   │   │   ├── index.ts           # Assistente Comune configuration
+│   │   │   └── system-prompt.ts   # Italian system prompt
+│   │   └── invoice-analyzer-agent/
+│   │       ├── index.ts           # Invoice Analyzer Agent + factory function
+│   │       └── system-prompt.ts   # Analysis-focused Italian prompt
 │   ├── research-agent/
 │   │   └── index.ts           # Research agent
 │   └── index.ts               # Agent exports

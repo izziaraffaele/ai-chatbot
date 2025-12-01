@@ -14,7 +14,7 @@ import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
 import { ChatSDKError } from "@/lib/errors";
 import { generateUUID } from "@/lib/utils";
-import { createInvoiceAnalyzerAgent } from "@/mastra/agents/invoice-analyzer-agent";
+import { createInvoiceAnalyzerAgent } from "@/mastra/agents/faenza/invoice-analyzer-agent";
 
 export const maxDuration = 60;
 

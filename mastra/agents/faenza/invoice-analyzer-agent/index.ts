@@ -16,7 +16,7 @@
  */
 
 import { Agent } from "@mastra/core/agent";
-import { invoiceValidationTools } from "../../tools/invoice-validation-tools";
+import { invoiceValidationTools } from "../../../tools/invoice-validation-tools";
 import { invoiceAnalyzerSystemPrompt } from "./system-prompt";
 
 /**
