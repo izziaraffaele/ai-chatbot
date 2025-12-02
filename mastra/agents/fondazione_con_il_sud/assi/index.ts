@@ -15,6 +15,7 @@
  *   - updateDocument: Modify existing documents
  *   - requestSuggestions: Provide writing suggestions
  *   - fondazioneBandi: Access Foundation announcements
+ *   - fondazioneBrowser: Browse bandi file system in visual widget
  *   - catalog: Semantic search over knowledge base
  * - Memory configured with LibSQL for conversation history
  * - System prompt in Italian for internal staff
@@ -29,9 +30,14 @@ import { Memory } from "@mastra/memory";
 import { fondazioneCatalogTool } from "../../../tools/catalog-tool";
 import { createDocumentTool } from "../../../tools/create-document-tool";
 import { fondazioneBandiTool } from "../../../tools/fondazione-bandi-tool";
+import { fondazioneBrowserTool } from "../../../tools/fondazione-fs-tool";
 import { requestSuggestionsTool } from "../../../tools/request-suggestions-tool";
 import { updateDocumentTool } from "../../../tools/update-document-tool";
-import { getGeoHints, getRuntimeConfig } from "../../../utils/runtime-utils";
+import {
+  getCanvasContext,
+  getGeoHints,
+  getRuntimeConfig,
+} from "../../../utils/runtime-utils";
 import { sfcAssiSystemPrompt } from "./system-prompt";
 
 /**
@@ -47,12 +53,13 @@ import { sfcAssiSystemPrompt } from "./system-prompt";
 export const sfcAssiAgent = new Agent({
   name: "Assistente Interno Fondazione CON IL SUD – Assi",
   instructions: ({ runtimeContext }) => {
-    // Extract runtime configuration and geolocation hints
+    // Extract runtime configuration, geolocation hints, and canvas context
     const config = getRuntimeConfig(runtimeContext);
     const geoHints = getGeoHints(runtimeContext);
+    const canvasContext = getCanvasContext(runtimeContext);
 
     // Build system prompt for internal Fondazione assistant
-    return sfcAssiSystemPrompt(config, geoHints);
+    return sfcAssiSystemPrompt(config, geoHints, canvasContext);
   },
   model: "openai/gpt-5.1",
   tools: {
@@ -60,6 +67,7 @@ export const sfcAssiAgent = new Agent({
     updateDocument: updateDocumentTool,
     requestSuggestions: requestSuggestionsTool,
     fondazioneBandi: fondazioneBandiTool,
+    fondazioneBrowser: fondazioneBrowserTool,
     catalog: fondazioneCatalogTool,
   },
   memory: new Memory({

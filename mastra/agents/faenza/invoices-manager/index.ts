@@ -2,7 +2,11 @@ import { Agent } from "@mastra/core/agent";
 import { LibSQLStore } from "@mastra/libsql";
 import { Memory } from "@mastra/memory";
 import { mastraTools } from "../../../tools";
-import { getGeoHints, getRuntimeConfig } from "../../../utils/runtime-utils";
+import {
+  getCanvasContext,
+  getGeoHints,
+  getRuntimeConfig,
+} from "../../../utils/runtime-utils";
 import { invoiceAnalyzerAgent } from "../invoice-analyzer-agent";
 import { chatAgentSystemPrompt } from "./system-prompt";
 /**
@@ -25,12 +29,13 @@ import { chatAgentSystemPrompt } from "./system-prompt";
 export const chatAgent = new Agent({
   name: "Assistente Comune",
   instructions: ({ runtimeContext }) => {
-    // Extract runtime configuration and geolocation hints
+    // Extract runtime configuration, geolocation hints, and canvas context
     const config = getRuntimeConfig(runtimeContext);
     const geoHints = getGeoHints(runtimeContext);
+    const canvasContext = getCanvasContext(runtimeContext);
 
     // Build system prompt for Comune di Faenza assistant
-    const prompt = chatAgentSystemPrompt(config, geoHints);
+    const prompt = chatAgentSystemPrompt(config, geoHints, canvasContext);
 
     return prompt;
   },

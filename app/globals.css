@@ -334,3 +334,46 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ============================================================================
+   MARKDOWN VIEWER STYLES
+   Custom scrollbar and counter system for the markdown viewer widget
+   ============================================================================ */
+
+/* Custom scrollbar for markdown viewer */
+.markdown-viewer-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.markdown-viewer-scrollbar::-webkit-scrollbar-track {
+  background: #fef3e2;
+}
+
+.markdown-viewer-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #f97316, #f59e0b);
+  border-radius: 5px;
+}
+
+.markdown-viewer-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #ea580c, #d97706);
+}
+
+/* Firefox scrollbar for markdown viewer */
+.markdown-viewer-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: #f97316 #fef3e2;
+}
+
+/* Counter system for ordered lists */
+.counter-reset-item {
+  counter-reset: item;
+}
+
+.counter-increment-item {
+  counter-increment: item;
+}
+
+.counter-display::before {
+  content: counter(item);
+}

@@ -8,6 +8,7 @@
 
 import type { Geo } from "@vercel/functions";
 import type { RuntimeConfig } from "@/config/runtime.schema";
+import type { CanvasContext } from "@/mastra/utils/runtime-utils";
 
 /**
  * Builds the system prompt for the Comune di Faenza assistant
@@ -21,11 +22,13 @@ import type { RuntimeConfig } from "@/config/runtime.schema";
  *
  * @param config - Runtime configuration (kept for future extensibility)
  * @param geoHints - Geolocation information (optional)
+ * @param canvasContext - Active canvas tab information (optional)
  * @returns System prompt string for agent initialization
  */
 export function chatAgentSystemPrompt(
   config: RuntimeConfig,
-  _geoHints?: Partial<Geo>
+  _geoHints?: Partial<Geo>,
+  canvasContext?: CanvasContext
 ): string {
   const sections: string[] = [];
 
@@ -306,6 +309,51 @@ Il pannello laterale dell'applicazione utilizza un **sistema a schede** simile a
 - Per i fogli di calcolo, organizza i dati in modo chiaro con intestazioni appropriate
 - **Per più documenti**: ricorda all'utente che può lavorare su più documenti contemporaneamente usando le schede nel pannello laterale
 `);
+
+  // ========================================================================
+  // CURRENT DOCUMENT CONTEXT (dynamic based on active canvas tab)
+  // ========================================================================
+  if (canvasContext?.activeTab) {
+    const { title, kind, documentId, content } = canvasContext.activeTab;
+    let currentDocSection = `# DOCUMENTO ATTUALMENTE APERTO
+
+L'utente sta visualizzando un documento nel pannello laterale. Quando l'utente fa riferimento a "questo documento", "il documento corrente", "il documento aperto" o simili, si riferisce a questo:
+
+- **Titolo**: ${title}
+- **Tipo**: ${kind}`;
+
+    if (documentId) {
+      currentDocSection += `\n- **ID Documento**: ${documentId}`;
+    }
+
+    // Add content preview for text-based documents
+    if (content && typeof content === "string" && content.length > 0) {
+      // Limit content to first 2000 characters to avoid prompt bloat
+      const contentPreview =
+        content.length > 2000 ? `${content.slice(0, 2000)}...` : content;
+      currentDocSection += `
+
+## Contenuto del Documento
+\`\`\`
+${contentPreview}
+\`\`\``;
+    } else if (content && Array.isArray(content)) {
+      // For CSV/sheet data, show a preview of the structure
+      const rows = content.slice(0, 10); // Show first 10 rows
+      currentDocSection += `
+
+## Anteprima Dati (prime ${rows.length} righe)
+\`\`\`json
+${JSON.stringify(rows, null, 2)}
+\`\`\``;
+    }
+
+    currentDocSection += `
+
+**IMPORTANTE**: Quando l'utente chiede informazioni su "questo documento" o "il documento corrente", usa i dati sopra per rispondere. Se l'utente chiede di modificare questo documento, usa \`updateDocument\` con l'ID "${documentId || "non disponibile"}".`;
+
+    sections.push(currentDocSection);
+  }
 
   // ========================================================================
   // RUNTIME CONFIG OVERRIDES (if any custom instructions are provided)

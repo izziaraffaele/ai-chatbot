@@ -36,6 +36,7 @@ import {
   useCanvasTabs,
 } from "@/hooks/use-canvas-tabs";
 import { useChatDocument } from "@/hooks/use-chat-document";
+import { isPendingDocumentId } from "@/lib/canvas";
 import type { Document } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
 import { ArtifactActions } from "../elements/artifact";
@@ -117,6 +118,11 @@ export function DocumentArtifact({
   const handleSave = useCallback(
     async (content: string) => {
       if (!activeTab) {
+        return;
+      }
+
+      // Skip saving for pending documents (no real ID yet)
+      if (isPendingDocumentId(documentId)) {
         return;
       }
 

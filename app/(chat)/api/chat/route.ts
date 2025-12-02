@@ -300,6 +300,7 @@ export async function POST(request: Request) {
       selectedVisibilityType,
       tools,
       agentId,
+      canvasContext,
     } = requestBody;
 
     // 2. Authenticate session
@@ -325,6 +326,7 @@ export async function POST(request: Request) {
     const runtimeContext = createToolContext(session, {
       geoHints: { longitude, latitude, city, country },
       config: runtimeConfig,
+      canvasContext, // Pass active canvas tab info for document-aware responses
     });
 
     // 5. Handle message based on type

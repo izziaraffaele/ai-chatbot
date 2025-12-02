@@ -15,8 +15,11 @@ export const WIDGET_KINDS = {
   SHEET: "sheet",
   // Media types (multi-instance)
   IMAGE: "image",
+  // Viewer widgets (multi-instance)
+  MARKDOWN_VIEWER: "markdown-viewer",
   // Selector widgets (single-instance)
   DOCUMENT_SELECTOR: "document-selector",
+  FONDAZIONE_BROWSER: "fondazione-browser",
 } as const;
 
 export type WidgetKind = (typeof WIDGET_KINDS)[keyof typeof WIDGET_KINDS];
@@ -248,10 +251,20 @@ export function isMediaKind(kind: WidgetKind): boolean {
 }
 
 /**
+ * Check if a kind is a viewer type (markdown-viewer)
+ */
+export function isViewerKind(kind: WidgetKind): boolean {
+  return kind === WIDGET_KINDS.MARKDOWN_VIEWER;
+}
+
+/**
  * Check if a kind is a selector widget (single-instance)
  */
 export function isSelectorKind(kind: WidgetKind): boolean {
-  return kind === WIDGET_KINDS.DOCUMENT_SELECTOR;
+  return (
+    kind === WIDGET_KINDS.DOCUMENT_SELECTOR ||
+    kind === WIDGET_KINDS.FONDAZIONE_BROWSER
+  );
 }
 
 /**
@@ -259,12 +272,15 @@ export function isSelectorKind(kind: WidgetKind): boolean {
  */
 export function getWidgetCategory(
   kind: WidgetKind
-): "document" | "media" | "selector" {
+): "document" | "media" | "viewer" | "selector" {
   if (isDocumentKind(kind)) {
     return "document";
   }
   if (isMediaKind(kind)) {
     return "media";
+  }
+  if (isViewerKind(kind)) {
+    return "viewer";
   }
   return "selector";
 }

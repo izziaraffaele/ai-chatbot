@@ -24,6 +24,11 @@ import { LibSQLStore } from "@mastra/libsql";
 import { Memory } from "@mastra/memory";
 import { fondazioneCatalogTool } from "../../../tools/catalog-tool";
 import { fondazioneBandiTool } from "../../../tools/fondazione-bandi-tool";
+import {
+  getCanvasContext,
+  getGeoHints,
+  getRuntimeConfig,
+} from "../../../utils/runtime-utils";
 import { sfcAsseSystemPrompt } from "./system-prompt";
 
 /**
@@ -38,7 +43,15 @@ import { sfcAsseSystemPrompt } from "./system-prompt";
  */
 export const sfcAsseAgent = new Agent({
   name: "Assistente Fondazione CON IL SUD – Asse",
-  instructions: sfcAsseSystemPrompt,
+  instructions: ({ runtimeContext }) => {
+    // Extract runtime configuration, geolocation hints, and canvas context
+    const config = getRuntimeConfig(runtimeContext);
+    const geoHints = getGeoHints(runtimeContext);
+    const canvasContext = getCanvasContext(runtimeContext);
+
+    // Build system prompt for Fondazione public assistant
+    return sfcAsseSystemPrompt(config, geoHints, canvasContext);
+  },
   model: "openai/gpt-5.1",
   tools: {
     fondazioneBandi: fondazioneBandiTool,

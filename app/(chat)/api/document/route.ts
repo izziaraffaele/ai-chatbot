@@ -80,6 +80,15 @@ export async function POST(request: Request) {
     ).toResponse();
   }
 
+  // Validate that id is a proper UUID before querying the database.
+  // This prevents errors from temporary "pending-{toolCallId}" IDs.
+  if (!isValidUUID(id)) {
+    return new ChatSDKError(
+      "bad_request:document",
+      "Invalid document id format"
+    ).toResponse();
+  }
+
   const session = await auth();
 
   if (!session?.user) {

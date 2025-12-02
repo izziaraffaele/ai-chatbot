@@ -14,6 +14,7 @@ import {
 } from "./catalog-tool";
 import { createDocumentTool } from "./create-document-tool";
 import { fondazioneBandiTool } from "./fondazione-bandi-tool";
+import { fondazioneBrowserTool } from "./fondazione-fs-tool";
 import { loadInvoiceTool } from "./load-invoice-tool";
 import { requestSuggestionsTool } from "./request-suggestions-tool";
 import { updateDocumentTool } from "./update-document-tool";
@@ -29,6 +30,7 @@ export type UpdateDocumentTool = typeof updateDocumentTool;
 export type RequestSuggestionsTool = typeof requestSuggestionsTool;
 export type LoadInvoiceTool = typeof loadInvoiceTool;
 export type FondazioneBandiTool = typeof fondazioneBandiTool;
+export type FondazioneBrowserTool = typeof fondazioneBrowserTool;
 export type { FondazioneCatalogTool };
 
 // Invoice validation tool types
@@ -47,6 +49,7 @@ export type MastraToolTypes =
   | RequestSuggestionsTool
   | LoadInvoiceTool
   | FondazioneBandiTool
+  | FondazioneBrowserTool
   | FondazioneCatalogTool;
 
 /**
@@ -60,6 +63,7 @@ export const mastraTools = {
   requestSuggestions: requestSuggestionsTool,
   loadInvoice: loadInvoiceTool,
   fondazioneBandi: fondazioneBandiTool,
+  fondazioneBrowser: fondazioneBrowserTool,
   catalog: fondazioneCatalogTool,
 };
 
@@ -86,6 +90,7 @@ export const TOOL_NAMES = {
   REQUEST_SUGGESTIONS: "requestSuggestions",
   LOAD_INVOICE: "loadInvoice",
   FONDAZIONE_BANDI: "fondazioneBandi",
+  FONDAZIONE_BROWSER: "fondazioneBrowser",
   CATALOG: "catalog",
   // Invoice validation tools
   VALIDATE_IBAN: "validateIban",

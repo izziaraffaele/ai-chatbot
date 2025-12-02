@@ -643,6 +643,7 @@ export function snapshotDocumentVersion(documentId: string): boolean {
 export const ARTIFACT_KIND_TO_TAB_TYPE: Record<string, CanvasTabType> = {
   // Widget tabs (single-instance)
   "document-selector": "widget",
+  "fondazione-browser": "widget",
   // Document tabs (multi-instance)
   text: "document",
   code: "document",
@@ -658,6 +659,7 @@ export const ARTIFACT_KIND_TO_TAB_TYPE: Record<string, CanvasTabType> = {
  */
 const ARTIFACT_KIND_TO_WIDGET_KIND: Record<string, WidgetKind> = {
   "document-selector": WIDGET_KINDS.DOCUMENT_SELECTOR,
+  "fondazione-browser": WIDGET_KINDS.FONDAZIONE_BROWSER,
   text: WIDGET_KINDS.TEXT,
   code: WIDGET_KINDS.CODE,
   sheet: WIDGET_KINDS.SHEET,

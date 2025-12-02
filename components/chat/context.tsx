@@ -27,6 +27,7 @@ import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useClientTools } from "@/hooks/use-client-tools";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useSelectedAgent } from "@/hooks/use-selected-agent";
+import { getTabsState } from "@/hooks/use-canvas-tabs";
 import {
   processClientToolCall,
   serializeClientTools,
@@ -110,6 +111,24 @@ export function useChatController({
     createChatTransport({
       api,
       prepareSendMessagesRequest(request) {
+        // Get current canvas state synchronously for active tab context
+        const tabsState = getTabsState();
+        const activeTab = tabsState.tabs.find(
+          (tab) => tab.id === tabsState.activeTabId
+        );
+
+        // Build canvas context with active tab info for agent awareness
+        const canvasContext = activeTab
+          ? {
+              activeTab: {
+                title: activeTab.title,
+                kind: activeTab.artifact.kind,
+                documentId: activeTab.artifact.documentId,
+                content: activeTab.artifact.content,
+              },
+            }
+          : { activeTab: null };
+
         return {
           body: {
             id: request.id,
@@ -118,6 +137,7 @@ export function useChatController({
             runtimeConfig,
             tools: serializeClientTools(registry.getTools()),
             agentId: selectedAgentRef.current?.registryId, // Dynamic agent selection via ref
+            canvasContext, // Include active canvas tab for document-aware responses
             ...request.body,
           },
         };

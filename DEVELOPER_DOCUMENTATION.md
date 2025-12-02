@@ -261,6 +261,12 @@ Performs semantic search over the pgvector-indexed knowledge base (Chairos manua
 - `listBandiMetadata()`: Scans first-level subdirectories for `.md` files and returns metadata (no content)
 - `loadBandoByIdOrSlug(idOrSlug)`: Loads full content for one bando using relative path
 
+**FS Browser Utilities (`mastra/utils/fondazione-fs-loader.ts`):**
+- `listDirectory(relativePath)`: Lists files and folders in a directory (with security validation)
+- `readFileContent(relativePath)`: Reads file content as UTF-8 string
+- `resolveSafePath(relativePath)`: Validates and resolves path within BASE_PATH (prevents traversal attacks)
+- `getParentPath(relativePath)`: Computes parent directory path
+
 ### Fondazione CON IL SUD Internal Agent (`mastra/agents/fondazione_con_il_sud/assi/`)
 
 An **internal** assistant for **Fondazione CON IL SUD** staff that provides document management capabilities with the canvas tab system, plus access to the knowledge base.
@@ -289,6 +295,7 @@ export const sfcAssiAgent = new Agent({
     updateDocument: updateDocumentTool,
     requestSuggestions: requestSuggestionsTool,
     fondazioneBandi: fondazioneBandiTool,
+    fondazioneBrowser: fondazioneBrowserTool,
     catalog: fondazioneCatalogTool,
   },
   memory: new Memory({
@@ -305,14 +312,16 @@ export const sfcAssiAgent = new Agent({
 | `updateDocument` | Modify existing documents | `id`, `description` of changes |
 | `requestSuggestions` | Provide writing suggestions | Document-aware suggestions |
 | `fondazioneBandi` | Manage bandi (announcements) | `mode="list"` or `mode="load"` |
+| `fondazioneBrowser` | Visual file browser for bandi | `action="list"` or `action="read"` |
 | `catalog` | Semantic search over indexed docs | Multi-query semantic search |
 
 **Workflow:**
 1. Staff asks to create document → Agent calls `createDocument({ title: "...", kind: "text" })`
 2. Staff asks about bandi → Agent calls `fondazioneBandi({ mode: "list" })`
-3. Staff needs Foundation info → Agent calls `catalog({ queries: [...] })`
-4. Staff wants to modify document → Agent calls `updateDocument({ id: "...", description: "..." })`
-5. Documents open in canvas tabs for simultaneous work
+3. Staff wants to browse bandi files → Agent calls `fondazioneBrowser({ action: "list" })`
+4. Staff needs Foundation info → Agent calls `catalog({ queries: [...] })`
+5. Staff wants to modify document → Agent calls `updateDocument({ id: "...", description: "..." })`
+6. Documents open in canvas tabs for simultaneous work
 
 **Canvas Tab System:**
 - Each document opens in a separate tab in the sidebar panel
@@ -881,15 +890,16 @@ if (invoiceContext) {
 | Tool | Description | Input |
 |------|-------------|-------|
 | `fondazioneBandi` | List or load bandi from knowledge base | `{ mode: "list" \| "load", bandoId?: string }` |
+| `fondazioneBrowser` | Visual file browser for bandi files | `{ action: "list" \| "read", path?: string }` |
 
-**Modes:**
+**fondazioneBandi Modes:**
 
 | Mode | Input | Output |
 |------|-------|--------|
 | `list` | None | Array of `{ id, slug, title, shortDescription, status, deadline }` (no content) |
 | `load` | `bandoId` (id, slug, or partial title) | Full bando `{ id, slug, title, shortDescription, status, deadline, content }` |
 
-**Usage:**
+**fondazioneBandi Usage:**
 
 ```typescript
 // List all bandi (metadata only)
@@ -904,6 +914,55 @@ const result = await fondazioneBandiTool.execute({
 });
 // Returns: { mode: "load", bando: { id, title, ..., content: "..." } }
 ```
+
+**fondazioneBrowser Actions:**
+
+| Action | Input | Output |
+|--------|-------|--------|
+| `list` | `path` (optional, default: root) | `{ action: "list", path, items: FondazioneFsItem[] }` |
+| `read` | `path` (required) | `{ action: "read", path, extension, content }` |
+
+**FondazioneFsItem Structure:**
+
+```typescript
+type FondazioneFsItem = {
+  name: string;           // File or folder name
+  type: "file" | "folder";
+  path: string;           // Relative path from bandi root
+  extension?: string;     // File extension (e.g., ".md", ".csv")
+};
+```
+
+**fondazioneBrowser Usage:**
+
+```typescript
+// List root directory (opens visual browser widget)
+const result = await fondazioneBrowserTool.execute({
+  context: { action: "list" }
+});
+// Returns: { action: "list", path: "", items: [...] }
+// UI: Automatically opens "Esplora Bandi" widget in canvas panel
+
+// List specific folder
+const result = await fondazioneBrowserTool.execute({
+  context: { action: "list", path: "sport_e_periferie" }
+});
+// Returns: { action: "list", path: "sport_e_periferie", items: [...] }
+
+// Read file content
+const result = await fondazioneBrowserTool.execute({
+  context: { action: "read", path: "sport_e_periferie/bando.md" }
+});
+// Returns: { action: "read", path: "...", extension: ".md", content: "..." }
+```
+
+**Widget Behavior:**
+- When `action: "list"` is called, the "Esplora Bandi" widget opens automatically in the canvas panel
+- Root view shows a grid of folder cards for top-level bando categories
+- Explorer view shows list-based navigation for subfolders
+- `.md` files open in an inline markdown viewer within the widget
+- `.csv` files open in a **new** sheet tab for spreadsheet viewing
+- The agent should NOT paste file contents into chat; instead use the visual browser
 
 ### Invoice Analyzer Tools (`mastra/tools/invoice-validation-tools.ts`)
 
@@ -1125,6 +1184,60 @@ const data = await response.json();
 // data contains { metadata, content, validation }
 ```
 
+### Fondazione File System API Endpoint
+
+**Path:** `GET /api/fondazione/fs`
+
+Used by the Fondazione Browser widget to browse and read files from the bandi directory.
+
+```typescript
+// List directory contents
+GET /api/fondazione/fs?action=list&path={relativePath}
+
+// Response (success)
+{
+  success: true,
+  action: "list",
+  path: string,                    // Relative path from bandi root
+  items: FondazioneFsItem[]        // Array of files/folders
+}
+
+// Read file content
+GET /api/fondazione/fs?action=read&path={relativePath}
+
+// Response (success)
+{
+  success: true,
+  action: "read",
+  path: string,
+  extension: string | null,        // e.g., ".md", ".csv"
+  content: string                  // File content as UTF-8
+}
+
+// Response (error)
+{
+  error: string,
+  message: string
+}
+```
+
+**Security:**
+- All paths are validated to prevent directory traversal attacks
+- Only files within `mastra/knowledgebase/fondazione_con_il_sud/bandi` can be accessed
+- Requires authenticated session
+
+**Usage:**
+```typescript
+// In FondazioneBrowserArtifact
+const response = await fetch(`/api/fondazione/fs?action=list&path=${encodeURIComponent(path)}`);
+const data = await response.json();
+// data contains { path, items }
+
+const fileResponse = await fetch(`/api/fondazione/fs?action=read&path=${encodeURIComponent(filePath)}`);
+const fileData = await fileResponse.json();
+// fileData contains { path, extension, content }
+```
+
 ---
 
 ## Data Flow
@@ -1325,11 +1438,13 @@ mastra/
 │   ├── index.ts               # Tool exports
 │   ├── load-invoice-tool.ts   # Invoice loading tool
 │   ├── fondazione-bandi-tool.ts  # Fondazione bandi list/load tool
+│   ├── fondazione-fs-tool.ts  # Fondazione FS browser tool
 │   ├── invoice-validation-tools.ts  # Validation tools for analyzer
 │   └── ...                    # Other tools
 ├── utils/
 │   ├── knowledge-base-loader.ts    # Faenza KB utilities + validation
 │   ├── fondazione-kb-loader.ts     # Fondazione KB utilities
+│   ├── fondazione-fs-loader.ts     # Fondazione FS browser utilities
 │   └── runtime-utils.ts            # Runtime context
 └── index.ts                   # Mastra instance
 
@@ -1340,6 +1455,9 @@ app/
 │       │   └── route.ts       # Main chat endpoint
 │       ├── invoice/
 │       │   └── route.ts       # Direct invoice loading API for detail view
+│       ├── fondazione/
+│       │   └── fs/
+│       │       └── route.ts   # Fondazione FS browser API
 │       └── analyze-invoice/
 │           └── route.ts       # Invoice analysis streaming endpoint
 
@@ -1616,7 +1734,9 @@ The tab system is built on a centralized widget registry that decouples tab mana
 | `code` | Codice | Yes | Yes | Code2 |
 | `sheet` | Foglio di calcolo | Yes | Yes | FileSpreadsheet |
 | `image` | Immagine | Yes | No | Image |
+| `markdown-viewer` | Visualizzatore Markdown | Yes | No | BookOpenText |
 | `document-selector` | Selettore documenti | No | No | LayoutGrid |
+| `fondazione-browser` | Esplora Bandi | No | No | FolderOpen |
 
 ### Widget Definition Structure
 
@@ -1781,6 +1901,71 @@ const myWidgetDefinition: WidgetDefinition<"my-widget", MyContent> = {
 // 3. Register in lib/canvas/widget-definitions.tsx
 widgetRegistry.register(myWidgetDefinition);
 ```
+
+### Markdown Viewer Widget
+
+The Markdown Viewer widget (`markdown-viewer`) is a feature-rich component for rendering markdown content with enhanced UX features.
+
+**Path:** `components/artifacts/markdown-viewer.tsx`
+
+**Features:**
+- **Progress Bar**: Fixed at viewport top, shows scroll progress (0-100%)
+- **Table of Contents Sidebar**: Collapsible TOC with reading time estimate, active section tracking
+- **Styled Markdown Elements**: Orange/amber theme with custom styling for headings, lists, code blocks, blockquotes, tables, links
+- **Scroll-to-Top Button**: Floating action button appears after scrolling 300px
+- **Custom Scrollbar**: Themed scrollbar with orange-amber gradient
+
+**Usage:**
+
+```typescript
+// As a standalone component
+import { MarkdownViewer } from "@/components/artifacts/markdown-viewer";
+
+<MarkdownViewer
+  content={markdownString}
+  title="Document Title"
+  description="Optional description"
+/>
+
+// As a canvas widget
+import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
+
+const { openTab } = useCanvasTabs();
+openTab({
+  documentId: "md-123",
+  kind: "markdown-viewer",
+  content: markdownString,
+  title: "My Document",
+  status: "idle",
+});
+```
+
+**Props (MarkdownViewerProps):**
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `content` | `string` | Yes | Markdown content to render |
+| `title` | `string` | No | Document title (default: "Markdown Document") |
+| `description` | `string` | No | Optional description in header |
+| `className` | `string` | No | Additional CSS classes |
+
+**Markdown Element Styling:**
+- **Headings (H1-H6)**: Gradient borders, ChevronRight icons, proper scroll offsets
+- **Unordered Lists**: Custom gradient bullets (orange-500 to amber-500)
+- **Ordered Lists**: Circular numbered badges with gradient background
+- **Task Lists**: Styled checkboxes with completion state
+- **Code Blocks**: Syntax highlighting with Prism oneDark theme, copy button, traffic light dots
+- **Blockquotes**: Content-aware coloring (Note/Tip=blue, Warning=amber, Info=indigo, default=orange)
+- **Tables**: Orange-themed borders, gradient header background, hover states
+- **Links**: Orange-600 color with ChevronRight icon, opens in new tab
+
+**Integration with Fondazione Browser:**
+The Markdown Viewer is automatically used by the Fondazione Browser widget when viewing `.md` files. When a user clicks on a markdown file in the file explorer, it renders in the rich MarkdownViewer component instead of the basic prose renderer.
+
+**CSS Requirements:**
+The widget requires custom CSS classes defined in `app/globals.css`:
+- `.markdown-viewer-scrollbar`: Custom scrollbar styling
+- `.counter-reset-item`, `.counter-increment-item`, `.counter-display::before`: CSS counters for ordered lists
 
 ### Accessibility Features
 
@@ -3148,6 +3333,65 @@ if (tabArtifact?.content !== undefined && tabArtifact?.content !== null) {
 - Use `writer.custom()` for data events that need to reach `useDataStreamSubscription`
 - Use `writer.write()` only for standard Mastra stream events
 - Always check for `undefined`/`null` explicitly, not truthiness, when dealing with content that can be empty strings
+
+### 23. Pending Document Save Error Fix
+
+**Files**: `components/artifacts/document.tsx`, `app/(chat)/api/document/route.ts`
+
+**Issue**: "Failed to save document" console error appeared when creating new documents. The error occurred because the auto-save mechanism tried to save content before the document had a real UUID.
+
+**Root Cause**: 
+1. When a new document is created, a "pending" tab opens with a temporary ID like `pending-call_abc123` (generated by `generatePendingDocumentId`)
+2. The `ArtifactDraftProvider` auto-save triggers when content changes
+3. `handleSave` in `document.tsx` called `/api/document?id=pending-call_abc123`
+4. The POST endpoint didn't validate UUID format (unlike the GET endpoint), causing the API to fail
+
+**Fix**: 
+
+1. **Client-side guard** (`components/artifacts/document.tsx`): Skip saving for pending documents:
+
+```typescript
+import { isPendingDocumentId } from "@/lib/canvas";
+
+const handleSave = useCallback(
+  async (content: string) => {
+    if (!activeTab) {
+      return;
+    }
+
+    // Skip saving for pending documents (no real ID yet)
+    if (isPendingDocumentId(documentId)) {
+      return;
+    }
+
+    try {
+      // ... existing save logic
+    }
+  },
+  [activeTab, chatDocument, documentId, title, kind]
+);
+```
+
+2. **Server-side defense-in-depth** (`app/(chat)/api/document/route.ts`): Added UUID validation to POST endpoint to match GET endpoint:
+
+```typescript
+export async function POST(request: Request) {
+  // ...
+
+  // Validate that id is a proper UUID before querying the database.
+  // This prevents errors from temporary "pending-{toolCallId}" IDs.
+  if (!isValidUUID(id)) {
+    return new ChatSDKError(
+      "bad_request:document",
+      "Invalid document id format"
+    ).toResponse();
+  }
+
+  // ... rest of handler
+}
+```
+
+**Key Insight**: The existing `isPendingDocumentId` helper in `lib/canvas/widget-registry.ts` was designed exactly for this purpose - to detect temporary IDs before they're bound to real UUIDs.
 
 ---
 

@@ -11,17 +11,20 @@
 
 import type { Geo } from "@vercel/functions";
 import type { RuntimeConfig } from "@/config/runtime.schema";
+import type { CanvasContext } from "@/mastra/utils/runtime-utils";
 
 /**
  * Generate the system prompt for the internal Fondazione CON IL SUD assistant
  *
  * @param config - Runtime configuration
  * @param geoHints - Geolocation information (optional)
+ * @param canvasContext - Active canvas tab information (optional)
  * @returns System prompt string for agent initialization
  */
 export function sfcAssiSystemPrompt(
   config: RuntimeConfig,
-  _geoHints?: Partial<Geo>
+  _geoHints?: Partial<Geo>,
+  canvasContext?: CanvasContext
 ): string {
   const sections: string[] = [];
 
@@ -67,6 +70,13 @@ Puoi accedere ai bandi della Fondazione usando lo strumento \`fondazioneBandi\`:
 - Elencare tutti i bandi disponibili
 - Caricare il contenuto completo di un bando specifico
 - Verificare stato, scadenze e requisiti
+
+## 4. Esplorazione File Bandi (\`fondazioneBrowser\`)
+
+Puoi esplorare visivamente i file dei bandi usando lo strumento \`fondazioneBrowser\`:
+- Sfogliare le cartelle dei bandi nel pannello laterale
+- Visualizzare file Markdown direttamente nel browser
+- Aprire file CSV in fogli di calcolo separati
 `);
 
   // ========================================================================
@@ -173,6 +183,37 @@ Quando l'utente indica un bando:
 Chiama: \`fondazioneBandi({ mode: "load", bandoId: "identificatore" })\`
 
 Riassumi i punti chiave senza incollare l'intero documento.
+
+## Esplorazione File Bandi (\`fondazioneBrowser\`)
+
+### QUANDO USARE FONDAZIONE BROWSER:
+Quando l'utente vuole **sfogliare visivamente** i file dei bandi:
+- "Mostrami i file dei bandi"
+- "Fammi vedere i bandi"
+- "Apri il browser dei bandi"
+- "Voglio esplorare i documenti dei bandi"
+
+### COME FUNZIONA:
+
+1. **Per aprire il browser** (mostra le cartelle principali):
+   \`fondazioneBrowser({ action: "list" })\`
+
+2. **Per navigare in una cartella specifica**:
+   \`fondazioneBrowser({ action: "list", path: "nome_cartella" })\`
+
+3. **Per leggere un file specifico**:
+   \`fondazioneBrowser({ action: "read", path: "cartella/file.md" })\`
+
+### COMPORTAMENTO AUTOMATICO:
+- Quando chiami \`action: "list"\`, si apre automaticamente il **pannello "Esplora Bandi"** nel lato destro
+- L'utente può navigare cliccando sulle cartelle
+- I file **.md** si aprono direttamente nel pannello
+- I file **.csv** si aprono in una **nuova scheda foglio di calcolo**
+
+### IMPORTANTE:
+- **NON** incollare il contenuto dei file nella chat
+- Usa il browser per permettere all'utente di esplorare visivamente
+- Per analisi di dati CSV, invita l'utente a cliccare sul file nel browser per aprirlo nel foglio di calcolo
 `);
 
   // ========================================================================
@@ -222,6 +263,51 @@ Il pannello laterale utilizza un **sistema a schede** simile a un browser web:
 `);
 
   // ========================================================================
+  // CURRENT DOCUMENT CONTEXT (dynamic based on active canvas tab)
+  // ========================================================================
+  if (canvasContext?.activeTab) {
+    const { title, kind, documentId, content } = canvasContext.activeTab;
+    let currentDocSection = `# DOCUMENTO ATTUALMENTE APERTO
+
+L'utente sta visualizzando un documento nel pannello laterale. Quando l'utente fa riferimento a "questo documento", "il documento corrente", "il documento aperto" o simili, si riferisce a questo:
+
+- **Titolo**: ${title}
+- **Tipo**: ${kind}`;
+
+    if (documentId) {
+      currentDocSection += `\n- **ID Documento**: ${documentId}`;
+    }
+
+    // Add content preview for text-based documents
+    if (content && typeof content === "string" && content.length > 0) {
+      // Limit content to first 2000 characters to avoid prompt bloat
+      const contentPreview =
+        content.length > 2000 ? `${content.slice(0, 2000)}...` : content;
+      currentDocSection += `
+
+## Contenuto del Documento
+\`\`\`
+${contentPreview}
+\`\`\``;
+    } else if (content && Array.isArray(content)) {
+      // For CSV/sheet data, show a preview of the structure
+      const rows = content.slice(0, 10); // Show first 10 rows
+      currentDocSection += `
+
+## Anteprima Dati (prime ${rows.length} righe)
+\`\`\`json
+${JSON.stringify(rows, null, 2)}
+\`\`\``;
+    }
+
+    currentDocSection += `
+
+**IMPORTANTE**: Quando l'utente chiede informazioni su "questo documento" o "il documento corrente", usa i dati sopra per rispondere. Se l'utente chiede di modificare questo documento, usa \`updateDocument\` con l'ID "${documentId || "non disponibile"}".`;
+
+    sections.push(currentDocSection);
+  }
+
+  // ========================================================================
   // RUNTIME CONFIG OVERRIDES
   // ========================================================================
   if (config.assistant.instructions) {
@@ -247,6 +333,7 @@ Posso aiutarti a:
 - Creare e modificare documenti (relazioni, tabelle, note)
 - Cercare informazioni nella documentazione della Fondazione
 - Consultare i dettagli dei bandi
+- Esplorare visivamente i file dei bandi
 
 Ogni documento si apre in una scheda separata, così puoi lavorare su più cose contemporaneamente.
 

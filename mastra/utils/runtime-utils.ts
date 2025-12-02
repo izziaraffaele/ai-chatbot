@@ -39,6 +39,30 @@ export type LoadedInvoiceContext = {
   content: string;
 };
 
+/**
+ * Active tab information from the canvas, stored in runtime context.
+ * Used by agents to answer questions about the currently open document.
+ */
+export type ActiveTabContext = {
+  /** Tab title */
+  title: string;
+  /** Widget kind (text, code, sheet, document-selector, etc.) */
+  kind: string;
+  /** Document ID for persistence/streaming */
+  documentId?: string;
+  /** Tab content (string for text/code, array for CSV, etc.) */
+  content?: unknown;
+};
+
+/**
+ * Canvas context containing information about the currently active tab.
+ * This allows agents to be aware of what document the user is looking at.
+ */
+export type CanvasContext = {
+  /** The currently active tab, or null if no tab is open */
+  activeTab: ActiveTabContext | null;
+};
+
 // ============================================================================
 // EXTRACTORS: Functions to extract values from RuntimeContext
 // ============================================================================
@@ -88,6 +112,27 @@ export const setLoadedInvoice = (
   ctx.set("loadedInvoice", invoice);
 };
 
+/**
+ * Get the canvas context (active tab info) from runtime context.
+ * Returns undefined if no canvas context has been set.
+ */
+export const getCanvasContext = (
+  ctx: RuntimeContext
+): CanvasContext | undefined => {
+  return ctx.get("canvasContext") as CanvasContext | undefined;
+};
+
+/**
+ * Store canvas context in the runtime context.
+ * This makes the active tab info available to agents and tools.
+ */
+export const setCanvasContext = (
+  ctx: RuntimeContext,
+  canvasContext: CanvasContext
+): void => {
+  ctx.set("canvasContext", canvasContext);
+};
+
 // ============================================================================
 // BUILDERS: Functions to create RuntimeContext with injected values
 // ============================================================================
@@ -96,12 +141,17 @@ export const setLoadedInvoice = (
  * Creates a Mastra RuntimeContext with injected session and geolocation hints
  *
  * @param session - User session for authentication and user identification
- * @param geoHints - Geolocation hints from request for system prompt customization
- * @returns RuntimeContext configured with session and geo hints
+ * @param args.geoHints - Geolocation hints from request for system prompt customization
+ * @param args.config - Runtime configuration overrides
+ * @param args.canvasContext - Active canvas tab information for document-aware responses
+ * @returns RuntimeContext configured with session, geo hints, and canvas context
  *
  * @example
  * ```typescript
- * const runtimeContext = createToolContext(session, geoHints);
+ * const runtimeContext = createToolContext(session, {
+ *   geoHints: { city: 'Faenza' },
+ *   canvasContext: { activeTab: { title: 'Invoice', kind: 'text', content: '...' } }
+ * });
  *
  * await chatAgent.generate({
  *   messages: [...],
@@ -114,10 +164,11 @@ export function createToolContext(
   args: {
     geoHints?: Partial<Geo>;
     config?: Partial<RuntimeConfig>;
+    canvasContext?: CanvasContext;
   } = {}
 ): RuntimeContext {
   const context = new RuntimeContext();
-  const { geoHints, config = {} } = args;
+  const { geoHints, config = {}, canvasContext } = args;
 
   // Inject session for tool authentication and user context
   if (session) {
@@ -131,6 +182,11 @@ export function createToolContext(
 
   // Inject runtime config
   context.set("config", deepMerge(runtimeConfig, config));
+
+  // Inject canvas context for document-aware responses
+  if (canvasContext) {
+    context.set("canvasContext", canvasContext);
+  }
 
   return context;
 }

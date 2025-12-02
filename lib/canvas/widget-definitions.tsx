@@ -1,9 +1,11 @@
 "use client";
 
 import {
+  BookOpenText,
   Code2,
   FileSpreadsheet,
   FileText,
+  FolderOpen,
   Image,
   LayoutGrid,
 } from "lucide-react";
@@ -34,6 +36,20 @@ const LazyDocumentSelectorArtifact = lazy(
   () =>
     import("@/components/artifacts/document-selector").then((mod) => ({
       default: mod.DocumentSelectorArtifact,
+    }))
+);
+
+const LazyFondazioneBrowserArtifact = lazy(
+  () =>
+    import("@/components/artifacts/fondazione-browser").then((mod) => ({
+      default: mod.FondazioneBrowserArtifact,
+    }))
+);
+
+const LazyMarkdownViewerArtifact = lazy(
+  () =>
+    import("@/components/artifacts/markdown-viewer").then((mod) => ({
+      default: mod.MarkdownViewerArtifact,
     }))
 );
 
@@ -152,6 +168,38 @@ const DocumentSelectorRenderer = memo(function DocumentSelectorRenderer({
   );
 });
 
+/**
+ * Adapter for Fondazione Browser widget
+ */
+const FondazioneBrowserRenderer = memo(function FondazioneBrowserRenderer({
+  className,
+}: WidgetRendererProps<unknown>) {
+  return (
+    <Suspense fallback={<WidgetLoadingFallback />}>
+      <LazyFondazioneBrowserArtifact className={className} />
+    </Suspense>
+  );
+});
+
+/**
+ * Adapter for Markdown Viewer widget
+ */
+const MarkdownViewerRenderer = memo(function MarkdownViewerRenderer({
+  content,
+  title,
+  className,
+}: WidgetRendererProps<string>) {
+  return (
+    <Suspense fallback={<WidgetLoadingFallback />}>
+      <LazyMarkdownViewerArtifact
+        className={className}
+        content={content}
+        title={title}
+      />
+    </Suspense>
+  );
+});
+
 // ============================================================================
 // WIDGET DEFINITIONS
 // ============================================================================
@@ -261,6 +309,50 @@ export const documentSelectorWidgetDefinition: WidgetDefinition<
   },
 };
 
+/**
+ * Fondazione Browser Widget Definition
+ * Provides a visual file browser for Fondazione CON IL SUD bandi
+ */
+export const fondazioneBrowserWidgetDefinition: WidgetDefinition<
+  typeof WIDGET_KINDS.FONDAZIONE_BROWSER,
+  unknown
+> = {
+  kind: WIDGET_KINDS.FONDAZIONE_BROWSER,
+  label: "Esplora Bandi",
+  icon: FolderOpen,
+  renderer: FondazioneBrowserRenderer,
+  allowMultiple: false,
+  supportsStreaming: false,
+  defaultContent: { path: "", items: [] },
+  tabColor: {
+    active: "bg-orange-500 text-white border-orange-500",
+    inactive: "bg-muted text-muted-foreground border-border",
+    icon: "text-white",
+  },
+};
+
+/**
+ * Markdown Viewer Widget Definition
+ * Rich markdown viewer with TOC sidebar, progress bar, and styled elements
+ */
+export const markdownViewerWidgetDefinition: WidgetDefinition<
+  typeof WIDGET_KINDS.MARKDOWN_VIEWER,
+  string
+> = {
+  kind: WIDGET_KINDS.MARKDOWN_VIEWER,
+  label: "Visualizzatore Markdown",
+  icon: BookOpenText,
+  renderer: MarkdownViewerRenderer,
+  allowMultiple: true,
+  supportsStreaming: false,
+  defaultContent: "",
+  tabColor: {
+    active: "bg-orange-500 text-white border-orange-500",
+    inactive: "bg-muted/50 text-muted-foreground border-border/50",
+    icon: "text-white",
+  },
+};
+
 // ============================================================================
 // REGISTRATION
 // ============================================================================
@@ -274,7 +366,9 @@ export function registerBuiltInWidgets(): void {
   widgetRegistry.register(codeWidgetDefinition);
   widgetRegistry.register(sheetWidgetDefinition);
   widgetRegistry.register(imageWidgetDefinition);
+  widgetRegistry.register(markdownViewerWidgetDefinition);
   widgetRegistry.register(documentSelectorWidgetDefinition);
+  widgetRegistry.register(fondazioneBrowserWidgetDefinition);
 }
 
 /**
@@ -285,6 +379,8 @@ export const builtInWidgetDefinitions = [
   codeWidgetDefinition,
   sheetWidgetDefinition,
   imageWidgetDefinition,
+  markdownViewerWidgetDefinition,
   documentSelectorWidgetDefinition,
+  fondazioneBrowserWidgetDefinition,
 ];
 

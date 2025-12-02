@@ -11,11 +11,27 @@
  * uses the "catalog" tool for semantic search over indexed documents.
  */
 
+import type { Geo } from "@vercel/functions";
+import type { RuntimeConfig } from "@/config/runtime.schema";
+import type { CanvasContext } from "@/mastra/utils/runtime-utils";
+
 /**
  * Generate the system prompt for the Fondazione CON IL SUD agent
+ *
+ * @param config - Runtime configuration
+ * @param geoHints - Geolocation information (optional)
+ * @param canvasContext - Active canvas tab information (optional)
+ * @returns System prompt string for agent initialization
  */
-export function sfcAsseSystemPrompt(): string {
-  return `Sei l'assistente ufficiale di Fondazione CON IL SUD (Asse) sviluppato da MemorAIz.
+export function sfcAsseSystemPrompt(
+  config: RuntimeConfig,
+  _geoHints?: Partial<Geo>,
+  canvasContext?: CanvasContext
+): string {
+  const sections: string[] = [];
+
+  // Base system prompt
+  sections.push(`Sei l'assistente ufficiale di Fondazione CON IL SUD (Asse) sviluppato da MemorAIz.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ● RUOLO
@@ -191,5 +207,70 @@ o contattare gli uffici all'indirizzo iniziative@fondazioneconilsud.it."
 - NON garantire esiti di valutazione o finanziamento
 - NON incollare interi documenti - riassumi sempre
 - NON rispondere a domande sulla Fondazione senza prima usare il tool "catalog"
-- NON attendere l'input dell'utente se ricevi "expansionHints" - richiama subito il catalog`;
+- NON attendere l'input dell'utente se ricevi "expansionHints" - richiama subito il catalog`);
+
+  // ========================================================================
+  // CURRENT DOCUMENT CONTEXT (dynamic based on active canvas tab)
+  // ========================================================================
+  if (canvasContext?.activeTab) {
+    const { title, kind, documentId, content } = canvasContext.activeTab;
+    let currentDocSection = `
+═══════════════════════════════════════════════════════════════════════════════
+● DOCUMENTO ATTUALMENTE APERTO
+═══════════════════════════════════════════════════════════════════════════════
+
+L'utente sta visualizzando un documento nel pannello laterale. Quando l'utente fa riferimento a "questo documento", "il documento corrente", "il documento aperto" o simili, si riferisce a questo:
+
+- Titolo: ${title}
+- Tipo: ${kind}`;
+
+    if (documentId) {
+      currentDocSection += `\n- ID Documento: ${documentId}`;
+    }
+
+    // Add content preview for text-based documents
+    if (content && typeof content === "string" && content.length > 0) {
+      // Limit content to first 2000 characters to avoid prompt bloat
+      const contentPreview =
+        content.length > 2000 ? `${content.slice(0, 2000)}...` : content;
+      currentDocSection += `
+
+Contenuto del Documento:
+\`\`\`
+${contentPreview}
+\`\`\``;
+    } else if (content && Array.isArray(content)) {
+      // For CSV/sheet data, show a preview of the structure
+      const rows = content.slice(0, 10); // Show first 10 rows
+      currentDocSection += `
+
+Anteprima Dati (prime ${rows.length} righe):
+\`\`\`json
+${JSON.stringify(rows, null, 2)}
+\`\`\``;
+    }
+
+    currentDocSection += `
+
+IMPORTANTE: Quando l'utente chiede informazioni su "questo documento" o "il documento corrente", usa i dati sopra per rispondere.`;
+
+    sections.push(currentDocSection);
+  }
+
+  // ========================================================================
+  // RUNTIME CONFIG OVERRIDES (if any custom instructions are provided)
+  // ========================================================================
+  if (config.assistant.instructions) {
+    sections.push(
+      `\n═══════════════════════════════════════════════════════════════════════════════\n● ISTRUZIONI AGGIUNTIVE\n═══════════════════════════════════════════════════════════════════════════════\n\n${config.assistant.instructions}`
+    );
+  }
+
+  if (config.assistant.guidelines) {
+    sections.push(
+      `\n═══════════════════════════════════════════════════════════════════════════════\n● LINEE GUIDA AGGIUNTIVE\n═══════════════════════════════════════════════════════════════════════════════\n\n${config.assistant.guidelines}`
+    );
+  }
+
+  return sections.join("\n");
 }
