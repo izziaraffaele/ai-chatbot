@@ -172,6 +172,7 @@ export async function getChatsByUserId({
   startingAfter: string | null;
   endingBefore: string | null;
 }) {
+
   try {
     const extendedLimit = limit + 1;
 
@@ -230,6 +231,7 @@ export async function getChatsByUserId({
       hasMore,
     };
   } catch (_error) {
+    console.error("getChatsByUserId error:", _error);
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to get chats by user id"
@@ -554,6 +556,7 @@ export async function getMessageCountByUserId({
   id: string;
   differenceInHours: number;
 }) {
+
   try {
     const twentyFourHoursAgo = new Date(
       Date.now() - differenceInHours * 60 * 60 * 1000
@@ -574,6 +577,7 @@ export async function getMessageCountByUserId({
 
     return stats?.count ?? 0;
   } catch (_error) {
+    console.error("getMessageCountByUserId error:", _error);
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to get message count by user id"

@@ -68,7 +68,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
   const getDocumentExpert = (): Agent => {
     if (!documentExpert) {
       const artifactModel =
-        config.model || process.env.ARTIFACT_MODEL || "openai/gpt-4.1";
+        config.model || process.env.ARTIFACT_MODEL || "openai/gpt-5.1";
 
       documentExpert = new Agent({
         name: `${config.kind}-document-expert`,

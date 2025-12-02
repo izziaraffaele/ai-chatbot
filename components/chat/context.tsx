@@ -26,6 +26,7 @@ import type { VisibilityType } from "@/components/visibility-selector";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useClientTools } from "@/hooks/use-client-tools";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
+import { useSelectedAgent } from "@/hooks/use-selected-agent";
 import {
   processClientToolCall,
   serializeClientTools,
@@ -81,7 +82,11 @@ export function useChatController({
 }: ChatControllerProps): ChatController<ChatMessage> {
   const { mutate } = useSWRConfig();
 
-  // const { selectedAgent } = useSelectedAgent();
+  // Selected agent for dynamic agent routing
+  const { selectedAgent } = useSelectedAgent();
+  // Use ref to always get latest selectedAgent in transport callback
+  const selectedAgentRef = useRef(selectedAgent);
+  selectedAgentRef.current = selectedAgent;
 
   // visibility state
   const { visibilityType } = useChatVisibility({
@@ -112,6 +117,7 @@ export function useChatController({
             selectedVisibilityType: visibilityType,
             runtimeConfig,
             tools: serializeClientTools(registry.getTools()),
+            agentId: selectedAgentRef.current?.registryId, // Dynamic agent selection via ref
             ...request.body,
           },
         };

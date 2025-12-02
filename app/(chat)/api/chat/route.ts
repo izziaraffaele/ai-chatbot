@@ -293,8 +293,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { id, message, runtimeConfig, selectedVisibilityType, tools } =
-      requestBody;
+    const {
+      id,
+      message,
+      runtimeConfig,
+      selectedVisibilityType,
+      tools,
+      agentId,
+    } = requestBody;
 
     // 2. Authenticate session
     const session = await auth();
@@ -313,7 +319,9 @@ export async function POST(request: Request) {
 
     // 4. Setup agents and context
     const { longitude, latitude, city, country } = geolocation(request);
-    const chatAgent = mastra.getAgent("chatAgent");
+    // Use dynamic agent selection based on request, default to chatAgent
+    const selectedAgentId = agentId || "chatAgent";
+    const chatAgent = mastra.getAgent(selectedAgentId);
     const runtimeContext = createToolContext(session, {
       geoHints: { longitude, latitude, city, country },
       config: runtimeConfig,

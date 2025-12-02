@@ -35,6 +35,7 @@ export const postRequestBodySchema = z.object({
   selectedVisibilityType: z.enum(["public", "private"]),
   runtimeConfig: RuntimeConfigSchema.partial(),
   tools: z.record(z.string(), z.any()).optional(),
+  agentId: z.string().optional(), // Agent registry ID (e.g., "chatAgent", "sfcAsseAgent")
 });
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

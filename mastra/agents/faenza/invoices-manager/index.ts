@@ -34,7 +34,7 @@ export const chatAgent = new Agent({
 
     return prompt;
   },
-  model: "openai/gpt-4.1",
+  model: "openai/gpt-5.1",
   agents: { invoiceAnalyzerAgent },
   tools: {
     createDocument: mastraTools.createDocument,

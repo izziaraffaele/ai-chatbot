@@ -8,7 +8,12 @@
  * - writer: DataStream writer for real-time UI updates
  */
 
+import {
+  type FondazioneCatalogTool,
+  fondazioneCatalogTool,
+} from "./catalog-tool";
 import { createDocumentTool } from "./create-document-tool";
+import { fondazioneBandiTool } from "./fondazione-bandi-tool";
 import { loadInvoiceTool } from "./load-invoice-tool";
 import { requestSuggestionsTool } from "./request-suggestions-tool";
 import { updateDocumentTool } from "./update-document-tool";
@@ -23,6 +28,8 @@ export type CreateDocumentTool = typeof createDocumentTool;
 export type UpdateDocumentTool = typeof updateDocumentTool;
 export type RequestSuggestionsTool = typeof requestSuggestionsTool;
 export type LoadInvoiceTool = typeof loadInvoiceTool;
+export type FondazioneBandiTool = typeof fondazioneBandiTool;
+export type { FondazioneCatalogTool };
 
 // Invoice validation tool types
 export type {
@@ -38,7 +45,9 @@ export type MastraToolTypes =
   | CreateDocumentTool
   | UpdateDocumentTool
   | RequestSuggestionsTool
-  | LoadInvoiceTool;
+  | LoadInvoiceTool
+  | FondazioneBandiTool
+  | FondazioneCatalogTool;
 
 /**
  * Tools Map
@@ -50,6 +59,8 @@ export const mastraTools = {
   updateDocument: updateDocumentTool,
   requestSuggestions: requestSuggestionsTool,
   loadInvoice: loadInvoiceTool,
+  fondazioneBandi: fondazioneBandiTool,
+  catalog: fondazioneCatalogTool,
 };
 
 /**
@@ -74,6 +85,8 @@ export const TOOL_NAMES = {
   UPDATE_DOCUMENT: "updateDocument",
   REQUEST_SUGGESTIONS: "requestSuggestions",
   LOAD_INVOICE: "loadInvoice",
+  FONDAZIONE_BANDI: "fondazioneBandi",
+  CATALOG: "catalog",
   // Invoice validation tools
   VALIDATE_IBAN: "validateIban",
   VALIDATE_CIG: "validateCig",

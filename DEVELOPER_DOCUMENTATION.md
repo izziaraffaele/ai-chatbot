@@ -104,6 +104,7 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 | **Assistente Comune** | `assistente` | Official Comune di Faenza assistant for document management | Faenza logo (`/images/logo-faenza.jpg`) |
 | **Researcher** | `researcher` | Web research and synthesis specialist | 🔍 |
 | **Invoice Analyzer** | `invoiceAnalyzerAgent` | Specialized sub-agent for deep invoice analysis | 🔬 |
+| **Fondazione CON IL SUD** | `sfc_asse` | Assistant for Fondazione CON IL SUD information and bandi | 🌉 |
 
 ### Assistente Comune (`mastra/agents/faenza/invoices-manager/`)
 
@@ -124,7 +125,7 @@ export const chatAgent = new Agent({
     const geoHints = getGeoHints(runtimeContext);
     return chatAgentSystemPrompt(config, geoHints);
   },
-  model: "openai/gpt-4.1",
+  model: "openai/gpt-5.1",
   // Sub-agent for deep invoice analysis
   agents: { invoiceAnalyzerAgent },
   tools: {
@@ -174,7 +175,7 @@ export const invoiceAnalyzerAgent = new Agent({
     Usa questo agente quando l'utente chiede di "analizzare una fattura" per trovare
     campi mancanti come IBAN, CIG, CUP, Codice Fiscale, o Codice PA.`,
   instructions: invoiceAnalyzerSystemPrompt([...missingFields]),
-  model: "openai/gpt-4.1",
+  model: "openai/gpt-5.1",
   tools: invoiceValidationTools,
 });
 
@@ -192,6 +193,71 @@ const customAnalyzer = createInvoiceAnalyzerAgent(["CUP", "IBAN"]);
 | `validateCodicePa` | Validates PA code | `^[A-Z0-9]{6,7}$` |
 
 **Note:** The legacy API endpoint `POST /api/analyze-invoice` still exists but is no longer used by the UI. The sub-agent approach is preferred as it keeps the conversation context intact.
+
+### Fondazione CON IL SUD Agent (`mastra/agents/fondazione_con_il_sud/asse/`)
+
+An assistant for **Fondazione CON IL SUD** that provides information about the foundation and guides users through available bandi (announcements).
+
+**Purpose:**
+- Answer general questions about the Foundation (mission, areas of intervention, governance, history)
+- List available bandi with brief descriptions
+- Load and explain specific bando details on user request
+- Guide users through requirements, deadlines, and application procedures
+
+**Knowledge Base (pgvector indexed):**
+- **Chairos Manual** (`mastra/knowledgebase/fondazione_con_il_sud/chairos.md`): Operational procedures, forms, and guidelines
+- **Website KB** (`mastra/knowledgebase/fondazione_con_il_sud/website_kb.md`): Foundation mission, governance, projects, contacts
+- **Bandi** (`mastra/knowledgebase/fondazione_con_il_sud/bandi/<category>/<bando>.md`): Individual markdown files organized by category. Loaded on-demand via `fondazioneBandi` tool.
+
+**Configuration:**
+
+```typescript
+export const sfcAsseAgent = new Agent({
+  name: "Assistente Fondazione CON IL SUD – Asse",
+  instructions: sfcAsseSystemPrompt,
+  model: "openai/gpt-5.1",
+  tools: {
+    fondazioneBandi: fondazioneBandiTool,
+    catalog: fondazioneCatalogTool,
+  },
+  memory: new Memory({
+    storage: new LibSQLStore({ url: "file:../mastra.db" }),
+  }),
+});
+```
+
+**Tools:**
+
+| Tool | Purpose | Usage |
+|------|---------|-------|
+| `fondazioneBandi` | Manage bandi (announcements) | `mode="list"` for metadata, `mode="load"` for full content |
+| `catalog` | Semantic search over indexed docs | `queryText` for natural language search |
+
+**`fondazioneBandi` Modes:**
+
+| Mode | Input | Output |
+|------|-------|--------|
+| `list` | None | Array of bandi metadata (id, title, shortDescription, status, deadline) |
+| `load` | `bandoId` (id, slug, or partial title) | Full bando content with metadata |
+
+**`catalog` Tool:**
+
+Performs semantic search over the pgvector-indexed knowledge base (Chairos manual + website KB).
+
+| Input | Output |
+|-------|--------|
+| `queryText` (natural language query in Italian) | `relevantContext` (concatenated snippets) + `sources` (metadata with scores) |
+
+**Workflow:**
+1. User asks general question → Agent calls `catalog({ queryText: "..." })` for semantic search
+2. User asks "Quali bandi sono disponibili?" → Agent calls `fondazioneBandi({ mode: "list" })`
+3. Agent shows brief list and asks user to select one
+4. User selects a bando → Agent calls `fondazioneBandi({ mode: "load", bandoId: "..." })`
+5. Agent answers questions using the loaded bando content or catalog results
+
+**KB Loader Utilities (`mastra/utils/fondazione-kb-loader.ts`):**
+- `listBandiMetadata()`: Scans first-level subdirectories for `.md` files and returns metadata (no content)
+- `loadBandoByIdOrSlug(idOrSlug)`: Loads full content for one bando using relative path
 
 ### Agent Configuration (`lib/ai/agent-config.ts`)
 
@@ -214,6 +280,14 @@ export const AGENT_CONFIGS: Record<string, AgentConfig> = {
     avatar: "🔍",
     color: "blue",
     registryId: "researchAgent",
+  },
+  sfc_asse: {
+    id: "sfc_asse",
+    name: "Fondazione CON IL SUD",
+    description: "Informazioni sulla Fondazione e supporto sui bandi",
+    avatar: "🌉",
+    color: "orange",
+    registryId: "sfcAsseAgent",
   },
 };
 ```
@@ -278,6 +352,219 @@ Example: `CSB_IT00185240397_00IS8-[1796150500].xml`
 | "Lavora su CSB_IT00185240397" | Load specific invoice with validation |
 | "Carica la fattura 00185240397" | Load by partial ID |
 | "Chi è il fornitore?" | Analyze loaded invoice |
+
+---
+
+## Catalog System (pgvector Semantic Search)
+
+### Overview
+
+The Catalog System provides semantic search capabilities over markdown knowledge bases using pgvector. It enables agents to retrieve relevant snippets from indexed documents based on natural language queries.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         CATALOG ARCHITECTURE                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────────┐   │
+│  │  Catalog Config  │───▶│  Ingestion       │───▶│  pgvector Index      │   │
+│  │  (catalog-       │    │  (catalog-       │    │  (PostgreSQL)        │   │
+│  │   config.ts)     │    │   ingest.ts)     │    │                      │   │
+│  └──────────────────┘    └──────────────────┘    └──────────────────────┘   │
+│         │                        │                        │                  │
+│         │                        │                        │                  │
+│         ▼                        ▼                        ▼                  │
+│  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────────┐   │
+│  │  CatalogDefinition│   │  MDocument.chunk()│   │  Embeddings          │   │
+│  │  - kbId           │   │  + embedMany()   │    │  (text-embedding-    │   │
+│  │  - indexName      │   │                  │    │   3-small)           │   │
+│  │  - sources[]      │   │                  │    │                      │   │
+│  └──────────────────┘    └──────────────────┘    └──────────────────────┘   │
+│                                                            │                 │
+│                                                            ▼                 │
+│  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────────┐   │
+│  │  Catalog Tool    │◀───│  createVector-   │◀───│  Agent Query         │   │
+│  │  (catalog-       │    │  QueryTool()     │    │  { queryText: "..." }│   │
+│  │   tool.ts)       │    │                  │    │                      │   │
+│  └──────────────────┘    └──────────────────┘    └──────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Key Components
+
+#### 1. Catalog Configuration (`mastra/utils/catalog-config.ts`)
+
+Defines knowledge base catalogs with their sources:
+
+```typescript
+export type CatalogSource = {
+  id: string;        // Logical source id, e.g. "chairos"
+  filePath: string;  // Path to markdown file
+};
+
+export type CatalogDefinition = {
+  kbId: string;      // Knowledge base id (used in metadata)
+  indexName: string; // pgvector index name
+  sources: CatalogSource[];
+};
+
+// Example: Fondazione CON IL SUD catalog
+export const FONDAZIONE_CATALOG: CatalogDefinition = {
+  kbId: "fondazione_con_il_sud",
+  indexName: "fondazione_catalog",
+  sources: [
+    { id: "chairos", filePath: ".../chairos.md" },
+    { id: "website", filePath: ".../website_kb.md" },
+  ],
+};
+```
+
+#### 2. Ingestion Utility (`mastra/utils/catalog-ingest.ts`)
+
+Processes markdown files into pgvector:
+
+```typescript
+import { ingestCatalog } from "./catalog-ingest";
+import { FONDAZIONE_CATALOG } from "./catalog-config";
+
+// Ingest all sources in a catalog
+await ingestCatalog(FONDAZIONE_CATALOG);
+```
+
+**Process:**
+1. Read markdown file
+2. Chunk using `MDocument.fromMarkdown().chunk()` (recursive strategy, 1024 chars, 128 overlap)
+3. Generate embeddings using `text-embedding-3-small`
+4. Create pgvector index if needed (1536 dimensions, cosine metric)
+5. Upsert vectors with metadata (kbId, sourceId, filePath, chunkIndex, text)
+
+#### 3. Catalog Tool (`mastra/tools/catalog-tool.ts`)
+
+Semantic search tool for the Fondazione CON IL SUD knowledge base. Supports
+**multi-query** searches and **autonomous expansion** for comprehensive results.
+
+```typescript
+import { fondazioneCatalogTool } from "./catalog-tool";
+
+// Input schema - supports 1-5 queries in a single call
+{
+  queries: string[];  // Array of search queries (1-5 queries)
+  topK?: number;      // Max results per query (default: 5, max: 10)
+}
+```
+
+**Tool Output:**
+```typescript
+{
+  results: [
+    {
+      query: "quali sono le aree di intervento?",
+      chunks: [
+        {
+          id: "fondazione_con_il_sud:chairos:12",
+          text: "... chunk text ...",
+          sourceId: "chairos",
+          score: 0.82,
+        }
+      ],
+      count: 5
+    }
+  ],
+  totalUniqueResults: 5,
+  expansionHints: ["Prova con: 'guida operativa ...'"]  // Optional
+}
+```
+
+#### 4. Vector Infrastructure (`mastra/vectors/`)
+
+Shared embedding model and pgvector store:
+
+```typescript
+// embedder.ts
+export const EMBEDDING_MODEL_ID = "text-embedding-3-small";
+export const EMBEDDING_DIMENSION = 1536;
+export const embeddingModel = openai.embedding(EMBEDDING_MODEL_ID);
+
+// pgvector.ts
+export const PGVECTOR_STORE_NAME = "pgVector";
+export const pgVector = new PgVector({
+  connectionString: process.env.POSTGRES_URL,
+});
+```
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `POSTGRES_URL` | PostgreSQL connection string with pgvector extension |
+| `OPENAI_API_KEY` | OpenAI API key for embeddings |
+
+These variables are typically defined in `.env.local`. The catalog ingestion
+script (`mastra/scripts/ingest-fondazione-catalog.ts`, run via
+`pnpm catalog:ingest:fondazione`) explicitly loads `.env.local` so that
+`POSTGRES_URL` and `OPENAI_API_KEY` are available before pgvector is
+initialized.
+
+### Ingestion Commands
+
+```bash
+# Ingest Fondazione CON IL SUD catalog
+pnpm catalog:ingest:fondazione
+```
+
+### Adding a New Catalog
+
+1. **Define catalog in `catalog-config.ts`:**
+```typescript
+export const MY_CATALOG: CatalogDefinition = {
+  kbId: "my_knowledge_base",
+  indexName: "my_catalog",
+  sources: [
+    { id: "docs", filePath: path.join(process.cwd(), "path/to/docs.md") },
+  ],
+};
+```
+
+2. **Create ingestion script:**
+```typescript
+// mastra/scripts/ingest-my-catalog.ts
+import { MY_CATALOG } from "../utils/catalog-config";
+import { ingestCatalog } from "../utils/catalog-ingest";
+await ingestCatalog(MY_CATALOG);
+```
+
+3. **Create catalog tool** (follow pattern in `catalog-tool.ts`):
+```typescript
+export const myCatalogTool = createTool({
+  id: "my_catalog",
+  description: "Search my knowledge base...",
+  inputSchema: z.object({
+    queries: z.array(z.string().min(3)).min(1).max(5),
+    topK: z.number().optional()
+  }),
+  execute: async ({ context }) => {
+    // Process queries in parallel with Promise.all
+    const results = await Promise.all(context.queries.map(async (q) => {
+      const { embedding } = await embed({ model: embeddingModel, value: q });
+    const results = await pgVector.query({
+      indexName: MY_CATALOG.indexName,
+      queryVector: embedding,
+      topK: context.topK ?? 5,
+    });
+    return { query: context.query, results, totalResults: results.length };
+  },
+});
+```
+
+4. **Register tool in agent:**
+```typescript
+export const myAgent = new Agent({
+  tools: { catalog: myCatalogTool },
+});
+```
 
 ---
 
@@ -527,6 +814,35 @@ if (invoiceContext) {
 | `loadInvoice` | Load invoice from knowledge base | `{ fileId?: string }` |
 
 **Note:** The Assistente Comune has only one **backend tool** – `loadInvoice`. Its sole purpose is document management.
+
+### Fondazione CON IL SUD Tools
+
+| Tool | Description | Input |
+|------|-------------|-------|
+| `fondazioneBandi` | List or load bandi from knowledge base | `{ mode: "list" \| "load", bandoId?: string }` |
+
+**Modes:**
+
+| Mode | Input | Output |
+|------|-------|--------|
+| `list` | None | Array of `{ id, slug, title, shortDescription, status, deadline }` (no content) |
+| `load` | `bandoId` (id, slug, or partial title) | Full bando `{ id, slug, title, shortDescription, status, deadline, content }` |
+
+**Usage:**
+
+```typescript
+// List all bandi (metadata only)
+const result = await fondazioneBandiTool.execute({
+  context: { mode: "list" }
+});
+// Returns: { mode: "list", bandi: [{ id, title, shortDescription, ... }] }
+
+// Load specific bando
+const result = await fondazioneBandiTool.execute({
+  context: { mode: "load", bandoId: "sport" }
+});
+// Returns: { mode: "load", bando: { id, title, ..., content: "..." } }
+```
 
 ### Invoice Analyzer Tools (`mastra/tools/invoice-validation-tools.ts`)
 
@@ -929,20 +1245,31 @@ mastra/
 │   │   └── invoice-analyzer-agent/
 │   │       ├── index.ts           # Invoice Analyzer Agent + factory function
 │   │       └── system-prompt.ts   # Analysis-focused Italian prompt
+│   ├── fondazione_con_il_sud/
+│   │   └── asse/
+│   │       ├── index.ts           # Fondazione CON IL SUD agent
+│   │       └── system-prompt.ts   # Italian system prompt with KB injection
 │   ├── research-agent/
 │   │   └── index.ts           # Research agent
 │   └── index.ts               # Agent exports
 ├── knowledgebase/
-│   └── faenza/
-│       └── *.xml              # 66 invoice files
+│   ├── faenza/
+│   │   └── *.xml              # 66 invoice files
+│   └── fondazione_con_il_sud/
+│       ├── website_kb.md      # Scraped foundation website content
+│       └── bandi/
+│           └── <category>/    # Category subdirectories (e.g., "evado a lavorare", "sport")
+│               └── *.md       # Bandi markdown files
 ├── tools/
 │   ├── index.ts               # Tool exports
 │   ├── load-invoice-tool.ts   # Invoice loading tool
+│   ├── fondazione-bandi-tool.ts  # Fondazione bandi list/load tool
 │   ├── invoice-validation-tools.ts  # Validation tools for analyzer
 │   └── ...                    # Other tools
 ├── utils/
-│   ├── knowledge-base-loader.ts  # KB utilities + validation functions
-│   └── runtime-utils.ts          # Runtime context
+│   ├── knowledge-base-loader.ts    # Faenza KB utilities + validation
+│   ├── fondazione-kb-loader.ts     # Fondazione KB utilities
+│   └── runtime-utils.ts            # Runtime context
 └── index.ts                   # Mastra instance
 
 app/
@@ -1004,7 +1331,7 @@ hooks/
 export const myAgent = new Agent({
   name: "My Agent",
   instructions: "...",
-  model: "openai/gpt-4.1",
+  model: "openai/gpt-5.1",
   tools: { ... },
 });
 ```
