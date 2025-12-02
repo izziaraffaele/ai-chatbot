@@ -69,3 +69,4 @@ export const FONDAZIONE_CATALOG: CatalogDefinition = {
   ],
 };
 
+

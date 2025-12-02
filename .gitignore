@@ -47,3 +47,5 @@ yarn-error.log*
 .mastra
 
 mastra/knowledgebase/*
+
+*py

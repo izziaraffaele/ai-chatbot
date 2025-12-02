@@ -103,6 +103,8 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 |-------|-----|-------------|--------|
 | **Assistente Comune** | `assistente` | Official Comune di Faenza assistant for document management | Faenza logo (`/images/logo-faenza.jpg`) |
 | **Researcher** | `researcher` | Web research and synthesis specialist | 🔍 |
+| **Fondazione Asse** | `sfcAsseAgent` | Public-facing Fondazione CON IL SUD assistant | Fondazione logo |
+| **Fondazione Assi** | `sfcAssiAgent` | Internal Fondazione CON IL SUD assistant with document management | Fondazione logo |
 | **Invoice Analyzer** | `invoiceAnalyzerAgent` | Specialized sub-agent for deep invoice analysis | 🔬 |
 | **Fondazione CON IL SUD** | `sfc_asse` | Assistant for Fondazione CON IL SUD information and bandi | 🌉 |
 
@@ -258,6 +260,65 @@ Performs semantic search over the pgvector-indexed knowledge base (Chairos manua
 **KB Loader Utilities (`mastra/utils/fondazione-kb-loader.ts`):**
 - `listBandiMetadata()`: Scans first-level subdirectories for `.md` files and returns metadata (no content)
 - `loadBandoByIdOrSlug(idOrSlug)`: Loads full content for one bando using relative path
+
+### Fondazione CON IL SUD Internal Agent (`mastra/agents/fondazione_con_il_sud/assi/`)
+
+An **internal** assistant for **Fondazione CON IL SUD** staff that provides document management capabilities with the canvas tab system, plus access to the knowledge base.
+
+**Purpose:**
+- Help internal staff review and manage documents
+- Create and update documents (text, code, spreadsheets) using canvas tabs
+- Access knowledge base for Foundation information
+- Browse and review bandi (announcements)
+
+**Note:** This is the INTERNAL version for Foundation staff. For public-facing assistant, see the "asse" agent.
+
+**Configuration:**
+
+```typescript
+export const sfcAssiAgent = new Agent({
+  name: "Assistente Interno Fondazione CON IL SUD – Assi",
+  instructions: ({ runtimeContext }) => {
+    const config = getRuntimeConfig(runtimeContext);
+    const geoHints = getGeoHints(runtimeContext);
+    return sfcAssiSystemPrompt(config, geoHints);
+  },
+  model: "openai/gpt-5.1",
+  tools: {
+    createDocument: createDocumentTool,
+    updateDocument: updateDocumentTool,
+    requestSuggestions: requestSuggestionsTool,
+    fondazioneBandi: fondazioneBandiTool,
+    catalog: fondazioneCatalogTool,
+  },
+  memory: new Memory({
+    storage: new LibSQLStore({ url: "file:../mastra.db" }),
+  }),
+});
+```
+
+**Tools:**
+
+| Tool | Purpose | Usage |
+|------|---------|-------|
+| `createDocument` | Create text/code/sheet documents in canvas tabs | `title`, `kind` ("text", "code", "sheet") |
+| `updateDocument` | Modify existing documents | `id`, `description` of changes |
+| `requestSuggestions` | Provide writing suggestions | Document-aware suggestions |
+| `fondazioneBandi` | Manage bandi (announcements) | `mode="list"` or `mode="load"` |
+| `catalog` | Semantic search over indexed docs | Multi-query semantic search |
+
+**Workflow:**
+1. Staff asks to create document → Agent calls `createDocument({ title: "...", kind: "text" })`
+2. Staff asks about bandi → Agent calls `fondazioneBandi({ mode: "list" })`
+3. Staff needs Foundation info → Agent calls `catalog({ queries: [...] })`
+4. Staff wants to modify document → Agent calls `updateDocument({ id: "...", description: "..." })`
+5. Documents open in canvas tabs for simultaneous work
+
+**Canvas Tab System:**
+- Each document opens in a separate tab in the sidebar panel
+- Multiple documents can be open simultaneously
+- Users can switch between tabs like a web browser
+- Tabs can be closed individually
 
 ### Agent Configuration (`lib/ai/agent-config.ts`)
 

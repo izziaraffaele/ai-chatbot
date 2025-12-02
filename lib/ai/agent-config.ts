@@ -37,11 +37,20 @@ export const AGENT_CONFIGS: Record<string, AgentConfig> = {
   },
   sfc_asse: {
     id: "sfc_asse",
-    name: "Fondazione CON IL SUD",
-    description: "Informazioni sulla Fondazione e supporto sui bandi",
+    name: "Fondazione CON IL SUD - Esterno",
+    description:
+      "Assistente pubblico per informazioni sulla Fondazione e bandi",
     avatar: "🌉",
     color: "orange",
     registryId: "sfcAsseAgent",
+  },
+  sfc_assi: {
+    id: "sfc_assi",
+    name: "Fondazione CON IL SUD - INTERNO",
+    description: "Assistente interno per gestione documenti e knowledge base",
+    avatar: "🏢",
+    color: "purple",
+    registryId: "sfcAssiAgent",
   },
 } as const;
 
