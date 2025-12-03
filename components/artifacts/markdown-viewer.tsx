@@ -26,6 +26,9 @@ import { cn } from "@/lib/utils";
  * Table of contents item structure
  */
 type TocItem = {
+  /** Unique key for React list rendering (handles duplicate headings) */
+  tocKey: string;
+  /** DOM anchor ID derived from heading text (may repeat for duplicate headings) */
   id: string;
   level: number;
   text: string;
@@ -84,13 +87,20 @@ function generateSlug(text: string): string {
 function parseToc(content: string): TocItem[] {
   const headingRegex = /^(#{1,6})\s+(.+)$/gm;
   const items: TocItem[] = [];
+  const slugCounts = new Map<string, number>();
   let match: RegExpExecArray | null;
 
   while ((match = headingRegex.exec(content)) !== null) {
     const level = match[1].length;
     const text = match[2].trim();
     const id = generateSlug(text);
-    items.push({ id, level, text });
+
+    // Generate unique tocKey by tracking slug occurrences
+    const count = slugCounts.get(id) ?? 0;
+    slugCounts.set(id, count + 1);
+    const tocKey = count === 0 ? id : `${id}-${count}`;
+
+    items.push({ tocKey, id, level, text });
   }
 
   return items;
@@ -222,7 +232,7 @@ const TableOfContents = memo(function TableOfContents({
                       ? "bg-orange-100 text-orange-700"
                       : "text-neutral-600 hover:bg-orange-50"
                   )}
-                  key={item.id}
+                  key={item.tocKey}
                   onClick={() => onNavigate(item.id)}
                   style={{ paddingLeft: `${indent}rem` }}
                   type="button"

@@ -1964,6 +1964,15 @@ The Markdown Viewer widget (`markdown-viewer`) is a feature-rich component for r
 - **Scroll-to-Top Button**: Floating action button appears after scrolling 300px
 - **Custom Scrollbar**: Themed scrollbar with orange-amber gradient
 
+**Table of Contents Implementation:**
+The TOC is built by `parseToc()` which extracts headings from markdown. Each `TocItem` has:
+- `tocKey`: A unique React list key (handles duplicate headings by appending `-1`, `-2`, etc.)
+- `id`: The DOM anchor ID derived from the heading slug (may repeat for duplicate headings)
+- `level`: Heading depth (1-6)
+- `text`: The heading text
+
+This separation ensures React receives unique keys even when multiple headings share the same text, while preserving anchor-based navigation behavior.
+
 **Usage:**
 
 ```typescript
