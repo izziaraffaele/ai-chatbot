@@ -2,7 +2,6 @@
 
 import { isToolUIPart } from "ai";
 import equal from "fast-deep-equal";
-import Image from "next/image";
 import type React from "react";
 import { memo, useState } from "react";
 import { MessagePartIterator } from "@/components/chat/iterators";
@@ -50,14 +49,9 @@ function PureAssistantMessage({
   const [mode, setMode] = useState<ChatMessageMode>("view");
 
   const avatar = sender?.avatar || (
-    <Image
-      alt="Assistente Comune di Faenza"
-      className="size-8 rounded-full object-cover"
-      height={32}
-      src="/images/logo-faenza.jpg"
-      unoptimized
-      width={32}
-    />
+    <span className="flex size-8 items-center justify-center rounded-full bg-orange-100 text-lg">
+      🏢
+    </span>
   );
 
   const hasText = message.parts?.some(

@@ -15,7 +15,6 @@ import {
 import { createDocumentTool } from "./create-document-tool";
 import { fondazioneBandiTool } from "./fondazione-bandi-tool";
 import { fondazioneBrowserTool } from "./fondazione-fs-tool";
-import { loadInvoiceTool } from "./load-invoice-tool";
 import { requestSuggestionsTool } from "./request-suggestions-tool";
 import { updateDocumentTool } from "./update-document-tool";
 import { getWeatherTool } from "./weather-tool";
@@ -28,16 +27,9 @@ export type GetWeatherTool = typeof getWeatherTool;
 export type CreateDocumentTool = typeof createDocumentTool;
 export type UpdateDocumentTool = typeof updateDocumentTool;
 export type RequestSuggestionsTool = typeof requestSuggestionsTool;
-export type LoadInvoiceTool = typeof loadInvoiceTool;
 export type FondazioneBandiTool = typeof fondazioneBandiTool;
 export type FondazioneBrowserTool = typeof fondazioneBrowserTool;
 export type { FondazioneCatalogTool };
-
-// Invoice validation tool types
-export type {
-  InvoiceValidationTools,
-  ValidationOutput,
-} from "./invoice-validation-tools";
 
 /**
  * All Mastra Tools Union Type
@@ -47,7 +39,6 @@ export type MastraToolTypes =
   | CreateDocumentTool
   | UpdateDocumentTool
   | RequestSuggestionsTool
-  | LoadInvoiceTool
   | FondazioneBandiTool
   | FondazioneBrowserTool
   | FondazioneCatalogTool;
@@ -61,24 +52,10 @@ export const mastraTools = {
   createDocument: createDocumentTool,
   updateDocument: updateDocumentTool,
   requestSuggestions: requestSuggestionsTool,
-  loadInvoice: loadInvoiceTool,
   fondazioneBandi: fondazioneBandiTool,
   fondazioneBrowser: fondazioneBrowserTool,
   catalog: fondazioneCatalogTool,
 };
-
-/**
- * Invoice Validation Tools
- * Used by the Invoice Analyzer Agent
- */
-export {
-  invoiceValidationTools,
-  validateCigTool,
-  validateCodiceFiscaleTool,
-  validateCodicePaTool,
-  validateCupTool,
-  validateIbanTool,
-} from "./invoice-validation-tools";
 
 /**
  * Tool names for easy reference
@@ -88,14 +65,7 @@ export const TOOL_NAMES = {
   CREATE_DOCUMENT: "createDocument",
   UPDATE_DOCUMENT: "updateDocument",
   REQUEST_SUGGESTIONS: "requestSuggestions",
-  LOAD_INVOICE: "loadInvoice",
   FONDAZIONE_BANDI: "fondazioneBandi",
   FONDAZIONE_BROWSER: "fondazioneBrowser",
   CATALOG: "catalog",
-  // Invoice validation tools
-  VALIDATE_IBAN: "validateIban",
-  VALIDATE_CIG: "validateCig",
-  VALIDATE_CUP: "validateCup",
-  VALIDATE_CODICE_FISCALE: "validateCodiceFiscale",
-  VALIDATE_CODICE_PA: "validateCodicePa",
 } as const;

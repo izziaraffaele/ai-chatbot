@@ -15,18 +15,9 @@ export type AgentConfig = {
 
 /**
  * Available agent configurations
- * Supports the Research agent for web search and the Comune di Faenza assistant
+ * Supports the Research agent for web search and the Fondazione CON IL SUD assistants
  */
 export const AGENT_CONFIGS: Record<string, AgentConfig> = {
-  assistente: {
-    id: "assistente",
-    name: "Assistente comune",
-    description:
-      "Assistente ufficiale del Comune di Faenza per la gestione documenti",
-    avatar: "🏛️",
-    color: "green",
-    registryId: "chatAgent",
-  },
   researcher: {
     id: "researcher",
     name: "Researcher",
@@ -69,11 +60,10 @@ export function getAgentConfig(id: string): AgentConfig | undefined {
 }
 
 /**
- * Get default agent (first available)
+ * Get default agent (Fondazione Assi - internal)
  */
 export function getDefaultAgent(): AgentConfig {
-  const agents = getAvailableAgents();
-  return agents[0] || AGENT_CONFIGS.research;
+  return AGENT_CONFIGS.sfc_assi;
 }
 
 export function getAgentConfigByRegistryId(
