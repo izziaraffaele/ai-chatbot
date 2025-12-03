@@ -32,15 +32,14 @@ export type {
   DocumentSelectorUIArtifact,
   FileValidation,
 } from "./document-selector";
-
-// Re-export markdown viewer types and components
-export {
-  MarkdownViewer,
-  MarkdownViewerArtifact,
-  MARKDOWN_VIEWER_KIND,
-} from "./markdown-viewer";
 export type {
+  MarkdownViewerArtifactProps,
   MarkdownViewerKind,
   MarkdownViewerProps,
-  MarkdownViewerArtifactProps,
+} from "./markdown-viewer";
+// Re-export markdown viewer types and components
+export {
+  MARKDOWN_VIEWER_KIND,
+  MarkdownViewer,
+  MarkdownViewerArtifact,
 } from "./markdown-viewer";

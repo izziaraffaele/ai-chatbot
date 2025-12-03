@@ -18,39 +18,34 @@ import { WIDGET_KINDS, widgetRegistry } from "./widget-registry";
 // ============================================================================
 
 // Document artifacts - lazy loaded for code splitting
-const LazyDocumentArtifact = lazy(
-  () =>
-    import("@/components/artifacts/document").then((mod) => ({
-      default: mod.DocumentArtifact,
-    }))
+const LazyDocumentArtifact = lazy(() =>
+  import("@/components/artifacts/document").then((mod) => ({
+    default: mod.DocumentArtifact,
+  }))
 );
 
-const LazyMediaArtifact = lazy(
-  () =>
-    import("@/components/artifacts/media").then((mod) => ({
-      default: mod.MediaArtifact,
-    }))
+const LazyMediaArtifact = lazy(() =>
+  import("@/components/artifacts/media").then((mod) => ({
+    default: mod.MediaArtifact,
+  }))
 );
 
-const LazyDocumentSelectorArtifact = lazy(
-  () =>
-    import("@/components/artifacts/document-selector").then((mod) => ({
-      default: mod.DocumentSelectorArtifact,
-    }))
+const LazyDocumentSelectorArtifact = lazy(() =>
+  import("@/components/artifacts/document-selector").then((mod) => ({
+    default: mod.DocumentSelectorArtifact,
+  }))
 );
 
-const LazyFondazioneBrowserArtifact = lazy(
-  () =>
-    import("@/components/artifacts/fondazione-browser").then((mod) => ({
-      default: mod.FondazioneBrowserArtifact,
-    }))
+const LazyFondazioneBrowserArtifact = lazy(() =>
+  import("@/components/artifacts/fondazione-browser").then((mod) => ({
+    default: mod.FondazioneBrowserArtifact,
+  }))
 );
 
-const LazyMarkdownViewerArtifact = lazy(
-  () =>
-    import("@/components/artifacts/markdown-viewer").then((mod) => ({
-      default: mod.MarkdownViewerArtifact,
-    }))
+const LazyMarkdownViewerArtifact = lazy(() =>
+  import("@/components/artifacts/markdown-viewer").then((mod) => ({
+    default: mod.MarkdownViewerArtifact,
+  }))
 );
 
 // ============================================================================
@@ -318,7 +313,7 @@ export const fondazioneBrowserWidgetDefinition: WidgetDefinition<
   unknown
 > = {
   kind: WIDGET_KINDS.FONDAZIONE_BROWSER,
-  label: "Esplora Bandi",
+  label: "Esplora Documenti",
   icon: FolderOpen,
   renderer: FondazioneBrowserRenderer,
   allowMultiple: false,
@@ -383,4 +378,3 @@ export const builtInWidgetDefinitions = [
   documentSelectorWidgetDefinition,
   fondazioneBrowserWidgetDefinition,
 ];
-

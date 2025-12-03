@@ -213,7 +213,12 @@ o contattare gli uffici all'indirizzo iniziative@fondazioneconilsud.it."
   // CURRENT DOCUMENT CONTEXT (dynamic based on active canvas tab)
   // ========================================================================
   if (canvasContext?.activeTab) {
-    const { title, kind, documentId, content } = canvasContext.activeTab;
+    const { title, kind, documentId, content, viewedContent } =
+      canvasContext.activeTab;
+
+    // Prioritize viewedContent if present (e.g., viewing a file inside a browser widget)
+    const hasViewedContent = viewedContent?.content;
+
     let currentDocSection = `
 ═══════════════════════════════════════════════════════════════════════════════
 ● DOCUMENTO ATTUALMENTE APERTO
@@ -221,15 +226,31 @@ o contattare gli uffici all'indirizzo iniziative@fondazioneconilsud.it."
 
 L'utente sta visualizzando un documento nel pannello laterale. Quando l'utente fa riferimento a "questo documento", "il documento corrente", "il documento aperto" o simili, si riferisce a questo:
 
-- Titolo: ${title}
-- Tipo: ${kind}`;
+- Titolo: ${hasViewedContent ? viewedContent.title : title}
+- Tipo: ${hasViewedContent ? viewedContent.contentType || "documento" : kind}`;
 
-    if (documentId) {
+    if (hasViewedContent && viewedContent.description) {
+      currentDocSection += `\n- Percorso: ${viewedContent.description}`;
+    }
+
+    if (documentId && !hasViewedContent) {
       currentDocSection += `\n- ID Documento: ${documentId}`;
     }
 
-    // Add content preview for text-based documents
-    if (content && typeof content === "string" && content.length > 0) {
+    // Use viewedContent if available, otherwise use tab content
+    if (hasViewedContent) {
+      // Limit content to first 2000 characters to avoid prompt bloat
+      const contentPreview =
+        viewedContent.content.length > 2000
+          ? `${viewedContent.content.slice(0, 2000)}...`
+          : viewedContent.content;
+      currentDocSection += `
+
+Contenuto del Documento:
+\`\`\`${viewedContent.contentType || ""}
+${contentPreview}
+\`\`\``;
+    } else if (content && typeof content === "string" && content.length > 0) {
       // Limit content to first 2000 characters to avoid prompt bloat
       const contentPreview =
         content.length > 2000 ? `${content.slice(0, 2000)}...` : content;

@@ -28,6 +28,7 @@ import { useClientTools } from "@/hooks/use-client-tools";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useSelectedAgent } from "@/hooks/use-selected-agent";
 import { getTabsState } from "@/hooks/use-canvas-tabs";
+import { getVisibleContent } from "@/lib/canvas";
 import {
   processClientToolCall,
   serializeClientTools,
@@ -117,6 +118,12 @@ export function useChatController({
           (tab) => tab.id === tabsState.activeTabId
         );
 
+        // Check if the active tab has visible content registered
+        // (for complex widgets like Fondazione Browser showing a file)
+        const viewedContent = activeTab
+          ? getVisibleContent(activeTab.id)
+          : undefined;
+
         // Build canvas context with active tab info for agent awareness
         const canvasContext = activeTab
           ? {
@@ -125,6 +132,8 @@ export function useChatController({
                 kind: activeTab.artifact.kind,
                 documentId: activeTab.artifact.documentId,
                 content: activeTab.artifact.content,
+                // Include viewed content if widget has registered it
+                viewedContent,
               },
             }
           : { activeTab: null };

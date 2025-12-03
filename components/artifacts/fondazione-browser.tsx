@@ -21,6 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
+import { clearVisibleContent, setVisibleContent } from "@/lib/canvas";
 import { cn } from "@/lib/utils";
 
 // ============================================================================
@@ -75,9 +76,7 @@ export type FondazioneBrowserArtifactKind = typeof FONDAZIONE_BROWSER_KIND;
  * Format a folder name for display (capitalize, replace underscores)
  */
 function formatFolderName(name: string): string {
-  return name
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return name.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 /**
@@ -197,19 +196,22 @@ export function FondazioneBrowserArtifact({
   }, []);
 
   // Fetch file content from API
-  const fetchFileContent = useCallback(async (path: string): Promise<string> => {
-    const response = await fetch(
-      `/api/fondazione/fs?action=read&path=${encodeURIComponent(path)}`
-    );
+  const fetchFileContent = useCallback(
+    async (path: string): Promise<string> => {
+      const response = await fetch(
+        `/api/fondazione/fs?action=read&path=${encodeURIComponent(path)}`
+      );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Errore nella lettura del file");
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Errore nella lettura del file");
+      }
 
-    const data = await response.json();
-    return data.content;
-  }, []);
+      const data = await response.json();
+      return data.content;
+    },
+    []
+  );
 
   // Handle folder click
   const handleFolderClick = useCallback(
@@ -297,10 +299,40 @@ export function FondazioneBrowserArtifact({
     return { folders, files, total: items.length };
   }, [items]);
 
+  // Register visible content when viewing a markdown file
+  // This allows the agent to know what the user is currently viewing
+  useEffect(() => {
+    if (!activeTab) {
+      return;
+    }
+
+    if (viewMode === "markdown" && selectedMarkdownFile) {
+      // Register the markdown content so the agent can access it
+      setVisibleContent(activeTab.id, {
+        title: selectedMarkdownFile.name,
+        description: selectedMarkdownFile.path,
+        content: selectedMarkdownFile.content,
+        contentType: "markdown",
+      });
+    } else {
+      // Clear visible content when not viewing markdown
+      clearVisibleContent(activeTab.id);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (activeTab) {
+        clearVisibleContent(activeTab.id);
+      }
+    };
+  }, [activeTab, viewMode, selectedMarkdownFile]);
+
   // Render markdown view using the rich MarkdownViewer component
   if (viewMode === "markdown" && selectedMarkdownFile) {
     return (
-      <ChatArtifact className={cn("h-full rounded-none border-none", className)}>
+      <ChatArtifact
+        className={cn("h-full rounded-none border-none", className)}
+      >
         <ChatArtifactHeader
           actions={
             <div className="flex items-center gap-2">
@@ -374,7 +406,7 @@ export function FondazioneBrowserArtifact({
         }
         onClose={handleClose}
         subtitle={currentPath || "Cartella principale"}
-        title={activeTab?.title || "Esplora Bandi"}
+        title={activeTab?.title || "Esplora Documenti"}
       />
 
       <ChatArtifactBody>
@@ -428,10 +460,7 @@ export function FondazioneBrowserArtifact({
           {!isLoading && !error && (
             <>
               {viewMode === "root" ? (
-                <RootGridView
-                  items={items}
-                  onFolderClick={handleFolderClick}
-                />
+                <RootGridView items={items} onFolderClick={handleFolderClick} />
               ) : (
                 <ExplorerListView
                   items={items}
@@ -580,10 +609,7 @@ function ExplorerListView({
                 <ChevronRight className="size-4 text-muted-foreground" />
               )}
               {!isSupported && (
-                <Badge
-                  className="text-xs"
-                  variant="outline"
-                >
+                <Badge className="text-xs" variant="outline">
                   Non supportato
                 </Badge>
               )}
@@ -594,5 +620,3 @@ function ExplorerListView({
     </div>
   );
 }
-
-

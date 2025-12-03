@@ -30,6 +30,17 @@ const assistantMessageSchema = z.object({
 });
 
 /**
+ * Viewed content schema for content being displayed within a complex widget.
+ * This represents what the user is actually seeing on screen.
+ */
+const viewedContentSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  content: z.string(),
+  contentType: z.enum(["markdown", "text", "csv", "json"]).optional(),
+});
+
+/**
  * Canvas context schema for passing active tab information to agents.
  * This allows agents to answer questions about the currently open document.
  */
@@ -38,6 +49,7 @@ const activeTabSchema = z.object({
   kind: z.string(),
   documentId: z.string().optional(),
   content: z.unknown().optional(), // Can be string, CSV data, etc.
+  viewedContent: viewedContentSchema.optional(), // Content viewed within complex widgets
 });
 
 export const canvasContextSchema = z

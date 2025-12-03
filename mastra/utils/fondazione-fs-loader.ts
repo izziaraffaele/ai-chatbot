@@ -14,11 +14,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Base path for the Fondazione bandi knowledge base
+ * Base path for the Fondazione CON IL SUD knowledge base
  */
 export const BASE_PATH = path.join(
   process.cwd(),
-  "mastra/knowledgebase/fondazione_con_il_sud/bandi"
+  "mastra/knowledgebase/fondazione_con_il_sud"
 );
 
 /**
@@ -236,4 +236,5 @@ export function getParentPath(relativePath: string): string {
 
   return normalized.slice(0, lastSlash);
 }
+
 

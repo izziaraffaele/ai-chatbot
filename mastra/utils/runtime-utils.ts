@@ -40,6 +40,23 @@ export type LoadedInvoiceContext = {
 };
 
 /**
+ * Content currently being viewed within a complex widget.
+ * This represents what the user is actually seeing, which may differ
+ * from the tab's artifact content (e.g., a markdown file opened within
+ * the Fondazione Browser widget).
+ */
+export type ViewedContent = {
+  /** Title of the viewed content (e.g., filename) */
+  title: string;
+  /** Optional description or path */
+  description?: string;
+  /** The actual content being viewed (typically text/markdown) */
+  content: string;
+  /** Content type hint for the agent */
+  contentType?: "markdown" | "text" | "csv" | "json";
+};
+
+/**
  * Active tab information from the canvas, stored in runtime context.
  * Used by agents to answer questions about the currently open document.
  */
@@ -52,6 +69,13 @@ export type ActiveTabContext = {
   documentId?: string;
   /** Tab content (string for text/code, array for CSV, etc.) */
   content?: unknown;
+  /**
+   * Content currently being viewed within a complex widget.
+   * When present, this takes priority over `content` for agent awareness.
+   * For example, when a user views a markdown file inside the Fondazione Browser,
+   * this field contains the markdown content, while `content` has the folder listing.
+   */
+  viewedContent?: ViewedContent;
 };
 
 /**

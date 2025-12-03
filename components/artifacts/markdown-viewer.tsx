@@ -13,14 +13,7 @@ import {
   Info,
   Menu,
 } from "lucide-react";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { cn } from "@/lib/utils";
@@ -234,7 +227,9 @@ const TableOfContents = memo(function TableOfContents({
                   style={{ paddingLeft: `${indent}rem` }}
                   type="button"
                 >
-                  <span className={cn("size-1 shrink-0 rounded-full", dotColor)} />
+                  <span
+                    className={cn("size-1 shrink-0 rounded-full", dotColor)}
+                  />
                   <span className="truncate">{item.text}</span>
                 </button>
               );
@@ -374,7 +369,7 @@ function renderHeading(
         <h2
           className={cn(
             baseClasses,
-            "mb-5 mt-12 flex items-center gap-3 border-orange-200 border-b pb-3 font-semibold text-2xl text-neutral-800"
+            "mt-12 mb-5 flex items-center gap-3 border-orange-200 border-b pb-3 font-semibold text-2xl text-neutral-800"
           )}
           data-heading-id={id}
           id={id}
@@ -388,7 +383,7 @@ function renderHeading(
         <h3
           className={cn(
             baseClasses,
-            "mb-4 mt-8 flex items-center gap-2 font-semibold text-xl text-neutral-800"
+            "mt-8 mb-4 flex items-center gap-2 font-semibold text-neutral-800 text-xl"
           )}
           data-heading-id={id}
           id={id}
@@ -402,7 +397,7 @@ function renderHeading(
         <h4
           className={cn(
             baseClasses,
-            "mb-3 mt-6 font-semibold text-lg text-neutral-700"
+            "mt-6 mb-3 font-semibold text-lg text-neutral-700"
           )}
           data-heading-id={id}
           id={id}
@@ -415,7 +410,7 @@ function renderHeading(
         <h5
           className={cn(
             baseClasses,
-            "mb-2 mt-4 font-medium text-base text-neutral-700"
+            "mt-4 mb-2 font-medium text-base text-neutral-700"
           )}
           data-heading-id={id}
           id={id}
@@ -428,7 +423,7 @@ function renderHeading(
         <h6
           className={cn(
             baseClasses,
-            "mb-2 mt-4 font-medium text-sm text-neutral-600"
+            "mt-4 mb-2 font-medium text-neutral-600 text-sm"
           )}
           data-heading-id={id}
           id={id}
@@ -554,9 +549,7 @@ function parseMarkdown(content: string): React.ReactNode[] {
       const level = headingMatch[1].length;
       const text = headingMatch[2];
       const id = generateSlug(text);
-      elements.push(
-        <div key={key++}>{renderHeading(level, text, id)}</div>
-      );
+      elements.push(<div key={key++}>{renderHeading(level, text, id)}</div>);
       i++;
       continue;
     }
@@ -611,9 +604,15 @@ function parseMarkdown(content: string): React.ReactNode[] {
         i++;
       }
       elements.push(
-        <ol className="counter-reset-item mb-5 flex list-none flex-col gap-2" key={key++}>
+        <ol
+          className="counter-reset-item mb-5 flex list-none flex-col gap-2"
+          key={key++}
+        >
           {listItems.map((item, idx) => (
-            <li className="counter-increment-item flex items-start gap-3" key={idx}>
+            <li
+              className="counter-increment-item flex items-start gap-3"
+              key={idx}
+            >
               <span className="counter-display flex size-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-sm text-white" />
               <span className="text-neutral-700 leading-relaxed">
                 {parseInlineMarkdown(item)}
@@ -670,13 +669,17 @@ function parseMarkdown(content: string): React.ReactNode[] {
     }
 
     // Table
-    if (line.includes("|") && i + 1 < lines.length && lines[i + 1].includes("|")) {
+    if (
+      line.includes("|") &&
+      i + 1 < lines.length &&
+      lines[i + 1].includes("|")
+    ) {
       const tableLines: string[] = [];
       while (i < lines.length && lines[i].includes("|")) {
         tableLines.push(lines[i]);
         i++;
       }
-      
+
       if (tableLines.length >= 2) {
         const parseRow = (row: string) =>
           row
@@ -689,7 +692,10 @@ function parseMarkdown(content: string): React.ReactNode[] {
         const rows = tableLines.slice(2).map(parseRow);
 
         elements.push(
-          <div className="mb-6 overflow-auto rounded-lg border-2 border-orange-200 shadow-sm" key={key++}>
+          <div
+            className="mb-6 overflow-auto rounded-lg border-2 border-orange-200 shadow-sm"
+            key={key++}
+          >
             <table className="w-full">
               <thead className="border-orange-200 border-b-2 bg-gradient-to-r from-orange-50 to-amber-50">
                 <tr>
@@ -781,7 +787,7 @@ function parseInlineMarkdown(text: string): React.ReactNode {
     const italicMatch = remaining.match(/^(\*|_)(.+?)\1/);
     if (italicMatch) {
       elements.push(
-        <em className="italic text-neutral-700" key={key++}>
+        <em className="text-neutral-700 italic" key={key++}>
           {italicMatch[2]}
         </em>
       );
@@ -917,8 +923,12 @@ export const MarkdownViewer = memo(function MarkdownViewer({
     if (element && containerRef.current) {
       const containerRect = containerRef.current.getBoundingClientRect();
       const elementRect = element.getBoundingClientRect();
-      const offset = elementRect.top - containerRect.top + containerRef.current.scrollTop - 96;
-      
+      const offset =
+        elementRect.top -
+        containerRect.top +
+        containerRef.current.scrollTop -
+        96;
+
       containerRef.current.scrollTo({
         top: offset,
         behavior: "smooth",
@@ -1026,4 +1036,3 @@ export function MarkdownViewerArtifact({
 
 export const MARKDOWN_VIEWER_KIND = "markdown-viewer" as const;
 export type MarkdownViewerKind = typeof MARKDOWN_VIEWER_KIND;
-

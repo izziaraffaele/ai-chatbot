@@ -941,7 +941,7 @@ const result = await fondazioneBrowserTool.execute({
   context: { action: "list" }
 });
 // Returns: { action: "list", path: "", items: [...] }
-// UI: Automatically opens "Esplora Bandi" widget in canvas panel
+// UI: Automatically opens "Esplora Documenti" widget in canvas panel
 
 // List specific folder
 const result = await fondazioneBrowserTool.execute({
@@ -957,7 +957,7 @@ const result = await fondazioneBrowserTool.execute({
 ```
 
 **Widget Behavior:**
-- When `action: "list"` is called, the "Esplora Bandi" widget opens automatically in the canvas panel
+- When `action: "list"` is called, the "Esplora Documenti" widget opens automatically in the canvas panel
 - Root view shows a grid of folder cards for top-level bando categories
 - Explorer view shows list-based navigation for subfolders
 - `.md` files open in an inline markdown viewer within the widget
@@ -1722,6 +1722,7 @@ The tab system is built on a centralized widget registry that decouples tab mana
 | **Widget Registry** | `lib/canvas/widget-registry.ts` | Centralized registry for widget definitions |
 | **Widget Context** | `lib/canvas/widget-context.tsx` | Per-tab context provider for state/streaming |
 | **Widget Definitions** | `lib/canvas/widget-definitions.tsx` | Built-in widget registrations |
+| **Visible Content Store** | `lib/canvas/visible-content-store.ts` | Store for complex widget viewed content (agent awareness) |
 | **CanvasWidgetContainer** | `components/chat/canvas-widget.tsx` | Generic widget container component |
 | **CanvasTabs** | `components/chat/canvas-tabs.tsx` | Tab bar UI with accessibility |
 | **useCanvasTabs** | `hooks/use-canvas-tabs.ts` | Tab state management hook |
@@ -1736,7 +1737,7 @@ The tab system is built on a centralized widget registry that decouples tab mana
 | `image` | Immagine | Yes | No | Image |
 | `markdown-viewer` | Visualizzatore Markdown | Yes | No | BookOpenText |
 | `document-selector` | Selettore documenti | No | No | LayoutGrid |
-| `fondazione-browser` | Esplora Bandi | No | No | FolderOpen |
+| `fondazione-browser` | Esplora Documenti | No | No | FolderOpen |
 
 ### Widget Definition Structure
 
@@ -1781,6 +1782,54 @@ type WidgetContextValue<TContent, TMeta> = {
   onClose: () => void;
   onTitleChange?: (title: string) => void;
 };
+```
+
+### Visible Content Store
+
+Complex widgets (like Fondazione Browser) may display content that differs from the tab's artifact content. For example, when viewing a markdown file inside the browser widget, the user sees the markdown content, but the tab's artifact still holds the folder listing. The **Visible Content Store** allows widgets to register what the user is actually viewing, making this information available to the agent.
+
+**Location**: `lib/canvas/visible-content-store.ts`
+
+```typescript
+type VisibleContent = {
+  title: string;              // Displayed content title (e.g., filename)
+  description?: string;       // Path or additional context
+  content: string;            // The actual content being viewed
+  contentType?: "markdown" | "text" | "csv" | "json";
+};
+```
+
+**Usage in Widgets:**
+
+```typescript
+import { setVisibleContent, clearVisibleContent } from "@/lib/canvas";
+
+// When viewing a file inside a complex widget:
+useEffect(() => {
+  if (activeTab && isViewingFile) {
+    setVisibleContent(activeTab.id, {
+      title: file.name,
+      description: file.path,
+      content: file.content,
+      contentType: "markdown",
+    });
+  } else if (activeTab) {
+    clearVisibleContent(activeTab.id);
+  }
+  return () => {
+    if (activeTab) clearVisibleContent(activeTab.id);
+  };
+}, [activeTab, isViewingFile, file]);
+```
+
+**Agent Awareness:**
+
+The canvas context sent to agents includes `viewedContent` when present:
+
+```typescript
+// In agent system prompts, viewedContent takes priority over content
+const { title, kind, content, viewedContent } = canvasContext.activeTab;
+const displayContent = viewedContent?.content || content;
 ```
 
 ### Tab State Structure
@@ -2214,7 +2263,11 @@ lib/canvas/
 │   ├── isPendingDocumentId()   # Check if ID is a pending ID
 │   └── generatePendingDocumentId() # Create pending-{toolCallId} ID
 ├── widget-context.tsx          # Per-tab context provider (props-based, no local state)
-└── widget-definitions.tsx      # Built-in widget definitions
+├── widget-definitions.tsx      # Built-in widget definitions
+└── visible-content-store.ts    # Store for widget visible content (agent awareness)
+    ├── setVisibleContent()     # Register content viewed in complex widgets
+    ├── getVisibleContent()     # Get visible content for a tab
+    └── clearVisibleContent()   # Clear when navigating away
 
 hooks/
 ├── use-canvas-tabs.ts          # Tab state management (SWR-based)

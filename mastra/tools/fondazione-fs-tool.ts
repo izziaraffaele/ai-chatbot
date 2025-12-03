@@ -65,16 +65,16 @@ export type { FondazioneFsItem };
  * - action="read": Legge il contenuto di un file specifico
  *
  * Il tool restituisce dati strutturati che vengono visualizzati
- * nel widget "Esplora Bandi" nel pannello laterale.
+ * nel widget "Esplora Documenti" nel pannello laterale.
  */
 export const fondazioneBrowserTool = createTool({
   id: "fondazioneBrowser",
-  description: `Esplora i file dei bandi di Fondazione CON IL SUD.
-- action="list": Elenca cartelle e file in un percorso (default: radice dei bandi).
+  description: `Esplora i documenti di Fondazione CON IL SUD.
+- action="list": Elenca cartelle e file in un percorso (default: radice documenti).
 - action="read": Legge il contenuto di un file specifico (es. file .md o .csv).
 
 IMPORTANTE: Usa questo strumento quando l'utente chiede di:
-- "Mostrami i bandi" / "Fammi vedere i bandi" → action="list"
+- "Mostrami i documenti" / "Fammi vedere i bandi" / "Esplora file" → action="list"
 - "Apri il file X" / "Leggi il documento Y" → action="read" con path
 
 Il risultato apre automaticamente il browser visuale nel pannello laterale.`,
@@ -156,4 +156,5 @@ Il risultato apre automaticamente il browser visuale nel pannello laterale.`,
     }
   },
 });
+
 

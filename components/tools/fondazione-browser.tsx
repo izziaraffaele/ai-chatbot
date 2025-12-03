@@ -80,7 +80,7 @@ function PureFondazioneBrowserTool({ part }: ChatToolProps) {
         documentId: "fondazione-browser",
         kind: "fondazione-browser",
         content: { path: output.path, items: output.items },
-        title: "Esplora Bandi",
+        title: "Esplora Documenti",
         isVisible: true,
         status: "idle",
         boundingBox: {
@@ -90,7 +90,7 @@ function PureFondazioneBrowserTool({ part }: ChatToolProps) {
           height: boundingBox.height,
         },
       },
-      "Esplora Bandi"
+      "Esplora Documenti"
     );
   }, [output, openTab]);
 
@@ -115,7 +115,7 @@ function PureFondazioneBrowserTool({ part }: ChatToolProps) {
         documentId: "fondazione-browser",
         kind: "fondazione-browser",
         content: { path: output.path, items: output.items },
-        title: "Esplora Bandi",
+        title: "Esplora Documenti",
         isVisible: true,
         status: "idle",
         boundingBox: {
@@ -125,7 +125,7 @@ function PureFondazioneBrowserTool({ part }: ChatToolProps) {
           height: 200,
         },
       },
-      "Esplora Bandi"
+      "Esplora Documenti"
     );
   }, [output, outputSignature, openTab]);
 
@@ -181,7 +181,7 @@ function PureFondazioneBrowserTool({ part }: ChatToolProps) {
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-foreground text-sm">
-              Esplora Bandi
+              Esplora Documenti
             </h3>
             <p className="text-muted-foreground text-xs">
               {pathLabel} • Clicca per aprire il browser
@@ -220,4 +220,5 @@ export const FondazioneBrowserTool = memo(
     return equal(prev.part, next.part);
   }
 );
+
 
