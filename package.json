@@ -17,7 +17,6 @@
     "db:pull": "drizzle-kit pull",
     "db:check": "drizzle-kit check",
     "db:up": "drizzle-kit up",
-    "catalog:ingest:fondazione": "tsx mastra/scripts/ingest-fondazione-catalog.ts",
     "test": "export PLAYWRIGHT=True && pnpm exec playwright test"
   },
   "dependencies": {

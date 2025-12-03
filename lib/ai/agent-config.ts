@@ -35,23 +35,6 @@ export const AGENT_CONFIGS: Record<string, AgentConfig> = {
     color: "blue",
     registryId: "researchAgent",
   },
-  sfc_asse: {
-    id: "sfc_asse",
-    name: "Fondazione CON IL SUD - Esterno",
-    description:
-      "Assistente pubblico per informazioni sulla Fondazione e bandi",
-    avatar: "🌉",
-    color: "orange",
-    registryId: "sfcAsseAgent",
-  },
-  sfc_assi: {
-    id: "sfc_assi",
-    name: "Fondazione CON IL SUD - INTERNO",
-    description: "Assistente interno per gestione documenti e knowledge base",
-    avatar: "🏢",
-    color: "purple",
-    registryId: "sfcAssiAgent",
-  },
 } as const;
 
 /**
@@ -73,7 +56,7 @@ export function getAgentConfig(id: string): AgentConfig | undefined {
  */
 export function getDefaultAgent(): AgentConfig {
   const agents = getAvailableAgents();
-  return agents[0] || AGENT_CONFIGS.research;
+  return agents[0] || AGENT_CONFIGS.assistente;
 }
 
 export function getAgentConfigByRegistryId(

@@ -12,6 +12,7 @@ import {
   Copy,
   Info,
   Menu,
+  X,
 } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -156,64 +157,76 @@ const ProgressBar = memo(function ProgressBar({
 });
 
 /**
- * Table of Contents sidebar
+ * Table of Contents - Right-side slide-out panel
  */
 const TableOfContents = memo(function TableOfContents({
   items,
   activeSection,
   isOpen,
-  onToggle,
+  onClose,
   readingTime,
   onNavigate,
 }: {
   items: TocItem[];
   activeSection: string;
   isOpen: boolean;
-  onToggle: () => void;
+  onClose: () => void;
   readingTime: number;
   onNavigate: (id: string) => void;
 }) {
-  return (
-    <nav
-      className={cn(
-        "sticky top-20 h-fit max-h-[calc(100vh-6rem)] rounded-xl bg-white shadow-lg transition-all duration-300",
-        isOpen ? "w-64" : "w-12"
-      )}
-    >
-      {/* Header button */}
-      <button
-        className="flex w-full items-center gap-3 rounded-t-xl bg-gradient-to-r from-orange-500 to-amber-500 p-4 text-white transition-colors hover:from-orange-600 hover:to-amber-600"
-        onClick={onToggle}
-        type="button"
-      >
-        {isOpen ? (
-          <>
-            <BookOpen className="size-5 shrink-0" />
-            <span className="flex-1 text-left font-medium">Contents</span>
-            <ChevronRight
-              className={cn(
-                "size-5 shrink-0 transition-transform",
-                isOpen && "rotate-180"
-              )}
-            />
-          </>
-        ) : (
-          <Menu className="size-5" />
-        )}
-      </button>
+  // Handle navigation and close panel
+  const handleNavigate = useCallback(
+    (id: string) => {
+      onNavigate(id);
+      onClose();
+    },
+    [onNavigate, onClose]
+  );
 
-      {/* Reading time indicator */}
-      {isOpen && (
-        <div className="flex items-center gap-2 border-orange-100 border-b px-4 py-3 text-neutral-600 text-sm">
+  return (
+    <>
+      {/* Backdrop overlay */}
+      <div
+        aria-hidden="true"
+        className={cn(
+          "fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity duration-300",
+          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        )}
+        onClick={onClose}
+        onKeyDown={(e) => e.key === "Escape" && onClose()}
+      />
+
+      {/* Slide-out panel from right */}
+      <nav
+        className={cn(
+          "fixed top-0 right-0 z-50 h-full w-80 bg-white shadow-2xl transition-transform duration-300 ease-out",
+          isOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-4">
+          <div className="flex items-center gap-3 text-white">
+            <BookOpen className="size-5" />
+            <span className="font-semibold text-lg">Contenuti</span>
+          </div>
+          <button
+            className="flex size-8 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+            onClick={onClose}
+            type="button"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+
+        {/* Reading time indicator */}
+        <div className="flex items-center gap-2 border-orange-100 border-b px-5 py-3 text-neutral-600 text-sm">
           <Clock className="size-4 text-orange-500" />
           <span>{readingTime} min read</span>
         </div>
-      )}
 
-      {/* Navigation list */}
-      {isOpen && (
-        <div className="max-h-[calc(100vh-12rem)] overflow-y-auto py-2">
-          <div className="flex flex-col gap-1 px-2">
+        {/* Navigation list */}
+        <div className="h-[calc(100%-8rem)] overflow-y-auto py-3">
+          <div className="flex flex-col gap-1 px-3">
             {items.map((item) => {
               const indent = (item.level - 1) * 0.75 + 0.75;
               const isActive = activeSection === item.id;
@@ -227,18 +240,18 @@ const TableOfContents = memo(function TableOfContents({
               return (
                 <button
                   className={cn(
-                    "flex items-center gap-2 rounded px-3 py-2 text-left text-sm transition-colors",
+                    "flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
                     isActive
-                      ? "bg-orange-100 text-orange-700"
+                      ? "bg-orange-100 font-medium text-orange-700"
                       : "text-neutral-600 hover:bg-orange-50"
                   )}
                   key={item.tocKey}
-                  onClick={() => onNavigate(item.id)}
+                  onClick={() => handleNavigate(item.id)}
                   style={{ paddingLeft: `${indent}rem` }}
                   type="button"
                 >
                   <span
-                    className={cn("size-1 shrink-0 rounded-full", dotColor)}
+                    className={cn("size-1.5 shrink-0 rounded-full", dotColor)}
                   />
                   <span className="truncate">{item.text}</span>
                 </button>
@@ -246,8 +259,8 @@ const TableOfContents = memo(function TableOfContents({
             })}
           </div>
         </div>
-      )}
-    </nav>
+      </nav>
+    </>
   );
 });
 
@@ -872,7 +885,7 @@ export const MarkdownViewer = memo(function MarkdownViewer({
   const [activeSection, setActiveSection] = useState("");
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [showToc, setShowToc] = useState(true);
+  const [showToc, setShowToc] = useState(false);
 
   // Calculate reading time
   const readingTime = useMemo(() => calculateReadingTime(content), [content]);
@@ -974,43 +987,54 @@ export const MarkdownViewer = memo(function MarkdownViewer({
       <ProgressBar progress={scrollProgress} />
 
       {/* Main layout */}
-      <div className="mx-auto flex max-w-7xl gap-6 px-6 py-12">
-        {/* TOC Sidebar */}
-        <div className="hidden lg:block">
-          <TableOfContents
-            activeSection={activeSection}
-            isOpen={showToc}
-            items={toc}
-            onNavigate={handleNavigate}
-            onToggle={handleToggleToc}
-            readingTime={readingTime}
-          />
-        </div>
-
+      <div className="mx-auto max-w-5xl px-6 py-12">
         {/* Main content card */}
-        <div className="min-w-0 flex-1">
-          <article className="overflow-hidden rounded-2xl bg-white shadow-xl">
-            {/* Header */}
-            <header className="bg-gradient-to-r from-orange-500 to-amber-500 px-8 py-6">
-              <h1 className="font-bold text-2xl text-white">{title}</h1>
-              <div className="mt-2 flex items-center gap-4">
-                {description && (
-                  <span className="text-orange-100">{description}</span>
-                )}
-                <span className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-orange-100 text-sm">
-                  <Clock className="size-4" />
-                  {readingTime} min read
-                </span>
+        <article className="overflow-hidden rounded-2xl bg-white shadow-xl">
+          {/* Header with menu button */}
+          <header className="relative bg-gradient-to-r from-orange-500 to-amber-500 px-8 py-6">
+            <div className="flex items-start justify-between">
+              <div className="min-w-0 flex-1">
+                <h1 className="font-bold text-2xl text-white">{title}</h1>
+                <div className="mt-2 flex flex-wrap items-center gap-4">
+                  {description && (
+                    <span className="truncate text-orange-100">
+                      {description}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-orange-100 text-sm">
+                    <Clock className="size-4" />
+                    {readingTime} min read
+                  </span>
+                </div>
               </div>
-            </header>
-
-            {/* Content */}
-            <div className="prose-container px-8 py-10" ref={contentRef}>
-              {renderedContent}
+              {/* Menu button */}
+              <button
+                className="ml-4 flex size-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+                onClick={handleToggleToc}
+                title="Apri indice"
+                type="button"
+              >
+                <Menu className="size-5" />
+              </button>
             </div>
-          </article>
-        </div>
+          </header>
+
+          {/* Content */}
+          <div className="prose-container px-8 py-10" ref={contentRef}>
+            {renderedContent}
+          </div>
+        </article>
       </div>
+
+      {/* TOC Panel (slides in from right) */}
+      <TableOfContents
+        activeSection={activeSection}
+        isOpen={showToc}
+        items={toc}
+        onClose={handleToggleToc}
+        onNavigate={handleNavigate}
+        readingTime={readingTime}
+      />
 
       {/* Scroll to top button */}
       <ScrollToTopButton onClick={handleScrollToTop} visible={showScrollTop} />
