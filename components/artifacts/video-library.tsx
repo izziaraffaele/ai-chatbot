@@ -2,25 +2,48 @@
 
 import {
   ArrowLeft,
+  BookOpen,
   Clock,
+  HelpCircle,
   LayoutGrid,
   List,
+  Loader2,
   Play,
   Search,
   Video,
   XCircle,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FlashcardActivity } from "@/components/activities/flashcards";
+import { toUIFlashcardActivity } from "@/components/activities/flashcards/schema";
+import { QuizActivity } from "@/components/activities/quiz";
+import { toUIQuizActivity } from "@/components/activities/quiz/schema";
+import {
+  TranscriptToggleButton,
+  VideoTranscript,
+} from "@/components/artifacts/video-transcript";
 import {
   ChatArtifact,
   ChatArtifactBody,
   ChatArtifactHeader,
 } from "@/components/chat/artifact";
+import { Player } from "@/components/player";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
+import { createAttemptStore } from "@/lib/activity-tracking";
+import { clearVisibleContent, setVisibleContent } from "@/lib/canvas";
 import { cn } from "@/lib/utils";
+import { subscribeToSeek } from "@/lib/video/seek-store";
+import {
+  fetchLearningContent,
+  fetchTranscript,
+  formatTranscriptForAgent,
+  type LearningContentData,
+  type TranscriptData,
+} from "@/lib/video/transcript";
 
 // ============================================================================
 // TYPES
@@ -134,6 +157,20 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
     return content as VideoMetadata[];
   }, [activeTab?.artifact.content]);
 
+  // Auto-select single video (e.g., when opened from seekVideo tool)
+  // This "teleports" the user directly to the video player instead of showing the grid
+  useEffect(() => {
+    // Only auto-select if:
+    // 1. We have exactly 1 video (indicates it came from seekVideo, not listVideos)
+    // 2. We're not already in player mode
+    // 3. The video has a folder (required field from seekVideo)
+    if (videos.length === 1 && viewMode === "grid" && videos[0].folder) {
+      const singleVideo = videos[0];
+      setSelectedVideo(singleVideo);
+      setViewMode("player");
+    }
+  }, [videos, viewMode]);
+
   // Filter videos by search query
   const filteredVideos = useMemo(() => {
     if (!searchQuery) {
@@ -181,6 +218,7 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
         className={className}
         onBack={handleBackToGrid}
         onClose={handleClose}
+        tabId={activeTab?.id}
         video={selectedVideo}
       />
     );
@@ -198,7 +236,9 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Clock className="size-4" />
-              <span className="font-medium">{formatDuration(totalDuration)}</span>
+              <span className="font-medium">
+                {formatDuration(totalDuration)}
+              </span>
             </div>
           </div>
         }
@@ -377,6 +417,7 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
 type VideoPlayerViewProps = {
   className?: string;
   video: VideoMetadata;
+  tabId: string | undefined;
   onBack: () => void;
   onClose: () => void;
 };
@@ -384,96 +425,343 @@ type VideoPlayerViewProps = {
 function VideoPlayerView({
   className,
   video,
+  tabId,
   onBack,
   onClose,
 }: VideoPlayerViewProps) {
   const lessonLabel = getLessonLabel(video);
 
+  // Video element ref for tracking current time
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Transcript state
+  const [transcript, setTranscript] = useState<TranscriptData | null>(null);
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+
+  // Learning content state
+  const [learningContent, setLearningContent] =
+    useState<LearningContentData | null>(null);
+  const [learningContentLoading, setLearningContentLoading] = useState(true);
+
+  // Fetch transcript and learning content when video is selected
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadContent() {
+      // Fetch transcript and learning content in parallel
+      const [transcriptData, learningData] = await Promise.all([
+        fetchTranscript(video.folder),
+        fetchLearningContent(video.folder),
+      ]);
+
+      if (!cancelled) {
+        setTranscript(transcriptData);
+        setLearningContent(learningData);
+        setLearningContentLoading(false);
+      }
+    }
+
+    loadContent();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [video.folder]);
+
+  // Register transcript as visible content for agent awareness
+  useEffect(() => {
+    if (!tabId || !transcript) {
+      return;
+    }
+
+    // Format transcript for agent context
+    const formattedTranscript = formatTranscriptForAgent(
+      transcript,
+      video.title
+    );
+
+    setVisibleContent(tabId, {
+      title: video.title,
+      description: `Video transcript: ${video.folder}`,
+      content: formattedTranscript,
+      contentType: "text",
+    });
+
+    // Clear visible content when unmounting (going back to grid)
+    return () => {
+      if (tabId) {
+        clearVisibleContent(tabId);
+      }
+    };
+  }, [tabId, transcript, video.title, video.folder]);
+
+  // Track video current time for transcript sync
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) {
+      return;
+    }
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(videoElement.currentTime);
+    };
+
+    videoElement.addEventListener("timeupdate", handleTimeUpdate);
+
+    return () => {
+      videoElement.removeEventListener("timeupdate", handleTimeUpdate);
+    };
+  }, []);
+
+  // Subscribe to seek events from the agent's seekVideo tool
+  useEffect(() => {
+    const unsubscribe = subscribeToSeek((event) => {
+      if (videoRef.current) {
+        videoRef.current.currentTime = event.time;
+        // Optionally start playing if paused
+        if (videoRef.current.paused) {
+          videoRef.current.play().catch(() => {
+            // Ignore autoplay errors (browser policy)
+          });
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Handle seek from transcript click
+  const handleSeek = useCallback((time: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = time;
+    }
+  }, []);
+
+  // Handle back - also clear visible content
+  const handleBack = useCallback(() => {
+    if (tabId) {
+      clearVisibleContent(tabId);
+    }
+    onBack();
+  }, [tabId, onBack]);
+
   return (
     <ChatArtifact className={cn("h-full rounded-none border-none", className)}>
       {/* Header with Back Button */}
       <div className="flex items-center gap-3 border-border border-b px-4 py-3">
-        <Button className="gap-2" onClick={onBack} size="sm" variant="ghost">
+        <Button
+          className="gap-2"
+          onClick={handleBack}
+          size="sm"
+          variant="ghost"
+        >
           <ArrowLeft className="size-4" />
           Indietro
         </Button>
-        <div className="flex-1">
-          <h2 className="font-semibold text-sm">{video.title}</h2>
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate font-semibold text-sm">{video.title}</h2>
           {lessonLabel && (
             <p className="text-muted-foreground text-xs">{lessonLabel}</p>
           )}
         </div>
-        <Badge className="bg-muted text-muted-foreground" variant="outline">
+        <TranscriptToggleButton
+          hasTranscript={!!transcript}
+          isOpen={transcriptOpen}
+          onToggle={() => setTranscriptOpen(!transcriptOpen)}
+        />
+        <Badge
+          className="shrink-0 bg-muted text-muted-foreground"
+          variant="outline"
+        >
           {formatDuration(video.duration)}
         </Badge>
-        <Button className="size-8" onClick={onClose} size="icon" variant="ghost">
+        <Button
+          className="size-8"
+          onClick={onClose}
+          size="icon"
+          variant="ghost"
+        >
           <XCircle className="size-4" />
         </Button>
       </div>
 
       <ChatArtifactBody>
-        <div className="flex h-full flex-col">
-          {/* Video Player */}
-          <div className="relative aspect-video w-full bg-black">
-            <video
-              className="size-full"
-              controls
-              poster={video.thumbnailUrl}
-              src={video.videoUrl}
-            >
-              <track kind="captions" />
-              Il tuo browser non supporta la riproduzione video.
-            </video>
-          </div>
-
-          {/* Video Info */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  {lessonLabel && (
-                    <Badge
-                      className="bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
-                      variant="outline"
-                    >
-                      {lessonLabel}
-                    </Badge>
-                  )}
-                  <h1 className="font-bold text-xl">{video.title}</h1>
-                </div>
-                <p className="mt-2 text-muted-foreground">{video.description}</p>
-              </div>
-
-              {/* Video Details */}
-              <div className="grid grid-cols-2 gap-4 rounded-lg border border-border bg-muted/30 p-4">
-                <div>
-                  <p className="text-muted-foreground text-xs uppercase">
-                    Durata
-                  </p>
-                  <p className="font-medium">{formatDuration(video.duration)}</p>
-                </div>
-                {video.week && (
-                  <div>
-                    <p className="text-muted-foreground text-xs uppercase">
-                      Settimana
-                    </p>
-                    <p className="font-medium">{video.week}</p>
-                  </div>
-                )}
-                {video.lesson && (
-                  <div>
-                    <p className="text-muted-foreground text-xs uppercase">
-                      Lezione
-                    </p>
-                    <p className="font-medium">{video.lesson}</p>
-                  </div>
-                )}
-              </div>
+        <div className="flex h-full">
+          {/* Main content area - scrollable */}
+          <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+            {/* Video Player */}
+            <div className="relative aspect-video w-full shrink-0 bg-black">
+              <video
+                className="size-full"
+                controls
+                poster={video.thumbnailUrl}
+                ref={videoRef}
+                src={video.videoUrl}
+              >
+                <track kind="captions" />
+                Il tuo browser non supporta la riproduzione video.
+              </video>
             </div>
+
+            {/* Learning Content Tabs */}
+            <VideoLearningContent
+              learningContent={learningContent}
+              loading={learningContentLoading}
+              videoTitle={video.title}
+            />
           </div>
+
+          {/* Transcript Panel */}
+          <VideoTranscript
+            currentTime={currentTime}
+            isOpen={transcriptOpen}
+            onSeek={handleSeek}
+            onToggle={() => setTranscriptOpen(false)}
+            transcript={transcript}
+          />
         </div>
       </ChatArtifactBody>
     </ChatArtifact>
   );
 }
 
+// ============================================================================
+// VIDEO LEARNING CONTENT
+// ============================================================================
+
+type VideoLearningContentProps = {
+  learningContent: LearningContentData | null;
+  loading: boolean;
+  videoTitle: string;
+};
+
+/**
+ * VideoLearningContent
+ * Displays quiz and flashcard tabs below the video player
+ */
+function VideoLearningContent({
+  learningContent,
+  loading,
+  videoTitle,
+}: VideoLearningContentProps) {
+  // Convert learning content to activity format for the components
+  const quizActivity = useMemo(() => {
+    if (!learningContent?.quiz?.length) {
+      return null;
+    }
+    return toUIQuizActivity({
+      type: "quiz",
+      title: `Quiz: ${videoTitle}`,
+      description: "Verifica la tua comprensione del video",
+      payload: learningContent.quiz,
+    });
+  }, [learningContent?.quiz, videoTitle]);
+
+  const flashcardActivity = useMemo(() => {
+    if (!learningContent?.flashcards?.length) {
+      return null;
+    }
+    // Ensure hint is always a string (required by ModelFlashcard schema)
+    const flashcardsWithHints = learningContent.flashcards.map((fc) => ({
+      ...fc,
+      hint: fc.hint ?? "",
+    }));
+    return toUIFlashcardActivity({
+      type: "flashcard",
+      title: `Flashcards: ${videoTitle}`,
+      description: "Ripassa i concetti chiave del video",
+      payload: flashcardsWithHints,
+    });
+  }, [learningContent?.flashcards, videoTitle]);
+
+  // Create stores for activity tracking (stable references)
+  const quizStore = useMemo(
+    () => createAttemptStore(`video-quiz-${videoTitle}`, "quiz"),
+    [videoTitle]
+  );
+
+  const flashcardStore = useMemo(
+    () => createAttemptStore(`video-flashcard-${videoTitle}`, "flashcard"),
+    [videoTitle]
+  );
+
+  const hasQuiz = !!quizActivity;
+  const hasFlashcards = !!flashcardActivity;
+  const hasContent = hasQuiz || hasFlashcards;
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-48 items-center justify-center border-border border-t p-8">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="size-5 animate-spin" />
+          <span className="text-sm">Caricamento attività...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // No content state
+  if (!hasContent) {
+    return (
+      <div className="flex min-h-48 items-center justify-center border-border border-t p-8">
+        <div className="text-center text-muted-foreground">
+          <BookOpen className="mx-auto mb-2 size-8 opacity-50" />
+          <p className="text-sm">
+            Nessuna attività disponibile per questo video
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Determine default tab
+  const defaultTab = hasQuiz ? "quiz" : "flashcards";
+
+  return (
+    <div className="shrink-0 border-border border-t">
+      <Tabs defaultValue={defaultTab}>
+        <div className="shrink-0 border-border border-b bg-muted/30 px-4">
+          <TabsList className="h-12 w-full justify-start gap-2 bg-transparent p-0">
+            {hasQuiz && (
+              <TabsTrigger
+                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                value="quiz"
+              >
+                <HelpCircle className="size-4" />
+                Quiz ({learningContent?.quiz.length})
+              </TabsTrigger>
+            )}
+            {hasFlashcards && (
+              <TabsTrigger
+                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                value="flashcards"
+              >
+                <BookOpen className="size-4" />
+                Flashcards ({learningContent?.flashcards.length})
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
+
+        <div>
+          {hasQuiz && quizActivity && (
+            <TabsContent className="mt-0" value="quiz">
+              <Player store={quizStore}>
+                <QuizActivity activity={quizActivity} requireConfirm />
+              </Player>
+            </TabsContent>
+          )}
+          {hasFlashcards && flashcardActivity && (
+            <TabsContent className="mt-0 p-4" value="flashcards">
+              <Player store={flashcardStore}>
+                <FlashcardActivity activity={flashcardActivity} showHints />
+              </Player>
+            </TabsContent>
+          )}
+        </div>
+      </Tabs>
+    </div>
+  );
+}

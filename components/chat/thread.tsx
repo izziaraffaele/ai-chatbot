@@ -11,6 +11,7 @@ import { ChatComposer } from "./composer";
 
 /**
  * Chat interface container with full-height layout.
+ * H-FARM styled with warm cream background and generous spacing.
  *
  * @example
  * <ChatThread>
@@ -31,6 +32,7 @@ export const ChatThread = ({
   return (
     <div
       className={cn(
+        // H-FARM chat thread - clean, professional layout
         "group/thread relative flex h-dvh min-w-0 flex-col overflow-hidden bg-background",
         className
       )}
@@ -43,6 +45,7 @@ export const ChatThread = ({
 
 /**
  * Chat header for navigation and controls.
+ * H-FARM styled with subtle border and warm background.
  *
  * @example
  * <ChatThreadHeader>
@@ -60,7 +63,8 @@ export const ChatThreadHeader = ({
   return (
     <header
       className={cn(
-        "flex shrink-0 items-center gap-2 bg-background px-2 py-1.5 md:px-2",
+        // H-FARM header - clean with subtle bottom border
+        "flex shrink-0 items-center gap-2 border-b border-border/50 bg-background px-3 py-2 md:px-4",
         className
       )}
       data-slot="chat-thread-header"
@@ -71,6 +75,7 @@ export const ChatThreadHeader = ({
 
 /**
  * Main message content area with auto-scroll. Includes ConversationScrollButton.
+ * H-FARM styled with generous padding and clean spacing.
  *
  * @example
  * <ChatThreadContent>
@@ -94,7 +99,8 @@ export const ChatThreadContent = ({
   return (
     <Conversation className={cn("min-h-0 flex-1", className)} {...others}>
       <ConversationContent
-        className="mx-auto flex max-w-4xl flex-col gap-4 px-2 py-4 md:gap-6 md:px-4"
+        // H-FARM content area - generous padding, professional spacing
+        className="mx-auto flex max-w-4xl flex-col gap-5 px-4 py-6 md:gap-6 md:px-6"
         data-slot="chat-thread-content"
       >
         {children}
@@ -106,6 +112,7 @@ export const ChatThreadContent = ({
 
 /**
  * Bottom input container with spacing and z-index layering.
+ * H-FARM styled composer area.
  *
  * @example
  * <ChatThreadComposer>
@@ -123,7 +130,8 @@ export const ChatThreadComposer = ({
   return (
     <div
       className={cn(
-        "relative z-1 mx-auto flex w-full max-w-4xl shrink-0 gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4",
+        // H-FARM composer area - clean bottom section
+        "relative z-10 mx-auto flex w-full max-w-4xl shrink-0 gap-2 bg-background px-4 pb-4 md:px-6 md:pb-6",
         className
       )}
       data-slot="chat-thread-composer"

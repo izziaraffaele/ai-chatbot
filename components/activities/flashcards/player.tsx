@@ -116,6 +116,8 @@ export type UseFlashcardPlayerReturn = {
   currentIndex: number;
   /** Whether the current card is flipped */
   flipped: boolean;
+  /** Whether the user has seen the answer for the current card (flipped at least once) */
+  hasSeenAnswer: boolean;
   /** Progress information */
   progress: {
     current: number;
@@ -264,6 +266,7 @@ export function useFlashcardPlayer(
   // UI state (not persisted in store)
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+  const [hasSeenAnswer, setHasSeenAnswer] = useState(false);
   const [studiedCards, setStudiedCards] = useState<any[]>([]);
   const [screen, setScreen] = useState<"welcome" | "study" | "end">(
     defaultScreen
@@ -328,6 +331,18 @@ export function useFlashcardPlayer(
   // Event handlers
   const start = useCallback(async () => {
     try {
+      // Check if already in progress - resume instead of starting new
+      const currentAttempt = state.currentAttempt;
+      if (currentAttempt?.status === "in_progress") {
+        setScreen("study");
+        return;
+      }
+
+      // If attempt exists but completed/abandoned, reset first
+      if (currentAttempt) {
+        store.reset();
+      }
+
       await store.start({
         cardIds: cards.map((c) => c.id),
         shuffle,
@@ -343,14 +358,21 @@ export function useFlashcardPlayer(
     } catch (error) {
       console.error("Failed to start flashcard session:", error);
     }
-  }, [store, cards, shuffle]);
+  }, [store, cards, shuffle, state.currentAttempt]);
 
   const flip = useCallback(async () => {
     if (!currentCard) {
       return;
     }
 
-    setFlipped(!flipped);
+    const newFlipped = !flipped;
+    setFlipped(newFlipped);
+    
+    // Mark as seen when showing the answer (back side)
+    if (newFlipped) {
+      setHasSeenAnswer(true);
+    }
+    
     await store.sendEvent(
       FlashcardEvent.cardFlipped({ cardId: currentCard.id })
     );
@@ -363,6 +385,7 @@ export function useFlashcardPlayer(
 
     setCurrentIndex((prev) => prev - 1);
     setFlipped(false);
+    setHasSeenAnswer(false);
 
     if (currentCard) {
       await store.sendEvent(
@@ -390,6 +413,7 @@ export function useFlashcardPlayer(
 
     setCurrentIndex((prev) => prev + 1);
     setFlipped(false);
+    setHasSeenAnswer(false);
 
     if (currentCard) {
       await store.sendEvent(
@@ -445,6 +469,7 @@ export function useFlashcardPlayer(
       }
       setCurrentIndex(0);
       setFlipped(false);
+      setHasSeenAnswer(false);
       setStudiedCards([]);
       setScreen(defaultScreen);
     } catch (error) {
@@ -461,6 +486,7 @@ export function useFlashcardPlayer(
       store.reset();
       setCurrentIndex(0);
       setFlipped(false);
+      setHasSeenAnswer(false);
       setStudiedCards([]);
       setScreen("study");
       await store.start({
@@ -479,6 +505,7 @@ export function useFlashcardPlayer(
     currentCard,
     currentIndex,
     flipped,
+    hasSeenAnswer,
     progress,
     stats,
     handlers: {

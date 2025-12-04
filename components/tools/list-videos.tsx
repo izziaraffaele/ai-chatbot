@@ -213,4 +213,3 @@ function PureListVideosTool({ part }: ChatToolProps) {
 export const ListVideosTool = memo(PureListVideosTool, (prev, next) => {
   return equal(prev.part, next.part);
 });
-

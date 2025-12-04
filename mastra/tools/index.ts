@@ -12,6 +12,7 @@ import { createDocumentTool } from "./create-document-tool";
 import { listVideosTool } from "./list-videos-tool";
 import { loadInvoiceTool } from "./load-invoice-tool";
 import { requestSuggestionsTool } from "./request-suggestions-tool";
+import { seekVideoTool } from "./seek-video-tool";
 import { updateDocumentTool } from "./update-document-tool";
 import { getWeatherTool } from "./weather-tool";
 
@@ -25,6 +26,7 @@ export type UpdateDocumentTool = typeof updateDocumentTool;
 export type RequestSuggestionsTool = typeof requestSuggestionsTool;
 export type LoadInvoiceTool = typeof loadInvoiceTool;
 export type ListVideosTool = typeof listVideosTool;
+export type SeekVideoTool = typeof seekVideoTool;
 
 // Invoice validation tool types
 export type {
@@ -41,7 +43,8 @@ export type MastraToolTypes =
   | UpdateDocumentTool
   | RequestSuggestionsTool
   | LoadInvoiceTool
-  | ListVideosTool;
+  | ListVideosTool
+  | SeekVideoTool;
 
 /**
  * Tools Map
@@ -54,6 +57,7 @@ export const mastraTools = {
   requestSuggestions: requestSuggestionsTool,
   loadInvoice: loadInvoiceTool,
   listVideos: listVideosTool,
+  seekVideo: seekVideoTool,
 };
 
 /**
@@ -79,6 +83,7 @@ export const TOOL_NAMES = {
   REQUEST_SUGGESTIONS: "requestSuggestions",
   LOAD_INVOICE: "loadInvoice",
   LIST_VIDEOS: "listVideos",
+  SEEK_VIDEO: "seekVideo",
   // Invoice validation tools
   VALIDATE_IBAN: "validateIban",
   VALIDATE_CIG: "validateCig",

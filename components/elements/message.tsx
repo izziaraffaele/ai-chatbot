@@ -36,7 +36,8 @@ export const Message = ({
   return (
     <Comp
       className={cn(
-        "group flex w-full max-w-[80%] flex-col gap-2",
+        // H-FARM message container - clean, professional
+        "group flex w-full max-w-[85%] flex-col gap-2",
         from === "user" ? "is-user ml-auto justify-end" : "is-assistant",
         className
       )}
@@ -54,8 +55,11 @@ export const MessageContent = ({
 }: MessageContentProps) => (
   <div
     className={cn(
-      "is-user:dark flex w-fit flex-col gap-2 overflow-hidden text-sm",
-      "group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
+      // H-FARM message content - refined bubbles
+      "flex w-fit flex-col gap-2 overflow-hidden text-sm",
+      // User message - subtle cream/secondary background
+      "group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:border group-[.is-user]:border-border/50 group-[.is-user]:bg-secondary/50 group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
+      // Assistant message - clean text
       "group-[.is-assistant]:text-foreground",
       className
     )}
@@ -72,7 +76,14 @@ export const MessageActions = ({
   children,
   ...props
 }: MessageActionsProps) => (
-  <div className={cn("flex items-center gap-1", className)} {...props}>
+  <div 
+    className={cn(
+      // H-FARM action buttons - subtle styling
+      "flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100",
+      className
+    )} 
+    {...props}
+  >
     {children}
   </div>
 );
@@ -88,10 +99,21 @@ export const MessageAction = ({
   label,
   variant = "ghost",
   size = "icon-sm",
+  className,
   ...props
 }: MessageActionProps) => {
   const button = (
-    <Button size={size} type="button" variant={variant} {...props}>
+    <Button 
+      className={cn(
+        // H-FARM action button - subtle, professional
+        "text-muted-foreground hover:text-foreground hover:bg-accent",
+        className
+      )}
+      size={size} 
+      type="button" 
+      variant={variant} 
+      {...props}
+    >
       {children}
       <span className="sr-only">{label || tooltip}</span>
     </Button>
@@ -349,7 +371,8 @@ export function MessageAttachment({
   return (
     <div
       className={cn(
-        "group relative size-24 overflow-hidden rounded-lg",
+        // H-FARM attachment - clean, rounded
+        "group relative size-24 overflow-hidden rounded-md border border-border",
         className
       )}
       {...props}
@@ -383,7 +406,7 @@ export function MessageAttachment({
         <>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex size-full shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <div className="flex size-full shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
                 <PaperclipIcon className="size-4" />
               </div>
             </TooltipTrigger>

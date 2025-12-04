@@ -42,6 +42,10 @@ import { useBranding } from "@/hooks/use-branding";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import { Skeleton } from "./ui/skeleton";
 
+/**
+ * H-FARM Styled App Sidebar
+ * Sophisticated Academic - clean, professional navigation
+ */
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
@@ -57,14 +61,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     });
 
     toast.promise(deletePromise, {
-      loading: t("common.loading", "Deleting all chats..."),
+      loading: t("common.loading", "Eliminazione chat in corso..."),
       success: () => {
         mutate(unstable_serialize(getChatHistoryPaginationKey));
         router.push("/");
         setShowDeleteAllDialog(false);
-        return t("sidebar.success.deleteAll", "All chats deleted successfully");
+        return t("sidebar.success.deleteAll", "Chat eliminate con successo");
       },
-      error: t("sidebar.error.deleteAll", "Failed to delete all chats"),
+      error: t("sidebar.error.deleteAll", "Errore durante l'eliminazione"),
     });
   };
 
@@ -76,13 +80,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 
   return (
     <>
-      <Sidebar className="group-data-[side=left]:border-r-0">
-        <SidebarHeader>
+      {/* H-FARM Sidebar - cream background, subtle border */}
+      <Sidebar className="group-data-[side=left]:border-r group-data-[side=left]:border-border">
+        <SidebarHeader className="border-b border-border/50 pb-4">
           <SidebarMenu>
             <div className="flex flex-row items-center justify-between">
               {renderRef ? (
                 <Link
-                  className="flex flex-row items-center gap-3"
+                  className="group flex flex-row items-center gap-3 transition-opacity hover:opacity-80"
                   href="/"
                   onClick={() => {
                     setOpenMobile(false);
@@ -97,12 +102,12 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                         src={branding.logo}
                         width={32}
                       />
-                      <span className="cursor-pointer font-semibold text-lg hover:opacity-80">
+                      <span className="font-semibold text-lg tracking-tight text-foreground">
                         {appTitle}
                       </span>
                     </>
                   ) : (
-                    <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
+                    <span className="font-semibold text-lg tracking-tight text-foreground">
                       {appTitle}
                     </span>
                   )}
@@ -110,12 +115,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               ) : (
                 <Skeleton className="h-8 flex-1 rounded-md" />
               )}
+              
+              {/* Action buttons - H-FARM subtle style */}
               <div className="flex flex-row gap-1">
                 {user && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        className="h-8 p-1 md:h-fit md:p-2"
+                        className="size-8 text-muted-foreground hover:text-foreground hover:bg-accent"
                         onClick={() => setShowDeleteAllDialog(true)}
                         type="button"
                         variant="ghost"
@@ -124,14 +131,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent align="end" className="hidden md:block">
-                      Delete All Chats
+                      Elimina tutte le chat
                     </TooltipContent>
                   </Tooltip>
                 )}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className="h-8 p-1 md:h-fit md:p-2"
+                      className="size-8 text-muted-foreground hover:text-foreground hover:bg-accent"
                       onClick={() => {
                         setOpenMobile(false);
                         router.push("/");
@@ -144,35 +151,47 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent align="end" className="hidden md:block">
-                    New Chat
+                    Nuova chat
                   </TooltipContent>
                 </Tooltip>
               </div>
             </div>
           </SidebarMenu>
         </SidebarHeader>
-        <SidebarContent>
+        
+        <SidebarContent className="px-2">
           <SidebarHistory user={user} />
         </SidebarContent>
-        <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
+        
+        <SidebarFooter className="border-t border-border/50 pt-2">
+          {user && <SidebarUserNav user={user} />}
+        </SidebarFooter>
       </Sidebar>
 
+      {/* Delete confirmation dialog - H-FARM styled */}
       <AlertDialog
         onOpenChange={setShowDeleteAllDialog}
         open={showDeleteAllDialog}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="border-border bg-card">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete all chats?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete all
-              your chats and remove them from our servers.
+            <AlertDialogTitle className="font-semibold tracking-tight">
+              Eliminare tutte le chat?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Questa azione non può essere annullata. Tutte le chat verranno
+              eliminate definitivamente dai nostri server.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteAll}>
-              Delete All
+            <AlertDialogCancel className="border-border">
+              Annulla
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDeleteAll}
+            >
+              Elimina tutto
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,6 +1,16 @@
 // Canvas module - Widget registry and context providers
 
 export {
+  clearAllVisibleContent,
+  clearVisibleContent,
+  getVisibleContent,
+  hasVisibleContent,
+  setVisibleContent,
+  subscribeToVisibleContent,
+  // Visible content store
+  type VisibleContent,
+} from "./visible-content-store";
+export {
   useWidgetActions,
   useWidgetContent,
   // Hooks
@@ -47,13 +57,3 @@ export {
   // Registry
   widgetRegistry,
 } from "./widget-registry";
-export {
-  clearAllVisibleContent,
-  clearVisibleContent,
-  getVisibleContent,
-  hasVisibleContent,
-  setVisibleContent,
-  subscribeToVisibleContent,
-  // Visible content store
-  type VisibleContent,
-} from "./visible-content-store";

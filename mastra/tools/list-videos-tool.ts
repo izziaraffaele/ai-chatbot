@@ -31,6 +31,31 @@ type TranscriptJson = {
 };
 
 /**
+ * Summary JSON structure from CDN
+ */
+type SummaryJson = {
+  title: string;
+  summary: string;
+};
+
+/**
+ * CDN base URLs
+ */
+const CDN_BASE_URL = "https://cdn.memoraiz.com";
+const CDN_VIDEO_URL = `${CDN_BASE_URL}/video/HFARM`;
+const CDN_JSON_URL = `${CDN_BASE_URL}/json/HFARM`;
+
+/**
+ * Regex patterns for folder name parsing (top-level for performance)
+ */
+const FOLDER_PREFIX_REGEX = /^EDITED - Hybrid Course-\d{8} \d{4}-\d+ /;
+const FOLDER_SUFFIX_REGEX = /_\d+$/;
+const WEEK_REGEX = /W(\d+)/;
+const LESSON_REGEX = /L(\d+)/;
+const WEEK_CLEAN_REGEX = /W\d+\s*/g;
+const LESSON_CLEAN_REGEX = /L\d+\s*/g;
+
+/**
  * Parse folder name to extract week, lesson, and title
  * Format: "EDITED - Hybrid Course-20251129 1421-1 W1 L1 What is Research"
  */
@@ -41,18 +66,21 @@ function parseFolderName(folderName: string): {
 } {
   // Remove "EDITED - Hybrid Course-" prefix and date/time
   const cleanName = folderName
-    .replace(/^EDITED - Hybrid Course-\d{8} \d{4}-\d+ /, "")
-    .replace(/_\d+$/, ""); // Remove trailing _1, _2 etc.
+    .replace(FOLDER_PREFIX_REGEX, "")
+    .replace(FOLDER_SUFFIX_REGEX, ""); // Remove trailing _1, _2 etc.
 
   // Extract W{n} L{n} pattern
-  const weekMatch = cleanName.match(/W(\d+)/);
-  const lessonMatch = cleanName.match(/L(\d+)/);
+  const weekMatch = cleanName.match(WEEK_REGEX);
+  const lessonMatch = cleanName.match(LESSON_REGEX);
 
   const week = weekMatch ? `W${weekMatch[1]}` : undefined;
   const lesson = lessonMatch ? `L${lessonMatch[1]}` : undefined;
 
   // Extract title (everything after W{n} L{n} pattern)
-  let title = cleanName.replace(/W\d+\s*/g, "").replace(/L\d+\s*/g, "").trim();
+  let title = cleanName
+    .replace(WEEK_CLEAN_REGEX, "")
+    .replace(LESSON_CLEAN_REGEX, "")
+    .trim();
 
   // If no title extracted, use a clean version of the folder name
   if (!title) {
@@ -82,7 +110,7 @@ function getDurationFromTranscript(transcriptPath: string): number {
 }
 
 /**
- * Get description from transcript (first few sentences)
+ * Get description from transcript (first few sentences) - fallback only
  */
 function getDescriptionFromTranscript(transcriptPath: string): string {
   try {
@@ -103,9 +131,37 @@ function getDescriptionFromTranscript(transcriptPath: string): string {
 }
 
 /**
- * Scan knowledge base directory and collect video metadata
+ * Fetch summary JSON from CDN
+ * Returns title and summary, or null if fetch fails
  */
-function scanKnowledgeBase(basePath: string): VideoMetadata[] {
+async function fetchSummaryFromCDN(
+  folderName: string
+): Promise<SummaryJson | null> {
+  try {
+    // Build the summary JSON filename: folder name + _summary.json with spaces as +
+    const summaryFilename = `${folderName}_summary.json`.replaceAll(" ", "+");
+    const url = `${CDN_JSON_URL}/${summaryFilename}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      return null;
+    }
+
+    const json = (await response.json()) as SummaryJson;
+    if (json.title && json.summary) {
+      return json;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Scan knowledge base directory and collect video metadata
+ * Fetches title and summary from CDN, falls back to local parsing
+ */
+async function scanKnowledgeBase(basePath: string): Promise<VideoMetadata[]> {
   const videos: VideoMetadata[] = [];
 
   if (!existsSync(basePath)) {
@@ -114,9 +170,10 @@ function scanKnowledgeBase(basePath: string): VideoMetadata[] {
 
   const folders = readdirSync(basePath, { withFileTypes: true });
 
-  for (const folder of folders) {
+  // Process folders and fetch CDN data in parallel
+  const videoPromises = folders.map(async (folder) => {
     if (!folder.isDirectory()) {
-      continue;
+      return null;
     }
 
     const folderPath = join(basePath, folder.name);
@@ -125,25 +182,34 @@ function scanKnowledgeBase(basePath: string): VideoMetadata[] {
     // Find the MP4 file
     const mp4File = folderContents.find((f) => f.endsWith(".mp4"));
     if (!mp4File) {
-      continue;
+      return null;
     }
 
-    // Find the JSON transcript
+    // Find the JSON transcript (for duration fallback)
     const jsonFile = folderContents.find(
-      (f) => f.endsWith(".json") && !f.includes("_music")
+      (f) =>
+        f.endsWith(".json") && !f.includes("_music") && !f.includes("_summary")
     );
 
-    const { week, lesson, title } = parseFolderName(folder.name);
+    // Parse folder name for week/lesson and fallback title
+    const { week, lesson, title: fallbackTitle } = parseFolderName(folder.name);
 
-    // Get transcript path for duration and description
+    // Get transcript path for duration and fallback description
     const transcriptPath = jsonFile ? join(folderPath, jsonFile) : null;
 
     const duration = transcriptPath
       ? getDurationFromTranscript(transcriptPath)
       : 0;
-    const description = transcriptPath
+    const fallbackDescription = transcriptPath
       ? getDescriptionFromTranscript(transcriptPath)
       : "Video content from H-FARM course";
+
+    // Fetch title and summary from CDN
+    const summaryData = await fetchSummaryFromCDN(folder.name);
+
+    // Use CDN data if available, otherwise fall back to local parsing
+    const title = summaryData?.title ?? fallbackTitle;
+    const description = summaryData?.summary ?? fallbackDescription;
 
     // Create a URL-safe ID from folder name
     const id = folder.name
@@ -153,10 +219,9 @@ function scanKnowledgeBase(basePath: string): VideoMetadata[] {
       .replace(/^-|-$/g, "");
 
     // Video URL from CDN - use mp4 filename with spaces encoded as + signs
-    const CDN_BASE_URL = "https://cdn.memoraiz.com/video/HFARM";
-    const videoUrl = `${CDN_BASE_URL}/${mp4File.replaceAll(" ", "+")}`;
+    const videoUrl = `${CDN_VIDEO_URL}/${mp4File.replaceAll(" ", "+")}`;
 
-    videos.push({
+    return {
       id,
       title,
       description,
@@ -165,7 +230,17 @@ function scanKnowledgeBase(basePath: string): VideoMetadata[] {
       folder: folder.name,
       week,
       lesson,
-    });
+    } as VideoMetadata;
+  });
+
+  // Wait for all fetches to complete
+  const results = await Promise.all(videoPromises);
+
+  // Filter out null results
+  for (const video of results) {
+    if (video) {
+      videos.push(video);
+    }
   }
 
   // Sort by week and lesson
@@ -232,8 +307,8 @@ export const listVideosTool = createTool({
         "mastra/knowledgebase/hfarm"
       );
 
-      // Scan for videos
-      let videos = scanKnowledgeBase(knowledgeBasePath);
+      // Scan for videos (fetches CDN data in parallel)
+      let videos = await scanKnowledgeBase(knowledgeBasePath);
 
       // Apply search filter if provided
       const search = context.search?.toLowerCase();

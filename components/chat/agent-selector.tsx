@@ -79,7 +79,9 @@ export function ChatAgentSelector({
 
   // Use consistent values during SSR to prevent hydration mismatch
   const showAvatar = mounted && selectedAgent?.avatar;
-  const displayName = mounted ? displayAgent : (placeholder || t("agent.selector.placeholder", "Assistant"));
+  const displayName = mounted
+    ? displayAgent
+    : placeholder || t("agent.selector.placeholder", "Assistant");
 
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>

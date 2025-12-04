@@ -26,6 +26,10 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 
+/**
+ * H-FARM Styled Chat History Item
+ * Sophisticated Academic - clean, professional sidebar items
+ */
 const PureChatItem = ({
   chat,
   isActive,
@@ -44,31 +48,43 @@ const PureChatItem = ({
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={isActive}>
-        <Link href={`/chat/${chat.id}`} onClick={() => setOpenMobile(false)}>
-          <span>{chat.title}</span>
+      <SidebarMenuButton 
+        asChild 
+        isActive={isActive}
+        className="transition-all duration-200"
+      >
+        <Link 
+          href={`/chat/${chat.id}`} 
+          onClick={() => setOpenMobile(false)}
+          className="text-sm font-medium"
+        >
+          <span className="truncate">{chat.title}</span>
         </Link>
       </SidebarMenuButton>
 
       <DropdownMenu modal={true}>
         <DropdownMenuTrigger asChild>
           <SidebarMenuAction
-            className="mr-0.5 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            className="mr-0.5 text-muted-foreground hover:text-foreground data-[state=open]:bg-accent data-[state=open]:text-foreground"
             showOnHover={!isActive}
           >
             <MoreHorizontalIcon />
-            <span className="sr-only">More</span>
+            <span className="sr-only">Opzioni</span>
           </SidebarMenuAction>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end" side="bottom">
+        <DropdownMenuContent 
+          align="end" 
+          side="bottom"
+          className="border-border bg-card"
+        >
           <DropdownMenuSub>
             <DropdownMenuSubTrigger className="cursor-pointer">
               <ShareIcon />
-              <span>Share</span>
+              <span>Condividi</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent>
+              <DropdownMenuSubContent className="border-border bg-card">
                 <DropdownMenuItem
                   className="cursor-pointer flex-row justify-between"
                   onClick={() => {
@@ -77,7 +93,7 @@ const PureChatItem = ({
                 >
                   <div className="flex flex-row items-center gap-2">
                     <LockIcon size={12} />
-                    <span>Private</span>
+                    <span>Privato</span>
                   </div>
                   {visibilityType === "private" ? (
                     <CheckCircleFillIcon />
@@ -91,7 +107,7 @@ const PureChatItem = ({
                 >
                   <div className="flex flex-row items-center gap-2">
                     <GlobeIcon />
-                    <span>Public</span>
+                    <span>Pubblico</span>
                   </div>
                   {visibilityType === "public" ? <CheckCircleFillIcon /> : null}
                 </DropdownMenuItem>
@@ -100,11 +116,11 @@ const PureChatItem = ({
           </DropdownMenuSub>
 
           <DropdownMenuItem
-            className="cursor-pointer text-destructive focus:bg-destructive/15 focus:text-destructive dark:text-red-500"
+            className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
             onSelect={() => onDelete(chat.id)}
           >
             <TrashIcon />
-            <span>Delete</span>
+            <span>Elimina</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

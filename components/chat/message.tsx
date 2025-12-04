@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 export type ChatMessageMode = "view" | "edit";
 
 // ============================================================================
-// Message Container
+// Message Container - H-FARM styled
 // ============================================================================
 
 export type ChatMessageProps = React.ComponentProps<typeof Message> & {
@@ -43,7 +43,8 @@ export const ChatMessage = ({
   <Message
     asChild
     className={cn(
-      "flex-row gap-2 group/canvas:w-full md:gap-3",
+      // H-FARM message layout - clean spacing
+      "flex-row gap-3 group/canvas:w-full md:gap-4",
       {
         "flex-row-reverse": from === "user",
       },
@@ -56,14 +57,18 @@ export const ChatMessage = ({
     from={from}
     {...others}
   >
-    <motion.div animate={{ opacity: 1 }} initial={{ opacity: 0 }}>
+    <motion.div 
+      animate={{ opacity: 1 }} 
+      initial={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
       {children}
     </motion.div>
   </Message>
 );
 
 // ============================================================================
-// Message Parts
+// Message Parts - H-FARM styled
 // ============================================================================
 
 export const ChatMessageAvatar = ({
@@ -72,7 +77,11 @@ export const ChatMessageAvatar = ({
 }: React.ComponentProps<"div">) => (
   <div
     className={cn(
-      "flex size-8 shrink-0 items-center justify-center rounded-full border-current bg-border/20 ring-1 ring-border dark:bg-background",
+      // H-FARM avatar - navy ring, cream background
+      "flex size-8 shrink-0 items-center justify-center rounded-full",
+      "bg-card border border-border text-foreground",
+      "ring-1 ring-border/50",
+      "transition-all duration-200",
       className
     )}
     data-slot="chat-message-avatar"
@@ -85,14 +94,18 @@ export const ChatMessageBody = ({
   ...others
 }: React.ComponentProps<"div">) => (
   <div
-    className={cn("flex flex-col gap-2", className)}
+    className={cn(
+      // H-FARM message body - clean spacing
+      "flex flex-col gap-2",
+      className
+    )}
     data-slot="chat-message-content"
     {...others}
   />
 );
 
 // ============================================================================
-// Message Actions
+// Message Actions - H-FARM styled
 // ============================================================================
 
 const isTextPart = (
@@ -158,7 +171,7 @@ export const ChatMessageToolbar = ({
 };
 
 // ============================================================================
-// Individual Actions
+// Individual Actions - H-FARM styled
 // ============================================================================
 
 type ChatMessageActionEditProps = {

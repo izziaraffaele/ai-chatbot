@@ -45,6 +45,7 @@ export const chatAgent = new Agent({
     updateDocument: mastraTools.updateDocument,
     requestSuggestions: mastraTools.requestSuggestions,
     listVideos: mastraTools.listVideos,
+    seekVideo: mastraTools.seekVideo,
   },
   memory: new Memory({
     storage: new LibSQLStore({

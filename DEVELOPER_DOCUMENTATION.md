@@ -248,6 +248,7 @@ createDocument({
 | `updateDocument` | Modify an existing document | `{ id: string, description: string }` |
 | `requestSuggestions` | Get suggested follow-up actions | `{}` |
 | `listVideos` | Browse course videos from the knowledge base | `{ search?: string }` |
+| `seekVideo` | Seek video player to a specific timestamp | `{ time: number, reason?: string, videoFolder?: string, videoTitle?: string }` |
 
 ---
 
@@ -329,6 +330,8 @@ app/
 lib/
 ├── ai/
 │   └── agent-config.ts            # UI agent configuration
+├── video/
+│   └── transcript.ts              # Video transcript utilities
 └── ...
 
 components/
@@ -444,7 +447,13 @@ mastra/knowledgebase/hfarm/
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | `ListVideosTool` | `components/tools/list-videos.tsx` | Tool result display card |
-| `VideoLibraryArtifact` | `components/artifacts/video-library.tsx` | Full video library panel |
+| `VideoLibraryArtifact` | `components/artifacts/video-library.tsx` | Full video library panel with grid and player views |
+| `VideoPlayerView` | `components/artifacts/video-library.tsx` | Video player with transcript and learning content |
+| `VideoLearningContent` | `components/artifacts/video-library.tsx` | Quiz/Flashcards tabs below video player |
+| `VideoTranscript` | `components/artifacts/video-transcript.tsx` | Auto-scrolling transcript panel |
+| `TranscriptToggleButton` | `components/artifacts/video-transcript.tsx` | Button to toggle transcript visibility |
+
+**Video Player View**: The player view displays only a header bar (with back button, title, transcript toggle, and duration) and the video player. Video metadata (badge, title, description, duration details) is shown only in the header, keeping the player view clean and focused.
 
 ### Video Serving
 
@@ -453,6 +462,175 @@ Videos are served from the Memoraiz CDN at `https://cdn.memoraiz.com/video/HFARM
 https://cdn.memoraiz.com/video/HFARM/{filename}.mp4
 ```
 Where `{filename}` is the mp4 filename with spaces encoded as `+` signs.
+
+### Video Transcripts
+
+Transcripts are fetched from the CDN in JSON format:
+```
+https://cdn.memoraiz.com/json/HFARM/{folder_name}.json
+```
+Where `{folder_name}` is the folder name with spaces encoded as `+` signs.
+
+**Transcript JSON structure:**
+```typescript
+{
+  detected_language?: string;
+  segments: Array<{
+    start: number;  // Start time in seconds
+    end: number;    // End time in seconds
+    text: string;   // Transcript text
+  }>;
+}
+```
+
+### Video Transcript Features
+
+1. **Auto-scrolling Transcript Panel**: Collapsible panel that displays the video transcript with timestamps
+2. **Synchronized Highlighting**: Current segment is highlighted based on video playback time
+3. **Click-to-seek**: Click any segment to jump to that timestamp in the video
+4. **Agent Context Integration**: When a video is playing, the transcript is automatically provided to the agent via `viewedContent`
+
+### Video Learning Content (Quiz & Flashcards)
+
+When a video is opened, the player displays interactive learning activities below the video:
+
+1. **Quiz Tab**: Multiple-choice questions to test comprehension
+2. **Flashcards Tab**: Review cards for key concepts from the video
+
+**Learning Content CDN URL:**
+```
+https://cdn.memoraiz.com/json/HFARM/{folder_name}_learning_content.json
+```
+
+**JSON Structure:**
+```typescript
+{
+  quiz: Array<{
+    id: string;
+    question: string;
+    choices: string[];
+    correctAnswerIndex: number;
+    explanation?: string;
+  }>;
+  flashcards: Array<{
+    id: string;
+    front: string;
+    back: string;
+    hint?: string;
+  }>;
+}
+```
+
+**Components:**
+- `VideoLearningContent`: Displays tabbed quiz/flashcard interface below video player
+- Uses existing `QuizActivity` and `FlashcardActivity` components for consistent UX
+- Shows loading spinner while fetching content
+- Gracefully handles missing content (shows "no activities available")
+
+### Transcript & Learning Content Utilities (`lib/video/transcript.ts`)
+
+```typescript
+// Build CDN URL for transcript
+buildTranscriptUrl(folderName: string): string
+
+// Fetch transcript from CDN
+fetchTranscript(folderName: string): Promise<TranscriptData | null>
+
+// Build CDN URL for learning content
+buildLearningContentUrl(folderName: string): string
+
+// Fetch learning content (quiz & flashcards) from CDN
+fetchLearningContent(folderName: string): Promise<LearningContentData | null>
+
+// Format timestamp (seconds) to MM:SS or HH:MM:SS
+formatTimestamp(seconds: number): string
+
+// Find current segment index based on video time
+findCurrentSegmentIndex(segments: TranscriptSegment[], currentTime: number): number
+
+// Format transcript for agent context
+formatTranscriptForAgent(transcript: TranscriptData, videoTitle: string): string
+```
+
+### Agent Video Context
+
+When a student is watching a video, the agent automatically receives the video transcript in its context. This allows the agent to:
+- Answer questions about "this video" or "what was said"
+- Reference specific timestamps (e.g., "At 2:30, the speaker discusses...")
+- Create summaries of the video content
+- Help students find specific topics within the video
+- **Seek to specific timestamps** when students ask where something is discussed
+
+The system prompt has special handling for video transcripts that provides:
+- Full transcript with timestamps
+- Instructions on how to use the transcript information
+- Guidance on creating study materials from video content
+- Instructions for using the `seekVideo` tool
+
+### Video Seek Tool (`seekVideo`)
+
+The `seekVideo` tool allows the agent to control the video player, jumping to specific timestamps when students ask about where something is discussed.
+
+**Architecture:**
+```
+1. Student: "When does the speaker talk about research?"
+         │
+         ▼
+2. Agent analyzes transcript in its context
+         │
+         ▼
+3. Agent finds "[2:30] Let's discuss research..."
+         │
+         ▼
+4. Agent calls seekVideo({ time: 150, reason: "Research discussion" })
+         │
+         ▼
+5. Tool returns success → UI component triggers seek
+         │
+         ▼
+6. Video player seeks to 2:30 and starts playing
+```
+
+**Files involved:**
+| File | Purpose |
+|------|---------|
+| `lib/video/seek-store.ts` | Pub/sub store for seek events |
+| `mastra/tools/seek-video-tool.ts` | Server-side Mastra tool |
+| `components/tools/seek-video.tsx` | Tool UI component (triggers seek) |
+| `components/artifacts/video-library.tsx` | Video player (subscribes to seek events) |
+
+**Usage examples:**
+```typescript
+// Agent calls this tool (with video context for reopening if canvas is closed)
+seekVideo({ 
+  time: 150, 
+  reason: "Research methodology discussion",
+  videoFolder: "EDITED - Hybrid Course-20251129 1631-1 W1 L6 Research",
+  videoTitle: "Research Methodology" 
+})
+
+// Output shown to user
+{ 
+  success: true, 
+  time: 150, 
+  formattedTime: "2:30", 
+  reason: "Research methodology discussion",
+  videoFolder: "...",
+  videoTitle: "..."
+}
+```
+
+**Canvas closed behavior:**
+When the user clicks the seek widget and the canvas is closed, the tool UI component:
+1. Opens the video library tab with a single video in the content array
+2. VideoLibraryArtifact detects single video and auto-switches to player mode (no grid view)
+3. Waits 500ms for the video player to mount
+4. Triggers the seek to the specific timestamp
+
+**Trigger phrases (Italian/English):**
+- "Quando si parla di X?" / "When is X discussed?"
+- "Portami al punto dove..." / "Take me to the part where..."
+- "Dove viene spiegato X?" / "Where is X explained?"
 
 ---
 
@@ -508,6 +686,178 @@ Console logs prefixed with relevant tags:
 ### Rate Limiting
 
 Rate limiting may be disabled for testing. Check `lib/ai/entitlements.ts` for current settings.
+
+---
+
+## Content Generation Scripts
+
+### Overview
+
+Python scripts in `scripts/` automate content generation for the knowledge base using OpenAI's API.
+
+### Prerequisites
+
+```bash
+# Install dependencies
+pip install -r scripts/requirements.txt
+
+# Set API key
+export OPENAI_API_KEY="your-key"
+```
+
+### Available Scripts
+
+| Script | Description | Output |
+|--------|-------------|--------|
+| `generate_summaries.py` | Generate titles and summaries for videos | `*_summary.json` |
+| `generate_learning_content.py` | Generate quizzes and flashcards | `*_learning_content.json` |
+
+### `generate_learning_content.py`
+
+Processes transcript files and generates learning materials:
+
+```bash
+python scripts/generate_learning_content.py
+```
+
+**Features:**
+- Scans `mastra/knowledgebase/hfarm/` subfolders for `.txt` files
+- Skips `*_music.txt` files and existing `*_learning_content.json` files
+- Uses GPT 5.1 to generate 10 quiz questions + 10 flashcards per transcript
+- Generates unique UUIDs for all items
+
+**Output Format:**
+```json
+{
+  "quiz": [
+    {
+      "id": "uuid",
+      "question": "Question text?",
+      "choices": ["A", "B", "C", "D"],
+      "correctAnswerIndex": 0,
+      "explanation": "Why this is correct"
+    }
+  ],
+  "flashcards": [
+    {
+      "id": "uuid",
+      "front": "Question/prompt",
+      "back": "Answer/explanation",
+      "hint": "Helpful hint"
+    }
+  ]
+}
+```
+
+**Schema Compatibility:**
+- Quiz format matches `components/activities/quiz/schema.tsx` (`ModelQuizQuestion`)
+- Flashcard format matches `components/activities/flashcards/schema.tsx` (`ModelFlashcard`)
+
+### Flashcard CSS Utilities
+
+The flashcard component uses a true 3D flip animation with CSS transforms defined in `app/globals.css`:
+
+| Utility | CSS Property | Purpose |
+|---------|--------------|---------|
+| `perspective-1000` | `perspective: 1000px;` | Create 3D depth for viewing |
+| `transform-3d` | `transform-style: preserve-3d;` | Enable 3D space on element |
+| `preserve-3d` | `transform-style: preserve-3d;` | Preserve 3D transforms |
+| `backface-hidden` | `backface-visibility: hidden;` | Hide card back during flip |
+| `rotate-y-0` | `transform: rotateY(0deg);` | Card front facing position |
+| `rotate-y-180` | `transform: rotateY(180deg);` | Flip card to show back |
+| `duration-600` | `transition-duration: 600ms;` | Custom animation duration |
+
+**3D Flip Animation Structure:**
+
+The flashcard uses a two-layer structure for smooth 3D flipping:
+1. **Perspective wrapper** (`data-slot="flashcard-perspective"`): Provides the 3D viewing depth
+2. **Inner container** (`data-slot="flashcard"`): Rotates on Y-axis to flip
+3. **Card sides** (`data-slot="flashcard-side"`): Front/back both have `backface-visibility: hidden`
+
+**Key Features:**
+- `cubic-bezier(0.4, 0.0, 0.2, 1)` timing for natural motion
+- Front card at `rotateY(0deg)`, back at `rotateY(180deg)`
+- Container rotates 180deg on flip, revealing back while hiding front
+- Hint displayed via tooltip on question mark button (top-right of card)
+- "Next" button disabled until user has flipped the card at least once
+
+---
+
+## H-FARM Visual Identity
+
+### Design System Overview
+
+The application implements H-FARM's "Sophisticated Academic" design style - combining warmth and approachability with modern professionalism.
+
+### Color Palette
+
+| Token | Light Mode | Dark Mode | Usage |
+|-------|-----------|-----------|-------|
+| `--background` | `#F5F3EE` (warm cream) | Navy deep | Main background |
+| `--foreground` | `#1a3a52` (navy blue) | Warm cream | Text color |
+| `--primary` | Navy blue | Cream | Primary actions, buttons |
+| `--border` | `#D5D1C8` | Navy tint | Delicate borders |
+| `--accent` | Soft cream | Navy highlight | Hover states |
+| `--success` | Professional green | - | Correct/success states |
+| `--destructive` | Refined red | - | Error/wrong states |
+
+### Typography
+
+- Clean sans-serif fonts (Geist)
+- Semibold headings with tight tracking
+- Uppercase labels with `0.05-0.08em` letter-spacing for section headers
+
+### Design Patterns
+
+**Cards & Containers:**
+- Subtle `border-border` borders (no heavy shadows)
+- `rounded-md` (6px) corners
+- Cream backgrounds with card components
+
+**Interactive Elements:**
+- Hover: `scale-[1.02]` + border color shift to `primary/30`
+- Focus: Navy ring (`ring-primary/20`)
+- Transitions: `200-300ms ease-out`
+
+**Quiz Choices:**
+- Default: Card with border, hover lifts slightly
+- Selected: Navy border + background tint + ring
+- Correct: Green border + success background
+- Wrong: Red border + destructive background
+
+**Flashcards:**
+- Clean card flip animation (500ms)
+- Front/back labels in uppercase tracking
+- Hover shadow effect
+
+### CSS Utility Classes
+
+| Class | Usage |
+|-------|-------|
+| `hfarm-label` | Uppercase tracking labels |
+| `hfarm-section-header` | Section header styling |
+| `hfarm-card` | Card with subtle border |
+| `hfarm-card-interactive` | Hover-enabled card |
+| `hfarm-btn` | Custom button base |
+| `hfarm-input` | Input styling |
+| `hfarm-selected` | Selection indicator |
+
+### Key Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/globals.css` | Color palette, typography, utility classes |
+| `components/ui/button.tsx` | Navy primary, hover/focus states |
+| `components/ui/input.tsx` | Cream background, navy focus ring |
+| `components/ui/card.tsx` | Subtle border, no heavy shadows |
+| `components/ui/badge.tsx` | `hfarm-navy` and `hfarm-label` variants |
+| `components/ui/tabs.tsx` | Navy active indicator |
+| `components/chat/thread.tsx` | Generous padding, clean layout |
+| `components/chat/message.tsx` | Refined message bubbles |
+| `components/activities/quiz/*` | H-FARM styled quiz screens |
+| `components/activities/flashcards/*` | H-FARM styled flashcard player |
+| `components/app-sidebar.tsx` | Cream sidebar, subtle interactions |
+| `components/ui/sidebar.tsx` | Theme variable integration |
 
 ---
 

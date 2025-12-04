@@ -223,56 +223,129 @@ Use \`updateDocument\` when a student wants to:
 
     const hasViewedContent = viewedContent?.content;
 
-    let currentDocSection = `# CURRENTLY OPEN DOCUMENT
+    // Check if this is a video transcript (video-library with transcript content)
+    const isVideoTranscript =
+      kind === "video-library" &&
+      hasViewedContent &&
+      viewedContent.description?.startsWith("Video transcript:");
+
+    if (isVideoTranscript && viewedContent) {
+      // Special handling for video transcripts
+      const transcriptPreview =
+        viewedContent.content.length > 4000
+          ? `${viewedContent.content.slice(0, 4000)}...\n\n[Transcript truncated for context window]`
+          : viewedContent.content;
+
+      // Extract video folder from description (format: "Video transcript: FOLDER_NAME")
+      const videoFolder =
+        viewedContent.description?.replace("Video transcript: ", "") || "";
+      const videoTitle = viewedContent.title;
+
+      const currentVideoSection = `# CURRENTLY PLAYING VIDEO
+
+The student is watching a video in the side panel. You have access to the video's transcript with timestamps.
+
+- **Video Title**: ${videoTitle}
+- **Video Folder**: ${videoFolder}
+- **Source**: H-FARM Course Video Library
+
+## Video Transcript (with timestamps)
+
+${transcriptPreview}
+
+## How to Use This Information
+
+- When the student asks about "this video", "the current video", or "what was said", refer to the transcript above
+- Use timestamps to help students find specific parts (e.g., "At 2:30, the speaker discusses...")
+- You can summarize key points, answer questions about the content, or help create study notes
+- If the student asks for a summary, create a structured summary of the main topics covered
+- If the student asks about something not in the transcript, let them know it wasn't mentioned in this video
+
+## Seeking to Specific Moments (seekVideo Tool)
+
+When a student asks about **where** something is discussed in the video, use the \`seekVideo\` tool to jump the video player to that timestamp.
+
+**When to use seekVideo:**
+- "Quando si parla di X?" / "When is X discussed?"
+- "Portami al punto dove..." / "Take me to the part where..."
+- "Dove viene spiegato X?" / "Where is X explained?"
+- "Fammi vedere la parte su..." / "Show me the part about..."
+
+**How to use:**
+1. Find the relevant timestamp in the transcript above (format: \`[MM:SS]\`)
+2. Convert the timestamp to seconds (e.g., 2:30 = 150 seconds)
+3. **IMPORTANT**: Always include the video context so the tool can reopen the video if needed
+4. Call the tool with all parameters
+
+**Current Video Context (use these exact values):**
+- videoFolder: "${videoFolder}"
+- videoTitle: "${videoTitle}"
+
+**Examples for THIS video:**
+- Student: "Quando si parla della metodologia di ricerca?"
+  → Find \`[2:30] Now let's discuss research methodology...\` in transcript
+  → Call \`seekVideo({ time: 150, reason: "Discussione sulla metodologia di ricerca", videoFolder: "${videoFolder}", videoTitle: "${videoTitle}" })\`
+
+- Student: "Where does the speaker explain the main concept?"
+  → Find \`[5:15] The main concept we need to understand is...\`
+  → Call \`seekVideo({ time: 315, reason: "Explanation of the main concept", videoFolder: "${videoFolder}", videoTitle: "${videoTitle}" })\`
+
+**Important**: The transcript reflects exactly what was said in the video. Use it to provide accurate information about the video content.`;
+
+      sections.push(currentVideoSection);
+    } else {
+      // Standard document handling
+      let currentDocSection = `# CURRENTLY OPEN DOCUMENT
 
 The student is viewing a document in the side panel. When they refer to "this document", "the current document", or similar, they mean:
 
 - **Title**: ${hasViewedContent ? viewedContent.title : title}
 - **Type**: ${hasViewedContent ? viewedContent.contentType || "document" : kind}`;
 
-    if (hasViewedContent && viewedContent.description) {
-      currentDocSection += `\n- **Path**: ${viewedContent.description}`;
-    }
+      if (hasViewedContent && viewedContent.description) {
+        currentDocSection += `\n- **Path**: ${viewedContent.description}`;
+      }
 
-    if (documentId && !hasViewedContent) {
-      currentDocSection += `\n- **Document ID**: ${documentId}`;
-    }
+      if (documentId && !hasViewedContent) {
+        currentDocSection += `\n- **Document ID**: ${documentId}`;
+      }
 
-    if (hasViewedContent) {
-      const contentPreview =
-        viewedContent.content.length > 2000
-          ? `${viewedContent.content.slice(0, 2000)}...`
-          : viewedContent.content;
-      currentDocSection += `
+      if (hasViewedContent) {
+        const contentPreview =
+          viewedContent.content.length > 2000
+            ? `${viewedContent.content.slice(0, 2000)}...`
+            : viewedContent.content;
+        currentDocSection += `
 
 ## Document Content
 \`\`\`${viewedContent.contentType || ""}
 ${contentPreview}
 \`\`\``;
-    } else if (content && typeof content === "string" && content.length > 0) {
-      const contentPreview =
-        content.length > 2000 ? `${content.slice(0, 2000)}...` : content;
-      currentDocSection += `
+      } else if (content && typeof content === "string" && content.length > 0) {
+        const contentPreview =
+          content.length > 2000 ? `${content.slice(0, 2000)}...` : content;
+        currentDocSection += `
 
 ## Document Content
 \`\`\`
 ${contentPreview}
 \`\`\``;
-    } else if (content && Array.isArray(content)) {
-      const rows = content.slice(0, 10);
-      currentDocSection += `
+      } else if (content && Array.isArray(content)) {
+        const rows = content.slice(0, 10);
+        currentDocSection += `
 
 ## Data Preview (first ${rows.length} rows)
 \`\`\`json
 ${JSON.stringify(rows, null, 2)}
 \`\`\``;
-    }
+      }
 
-    currentDocSection += `
+      currentDocSection += `
 
 **Important**: When the student asks about "this document" or wants to modify it, use \`updateDocument\` with the ID "${documentId || "not available"}".`;
 
-    sections.push(currentDocSection);
+      sections.push(currentDocSection);
+    }
   }
 
   // ========================================================================
