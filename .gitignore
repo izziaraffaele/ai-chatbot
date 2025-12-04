@@ -49,3 +49,4 @@ yarn-error.log*
 mastra/knowledgebase/*
 
 *py
+mastra/knowledge_base/*
