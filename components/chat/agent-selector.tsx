@@ -1,5 +1,5 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ModelSelector,
   ModelSelectorContent,
@@ -60,8 +60,14 @@ export function ChatAgentSelector({
   disabled,
 }: ChatAgentSelectorProps) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const t = useTranslations();
   const availableAgents = useMemo(() => getAvailableAgents(), []);
+
+  // Prevent hydration mismatch from localStorage-based selectedAgent
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const displayAgent = useMemo(() => {
     return selectedAgent
@@ -70,6 +76,10 @@ export function ChatAgentSelector({
   }, [selectedAgent, placeholder, t]);
 
   const isDisabled = disabled || status === "streaming";
+
+  // Use consistent values during SSR to prevent hydration mismatch
+  const showAvatar = mounted && selectedAgent?.avatar;
+  const displayName = mounted ? displayAgent : (placeholder || t("agent.selector.placeholder", "Assistant"));
 
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
@@ -81,10 +91,10 @@ export function ChatAgentSelector({
           variant="outline"
         >
           <div className="flex items-center gap-2">
-            {selectedAgent?.avatar && (
+            {showAvatar && (
               <span className="text-base">{selectedAgent.avatar}</span>
             )}
-            <ModelSelectorName>{displayAgent}</ModelSelectorName>
+            <ModelSelectorName>{displayName}</ModelSelectorName>
           </div>
           <ChevronDownIcon />
         </Button>

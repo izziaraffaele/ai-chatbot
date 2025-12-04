@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,6 +30,12 @@ export function VisibilitySelector({
 }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch from Radix UI's dynamic IDs
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Dynamic visibilities array with translations
   const visibilities = [
@@ -56,6 +62,22 @@ export function VisibilitySelector({
   const selectedVisibility = visibilities.find(
     (visibility) => visibility.id === value
   );
+
+  // Return a placeholder button during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <Button
+        className={cn("hidden h-8 md:flex md:h-fit md:px-2", className)}
+        data-testid="visibility-selector"
+        variant="outline"
+        {...others}
+      >
+        {selectedVisibility?.icon}
+        <span className="md:sr-only">{selectedVisibility?.label}</span>
+        <ChevronDownIcon />
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu onOpenChange={setOpen} open={open}>

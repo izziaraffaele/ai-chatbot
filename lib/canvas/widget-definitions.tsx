@@ -7,6 +7,7 @@ import {
   FileText,
   Image,
   LayoutGrid,
+  Video,
 } from "lucide-react";
 import { lazy, memo, Suspense } from "react";
 import type { WidgetDefinition, WidgetRendererProps } from "./widget-registry";
@@ -38,6 +39,12 @@ const LazyDocumentSelectorArtifact = lazy(() =>
 const LazyMarkdownViewerArtifact = lazy(() =>
   import("@/components/artifacts/markdown-viewer").then((mod) => ({
     default: mod.MarkdownViewerArtifact,
+  }))
+);
+
+const LazyVideoLibraryArtifact = lazy(() =>
+  import("@/components/artifacts/video-library").then((mod) => ({
+    default: mod.VideoLibraryArtifact,
   }))
 );
 
@@ -175,6 +182,19 @@ const MarkdownViewerRenderer = memo(function MarkdownViewerRenderer({
   );
 });
 
+/**
+ * Adapter for Video Library widget
+ */
+const VideoLibraryRenderer = memo(function VideoLibraryRenderer({
+  className,
+}: WidgetRendererProps<unknown>) {
+  return (
+    <Suspense fallback={<WidgetLoadingFallback />}>
+      <LazyVideoLibraryArtifact className={className} />
+    </Suspense>
+  );
+});
+
 // ============================================================================
 // WIDGET DEFINITIONS
 // ============================================================================
@@ -306,6 +326,28 @@ export const markdownViewerWidgetDefinition: WidgetDefinition<
   },
 };
 
+/**
+ * Video Library Widget Definition
+ * Video gallery with card grid view and integrated video player
+ */
+export const videoLibraryWidgetDefinition: WidgetDefinition<
+  typeof WIDGET_KINDS.VIDEO_LIBRARY,
+  unknown
+> = {
+  kind: WIDGET_KINDS.VIDEO_LIBRARY,
+  label: "Libreria Video",
+  icon: Video,
+  renderer: VideoLibraryRenderer,
+  allowMultiple: false,
+  supportsStreaming: false,
+  defaultContent: [],
+  tabColor: {
+    active: "bg-red-500 text-white border-red-500",
+    inactive: "bg-muted text-muted-foreground border-border",
+    icon: "text-white",
+  },
+};
+
 // ============================================================================
 // REGISTRATION
 // ============================================================================
@@ -321,6 +363,7 @@ export function registerBuiltInWidgets(): void {
   widgetRegistry.register(imageWidgetDefinition);
   widgetRegistry.register(markdownViewerWidgetDefinition);
   widgetRegistry.register(documentSelectorWidgetDefinition);
+  widgetRegistry.register(videoLibraryWidgetDefinition);
 }
 
 /**
@@ -333,4 +376,5 @@ export const builtInWidgetDefinitions = [
   imageWidgetDefinition,
   markdownViewerWidgetDefinition,
   documentSelectorWidgetDefinition,
+  videoLibraryWidgetDefinition,
 ];

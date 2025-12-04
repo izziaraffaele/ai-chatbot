@@ -15,15 +15,15 @@ export type AgentConfig = {
 
 /**
  * Available agent configurations
- * Supports the Research agent for web search and the Comune di Faenza assistant
+ * Supports the Research agent for web search and the H-FARM student assistant
  */
 export const AGENT_CONFIGS: Record<string, AgentConfig> = {
   assistente: {
     id: "assistente",
-    name: "Assistente comune",
+    name: "H-FARM Assistant",
     description:
-      "Assistente ufficiale del Comune di Faenza per la gestione documenti",
-    avatar: "🏛️",
+      "Official H-FARM assistant to help students explore courses, campus life, and learning materials",
+    avatar: "🎓",
     color: "green",
     registryId: "chatAgent",
   },

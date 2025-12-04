@@ -19,6 +19,8 @@ export const WIDGET_KINDS = {
   MARKDOWN_VIEWER: "markdown-viewer",
   // Selector widgets (single-instance)
   DOCUMENT_SELECTOR: "document-selector",
+  // Video widgets (single-instance)
+  VIDEO_LIBRARY: "video-library",
 } as const;
 
 export type WidgetKind = (typeof WIDGET_KINDS)[keyof typeof WIDGET_KINDS];
@@ -260,7 +262,10 @@ export function isViewerKind(kind: WidgetKind): boolean {
  * Check if a kind is a selector widget (single-instance)
  */
 export function isSelectorKind(kind: WidgetKind): boolean {
-  return kind === WIDGET_KINDS.DOCUMENT_SELECTOR;
+  return (
+    kind === WIDGET_KINDS.DOCUMENT_SELECTOR ||
+    kind === WIDGET_KINDS.VIDEO_LIBRARY
+  );
 }
 
 /**

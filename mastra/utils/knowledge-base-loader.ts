@@ -1,18 +1,18 @@
 /**
  * Knowledge Base Loader Utility
  *
- * Provides functions for listing and loading invoice files from the Faenza knowledge base.
+ * Provides functions for listing and loading files from the H-FARM knowledge base.
  * Supports partial matching for flexible file lookups.
- * Includes validation for required invoice fields (IBAN, CIG, CUP, etc.)
+ * Note: Invoice validation functions are kept for backwards compatibility but may be removed in future versions.
  */
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Directory containing the Faenza knowledge base files
+ * Directory containing the H-FARM knowledge base files
  */
-const KNOWLEDGE_BASE_PATH = join(process.cwd(), "mastra/knowledgebase/faenza");
+const KNOWLEDGE_BASE_PATH = join(process.cwd(), "mastra/knowledgebase/hfarm");
 
 // ============================================================================
 // REGEX PATTERNS (top-level for performance)

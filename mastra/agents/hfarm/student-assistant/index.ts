@@ -7,45 +7,44 @@ import {
   getGeoHints,
   getRuntimeConfig,
 } from "../../../utils/runtime-utils";
-import { invoiceAnalyzerAgent } from "../invoice-analyzer-agent";
-import { chatAgentSystemPrompt } from "./system-prompt";
+import { hfarmAssistantSystemPrompt } from "./system-prompt";
+
 /**
- * Assistente Comune di Faenza
+ * H-FARM Student Assistant
  *
- * Official AI assistant for Comune di Faenza, developed by MemorAIz.
+ * Official AI assistant for H-FARM, the Italian innovation hub and university.
  *
  * Purpose:
- * - List available documents in the knowledge base
- * - Load and display specific documents when requested
- * - Help users understand and work with invoice documents
- * - Create new documents (text, code, spreadsheets)
- * - Update existing documents
+ * - Help students explore H-FARM's courses and programs
+ * - Provide information about campus life and services
+ * - Assist with learning materials and educational content
+ * - Support students with general university-related questions
+ * - Browse and watch video content from H-FARM courses
  *
  * Configuration:
- * - Tools: createDocument, updateDocument, requestSuggestions, loadInvoice
+ * - Tools: createDocument, updateDocument, requestSuggestions, listVideos
  * - Memory configured with LibSQL for conversation history
- * - System prompt in Italian, supporting document management and creation
+ * - Bilingual support (Italian/English)
  */
 export const chatAgent = new Agent({
-  name: "Assistente Comune",
+  name: "H-FARM Assistant",
   instructions: ({ runtimeContext }) => {
     // Extract runtime configuration, geolocation hints, and canvas context
     const config = getRuntimeConfig(runtimeContext);
     const geoHints = getGeoHints(runtimeContext);
     const canvasContext = getCanvasContext(runtimeContext);
 
-    // Build system prompt for Comune di Faenza assistant
-    const prompt = chatAgentSystemPrompt(config, geoHints, canvasContext);
+    // Build system prompt for H-FARM student assistant
+    const prompt = hfarmAssistantSystemPrompt(config, geoHints, canvasContext);
 
     return prompt;
   },
   model: "openai/gpt-5.1",
-  agents: { invoiceAnalyzerAgent },
   tools: {
     createDocument: mastraTools.createDocument,
     updateDocument: mastraTools.updateDocument,
     requestSuggestions: mastraTools.requestSuggestions,
-    loadInvoice: mastraTools.loadInvoice,
+    listVideos: mastraTools.listVideos,
   },
   memory: new Memory({
     storage: new LibSQLStore({

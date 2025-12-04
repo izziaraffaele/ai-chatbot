@@ -24,6 +24,7 @@ export {
   sheetWidgetDefinition,
   // Widget definitions
   textWidgetDefinition,
+  videoLibraryWidgetDefinition,
 } from "./widget-definitions";
 export {
   type CanvasTabData,
