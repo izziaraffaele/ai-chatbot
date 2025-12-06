@@ -96,7 +96,7 @@ aws rds create-db-instance \
     --db-instance-identifier $DB_INSTANCE_ID \
     --db-instance-class $DB_INSTANCE_CLASS \
     --engine postgres \
-    --engine-version 16.3 \
+    --engine-version 16.11 \
     --master-username $DB_USERNAME \
     --master-user-password $DB_PASSWORD \
     --allocated-storage $DB_STORAGE \
