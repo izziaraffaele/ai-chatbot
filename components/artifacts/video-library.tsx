@@ -243,8 +243,8 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
           </div>
         }
         onClose={handleClose}
-        subtitle="Seleziona un video per riprodurlo"
-        title={activeTab?.title || "Libreria Video"}
+        subtitle="Select a video to play"
+        title={activeTab?.title || "Video Library"}
       />
 
       <ChatArtifactBody>
@@ -256,7 +256,7 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
               <Input
                 className="pl-9"
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cerca video..."
+                placeholder="Search videos..."
                 value={searchQuery}
               />
             </div>
@@ -271,7 +271,7 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
                     : "bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
                 onClick={() => setListStyle("grid")}
-                title="Vista griglia"
+                title="Grid view"
                 type="button"
               >
                 <LayoutGrid className="size-4" />
@@ -284,7 +284,7 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
                     : "bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
                 onClick={() => setListStyle("list")}
-                title="Vista lista"
+                title="List view"
                 type="button"
               >
                 <List className="size-4" />
@@ -298,7 +298,7 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
               "flex-1 overflow-y-auto p-4",
               listStyle === "grid"
                 ? "grid auto-rows-min grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-                : "flex flex-col gap-2"
+                : "flex flex-col gap-4"
             )}
           >
             {filteredVideos.map((video) => {
@@ -307,14 +307,27 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
               if (listStyle === "list") {
                 return (
                   <button
-                    className="flex items-center gap-4 rounded-lg border border-border bg-card p-3 text-left transition-all hover:bg-accent/50 hover:shadow-sm"
+                    className="flex items-center gap-4 rounded-lg border border-border bg-card px-8 py-8 text-left transition-all hover:bg-accent/50 hover:shadow-sm"
                     key={video.id}
                     onClick={() => handleVideoSelect(video)}
                     type="button"
                   >
-                    {/* Video Icon/Thumbnail */}
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-500 dark:bg-red-950 dark:text-red-400">
-                      <Video className="size-6" />
+                    {/* Video Thumbnail */}
+                    <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-red-50 dark:bg-red-950">
+                      {video.thumbnailUrl ? (
+                        <img
+                          alt={video.title}
+                          className="size-full object-cover"
+                          height={48}
+                          loading="lazy"
+                          src={video.thumbnailUrl}
+                          width={48}
+                        />
+                      ) : (
+                        <div className="flex size-full items-center justify-center text-red-500 dark:text-red-400">
+                          <Video className="size-6" />
+                        </div>
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
@@ -351,8 +364,19 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
                   onClick={() => handleVideoSelect(video)}
                   type="button"
                 >
-                  {/* Video Thumbnail/Placeholder */}
-                  <div className="relative aspect-video w-full bg-gradient-to-br from-red-100 to-red-200 dark:from-red-950 dark:to-red-900">
+                  {/* Video Thumbnail */}
+                  <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-red-100 to-red-200 dark:from-red-950 dark:to-red-900">
+                    {video.thumbnailUrl && (
+                      <img
+                        alt={video.title}
+                        className="absolute inset-0 size-full object-cover"
+                        height={180}
+                        loading="lazy"
+                        src={video.thumbnailUrl}
+                        width={320}
+                      />
+                    )}
+                    {/* Play Button Overlay */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="flex size-14 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110 dark:bg-black/80">
                         <Play className="size-6 text-red-500" />
@@ -393,7 +417,7 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
           {/* Empty filtered state */}
           {filteredVideos.length === 0 && videos.length > 0 && (
             <div className="px-6 pb-6 text-center text-muted-foreground text-sm">
-              Nessun video trovato con i filtri applicati
+              No videos found with the applied filters
             </div>
           )}
 
@@ -401,7 +425,7 @@ export function VideoLibraryArtifact({ className }: VideoLibraryArtifactProps) {
           {videos.length === 0 && (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
               <Video className="size-12 opacity-50" />
-              <p className="text-sm">Nessun video disponibile</p>
+              <p className="text-sm">No videos available</p>
             </div>
           )}
         </div>
@@ -557,7 +581,7 @@ function VideoPlayerView({
           variant="ghost"
         >
           <ArrowLeft className="size-4" />
-          Indietro
+          Back
         </Button>
         <div className="min-w-0 flex-1">
           <h2 className="truncate font-semibold text-sm">{video.title}</h2>
@@ -600,7 +624,7 @@ function VideoPlayerView({
                 src={video.videoUrl}
               >
                 <track kind="captions" />
-                Il tuo browser non supporta la riproduzione video.
+                Your browser does not support video playback.
               </video>
             </div>
 
@@ -653,7 +677,7 @@ function VideoLearningContent({
     return toUIQuizActivity({
       type: "quiz",
       title: `Quiz: ${videoTitle}`,
-      description: "Verifica la tua comprensione del video",
+      description: "Test your understanding of the video",
       payload: learningContent.quiz,
     });
   }, [learningContent?.quiz, videoTitle]);
@@ -670,7 +694,7 @@ function VideoLearningContent({
     return toUIFlashcardActivity({
       type: "flashcard",
       title: `Flashcards: ${videoTitle}`,
-      description: "Ripassa i concetti chiave del video",
+      description: "Review the key concepts of the video",
       payload: flashcardsWithHints,
     });
   }, [learningContent?.flashcards, videoTitle]);
@@ -693,10 +717,10 @@ function VideoLearningContent({
   // Loading state
   if (loading) {
     return (
-      <div className="flex min-h-48 items-center justify-center border-border border-t p-8">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="size-5 animate-spin" />
-          <span className="text-sm">Caricamento attività...</span>
+      <div className="flex min-h-48 items-center justify-center border-hf-cyan/20 border-t p-8">
+        <div className="flex items-center gap-2 text-hf-deep-blue/70">
+          <Loader2 className="size-5 animate-spin text-hf-cyan" />
+          <span className="text-sm">Loading activities...</span>
         </div>
       </div>
     );
@@ -705,12 +729,10 @@ function VideoLearningContent({
   // No content state
   if (!hasContent) {
     return (
-      <div className="flex min-h-48 items-center justify-center border-border border-t p-8">
-        <div className="text-center text-muted-foreground">
-          <BookOpen className="mx-auto mb-2 size-8 opacity-50" />
-          <p className="text-sm">
-            Nessuna attività disponibile per questo video
-          </p>
+      <div className="flex min-h-48 items-center justify-center border-hf-cyan/20 border-t p-8">
+        <div className="text-center text-hf-deep-blue/70">
+          <BookOpen className="mx-auto mb-2 size-8 text-hf-cyan/50" />
+          <p className="text-sm">No activities available for this video</p>
         </div>
       </div>
     );
@@ -720,13 +742,13 @@ function VideoLearningContent({
   const defaultTab = hasQuiz ? "quiz" : "flashcards";
 
   return (
-    <div className="shrink-0 border-border border-t">
+    <div className="shrink-0 border-hf-cyan/20 border-t">
       <Tabs defaultValue={defaultTab}>
-        <div className="shrink-0 border-border border-b bg-muted/30 px-4">
+        <div className="shrink-0 border-hf-cyan/20 border-b bg-hf-cyan/5 px-4">
           <TabsList className="h-12 w-full justify-start gap-2 bg-transparent p-0">
             {hasQuiz && (
               <TabsTrigger
-                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                className="gap-2 text-hf-deep-blue/70 hover:bg-hf-cyan/10 hover:text-hf-deep-blue data-[state=active]:border-hf-cyan/30 data-[state=active]:bg-white data-[state=active]:text-hf-deep-blue data-[state=active]:shadow-sm"
                 value="quiz"
               >
                 <HelpCircle className="size-4" />
@@ -735,7 +757,7 @@ function VideoLearningContent({
             )}
             {hasFlashcards && (
               <TabsTrigger
-                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                className="gap-2 text-hf-deep-blue/70 hover:bg-hf-cyan/10 hover:text-hf-deep-blue data-[state=active]:border-hf-cyan/30 data-[state=active]:bg-white data-[state=active]:text-hf-deep-blue data-[state=active]:shadow-sm"
                 value="flashcards"
               >
                 <BookOpen className="size-4" />

@@ -21,8 +21,8 @@ import { QuizProvider, useQuizContext } from "./player";
 import type { UIQuizActivity } from "./schema";
 
 // ============================================================================
-// H-FARM STYLED QUIZ ACTIVITY
-// Sophisticated Academic - clean, professional quiz experience
+// MEMORAIZ STYLED QUIZ ACTIVITY
+// Vibrant brand colors - cyan accent, deep blue text
 // ============================================================================
 
 /**
@@ -34,6 +34,7 @@ export function QuizActivity(props: QuizActivityProps) {
     defaultScreen = "welcome",
     attempts = [],
     onFeedback,
+    disabled = false,
     ...others
   } = props;
 
@@ -54,6 +55,7 @@ export function QuizActivity(props: QuizActivityProps) {
     <QuizProvider config={config}>
       <QuizActivityContent
         description={activity.description}
+        disabled={disabled}
         onFeedback={onFeedback}
         title={activity.title}
       />
@@ -74,6 +76,8 @@ type QuizActivityProps = {
     attemptedAt: Date;
   }>;
   onFeedback?: (value: number) => void;
+  /** Whether the quiz is disabled (e.g., during chat streaming) */
+  disabled?: boolean;
 };
 
 /**
@@ -83,10 +87,12 @@ function QuizActivityContent({
   title,
   description,
   onFeedback,
+  disabled = false,
 }: {
   title?: React.ReactNode;
   description?: React.ReactNode;
   onFeedback?: (value: number) => void;
+  disabled?: boolean;
 }) {
   const { quiz } = useQuizContext();
   const totalQuestions = quiz.config.questions.length;
@@ -95,6 +101,7 @@ function QuizActivityContent({
     return (
       <QuizPlayerWelcomeScreen
         description={description}
+        disabled={disabled}
         onCancel={quiz.handlers.cancel}
         onStart={quiz.handlers.start}
         questions={quiz.config.questions}
@@ -115,7 +122,7 @@ function QuizActivityContent({
     );
   }
 
-  // Quiz questions screen - H-FARM styled
+  // Quiz questions screen - Memoraiz styled
   if (quiz.currentQuestion) {
     const progressPercent = Math.round(
       ((quiz.currentIndex + 1) / totalQuestions) * 100
@@ -123,20 +130,20 @@ function QuizActivityContent({
 
     return (
       <div className="min-h-[500px] bg-background">
-        {/* H-FARM Progress Header */}
-        <div className="border-border border-b bg-muted/30 px-6 py-4">
+        {/* Memoraiz Progress Header */}
+        <div className="border-border border-b bg-hf-cyan/5 px-6 py-4">
           <div className="mb-3 flex items-center justify-between">
-            <span className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+            <span className="font-semibold text-hf-deep-blue/60 text-xs uppercase tracking-wider">
               {title}
             </span>
-            <span className="font-medium text-muted-foreground text-sm">
+            <span className="font-medium text-hf-deep-blue/70 text-sm">
               {quiz.currentIndex + 1} / {totalQuestions}
             </span>
           </div>
-          {/* Progress bar - H-FARM navy */}
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+          {/* Progress bar - Memoraiz cyan */}
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-hf-cyan/20">
             <div
-              className="h-full bg-primary transition-all duration-300 ease-out"
+              className="h-full bg-hf-cyan transition-all duration-300 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -150,6 +157,7 @@ function QuizActivityContent({
                 (choice: { value: unknown; label: string }) => (
                   <Quiz.Choice
                     disabled={
+                      disabled ||
                       quiz.isAnswerValidated ||
                       (quiz.selectedAnswer !== null &&
                         !quiz.config.requireConfirm)
@@ -185,7 +193,12 @@ function QuizActivityContent({
           {/* Action buttons */}
           {quiz.selectedAnswer && !quiz.isAnswerValidated && (
             <div className="flex justify-center pt-2">
-              <Button onClick={quiz.handlers.confirmAnswer} size="lg">
+              <Button
+                className="bg-hf-cyan text-white hover:bg-hf-cyan-light"
+                disabled={disabled}
+                onClick={quiz.handlers.confirmAnswer}
+                size="lg"
+              >
                 Conferma risposta
                 <ArrowRight className="ml-2 size-4" />
               </Button>
@@ -194,7 +207,12 @@ function QuizActivityContent({
 
           {quiz.isAnswerValidated && (
             <div className="flex justify-center pt-2">
-              <Button onClick={quiz.handlers.next} size="lg">
+              <Button
+                className="bg-hf-cyan text-white hover:bg-hf-cyan-light"
+                disabled={disabled}
+                onClick={quiz.handlers.next}
+                size="lg"
+              >
                 {quiz.currentIndex < totalQuestions - 1
                   ? "Prossima domanda"
                   : "Termina quiz"}
@@ -256,7 +274,7 @@ export function QuizActivityEnd(props: {
 }
 
 // ============================================================================
-// Screen Components - H-FARM Styled
+// Screen Components - Memoraiz Styled
 // ============================================================================
 
 type QuizPlayerWelcomeScreenProps = {
@@ -265,6 +283,7 @@ type QuizPlayerWelcomeScreenProps = {
   questions: QuizQuestionType[];
   onStart: () => void;
   onCancel: () => void;
+  disabled?: boolean;
 };
 
 type QuizPlayerEndScreenProps = {
@@ -279,7 +298,7 @@ type QuizPlayerEndScreenProps = {
 };
 
 /**
- * Quiz welcome screen - H-FARM styled
+ * Quiz welcome screen - Memoraiz styled
  */
 function QuizPlayerWelcomeScreen({
   title,
@@ -287,6 +306,7 @@ function QuizPlayerWelcomeScreen({
   questions,
   onCancel,
   onStart,
+  disabled = false,
 }: QuizPlayerWelcomeScreenProps) {
   const formatTime = (seconds: number) => {
     if (seconds < 60) {
@@ -307,40 +327,40 @@ function QuizPlayerWelcomeScreen({
       {/* Header */}
       <div>
         {title && (
-          <h2 className="mb-3 font-semibold text-2xl text-foreground tracking-tight">
+          <h2 className="mb-3 font-semibold text-2xl text-hf-deep-blue tracking-tight">
             {title}
           </h2>
         )}
         {description && (
-          <p className="text-muted-foreground leading-relaxed">{description}</p>
+          <p className="text-hf-deep-blue/70 leading-relaxed">{description}</p>
         )}
       </div>
 
-      {/* Stats - H-FARM card style */}
-      <div className="rounded-md border border-border bg-card/50 p-5">
-        <div className="mb-4 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+      {/* Stats - Memoraiz card style */}
+      <div className="rounded-md border border-hf-cyan/20 bg-hf-cyan/5 p-5">
+        <div className="mb-4 font-semibold text-hf-deep-blue/60 text-xs uppercase tracking-wider">
           Dettagli Quiz
         </div>
         <div className="space-y-3">
-          <div className="flex items-center gap-3 text-foreground">
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary/10">
-              <ListChecks className="size-4 text-primary" />
+          <div className="flex items-center gap-3 text-hf-deep-blue">
+            <div className="flex size-8 items-center justify-center rounded-md bg-hf-cyan/10">
+              <ListChecks className="size-4 text-hf-cyan" />
             </div>
             <span className="font-medium">{questions.length} Domande</span>
           </div>
 
-          <div className="flex items-center gap-3 text-foreground">
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary/10">
-              <Clock className="size-4 text-primary" />
+          <div className="flex items-center gap-3 text-hf-deep-blue">
+            <div className="flex size-8 items-center justify-center rounded-md bg-hf-cyan/10">
+              <Clock className="size-4 text-hf-cyan" />
             </div>
             <span className="font-medium">
               ~{estimatedTimePerQuestion}s per domanda
             </span>
           </div>
 
-          <div className="flex items-center gap-3 text-foreground">
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary/10">
-              <Timer className="size-4 text-primary" />
+          <div className="flex items-center gap-3 text-hf-deep-blue">
+            <div className="flex size-8 items-center justify-center rounded-md bg-hf-cyan/10">
+              <Timer className="size-4 text-hf-cyan" />
             </div>
             <span className="font-medium">
               Tempo stimato: {formatTime(totalTime)}
@@ -351,11 +371,21 @@ function QuizPlayerWelcomeScreen({
 
       {/* Actions */}
       <div className="flex items-center gap-3">
-        <Button onClick={onStart} size="lg">
+        <Button
+          className="bg-hf-cyan text-white hover:bg-hf-cyan-light"
+          disabled={disabled}
+          onClick={onStart}
+          size="lg"
+        >
           Inizia Quiz
           <ArrowRight className="ml-2 size-4" />
         </Button>
-        <Button onClick={onCancel} variant="ghost">
+        <Button
+          className="text-hf-deep-blue/70 hover:text-hf-deep-blue"
+          disabled={disabled}
+          onClick={onCancel}
+          variant="ghost"
+        >
           Annulla
         </Button>
       </div>
@@ -364,7 +394,7 @@ function QuizPlayerWelcomeScreen({
 }
 
 /**
- * Quiz end screen - H-FARM styled
+ * Quiz end screen - Memoraiz styled
  */
 function QuizPlayerEndScreen({
   onFeedback,
@@ -387,49 +417,49 @@ function QuizPlayerEndScreen({
       className="min-h-[500px] space-y-8 p-6"
       data-slot="quiz-player-end-screen"
     >
-      {/* Header - H-FARM styled */}
+      {/* Header - Memoraiz styled */}
       <div className="text-center">
-        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
-          <Trophy className="size-8 text-primary" />
+        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-hf-cyan/10">
+          <Trophy className="size-8 text-hf-cyan" />
         </div>
-        <h2 className="mb-2 font-semibold text-2xl text-foreground tracking-tight">
+        <h2 className="mb-2 font-semibold text-2xl text-hf-deep-blue tracking-tight">
           {t("quiz.completed.title", "Quiz completato!")}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-hf-deep-blue/70">
           {t("quiz.completed.subtitle", "Ecco i tuoi risultati")}
         </p>
       </div>
 
-      {/* Score display - H-FARM prominent */}
+      {/* Score display - Memoraiz prominent */}
       <div className="text-center">
-        <div className="mb-2 font-bold text-5xl text-primary">
+        <div className="mb-2 font-bold text-5xl text-hf-cyan">
           {percentage}%
         </div>
-        <div className="text-lg text-muted-foreground">
+        <div className="text-hf-deep-blue/70 text-lg">
           {score} / {totalQuestions} risposte corrette
         </div>
       </div>
 
-      {/* Stats Grid - H-FARM cards */}
+      {/* Stats Grid - Memoraiz cards */}
       <div className="grid grid-cols-2 gap-4">
         {/* Attempts Card */}
-        <div className="rounded-md border border-border bg-card/50 p-4 text-center">
-          <Target className="mx-auto mb-2 size-5 text-muted-foreground" />
-          <div className="font-semibold text-foreground text-xl">
+        <div className="rounded-md border border-hf-cyan/20 bg-hf-cyan/5 p-4 text-center">
+          <Target className="mx-auto mb-2 size-5 text-hf-cyan" />
+          <div className="font-semibold text-hf-deep-blue text-xl">
             {stats.totalAttempts}
           </div>
-          <div className="text-muted-foreground text-xs uppercase tracking-wider">
+          <div className="text-hf-deep-blue/60 text-xs uppercase tracking-wider">
             {t("quiz.completed.attempts", "Tentativi")}
           </div>
         </div>
 
         {/* Average Score Card */}
-        <div className="rounded-md border border-border bg-card/50 p-4 text-center">
-          <BarChart3 className="mx-auto mb-2 size-5 text-muted-foreground" />
-          <div className="font-semibold text-foreground text-xl">
+        <div className="rounded-md border border-hf-cyan/20 bg-hf-cyan/5 p-4 text-center">
+          <BarChart3 className="mx-auto mb-2 size-5 text-hf-cyan" />
+          <div className="font-semibold text-hf-deep-blue text-xl">
             {avgScoreDisplay}
           </div>
-          <div className="text-muted-foreground text-xs uppercase tracking-wider">
+          <div className="text-hf-deep-blue/60 text-xs uppercase tracking-wider">
             {t("quiz.completed.averageScore", "Media")}
           </div>
         </div>
@@ -437,7 +467,11 @@ function QuizPlayerEndScreen({
 
       {/* Actions */}
       <div className="flex flex-col items-center gap-3">
-        <Button onClick={onRestart} size="lg">
+        <Button
+          className="bg-hf-cyan text-white hover:bg-hf-cyan-light"
+          onClick={onRestart}
+          size="lg"
+        >
           <RotateCcw className="mr-2 size-4" />
           {t("quiz.feedback.restart", "Riprova")}
         </Button>
@@ -454,7 +488,7 @@ function QuizPlayerEndScreen({
               {t("quiz.feedback.useful", "Utile")}
             </Button>
             <Button
-              className="border-destructive/30 text-destructive hover:bg-destructive/10"
+              className="border-hf-red/30 text-hf-red hover:bg-hf-red/10"
               onClick={() => onFeedback(1)}
               size="sm"
               variant="outline"
@@ -470,7 +504,7 @@ function QuizPlayerEndScreen({
 }
 
 /**
- * Quiz Activity Empty component - H-FARM styled
+ * Quiz Activity Empty component - Memoraiz styled
  */
 export function QuizActivityEmpty(props: {
   title?: React.ReactNode;
@@ -478,13 +512,15 @@ export function QuizActivityEmpty(props: {
 }) {
   return (
     <div className="flex flex-col items-center justify-center space-y-4 py-12 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-        <ListChecks className="size-6 text-muted-foreground" />
+      <div className="flex size-12 items-center justify-center rounded-full bg-hf-cyan/10">
+        <ListChecks className="size-6 text-hf-cyan" />
       </div>
       {props.title && (
-        <h2 className="font-semibold text-foreground text-lg">{props.title}</h2>
+        <h2 className="font-semibold text-hf-deep-blue text-lg">
+          {props.title}
+        </h2>
       )}
-      <p className="max-w-sm text-muted-foreground">
+      <p className="max-w-sm text-hf-deep-blue/70">
         {props.description || "Nessuna domanda disponibile per questo quiz."}
       </p>
     </div>

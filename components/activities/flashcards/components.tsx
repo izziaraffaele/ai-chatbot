@@ -1,6 +1,6 @@
 /**
- * H-FARM Styled Flashcard Primitives
- * Sophisticated Academic - clean, professional flashcard components
+ * Memoraiz Styled Flashcard Primitives
+ * Vibrant brand colors - cyan accent, deep blue text
  */
 
 import { cva } from "class-variance-authority";
@@ -34,18 +34,20 @@ export type FlashcardProps = React.ComponentProps<"div"> & {
   flipped?: boolean;
   variant?: FlashcardVariant;
   size?: FlashcardSize;
+  /** Whether the flashcard is disabled (e.g., during streaming) */
+  disabled?: boolean;
 };
 
 // ============================================
-// H-FARM VARIANT DEFINITIONS
+// MEMORAIZ VARIANT DEFINITIONS
 // ============================================
 
 const flashcardVariants = cva("group relative cursor-pointer", {
   variants: {
     variant: {
       flip: "transform-3d transition-transform duration-500 ease-out data-[state=flipped]:rotate-y-180",
-      slide: "preserve-3d overflow-hidden rounded-md border border-border",
-      fade: "preserve-3d overflow-hidden rounded-md border border-border",
+      slide: "preserve-3d overflow-hidden rounded-md border border-hf-cyan/20",
+      fade: "preserve-3d overflow-hidden rounded-md border border-hf-cyan/20",
     },
   },
   defaultVariants: {
@@ -128,13 +130,14 @@ function useFlashcardContext() {
 }
 
 // ============================================
-// ROOT COMPONENT - H-FARM Styled with 3D Flip
+// ROOT COMPONENT - Memoraiz Styled with 3D Flip
 // ============================================
 
 function FlashcardRoot({
   flipped = false,
   variant = "flip",
   size = "md",
+  disabled = false,
   title,
   className,
   children,
@@ -170,12 +173,15 @@ function FlashcardRoot({
         >
           {/* Inner container that rotates */}
           <section
+            aria-disabled={disabled}
             aria-label="Flashcard"
             aria-roledescription="Interactive flashcard with front and back sides"
             className={cn(
-              "group relative size-full cursor-pointer",
+              "group relative size-full",
+              disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
               className
             )}
+            data-disabled={disabled ? "true" : undefined}
             data-size={contextValue.size}
             data-slot="flashcard"
             data-state={contextValue.flipped ? "flipped" : "front"}
@@ -193,13 +199,16 @@ function FlashcardRoot({
   return (
     <FlashcardContext.Provider value={contextValue}>
       <section
+        aria-disabled={disabled}
         aria-label="Flashcard"
         aria-roledescription="Interactive flashcard with front and back sides"
         className={cn(
           flashcardVariants({ variant: contextValue.variant }),
-          "hover:shadow-md transition-shadow duration-200",
+          "transition-shadow duration-200",
+          disabled ? "cursor-not-allowed opacity-60" : "hover:shadow-md",
           className
         )}
+        data-disabled={disabled ? "true" : undefined}
         data-size={contextValue.size}
         data-slot="flashcard"
         data-state={contextValue.flipped ? "flipped" : "front"}
@@ -214,7 +223,7 @@ function FlashcardRoot({
 }
 
 // ============================================
-// SIDE COMPONENTS - H-FARM Styled
+// SIDE COMPONENTS - Memoraiz Styled
 // ============================================
 
 type FlashcardSideProps = React.ComponentProps<"div"> & {
@@ -256,8 +265,8 @@ function FlashcardSide({
       aria-label={`${side === "front" ? "Question" : "Answer"} side of flashcard`}
       className={cn(
         flashcardSideVariants({ variant, side }),
-        // H-FARM card styling
-        "bg-card border-border shadow-sm",
+        // Memoraiz card styling
+        "border-hf-cyan/20 bg-card shadow-sm",
         className
       )}
       data-side={side}
@@ -280,7 +289,7 @@ function FlashcardBack(props: Omit<FlashcardSideProps, "side">) {
 }
 
 // ============================================
-// CONTENT COMPONENTS - H-FARM Styled
+// CONTENT COMPONENTS - Memoraiz Styled
 // ============================================
 
 function FlashcardContent({
@@ -290,7 +299,7 @@ function FlashcardContent({
   return (
     <CardContent
       className={cn(
-        // H-FARM content spacing
+        // Memoraiz content spacing
         "flex size-full flex-col items-center justify-center text-center",
         "group-data-[size=lg]:p-12 group-data-[size=md]:p-8 group-data-[size=sm]:p-6",
         className
@@ -301,7 +310,7 @@ function FlashcardContent({
   );
 }
 
-// Reveal Button - H-FARM styled
+// Reveal Button - Memoraiz styled
 function FlashcardRevealButton({
   className,
   label,
@@ -316,24 +325,26 @@ function FlashcardRevealButton({
     <Button
       aria-label={flipped ? "Nascondi risposta" : "Mostra risposta"}
       aria-pressed={flipped}
-      className={cn("gap-2 mt-4", className)}
+      className={cn(
+        "mt-4 gap-2",
+        flipped
+          ? "border-hf-cyan text-hf-cyan hover:bg-hf-cyan/10"
+          : "bg-hf-cyan text-white hover:bg-hf-cyan-light",
+        className
+      )}
       data-slot="flashcard-reveal-button"
       data-state={flipped ? "revealed" : "hidden"}
       size="sm"
       variant={flipped ? "outline" : "default"}
       {...props}
     >
-      {flipped ? (
-        <EyeOffIcon className="size-4" />
-      ) : (
-        <Eye className="size-4" />
-      )}
+      {flipped ? <EyeOffIcon className="size-4" /> : <Eye className="size-4" />}
       {children || label || (flipped ? "Nascondi" : "Mostra risposta")}
     </Button>
   );
 }
 
-// Label Component - H-FARM uppercase style
+// Label Component - Memoraiz uppercase style
 function FlashcardLabel({
   className,
   children,
@@ -342,8 +353,8 @@ function FlashcardLabel({
   return (
     <div
       className={cn(
-        // H-FARM label style - uppercase tracking
-        "mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground",
+        // Memoraiz label style - uppercase tracking
+        "mb-4 font-semibold text-hf-deep-blue/60 text-xs uppercase tracking-wider",
         className
       )}
       data-slot="flashcard-label"
@@ -354,13 +365,13 @@ function FlashcardLabel({
   );
 }
 
-// Title Component - H-FARM typography
+// Title Component - Memoraiz typography
 function FlashcardTitle({ className, ...props }: React.ComponentProps<"h3">) {
   return (
     <h3
       className={cn(
-        // H-FARM title - clean, semibold
-        "mb-3 font-semibold text-xl leading-relaxed tracking-tight text-foreground",
+        // Memoraiz title - clean, semibold
+        "mb-3 font-semibold text-hf-deep-blue text-xl leading-relaxed tracking-tight",
         "group-data-[size=lg]:text-2xl",
         className
       )}
@@ -375,7 +386,7 @@ function FlashcardText({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
       className={cn(
-        "mb-3 text-base leading-relaxed text-foreground",
+        "mb-3 text-base text-hf-deep-blue leading-relaxed",
         "group-data-[size=lg]:text-lg",
         className
       )}
@@ -385,14 +396,11 @@ function FlashcardText({ className, ...props }: React.ComponentProps<"p">) {
   );
 }
 
-// Hint Component - H-FARM subtle style (for inline use)
+// Hint Component - Memoraiz subtle style (for inline use)
 function FlashcardHint({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
-      className={cn(
-        "mt-2 text-sm italic text-muted-foreground",
-        className
-      )}
+      className={cn("mt-2 text-hf-deep-blue/70 text-sm italic", className)}
       data-slot="flashcard-hint"
       {...props}
     />
@@ -414,10 +422,10 @@ function FlashcardHintButton({ hint, className }: FlashcardHintButtonProps) {
             aria-label="Mostra suggerimento"
             className={cn(
               "flex size-14 items-center justify-center rounded-full",
-              "border-4 border-destructive bg-background",
-              "text-destructive hover:bg-destructive/5",
+              "border-4 border-hf-yellow bg-background",
+              "text-hf-yellow hover:bg-hf-yellow/5",
               "transition-all duration-200 hover:scale-105",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-hf-yellow/50",
               className
             )}
             data-slot="flashcard-hint-button"
@@ -427,12 +435,12 @@ function FlashcardHintButton({ hint, className }: FlashcardHintButtonProps) {
           </button>
         </TooltipTrigger>
         <TooltipContent
-          className="max-w-xs bg-popover px-4 py-3 text-sm text-popover-foreground shadow-lg"
+          className="max-w-xs bg-popover px-4 py-3 text-hf-deep-blue text-sm shadow-lg"
           side="left"
           sideOffset={8}
         >
-          <p className="font-medium text-muted-foreground">Suggerimento:</p>
-          <p className="mt-1">{hint}</p>
+          <p className="font-medium text-hf-deep-blue/70">Suggerimento:</p>
+          <p className="mt-1 text-hf-deep-blue">{hint}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

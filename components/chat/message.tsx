@@ -2,7 +2,7 @@
 
 import type { TextUIPart } from "ai";
 import { motion } from "framer-motion";
-import { CopyIcon, PencilIcon } from "lucide-react";
+import { CopyIcon, PencilIcon, Sparkles } from "lucide-react";
 import { useCallback } from "react";
 import {
   Message,
@@ -43,11 +43,12 @@ export const ChatMessage = ({
   <Message
     asChild
     className={cn(
-      // H-FARM message layout - clean spacing
-      "flex-row gap-3 group/canvas:w-full md:gap-4",
-      {
-        "flex-row-reverse": from === "user",
-      },
+      // Message layout - proper alignment per role
+      "flex w-full gap-3 md:gap-4",
+      from === "user"
+        ? "flex-row-reverse justify-start"
+        : "flex-row justify-start",
+      "group/canvas:w-full",
       className
     )}
     data-mode={isReadonly ? "readonly" : mode}
@@ -57,8 +58,8 @@ export const ChatMessage = ({
     from={from}
     {...others}
   >
-    <motion.div 
-      animate={{ opacity: 1 }} 
+    <motion.div
+      animate={{ opacity: 1 }}
       initial={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
     >
@@ -77,16 +78,53 @@ export const ChatMessageAvatar = ({
 }: React.ComponentProps<"div">) => (
   <div
     className={cn(
-      // H-FARM avatar - navy ring, cream background
-      "flex size-8 shrink-0 items-center justify-center rounded-full",
-      "bg-card border border-border text-foreground",
-      "ring-1 ring-border/50",
-      "transition-all duration-200",
+      // Base avatar styling
+      "flex size-10 shrink-0 items-center justify-center rounded-full",
+      "shadow-md transition-all duration-200",
       className
     )}
     data-slot="chat-message-avatar"
     {...others}
   />
+);
+
+/**
+ * Gold gradient avatar for AI/Assistant messages
+ */
+export const AssistantAvatar = ({ className }: { className?: string }) => (
+  <div
+    className={cn(
+      "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+      "bg-gradient-to-br from-hf-cyan to-hf-cyan-light shadow-md",
+      className
+    )}
+    data-slot="assistant-avatar"
+  >
+    <Sparkles className="h-5 w-5 text-white" />
+  </div>
+);
+
+/**
+ * Purple gradient avatar for user messages
+ */
+export const UserAvatar = ({
+  initial = "U",
+  className,
+}: {
+  initial?: string;
+  className?: string;
+}) => (
+  <div
+    className={cn(
+      "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+      "bg-gradient-to-br from-hf-user-gradient-start to-hf-user-gradient-end",
+      "font-semibold text-sm text-white shadow-md",
+      className
+    )}
+    data-slot="user-avatar"
+  >
+    {initial}
+  </div>
 );
 
 export const ChatMessageBody = ({
@@ -95,11 +133,41 @@ export const ChatMessageBody = ({
 }: React.ComponentProps<"div">) => (
   <div
     className={cn(
-      // H-FARM message body - clean spacing
+      // Message body - clean spacing
       "flex flex-col gap-2",
       className
     )}
     data-slot="chat-message-content"
+    {...others}
+  />
+);
+
+/**
+ * Message bubble with variants for AI and user messages.
+ */
+export type ChatMessageBubbleProps = React.ComponentProps<"div"> & {
+  variant?: "assistant" | "user";
+};
+
+export const ChatMessageBubble = ({
+  variant = "assistant",
+  className,
+  ...others
+}: ChatMessageBubbleProps) => (
+  <div
+    className={cn(
+      // Base bubble styles
+      "max-w-2xl whitespace-pre-wrap rounded-3xl px-6 py-4",
+      // Variant-specific styles
+      variant === "assistant" && [
+        "border border-hf-deep-blue/10 bg-white/95 text-hf-deep-blue/90",
+        "shadow-[var(--shadow-chat-md)]",
+      ],
+      variant === "user" && ["bg-transparent"],
+      className
+    )}
+    data-slot="chat-message-bubble"
+    data-variant={variant}
     {...others}
   />
 );

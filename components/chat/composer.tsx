@@ -257,9 +257,13 @@ export function ChatInput({
  * Similar to ChatMessageAction namespace pattern
  */
 
-const ChatComposerToolAttachmentMenu = () => (
+const ChatComposerToolAttachmentMenu = ({
+  disabled,
+}: {
+  disabled?: boolean;
+}) => (
   <PromptInputActionMenu>
-    <PromptInputActionMenuTrigger />
+    <PromptInputActionMenuTrigger disabled={disabled} />
     <PromptInputActionMenuContent>
       <PromptInputActionAddAttachments />
     </PromptInputActionMenuContent>
@@ -295,8 +299,11 @@ export const ChatComposerTool = {
  */
 const ComposerInputSpeechButton = ({
   onTranscriptionChange,
+  disabled,
   ...others
-}: React.ComponentProps<typeof PromptInputSpeechButton>) => {
+}: React.ComponentProps<typeof PromptInputSpeechButton> & {
+  disabled?: boolean;
+}) => {
   const { textInput } = usePromptInputController();
 
   const handleTranscriptionChange = useCallback(
@@ -310,6 +317,7 @@ const ComposerInputSpeechButton = ({
   return (
     <PromptInputSpeechButton
       {...others}
+      disabled={disabled}
       onTranscriptionChange={handleTranscriptionChange}
     />
   );

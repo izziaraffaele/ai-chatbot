@@ -784,7 +784,7 @@ export const PromptInputBody = ({
   className,
   ...props
 }: PromptInputBodyProps) => (
-  <div className={cn("contents", className)} {...props} />
+  <div className={cn("flex w-full flex-col bg-white", className)} {...props} />
 );
 
 export type PromptInputTextareaProps = ComponentProps<
@@ -926,7 +926,7 @@ export const PromptInputTools = ({
   className,
   ...props
 }: PromptInputToolsProps) => (
-  <div className={cn("flex items-center gap-1", className)} {...props} />
+  <div className={cn("flex items-center gap-2", className)} {...props} />
 );
 
 export type PromptInputButtonProps = ComponentProps<typeof InputGroupButton>;
@@ -942,7 +942,7 @@ export const PromptInputButton = ({
 
   return (
     <InputGroupButton
-      className={cn(className)}
+      className={cn("hover:bg-hf-deep-blue/5", className)}
       size={newSize}
       type="button"
       variant={variant}
@@ -964,7 +964,10 @@ export const PromptInputActionMenuTrigger = ({
   ...props
 }: PromptInputActionMenuTriggerProps) => (
   <DropdownMenuTrigger asChild>
-    <PromptInputButton className={className} {...props}>
+    <PromptInputButton
+      className={cn("hover:bg-hf-cyan/10", className)}
+      {...props}
+    >
       {children ?? <PlusIcon className="size-4" />}
     </PromptInputButton>
   </DropdownMenuTrigger>
@@ -1018,7 +1021,13 @@ export const PromptInputSubmit = ({
   return (
     <InputGroupButton
       aria-label="Submit"
-      className={cn(className)}
+      className={cn(
+        // Cyan gradient submit button
+        "bg-gradient-to-br from-hf-cyan to-hf-cyan-light text-white",
+        "shadow-md hover:from-hf-cyan-light hover:to-hf-cyan hover:shadow-lg",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
       size={size}
       type="submit"
       variant={variant}
@@ -1177,8 +1186,8 @@ export const PromptInputSpeechButton = ({
   return (
     <PromptInputButton
       className={cn(
-        "relative transition-all duration-200",
-        isListening && "animate-pulse bg-accent text-accent-foreground",
+        "relative text-hf-cyan transition-all duration-200 hover:bg-hf-cyan/10",
+        isListening && "animate-pulse bg-hf-cyan/20 text-hf-cyan",
         className
       )}
       disabled={!recognition}

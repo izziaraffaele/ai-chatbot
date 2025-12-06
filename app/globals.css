@@ -25,54 +25,54 @@
 /* define design tokens (light mode - H-FARM style) */
 :root {
   /* Core colors - H-FARM palette */
-  --background: hsl(40 27% 95%);           /* Warm cream #F5F3EE */
-  --foreground: hsl(205 51% 21%);          /* Navy blue #1a3a52 */
-  
+  --background: hsl(40 27% 95%); /* Warm cream #F5F3EE */
+  --foreground: hsl(205 51% 21%); /* Navy blue #1a3a52 */
+
   /* Card - Cream with subtle warmth */
-  --card: hsl(40 30% 97%);                 /* Slightly lighter cream */
-  --card-foreground: hsl(205 51% 21%);     /* Navy */
-  
+  --card: hsl(40 30% 97%); /* Slightly lighter cream */
+  --card-foreground: hsl(205 51% 21%); /* Navy */
+
   /* Popover - Clean white for contrast */
   --popover: hsl(40 30% 98%);
   --popover-foreground: hsl(205 51% 21%);
-  
+
   /* Primary - Navy blue (main action color) */
-  --primary: hsl(205 51% 21%);             /* Navy #1a3a52 */
-  --primary-foreground: hsl(40 27% 95%);   /* Cream text on navy */
-  
+  --primary: hsl(205 51% 21%); /* Navy #1a3a52 */
+  --primary-foreground: hsl(40 27% 95%); /* Cream text on navy */
+
   /* Secondary - Light cream for subtle backgrounds */
-  --secondary: hsl(37 22% 90%);            /* Soft warm gray */
+  --secondary: hsl(37 22% 90%); /* Soft warm gray */
   --secondary-foreground: hsl(205 51% 21%);
-  
+
   /* Muted - For subtle text and backgrounds */
   --muted: hsl(37 18% 88%);
-  --muted-foreground: hsl(205 30% 40%);    /* Softer navy */
-  
+  --muted-foreground: hsl(205 30% 40%); /* Softer navy */
+
   /* Accent - Warm highlight */
   --accent: hsl(37 25% 92%);
   --accent-foreground: hsl(205 51% 21%);
-  
+
   /* Destructive - Refined red */
   --destructive: hsl(0 65% 51%);
   --destructive-foreground: hsl(0 0% 100%);
-  
+
   /* Success - Professional green */
   --success: hsl(152 60% 36%);
   --success-foreground: hsl(0 0% 100%);
-  
+
   /* Borders - Delicate H-FARM style */
-  --border: hsl(37 15% 82%);               /* #D5D1C8 */
-  --border-subtle: hsl(37 20% 88%);        /* #E5E1D8 */
+  --border: hsl(37 15% 82%); /* #D5D1C8 */
+  --border-subtle: hsl(37 20% 88%); /* #E5E1D8 */
   --input: hsl(37 15% 82%);
-  --ring: hsl(205 51% 21%);                /* Navy focus ring */
-  
+  --ring: hsl(205 51% 21%); /* Navy focus ring */
+
   /* Chart colors */
-  --chart-1: hsl(205 51% 30%);             /* Navy tints */
+  --chart-1: hsl(205 51% 30%); /* Navy tints */
   --chart-2: hsl(152 60% 36%);
   --chart-3: hsl(37 50% 55%);
   --chart-4: hsl(205 40% 50%);
   --chart-5: hsl(152 40% 50%);
-  
+
   /* Sidebar - Cream background */
   --sidebar-background: hsl(40 27% 95%);
   --sidebar-foreground: hsl(205 51% 21%);
@@ -83,52 +83,52 @@
   --sidebar-border: hsl(37 15% 82%);
   --sidebar-ring: hsl(205 51% 21%);
   --sidebar: hsl(40 27% 95%);
-  
+
   /* Border radius - Gentle professional rounding */
-  --radius: 0.375rem;                      /* 6px - subtle rounding */
+  --radius: 0.375rem; /* 6px - subtle rounding */
 }
 
 /* define design tokens (dark mode - Navy-based) */
 .dark {
   /* Dark mode with navy base */
-  --background: hsl(205 45% 12%);          /* Deep navy */
-  --foreground: hsl(40 20% 92%);           /* Warm cream text */
-  
+  --background: hsl(205 45% 12%); /* Deep navy */
+  --foreground: hsl(40 20% 92%); /* Warm cream text */
+
   --card: hsl(205 45% 15%);
   --card-foreground: hsl(40 20% 92%);
-  
+
   --popover: hsl(205 45% 14%);
   --popover-foreground: hsl(40 20% 92%);
-  
-  --primary: hsl(40 25% 90%);              /* Cream buttons in dark mode */
+
+  --primary: hsl(40 25% 90%); /* Cream buttons in dark mode */
   --primary-foreground: hsl(205 45% 12%);
-  
+
   --secondary: hsl(205 35% 20%);
   --secondary-foreground: hsl(40 20% 92%);
-  
+
   --muted: hsl(205 35% 20%);
   --muted-foreground: hsl(40 15% 65%);
-  
+
   --accent: hsl(205 35% 22%);
   --accent-foreground: hsl(40 20% 92%);
-  
+
   --destructive: hsl(0 55% 45%);
   --destructive-foreground: hsl(0 0% 100%);
-  
+
   --success: hsl(152 55% 40%);
   --success-foreground: hsl(0 0% 100%);
-  
+
   --border: hsl(205 30% 25%);
   --border-subtle: hsl(205 25% 22%);
   --input: hsl(205 30% 25%);
   --ring: hsl(40 25% 80%);
-  
+
   --chart-1: hsl(40 50% 60%);
   --chart-2: hsl(152 50% 50%);
   --chart-3: hsl(205 50% 60%);
   --chart-4: hsl(37 50% 55%);
   --chart-5: hsl(152 40% 45%);
-  
+
   --sidebar-background: hsl(205 45% 10%);
   --sidebar-foreground: hsl(40 20% 92%);
   --sidebar-primary: hsl(40 25% 85%);
@@ -150,6 +150,27 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  /* Chat-specific colors - Memoraiz Logo palette */
+  --color-hf-deep-blue: #111042; /* Text color - deep blue connecting pillars */
+  --color-hf-cyan: #43a6cf; /* Primary accent - cyan pillar */
+  --color-hf-cyan-light: #5bb8dd; /* Lighter cyan for gradients */
+  --color-hf-yellow: #ffbe2c; /* Secondary accent - yellow pillar */
+  --color-hf-red: #ff3266; /* Tertiary accent - red/pink pillar */
+  --color-hf-lavender-start: #e8e4f3;
+  --color-hf-lavender-mid: #f5e6e8;
+  --color-hf-beige-end: #f0e8d5;
+  --color-hf-user-gradient-start: #43a6cf; /* Cyan gradient for user */
+  --color-hf-user-gradient-end: #5bb8dd;
+
+  /* Legacy aliases for compatibility */
+  --color-hf-navy: #111042;
+  --color-hf-gold: #43a6cf;
+  --color-hf-gold-light: #5bb8dd;
+
+  /* Chat-specific shadows */
+  --shadow-chat-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-chat-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -268,9 +289,14 @@
   html {
     overflow-x: hidden;
   }
-  
+
   /* H-FARM Typography hierarchy */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-semibold tracking-tight;
   }
 }
@@ -535,7 +561,7 @@
 /* Flashcard inner container that rotates */
 [data-slot="flashcard"] {
   transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-slot="flashcard"][data-state="flipped"] {
@@ -574,7 +600,12 @@
 }
 
 /* Smooth transitions for interactive elements */
-button, a, input, textarea, select, [role="button"] {
+button,
+a,
+input,
+textarea,
+select,
+[role="button"] {
   @apply transition-all duration-200;
 }
 

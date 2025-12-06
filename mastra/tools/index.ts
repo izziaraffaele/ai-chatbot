@@ -9,6 +9,7 @@
  */
 
 import { createDocumentTool } from "./create-document-tool";
+import { hfarmCatalogTool } from "./hfarm-catalog-tool";
 import { listVideosTool } from "./list-videos-tool";
 import { loadInvoiceTool } from "./load-invoice-tool";
 import { requestSuggestionsTool } from "./request-suggestions-tool";
@@ -27,6 +28,7 @@ export type RequestSuggestionsTool = typeof requestSuggestionsTool;
 export type LoadInvoiceTool = typeof loadInvoiceTool;
 export type ListVideosTool = typeof listVideosTool;
 export type SeekVideoTool = typeof seekVideoTool;
+export type HfarmCatalogTool = typeof hfarmCatalogTool;
 
 // Invoice validation tool types
 export type {
@@ -44,7 +46,8 @@ export type MastraToolTypes =
   | RequestSuggestionsTool
   | LoadInvoiceTool
   | ListVideosTool
-  | SeekVideoTool;
+  | SeekVideoTool
+  | HfarmCatalogTool;
 
 /**
  * Tools Map
@@ -58,6 +61,7 @@ export const mastraTools = {
   loadInvoice: loadInvoiceTool,
   listVideos: listVideosTool,
   seekVideo: seekVideoTool,
+  hfarmCatalog: hfarmCatalogTool,
 };
 
 /**
@@ -84,6 +88,7 @@ export const TOOL_NAMES = {
   LOAD_INVOICE: "loadInvoice",
   LIST_VIDEOS: "listVideos",
   SEEK_VIDEO: "seekVideo",
+  HFARM_CATALOG: "hfarmCatalog",
   // Invoice validation tools
   VALIDATE_IBAN: "validateIban",
   VALIDATE_CIG: "validateCig",

@@ -7,6 +7,7 @@ import {
   getGeoHints,
   getRuntimeConfig,
 } from "../../../utils/runtime-utils";
+import { quizAgent } from "../quiz-agent";
 import { hfarmAssistantSystemPrompt } from "./system-prompt";
 
 /**
@@ -20,9 +21,11 @@ import { hfarmAssistantSystemPrompt } from "./system-prompt";
  * - Assist with learning materials and educational content
  * - Support students with general university-related questions
  * - Browse and watch video content from H-FARM courses
+ * - Generate interactive quizzes via the Quiz Generator sub-agent
  *
  * Configuration:
- * - Tools: createDocument, updateDocument, requestSuggestions, listVideos
+ * - Tools: listVideos, seekVideo, hfarmCatalog (semantic search over knowledge base)
+ * - Sub-agents: quizAgent (for interactive quiz generation)
  * - Memory configured with LibSQL for conversation history
  * - Bilingual support (Italian/English)
  */
@@ -39,13 +42,14 @@ export const chatAgent = new Agent({
 
     return prompt;
   },
-  model: "openai/gpt-5.1",
+  model: "openai/gpt-5-chat-latest",
   tools: {
-    createDocument: mastraTools.createDocument,
-    updateDocument: mastraTools.updateDocument,
-    requestSuggestions: mastraTools.requestSuggestions,
     listVideos: mastraTools.listVideos,
     seekVideo: mastraTools.seekVideo,
+    hfarmCatalog: mastraTools.hfarmCatalog,
+  },
+  agents: {
+    quizAgent,
   },
   memory: new Memory({
     storage: new LibSQLStore({

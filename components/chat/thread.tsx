@@ -10,8 +10,42 @@ import { cn } from "@/lib/utils";
 import { ChatComposer } from "./composer";
 
 /**
+ * Header branding with gold avatar and assistant info.
+ * Shows the H-FARM Assistant identity in the header.
+ */
+export const ChatHeaderBranding = ({
+  className,
+  title = "H-FARM Assistant",
+  subtitle = "",
+  ...others
+}: React.ComponentProps<"div"> & {
+  title?: string;
+  subtitle?: string;
+}) => {
+  return (
+    <div className={cn("flex items-center gap-3", className)} {...others}>
+      {/* H-FARM logo */}
+      <img
+        alt="H-FARM"
+        className="h-10 shrink-0 object-contain"
+        height={40}
+        src="/images/hfarm_logo_text.png"
+        width={80}
+      />
+      {/* Title and subtitle */}
+      <div className="min-w-0 flex-1">
+        <h1 className="truncate font-semibold text-hf-deep-blue text-sm">
+          {title}
+        </h1>
+        <p className="truncate text-hf-deep-blue/60 text-xs">{subtitle}</p>
+      </div>
+    </div>
+  );
+};
+
+/**
  * Chat interface container with full-height layout.
- * H-FARM styled with warm cream background and generous spacing.
+ * H-FARM styled with lavender gradient background.
  *
  * @example
  * <ChatThread>
@@ -32,8 +66,9 @@ export const ChatThread = ({
   return (
     <div
       className={cn(
-        // H-FARM chat thread - clean, professional layout
-        "group/thread relative flex h-dvh min-w-0 flex-col overflow-hidden bg-background",
+        // H-FARM chat thread - lavender gradient background
+        "group/thread relative flex h-dvh min-w-0 flex-col overflow-hidden",
+        "bg-gradient-to-br from-hf-lavender-start via-hf-lavender-mid to-hf-beige-end",
         className
       )}
       data-slot="chat-thread"
@@ -45,7 +80,7 @@ export const ChatThread = ({
 
 /**
  * Chat header for navigation and controls.
- * H-FARM styled with subtle border and warm background.
+ * Glass-morphism style with subtle blur effect.
  *
  * @example
  * <ChatThreadHeader>
@@ -63,8 +98,9 @@ export const ChatThreadHeader = ({
   return (
     <header
       className={cn(
-        // H-FARM header - clean with subtle bottom border
-        "flex shrink-0 items-center gap-2 border-b border-border/50 bg-background px-3 py-2 md:px-4",
+        // Glass-morphism header with blur effect
+        "flex shrink-0 items-center gap-2 px-3 py-2 md:px-4",
+        "border-hf-deep-blue/10 border-b bg-white/60 backdrop-blur-sm",
         className
       )}
       data-slot="chat-thread-header"
@@ -75,7 +111,7 @@ export const ChatThreadHeader = ({
 
 /**
  * Main message content area with auto-scroll. Includes ConversationScrollButton.
- * H-FARM styled with generous padding and clean spacing.
+ * Generous padding and clean spacing for messages.
  *
  * @example
  * <ChatThreadContent>
@@ -99,8 +135,8 @@ export const ChatThreadContent = ({
   return (
     <Conversation className={cn("min-h-0 flex-1", className)} {...others}>
       <ConversationContent
-        // H-FARM content area - generous padding, professional spacing
-        className="mx-auto flex max-w-4xl flex-col gap-5 px-4 py-6 md:gap-6 md:px-6"
+        // Chat content area - generous padding, max-width container
+        className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 md:px-6"
         data-slot="chat-thread-content"
       >
         {children}
@@ -112,7 +148,7 @@ export const ChatThreadContent = ({
 
 /**
  * Bottom input container with spacing and z-index layering.
- * H-FARM styled composer area.
+ * Transparent background to show gradient through.
  *
  * @example
  * <ChatThreadComposer>
@@ -130,8 +166,8 @@ export const ChatThreadComposer = ({
   return (
     <div
       className={cn(
-        // H-FARM composer area - clean bottom section
-        "relative z-10 mx-auto flex w-full max-w-4xl shrink-0 gap-2 bg-background px-4 pb-4 md:px-6 md:pb-6",
+        // Composer area - transparent to show gradient, proper spacing
+        "relative z-10 mx-auto flex w-full max-w-4xl shrink-0 gap-2 px-4 pb-6 md:px-6",
         className
       )}
       data-slot="chat-thread-composer"

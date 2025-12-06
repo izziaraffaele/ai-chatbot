@@ -2,6 +2,7 @@ import { getToolName, type ToolUIPart } from "ai";
 import { ActivityTool } from "./activity";
 import { DocumentTool } from "./document";
 import { Fallback } from "./fallback";
+import { HFarmCatalogTool } from "./hfarm-catalog";
 import { ListVideosTool } from "./list-videos";
 import { LoadInvoiceTool } from "./load-invoice";
 import { SeekVideoTool } from "./seek-video";
@@ -16,6 +17,7 @@ export const ToolUI = {
   updateDocument: DocumentTool,
   requestSuggestions: DocumentTool,
   getWeather: Weather,
+  hfarmCatalog: HFarmCatalogTool,
   loadInvoice: LoadInvoiceTool,
   listVideos: ListVideosTool,
   seekVideo: SeekVideoTool,

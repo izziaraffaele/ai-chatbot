@@ -29,7 +29,6 @@ import {
 } from "./chat/composer";
 import { useChatRuntime } from "./chat/context";
 import { ChatAutoResume, ChatRouteParamsHandler } from "./chat/effects";
-import { ChatGreeting } from "./chat/empty";
 import { MessageIterator } from "./chat/iterators";
 import { DataStreamDispatcher } from "./chat/streaming";
 import {
@@ -38,12 +37,14 @@ import {
   ChatSuggestions,
 } from "./chat/suggestions";
 import {
+  ChatHeaderBranding,
   ChatThread,
   ChatThreadComposer,
   ChatThreadContent,
   ChatThreadHeader,
 } from "./chat/thread";
 import { ChatContextUsage } from "./chat/usage";
+import { WelcomeMessage } from "./chat/welcome-message";
 import { AssistantMessage } from "./messages/assistant-message";
 import { UserMessage } from "./messages/user-message";
 import { SidebarToggle } from "./sidebar-toggle";
@@ -58,7 +59,11 @@ import { VisibilitySelector } from "./visibility-selector";
  * This significantly improves performance during sub-agent text streaming.
  */
 const CanvasThreadPlaceholder = memo(
-  function CanvasThreadPlaceholder({ messageCount }: { messageCount: number }) {
+  function CanvasThreadPlaceholderInner({
+    messageCount,
+  }: {
+    messageCount: number;
+  }) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-muted-foreground opacity-50">
         <span className="text-sm">
@@ -182,82 +187,88 @@ export function AssistantChat({
     return getWidgetCategory(activeTabData.kind) === "selector";
   }, [activeTabData]);
 
+  // Disable chat input only during active streaming (allow interaction when waiting for client tool)
+  // Previously used `status !== "ready"` which blocked input during "submitted" state too,
+  // causing a deadlock when waiting for client tools like createActivity (quiz/flashcard)
+  const isChatStreaming = status === "streaming";
+
   const chatInput = (
     <ChatInput
       actions={({ status: inputStatus, hasInput }) => {
+        // During streaming, show stop button (enabled). When ready, show submit (disabled if no input)
+        const isStreamingOrSubmitted =
+          inputStatus === "streaming" || inputStatus === "submitted";
         const submitButton = (
           <ChatComposerAction.Submit
-            disabled={!hasInput}
+            disabled={!hasInput && !isStreamingOrSubmitted}
             status={inputStatus}
           />
         );
 
-        if (hasInput || promptInputMode === "text") {
+        if (hasInput || promptInputMode === "text" || isStreamingOrSubmitted) {
           return submitButton;
         }
 
         if (["speech", "prefer-speech"].includes(promptInputMode)) {
-          return <ChatComposerAction.Speech />;
+          return <ChatComposerAction.Speech disabled={isChatStreaming} />;
         }
 
         return (
-          <div className="flex gap-0.5">
-            <ChatComposerAction.Speech />
+          <div className="flex items-center gap-2">
+            <ChatComposerAction.Speech disabled={isChatStreaming} />
             {submitButton}
           </div>
         );
       }}
+      disabled={isChatStreaming}
       placeholder={t("chat.input.placeholder", "Send a message...")}
       tools={
         <>
-          <ChatComposerTool.AttachmentMenu />
+          <ChatComposerTool.AttachmentMenu disabled={isChatStreaming} />
           <ChatComposerTool.AgentSelector />
         </>
       }
     />
   );
 
-  const chatEmpty = (
-    <ChatGreeting
-      primaryText={t("chat.greeting.title", "Hello there!")}
-      secondaryText={t("chat.greeting.subtitle", "How can I help you today?")}
-    />
-  );
-
   // Render function for messages in main thread (always renders)
+  // WelcomeMessage is always shown, even after the first message
   const renderMainMessages = useMemo(
     () => (
-      <MessageIterator empty={chatEmpty} keyPrefix="main">
-        {({ message, isLastMessage, sender, vote, onVote, isStreaming }) => {
-          const baseProps = {
-            message,
-            isLastMessage,
-            sender,
-            isStreaming,
-          };
+      <>
+        <WelcomeMessage />
+        <MessageIterator keyPrefix="main">
+          {({ message, isLastMessage, sender, vote, onVote, isStreaming }) => {
+            const baseProps = {
+              message,
+              isLastMessage,
+              sender,
+              isStreaming,
+            };
 
-          // Render based on message role
-          if (message.role === "user") {
-            return <UserMessage {...baseProps} isReadonly={isReadonly} />;
-          }
+            // Render based on message role
+            if (message.role === "user") {
+              return <UserMessage {...baseProps} isReadonly={isReadonly} />;
+            }
 
-          if (message.role === "assistant") {
-            return (
-              <AssistantMessage
-                {...baseProps}
-                isReadonly={isReadonly}
-                onVoteAction={onVote}
-                vote={vote}
-              />
-            );
-          }
+            if (message.role === "assistant") {
+              return (
+                <AssistantMessage
+                  {...baseProps}
+                  isReadonly={isReadonly}
+                  onVoteAction={onVote}
+                  vote={vote}
+                />
+              );
+            }
 
-          // Skip other message types
-          return null;
-        }}
-      </MessageIterator>
+            // Skip other message types
+            return null;
+          }}
+        </MessageIterator>
+      </>
     ),
-    [chatEmpty, isReadonly]
+    [isReadonly]
   );
 
   // Render the active widget content
@@ -321,28 +332,33 @@ export function AssistantChat({
           <ChatThreadHeader>
             <SidebarToggle />
 
-            {(!open || windowWidth < 768) && (
-              <Button
-                asChild
-                className="order-2 ml-auto h-8 px-2 md:order-1 md:ml-0 md:h-fit md:px-2"
-                variant="outline"
-              >
-                <Link href="/">
-                  <PlusIcon />
-                  <span className="md:sr-only">
-                    {t("sidebar.buttonNewChat", "New Chat")}
-                  </span>
-                </Link>
-              </Button>
-            )}
+            {/* Header branding - hidden on mobile when sidebar is closed */}
+            <ChatHeaderBranding className="hidden md:flex" />
 
-            {!isReadonly && (
-              <VisibilitySelector
-                className="order-1 md:order-2"
-                onValueChange={setVisibilityType}
-                value={visibilityType}
-              />
-            )}
+            {/* Right side controls */}
+            <div className="ml-auto flex items-center gap-2">
+              {(!open || windowWidth < 768) && (
+                <Button
+                  asChild
+                  className="h-8 px-2 md:h-fit md:px-2"
+                  variant="outline"
+                >
+                  <Link href="/">
+                    <PlusIcon />
+                    <span className="md:sr-only">
+                      {t("sidebar.buttonNewChat", "New Chat")}
+                    </span>
+                  </Link>
+                </Button>
+              )}
+
+              {!isReadonly && (
+                <VisibilitySelector
+                  onValueChange={setVisibilityType}
+                  value={visibilityType}
+                />
+              )}
+            </div>
           </ChatThreadHeader>
 
           <ChatThreadContent>{renderMainMessages}</ChatThreadContent>
@@ -368,43 +384,47 @@ export function AssistantChat({
               onMouseEnter={handleCanvasThreadMouseEnter}
             >
               {/* Only render messages when canvas thread is active to avoid double-rendering during streaming */}
-              {canvasThreadActive ? (
-                <MessageIterator empty={chatEmpty} keyPrefix="canvas">
-                  {({
-                    message,
-                    isLastMessage,
-                    sender,
-                    vote,
-                    onVote,
-                    isStreaming,
-                  }) => {
-                    const baseProps = {
+              {/* Always render when no messages to show welcome message on initial load */}
+              {canvasThreadActive || messages.length === 0 ? (
+                <>
+                  <WelcomeMessage />
+                  <MessageIterator keyPrefix="canvas">
+                    {({
                       message,
                       isLastMessage,
                       sender,
+                      vote,
+                      onVote,
                       isStreaming,
-                    };
+                    }) => {
+                      const baseProps = {
+                        message,
+                        isLastMessage,
+                        sender,
+                        isStreaming,
+                      };
 
-                    if (message.role === "user") {
-                      return (
-                        <UserMessage {...baseProps} isReadonly={isReadonly} />
-                      );
-                    }
+                      if (message.role === "user") {
+                        return (
+                          <UserMessage {...baseProps} isReadonly={isReadonly} />
+                        );
+                      }
 
-                    if (message.role === "assistant") {
-                      return (
-                        <AssistantMessage
-                          {...baseProps}
-                          isReadonly={isReadonly}
-                          onVoteAction={onVote}
-                          vote={vote}
-                        />
-                      );
-                    }
+                      if (message.role === "assistant") {
+                        return (
+                          <AssistantMessage
+                            {...baseProps}
+                            isReadonly={isReadonly}
+                            onVoteAction={onVote}
+                            vote={vote}
+                          />
+                        );
+                      }
 
-                    return null;
-                  }}
-                </MessageIterator>
+                      return null;
+                    }}
+                  </MessageIterator>
+                </>
               ) : (
                 /* Lightweight placeholder - memoized to prevent re-renders during streaming */
                 <CanvasThreadPlaceholder messageCount={messages.length} />

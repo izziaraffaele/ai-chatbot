@@ -3,9 +3,9 @@
 import equal from "fast-deep-equal";
 import { Clock, Play } from "lucide-react";
 import { memo, useCallback, useEffect, useRef } from "react";
-import { useCanvasTabs, getTabsState } from "@/hooks/use-canvas-tabs";
-import { seekTo } from "@/lib/video/seek-store";
+import { getTabsState, useCanvasTabs } from "@/hooks/use-canvas-tabs";
 import { cn } from "@/lib/utils";
+import { seekTo } from "@/lib/video/seek-store";
 import type { ChatToolProps } from "./types";
 
 /**
@@ -46,8 +46,10 @@ function createVideoMetadata(output: SeekVideoOutput) {
     .replaceAll(/-+/g, "-")
     .replace(/^-|-$/g, "");
 
-  // Video URL from CDN
-  const mp4Filename = `${output.videoFolder}.mp4`.replaceAll(" ", "+");
+  // Video URL from CDN - spaces as + then URL-encoded
+  const mp4Filename = encodeURIComponent(
+    `${output.videoFolder}.mp4`.replaceAll(" ", "+")
+  );
   const videoUrl = `${CDN_VIDEO_URL}/${mp4Filename}`;
 
   return {
@@ -218,4 +220,3 @@ function PureSeekVideoTool({ part }: ChatToolProps) {
 export const SeekVideoTool = memo(PureSeekVideoTool, (prev, next) => {
   return equal(prev.part, next.part);
 });
-

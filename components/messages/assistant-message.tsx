@@ -10,6 +10,7 @@ import {
   ChatMessage,
   ChatMessageAvatar,
   ChatMessageBody,
+  ChatMessageBubble,
   type ChatMessageMode,
   ChatMessageToolbar,
 } from "@/components/chat/message";
@@ -49,14 +50,15 @@ function PureAssistantMessage({
 }: AssistantMessageProps) {
   const [mode, setMode] = useState<ChatMessageMode>("view");
 
-  const avatar = sender?.avatar || (
+  // Default avatar is the animated memo.gif
+  const avatar = sender?.avatar ?? (
     <Image
-      alt="Assistente Comune di Faenza"
-      className="size-8 rounded-full object-cover"
-      height={32}
-      src="/images/logo-faenza.jpg"
+      alt="H-FARM Assistant"
+      className="object-contain"
+      height={60}
+      src="/images/memo.gif"
       unoptimized
-      width={32}
+      width={60}
     />
   );
 
@@ -73,17 +75,17 @@ function PureAssistantMessage({
       isStreaming={isMessageStreaming}
       mode={mode}
     >
-      {avatar && (
-        <div
-          className={cn("flex shrink-0 items-end", {
-            "pb-9": !isMessageStreaming && hasText,
-          })}
-        >
-          <ChatMessageAvatar className="text-[#FFBE2C]">
-            {avatar}
-          </ChatMessageAvatar>
-        </div>
-      )}
+      {/* Avatar */}
+      <div
+        className={cn("flex shrink-0 items-end", {
+          "pb-9": !isMessageStreaming && hasText,
+        })}
+      >
+        <ChatMessageAvatar className="size-14 rounded-none border-0 bg-transparent shadow-none ring-0">
+          {avatar}
+        </ChatMessageAvatar>
+      </div>
+
       <ChatMessageBody
         className={cn("grow", {
           "md:gap-4": hasText,
@@ -92,7 +94,7 @@ function PureAssistantMessage({
         {/* Attachments */}
         <ChatMessagePart.Attachments parts={message.parts} />
 
-        {/* Message parts */}
+        {/* Message parts wrapped in bubble for text content */}
         <MessagePartIterator
           isLastMessage={isLastMessage}
           isStreaming={isStreaming}
@@ -102,10 +104,12 @@ function PureAssistantMessage({
             switch (part.type) {
               case "text":
                 return (
-                  <ChatMessagePart.Text
-                    mode={isReadonly ? "view" : mode}
-                    part={part}
-                  />
+                  <ChatMessageBubble variant="assistant">
+                    <ChatMessagePart.Text
+                      mode={isReadonly ? "view" : mode}
+                      part={part}
+                    />
+                  </ChatMessageBubble>
                 );
 
               case "reasoning":

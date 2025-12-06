@@ -11,8 +11,11 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       className={cn(
-        // H-FARM input group - cream background, subtle border
-        "group/input-group relative flex w-full items-center rounded-md border border-border bg-card/50 shadow-sm outline-none transition-all duration-200",
+        // Chat input group - rounded, clearly white background, shadow
+        "group/input-group relative flex w-full items-center",
+        "rounded-3xl border border-hf-deep-blue/5 bg-white",
+        "shadow-md",
+        "outline-none transition-all duration-200",
         "h-9 has-[>textarea]:h-auto",
 
         // Variants based on alignment.
@@ -21,14 +24,14 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
         "has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-start]]:[&>input]:pb-3",
         "has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3",
 
-        // Focus state - H-FARM navy ring
-        "has-[[data-slot=input-group-control]:focus-visible]:ring-2 has-[[data-slot=input-group-control]:focus-visible]:ring-primary/20 has-[[data-slot=input-group-control]:focus-visible]:border-primary",
+        // Focus state - navy ring
+        "has-[[data-slot=input-group-control]:focus-visible]:border-hf-deep-blue/20 has-[[data-slot=input-group-control]:focus-visible]:ring-2 has-[[data-slot=input-group-control]:focus-visible]:ring-hf-deep-blue/10",
 
         // Error state.
         "has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-destructive/20 dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40",
 
         // Dark mode
-        "dark:bg-card/30 dark:border-border",
+        "dark:border-border dark:bg-card",
 
         className
       )}
@@ -40,18 +43,18 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const inputGroupAddonVariants = cva(
-  "flex h-auto cursor-text select-none items-center justify-center gap-2 py-1.5 font-medium text-muted-foreground text-sm group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-3px)] [&>svg:not([class*='size-'])]:size-4",
+  "flex h-auto cursor-text select-none items-center justify-center gap-2 py-1.5 font-medium text-hf-deep-blue/70 text-sm group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-3px)] [&>svg:not([class*='size-'])]:size-4",
   {
     variants: {
       align: {
         "inline-start":
-          "order-first pl-3 has-[>button]:ml-[-0.45rem] has-[>kbd]:ml-[-0.35rem]",
+          "order-first pl-4 has-[>button]:ml-[-0.45rem] has-[>kbd]:ml-[-0.35rem]",
         "inline-end":
-          "order-last pr-3 has-[>button]:mr-[-0.4rem] has-[>kbd]:mr-[-0.35rem]",
+          "order-last pr-4 has-[>button]:mr-[-0.4rem] has-[>kbd]:mr-[-0.35rem]",
         "block-start":
-          "order-first w-full justify-start px-3 pt-3 group-has-[>input]/input-group:pt-2.5 [.border-b]:pb-3",
+          "order-first w-full justify-start px-5 pt-4 group-has-[>input]/input-group:pt-3 [.border-b]:pb-3",
         "block-end":
-          "order-last w-full justify-start px-3 pb-3 group-has-[>input]/input-group:pb-2.5 [.border-t]:pt-3",
+          "order-last w-full justify-start border-hf-deep-blue/5 border-t bg-white px-5 pt-4 pb-4 group-has-[>input]/input-group:pb-3",
       },
     },
     defaultVariants: {
@@ -83,15 +86,14 @@ function InputGroupAddon({
 }
 
 const inputGroupButtonVariants = cva(
-  "flex items-center gap-2 text-sm shadow-none transition-all duration-200",
+  "flex items-center gap-2 text-hf-deep-blue text-sm shadow-none transition-all duration-200",
   {
     variants: {
       size: {
-        xs: "h-6 gap-1 rounded-md px-2 has-[>svg]:px-2 [&>svg:not([class*='size-'])]:size-3.5",
-        sm: "h-8 gap-1.5 rounded-md px-2.5 has-[>svg]:px-2.5",
-        "icon-xs":
-          "size-6 rounded-md p-0 has-[>svg]:p-0",
-        "icon-sm": "size-8 p-0 has-[>svg]:p-0",
+        xs: "h-6 gap-1 rounded-full px-2 has-[>svg]:px-2 [&>svg:not([class*='size-'])]:size-3.5",
+        sm: "h-8 gap-1.5 rounded-full px-2.5 has-[>svg]:px-2.5",
+        "icon-xs": "size-6 rounded-full p-0 has-[>svg]:p-0",
+        "icon-sm": "size-8 rounded-full p-0 has-[>svg]:p-0",
       },
     },
     defaultVariants: {
@@ -154,7 +156,11 @@ function InputGroupTextarea({
   return (
     <Textarea
       className={cn(
-        "flex-1 resize-none rounded-none border-0 bg-transparent py-3 shadow-none focus-visible:ring-0 dark:bg-transparent",
+        "flex-1 resize-none rounded-t-3xl border-0 px-5 py-4",
+        "text-hf-deep-blue text-sm placeholder:text-hf-deep-blue/50",
+        "shadow-none focus-visible:ring-0",
+        // Explicit white background - placed at end to override base styles
+        "bg-white dark:bg-card",
         className
       )}
       data-slot="input-group-control"

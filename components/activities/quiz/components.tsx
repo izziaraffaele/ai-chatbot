@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 
 // ============================================================================
-// H-FARM STYLED QUIZ COMPONENTS
-// Sophisticated Academic - clean, professional quiz UI
+// MEMORAIZ STYLED QUIZ COMPONENTS
+// Vibrant brand colors - cyan accent, deep blue text
 // ============================================================================
 
 // Question
@@ -19,8 +19,8 @@ function QuizQuestion({
   return (
     <div
       className={cn(
-        // H-FARM quiz question - clean typography
-        "flex flex-col gap-6 text-foreground",
+        // Memoraiz quiz question - clean typography
+        "flex flex-col gap-6 text-hf-deep-blue",
         className
       )}
       data-slot="quiz-question"
@@ -41,7 +41,7 @@ function QuizChoices({ children, className, ...props }: QuizChoicesProps) {
   return (
     <div
       className={cn(
-        // H-FARM choices container - consistent spacing
+        // Memoraiz choices container - consistent spacing
         "flex flex-col gap-3",
         className
       )}
@@ -72,44 +72,44 @@ function QuizChoice({
   },
   ...props
 }: QuizChoiceProps) {
-  // H-FARM choice base styles
+  // Memoraiz choice base styles
   const baseClasses = cn(
-    "w-full px-4 py-3.5 rounded-md bg-card text-left",
-    "border border-border text-foreground",
+    "w-full rounded-md bg-card px-4 py-3.5 text-left",
+    "border border-border text-hf-deep-blue",
     "transition-all duration-200 ease-out",
-    "focus:outline-none focus:ring-2 focus:ring-primary/20"
+    "focus:outline-none focus:ring-2 focus:ring-hf-cyan/20"
   );
 
   const getStateClasses = () => {
-    // Correct answer - H-FARM success state
+    // Correct answer - success state
     if (isCorrect) {
       return cn(
         "border-success bg-success/10 text-success",
         "font-medium shadow-sm"
       );
     }
-    // Wrong answer - H-FARM error state
+    // Wrong answer - error state
     if (isWrong) {
       return cn(
         "border-destructive bg-destructive/10 text-destructive",
         "font-medium shadow-sm"
       );
     }
-    // Selected state - H-FARM navy accent
+    // Selected state - Memoraiz cyan accent
     if (selected) {
       return cn(
-        "border-primary bg-primary/5 text-primary",
-        "ring-2 ring-primary/20 shadow-sm"
+        "border-hf-cyan bg-hf-cyan/10 text-hf-cyan",
+        "shadow-sm ring-2 ring-hf-cyan/20"
       );
     }
     // Disabled state
     if (disabled) {
       return "opacity-50 cursor-not-allowed";
     }
-    // Default hover state - H-FARM subtle interaction
+    // Default hover state - Memoraiz subtle interaction
     return cn(
-      "hover:border-primary/40 hover:bg-accent/50",
-      "hover:shadow-sm hover:-translate-y-0.5",
+      "hover:border-hf-cyan/40 hover:bg-hf-cyan/5",
+      "hover:-translate-y-0.5 hover:shadow-sm",
       "cursor-pointer"
     );
   };
@@ -140,9 +140,9 @@ function QuizHint({ className, hint, ...props }: QuizHintProps) {
   return (
     <div
       className={cn(
-        // H-FARM hint style - subtle, informative
-        "text-muted-foreground text-sm italic",
-        "bg-muted/30 rounded-md px-3 py-2",
+        // Memoraiz hint style - subtle, informative
+        "text-hf-deep-blue/70 text-sm italic",
+        "rounded-md bg-hf-cyan/5 px-3 py-2",
         className
       )}
       data-slot="quiz-hint"
@@ -168,7 +168,7 @@ function QuizExplanation({
   return (
     <div
       className={cn(
-        // H-FARM explanation style - contextual feedback
+        // Memoraiz explanation style - contextual feedback
         "rounded-md px-4 py-3 text-sm leading-relaxed",
         isCorrect
           ? "border border-success/30 bg-success/10 text-success-foreground"
@@ -178,7 +178,7 @@ function QuizExplanation({
       data-slot="quiz-explanation"
       {...props}
     >
-      <div className="mb-1 font-semibold text-xs uppercase tracking-wider">
+      <div className="mb-1 font-semibold text-hf-deep-blue/70 text-xs uppercase tracking-wider">
         Spiegazione
       </div>
       {explanation}
@@ -186,11 +186,15 @@ function QuizExplanation({
   );
 }
 
-function QuizHeader({ children, className, ...props }: React.ComponentProps<"div">) {
+function QuizHeader({
+  children,
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
-    <div 
+    <div
       className={cn("space-y-2", className)}
-      data-slot="quiz-header" 
+      data-slot="quiz-header"
       {...props}
     >
       {children}
@@ -206,8 +210,8 @@ function QuizHeaderTitle({
   return (
     <div
       className={cn(
-        // H-FARM header title - uppercase label style
-        "text-xs font-semibold uppercase tracking-wider text-muted-foreground",
+        // Memoraiz header title - uppercase label style
+        "font-semibold text-hf-deep-blue/60 text-xs uppercase tracking-wider",
         className
       )}
       data-slot="quiz-header-title"

@@ -17,7 +17,8 @@
     "db:pull": "drizzle-kit pull",
     "db:check": "drizzle-kit check",
     "db:up": "drizzle-kit up",
-    "test": "export PLAYWRIGHT=True && pnpm exec playwright test"
+    "test": "export PLAYWRIGHT=True && pnpm exec playwright test",
+    "catalog:ingest:hfarm": "tsx mastra/scripts/ingest-hfarm-catalog.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.31",

@@ -22,8 +22,8 @@ import { FlashcardProvider, useFlashcardContext } from "./player";
 import type { UIFlashcardActivity } from "./schema";
 
 // ============================================================================
-// H-FARM STYLED FLASHCARD ACTIVITY
-// Sophisticated Academic - clean, professional flashcard experience
+// MEMORAIZ STYLED FLASHCARD ACTIVITY
+// Vibrant brand colors - cyan accent, deep blue text
 // ============================================================================
 
 type FlashcardActivityProps = {
@@ -40,6 +40,8 @@ type FlashcardActivityProps = {
     studiedAt: Date;
   }>;
   onFeedback?: (value: number) => void;
+  /** Whether the flashcard activity is disabled (e.g., during chat streaming) */
+  disabled?: boolean;
 };
 
 /**
@@ -51,6 +53,7 @@ export function FlashcardActivity(props: FlashcardActivityProps) {
     defaultScreen = "welcome",
     sessions = [],
     onFeedback,
+    disabled = false,
     ...others
   } = props;
 
@@ -83,6 +86,7 @@ export function FlashcardActivity(props: FlashcardActivityProps) {
     <FlashcardProvider config={config}>
       <FlashcardActivityContent
         description={activity.description}
+        disabled={disabled}
         onFeedback={onFeedback}
         title={activity.title}
       />
@@ -97,10 +101,12 @@ function FlashcardActivityContent({
   title,
   description,
   onFeedback,
+  disabled = false,
 }: {
   title?: React.ReactNode;
   description?: React.ReactNode;
   onFeedback?: (value: number) => void;
+  disabled?: boolean;
 }) {
   const { flashcard } = useFlashcardContext();
   const totalCards = flashcard.config.cards.length;
@@ -110,6 +116,7 @@ function FlashcardActivityContent({
       <FlashcardActivityWelcomeScreen
         cards={flashcard.config.cards}
         description={description}
+        disabled={disabled}
         onCancel={flashcard.handlers.cancel}
         onStart={flashcard.handlers.start}
         shuffle={flashcard.config.shuffle}
@@ -129,27 +136,28 @@ function FlashcardActivityContent({
     );
   }
 
-  // Flashcard study screen - H-FARM styled
+  // Flashcard study screen - Memoraiz styled
   if (flashcard.currentCard) {
     const progressPercent = flashcard.progress.percentage;
-    const showHint = flashcard.config.options?.showHints && flashcard.currentCard.hint;
+    const showHint =
+      flashcard.config.options?.showHints && flashcard.currentCard.hint;
 
     return (
       <div className="flex flex-col">
-        {/* H-FARM Progress Header */}
-        <div className="border-b border-border bg-muted/30 px-6 py-4">
+        {/* Memoraiz Progress Header */}
+        <div className="border-border border-b bg-hf-cyan/5 px-6 py-4">
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="font-semibold text-hf-deep-blue/60 text-xs uppercase tracking-wider">
               {title || "Flashcards"}
             </span>
-            <span className="text-sm font-medium text-muted-foreground">
+            <span className="font-medium text-hf-deep-blue/70 text-sm">
               {flashcard.currentIndex + 1} / {totalCards}
             </span>
           </div>
-          {/* Progress bar - H-FARM navy */}
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+          {/* Progress bar - Memoraiz cyan */}
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-hf-cyan/20">
             <div
-              className="h-full bg-primary transition-all duration-300 ease-out"
+              className="h-full bg-hf-cyan transition-all duration-300 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -160,41 +168,52 @@ function FlashcardActivityContent({
           <div className="relative mx-auto max-w-lg">
             {/* Hint button positioned outside the card (top right) */}
             {showHint && (
-              <div className="absolute -right-20 -top-2 z-10">
+              <div className="-right-20 -top-2 absolute z-10">
                 <Flashcard.HintButton hint={flashcard.currentCard.hint ?? ""} />
               </div>
             )}
-            
+
             <Flashcard
+              disabled={disabled}
               flipped={flashcard.flipped}
-              onClick={() => flashcard.handlers.flip()}
+              onClick={() => !disabled && flashcard.handlers.flip()}
               size="lg"
             >
               <Flashcard.Front>
                 <Flashcard.Content>
                   <Flashcard.Label>Domanda</Flashcard.Label>
-                  <Flashcard.Title>{flashcard.currentCard.front}</Flashcard.Title>
-                  <Flashcard.RevealButton onClick={(e) => {
-                    e.stopPropagation();
-                    flashcard.handlers.flip();
-                  }} />
+                  <Flashcard.Title>
+                    {flashcard.currentCard.front}
+                  </Flashcard.Title>
+                  <Flashcard.RevealButton
+                    disabled={disabled}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!disabled) {
+                        flashcard.handlers.flip();
+                      }
+                    }}
+                  />
                 </Flashcard.Content>
               </Flashcard.Front>
               <Flashcard.Back>
                 <Flashcard.Content>
                   <Flashcard.Label>Risposta</Flashcard.Label>
-                  <Flashcard.Title>{flashcard.currentCard.back}</Flashcard.Title>
+                  <Flashcard.Title>
+                    {flashcard.currentCard.back}
+                  </Flashcard.Title>
                 </Flashcard.Content>
               </Flashcard.Back>
             </Flashcard>
           </div>
         </div>
 
-        {/* Navigation - H-FARM styled */}
-        <div className="border-t border-border bg-muted/30 px-6 py-4">
+        {/* Navigation - Memoraiz styled */}
+        <div className="border-border border-t bg-hf-cyan/5 px-6 py-4">
           <div className="flex items-center justify-between">
             <Button
-              disabled={flashcard.currentIndex <= 0}
+              className="border-hf-cyan/30 text-hf-deep-blue hover:bg-hf-cyan/10"
+              disabled={disabled || flashcard.currentIndex <= 0}
               onClick={flashcard.handlers.previous}
               size="sm"
               variant="outline"
@@ -203,43 +222,49 @@ function FlashcardActivityContent({
               Precedente
             </Button>
 
-            <div className="text-sm text-muted-foreground">
+            <div className="text-hf-deep-blue/60 text-sm">
               Clicca la card per girare
             </div>
 
             <div className="flex gap-2">
-              {flashcard.config.options?.trackConfidence && flashcard.hasSeenAnswer && (
-                <>
-                  <Button
-                    onClick={() => flashcard.handlers.rate("low")}
-                    size="sm"
-                    variant="outline"
-                    className="border-destructive/30 text-destructive hover:bg-destructive/10"
-                  >
-                    <ThumbsDown className="mr-1 size-3" />
-                    Difficile
-                  </Button>
-                  <Button
-                    onClick={() => flashcard.handlers.rate("medium")}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Star className="mr-1 size-3" />
-                    Ok
-                  </Button>
-                  <Button
-                    onClick={() => flashcard.handlers.rate("high")}
-                    size="sm"
-                    className="bg-success text-success-foreground hover:bg-success/90"
-                  >
-                    <Star className="mr-1 size-3" />
-                    Facile
-                  </Button>
-                </>
-              )}
-              <Button 
-                disabled={!flashcard.hasSeenAnswer}
-                onClick={flashcard.handlers.next} 
+              {flashcard.config.options?.trackConfidence &&
+                flashcard.hasSeenAnswer && (
+                  <>
+                    <Button
+                      className="border-hf-red/30 text-hf-red hover:bg-hf-red/10"
+                      disabled={disabled}
+                      onClick={() => flashcard.handlers.rate("low")}
+                      size="sm"
+                      variant="outline"
+                    >
+                      <ThumbsDown className="mr-1 size-3" />
+                      Difficile
+                    </Button>
+                    <Button
+                      className="border-hf-yellow/30 text-hf-yellow hover:bg-hf-yellow/10"
+                      disabled={disabled}
+                      onClick={() => flashcard.handlers.rate("medium")}
+                      size="sm"
+                      variant="outline"
+                    >
+                      <Star className="mr-1 size-3" />
+                      Ok
+                    </Button>
+                    <Button
+                      className="bg-success text-success-foreground hover:bg-success/90"
+                      disabled={disabled}
+                      onClick={() => flashcard.handlers.rate("high")}
+                      size="sm"
+                    >
+                      <Star className="mr-1 size-3" />
+                      Facile
+                    </Button>
+                  </>
+                )}
+              <Button
+                className="bg-hf-cyan text-white hover:bg-hf-cyan-light"
+                disabled={disabled || !flashcard.hasSeenAnswer}
+                onClick={flashcard.handlers.next}
                 size="sm"
               >
                 {flashcard.currentIndex < totalCards - 1
@@ -309,7 +334,7 @@ export function FlashcardActivityEnd(props: {
 }
 
 // ============================================================================
-// Screen Components - H-FARM Styled
+// Screen Components - Memoraiz Styled
 // ============================================================================
 
 type FlashcardActivityWelcomeScreenProps = {
@@ -319,6 +344,7 @@ type FlashcardActivityWelcomeScreenProps = {
   shuffle?: boolean;
   onStart: () => void;
   onCancel: () => void;
+  disabled?: boolean;
 };
 
 type FlashcardActivityEndScreenProps = {
@@ -338,7 +364,7 @@ type FlashcardActivityEndScreenProps = {
 };
 
 /**
- * Flashcard welcome screen - H-FARM styled
+ * Flashcard welcome screen - Memoraiz styled
  */
 function FlashcardActivityWelcomeScreen({
   title,
@@ -347,6 +373,7 @@ function FlashcardActivityWelcomeScreen({
   shuffle,
   onCancel,
   onStart,
+  disabled = false,
 }: FlashcardActivityWelcomeScreenProps) {
   const t = useTranslations();
 
@@ -365,43 +392,41 @@ function FlashcardActivityWelcomeScreen({
       {/* Header */}
       <div>
         {title && (
-          <h2 className="mb-3 font-semibold text-2xl tracking-tight text-foreground">
+          <h2 className="mb-3 font-semibold text-2xl text-hf-deep-blue tracking-tight">
             {title}
           </h2>
         )}
         {description && (
-          <p className="text-muted-foreground leading-relaxed">
-            {description}
-          </p>
+          <p className="text-hf-deep-blue/70 leading-relaxed">{description}</p>
         )}
       </div>
 
-      {/* Stats - H-FARM card style */}
-      <div className="rounded-md border border-border bg-card/50 p-5">
-        <div className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      {/* Stats - Memoraiz card style */}
+      <div className="rounded-md border border-hf-cyan/20 bg-hf-cyan/5 p-5">
+        <div className="mb-4 font-semibold text-hf-deep-blue/60 text-xs uppercase tracking-wider">
           Dettagli Studio
         </div>
         <div className="space-y-3">
-          <div className="flex items-center gap-3 text-foreground">
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary/10">
-              <BookOpen className="size-4 text-primary" />
+          <div className="flex items-center gap-3 text-hf-deep-blue">
+            <div className="flex size-8 items-center justify-center rounded-md bg-hf-cyan/10">
+              <BookOpen className="size-4 text-hf-cyan" />
             </div>
             <span className="font-medium">
               {cards.length} {t("flashcards.welcome.cards", "carte")}
             </span>
           </div>
 
-          <div className="flex items-center gap-3 text-foreground">
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary/10">
-              <Clock className="size-4 text-primary" />
+          <div className="flex items-center gap-3 text-hf-deep-blue">
+            <div className="flex size-8 items-center justify-center rounded-md bg-hf-cyan/10">
+              <Clock className="size-4 text-hf-cyan" />
             </div>
             <span className="font-medium">~{estimatedTime} stimati</span>
           </div>
 
           {shuffle && (
-            <div className="flex items-center gap-3 text-foreground">
-              <div className="flex size-8 items-center justify-center rounded-md bg-primary/10">
-                <Shuffle className="size-4 text-primary" />
+            <div className="flex items-center gap-3 text-hf-deep-blue">
+              <div className="flex size-8 items-center justify-center rounded-md bg-hf-cyan/10">
+                <Shuffle className="size-4 text-hf-cyan" />
               </div>
               <span className="font-medium">Ordine casuale</span>
             </div>
@@ -411,11 +436,21 @@ function FlashcardActivityWelcomeScreen({
 
       {/* Actions */}
       <div className="flex items-center gap-3">
-        <Button onClick={onStart} size="lg">
+        <Button
+          className="bg-hf-cyan text-white hover:bg-hf-cyan-light"
+          disabled={disabled}
+          onClick={onStart}
+          size="lg"
+        >
           <Play className="mr-2 size-4" />
           {t("flashcards.welcome.start", "Inizia Studio")}
         </Button>
-        <Button onClick={onCancel} variant="ghost">
+        <Button
+          className="text-hf-deep-blue/70 hover:text-hf-deep-blue"
+          disabled={disabled}
+          onClick={onCancel}
+          variant="ghost"
+        >
           {t("flashcards.welcome.cancel", "Annulla")}
         </Button>
       </div>
@@ -424,7 +459,7 @@ function FlashcardActivityWelcomeScreen({
 }
 
 /**
- * Flashcard end screen - H-FARM styled
+ * Flashcard end screen - Memoraiz styled
  */
 function FlashcardActivityEndScreen({
   onFeedback,
@@ -447,7 +482,7 @@ function FlashcardActivityEndScreen({
     return `${hours}h ${remainingMinutes}m`;
   };
 
-  const percentage =
+  const _percentage =
     totalCards > 0 ? Math.round((stats.studiedCards / totalCards) * 100) : 0;
 
   const hasConfidence =
@@ -457,47 +492,47 @@ function FlashcardActivityEndScreen({
 
   return (
     <div className="space-y-8 p-6" data-slot="flashcard-end-screen">
-      {/* Header - H-FARM styled */}
+      {/* Header - Memoraiz styled */}
       <div className="text-center">
-        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
-          <BookOpen className="size-8 text-primary" />
+        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-hf-cyan/10">
+          <BookOpen className="size-8 text-hf-cyan" />
         </div>
-        <h2 className="mb-2 font-semibold text-2xl tracking-tight text-foreground">
+        <h2 className="mb-2 font-semibold text-2xl text-hf-deep-blue tracking-tight">
           {t("flashcards.completed.title", "Studio completato!")}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-hf-deep-blue/70">
           Ottimo lavoro con le tue flashcards
         </p>
       </div>
 
-      {/* Score display - H-FARM prominent */}
+      {/* Score display - Memoraiz prominent */}
       <div className="text-center">
-        <div className="mb-2 font-bold text-5xl text-primary">
+        <div className="mb-2 font-bold text-5xl text-hf-cyan">
           {stats.studiedCards}
         </div>
-        <div className="text-lg text-muted-foreground">
+        <div className="text-hf-deep-blue/70 text-lg">
           carte studiate su {totalCards}
         </div>
       </div>
 
-      {/* Stats - H-FARM cards */}
+      {/* Stats - Memoraiz cards */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-md border border-border bg-card/50 p-4 text-center">
-          <Clock className="mx-auto mb-2 size-5 text-muted-foreground" />
-          <div className="font-semibold text-xl text-foreground">
+        <div className="rounded-md border border-hf-cyan/20 bg-hf-cyan/5 p-4 text-center">
+          <Clock className="mx-auto mb-2 size-5 text-hf-cyan" />
+          <div className="font-semibold text-hf-deep-blue text-xl">
             {formatTime(stats.totalTime)}
           </div>
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">
+          <div className="text-hf-deep-blue/60 text-xs uppercase tracking-wider">
             Tempo totale
           </div>
         </div>
 
-        <div className="rounded-md border border-border bg-card/50 p-4 text-center">
-          <BarChart3 className="mx-auto mb-2 size-5 text-muted-foreground" />
-          <div className="font-semibold text-xl text-foreground">
+        <div className="rounded-md border border-hf-cyan/20 bg-hf-cyan/5 p-4 text-center">
+          <BarChart3 className="mx-auto mb-2 size-5 text-hf-cyan" />
+          <div className="font-semibold text-hf-deep-blue text-xl">
             {formatTime(Math.round(stats.avgTimePerCard))}
           </div>
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">
+          <div className="text-hf-deep-blue/60 text-xs uppercase tracking-wider">
             Media/carta
           </div>
         </div>
@@ -505,27 +540,33 @@ function FlashcardActivityEndScreen({
 
       {/* Confidence distribution */}
       {hasConfidence && (
-        <div className="rounded-md border border-border bg-card/50 p-4">
-          <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="rounded-md border border-hf-cyan/20 bg-hf-cyan/5 p-4">
+          <div className="mb-3 font-semibold text-hf-deep-blue/60 text-xs uppercase tracking-wider">
             {t("flashcards.completed.confidence", "Livelli di confidenza")}
           </div>
-          <div className="flex items-center justify-center gap-6 text-sm">
+          <div className="flex items-center justify-center gap-6 text-hf-deep-blue text-sm">
             {stats.confidenceDistribution.high > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-success">🌟</span>
-                <span className="font-medium">{stats.confidenceDistribution.high} Facili</span>
+                <span className="font-medium">
+                  {stats.confidenceDistribution.high} Facili
+                </span>
               </div>
             )}
             {stats.confidenceDistribution.medium > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">⭐</span>
-                <span className="font-medium">{stats.confidenceDistribution.medium} Ok</span>
+                <span className="text-hf-yellow">⭐</span>
+                <span className="font-medium">
+                  {stats.confidenceDistribution.medium} Ok
+                </span>
               </div>
             )}
             {stats.confidenceDistribution.low > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-destructive">💪</span>
-                <span className="font-medium">{stats.confidenceDistribution.low} Difficili</span>
+                <span className="text-hf-red">💪</span>
+                <span className="font-medium">
+                  {stats.confidenceDistribution.low} Difficili
+                </span>
               </div>
             )}
           </div>
@@ -535,13 +576,13 @@ function FlashcardActivityEndScreen({
       {/* Feedback */}
       {onFeedback && (
         <div className="text-center">
-          <p className="mb-3 text-sm text-muted-foreground">
+          <p className="mb-3 text-hf-deep-blue/70 text-sm">
             {t("flashcards.feedback.prompt", "Come è andata questa sessione?")}
           </p>
           <div className="flex items-center justify-center gap-1">
             {[1, 2, 3, 4, 5].map((rating) => (
               <Button
-                className="hover:bg-primary/10 hover:text-primary"
+                className="hover:bg-hf-yellow/10 hover:text-hf-yellow"
                 key={rating}
                 onClick={() => onFeedback(rating)}
                 size="sm"
@@ -556,7 +597,11 @@ function FlashcardActivityEndScreen({
 
       {/* Actions */}
       <div className="flex justify-center">
-        <Button onClick={onRestart} size="lg">
+        <Button
+          className="bg-hf-cyan text-white hover:bg-hf-cyan-light"
+          onClick={onRestart}
+          size="lg"
+        >
           <RotateCcw className="mr-2 size-4" />
           {t("flashcards.feedback.restart", "Studia ancora")}
         </Button>
@@ -566,7 +611,7 @@ function FlashcardActivityEndScreen({
 }
 
 /**
- * Flashcard Activity Empty - H-FARM styled
+ * Flashcard Activity Empty - Memoraiz styled
  */
 export function FlashcardActivityEmpty(props: {
   title?: React.ReactNode;
@@ -574,14 +619,17 @@ export function FlashcardActivityEmpty(props: {
 }) {
   return (
     <div className="flex flex-col items-center justify-center space-y-4 py-12 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-        <BookOpen className="size-6 text-muted-foreground" />
+      <div className="flex size-12 items-center justify-center rounded-full bg-hf-cyan/10">
+        <BookOpen className="size-6 text-hf-cyan" />
       </div>
       {props.title && (
-        <h2 className="font-semibold text-lg text-foreground">{props.title}</h2>
+        <h2 className="font-semibold text-hf-deep-blue text-lg">
+          {props.title}
+        </h2>
       )}
-      <p className="max-w-sm text-muted-foreground">
-        {props.description || "Nessuna flashcard disponibile per questa sessione."}
+      <p className="max-w-sm text-hf-deep-blue/70">
+        {props.description ||
+          "Nessuna flashcard disponibile per questa sessione."}
       </p>
     </div>
   );

@@ -1,4 +1,5 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   ModelSelector,
@@ -11,12 +12,11 @@ import {
   ModelSelectorName,
   ModelSelectorTrigger,
 } from "@/components/elements/model-selector";
-import { Button } from "@/components/ui/button";
 import { getAvailableAgents } from "@/lib/ai/agent-config";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import type { ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { CheckCircleFillIcon, ChevronDownIcon } from "../icons";
+import { CheckCircleFillIcon } from "../icons";
 
 /**
  * ChatAgentSelector
@@ -78,7 +78,6 @@ export function ChatAgentSelector({
   const isDisabled = disabled || status === "streaming";
 
   // Use consistent values during SSR to prevent hydration mismatch
-  const showAvatar = mounted && selectedAgent?.avatar;
   const displayName = mounted
     ? displayAgent
     : placeholder || t("agent.selector.placeholder", "Assistant");
@@ -86,20 +85,30 @@ export function ChatAgentSelector({
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
-        <Button
-          className={cn("justify-between md:h-[34px] md:px-2", className)}
+        <button
+          className={cn(
+            "flex items-center gap-2 rounded-full bg-[#F5F5F5] px-3 py-1.5",
+            "transition-colors hover:bg-[#EBEBEB]",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            className
+          )}
           data-testid="agent-selector"
           disabled={isDisabled}
-          variant="outline"
+          type="button"
         >
-          <div className="flex items-center gap-2">
-            {showAvatar && (
-              <span className="text-base">{selectedAgent.avatar}</span>
-            )}
-            <ModelSelectorName>{displayName}</ModelSelectorName>
-          </div>
-          <ChevronDownIcon />
-        </Button>
+          {/* H-FARM logo icon */}
+          <span className="flex size-5 items-center justify-center overflow-hidden rounded-full">
+            <img
+              alt="H-FARM"
+              className="h-5 w-5 object-cover"
+              height={20}
+              src="/images/hfarm_logo.png"
+              width={20}
+            />
+          </span>
+          <span className="text-hf-deep-blue text-sm">{displayName}</span>
+          <ChevronDown className="size-4 text-hf-deep-blue/60" />
+        </button>
       </ModelSelectorTrigger>
       <ModelSelectorContent>
         <ModelSelectorInput

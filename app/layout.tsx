@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/lib/i18n/context";
 
 import "./globals.css";
@@ -9,7 +8,6 @@ import { cookies } from "next/headers";
 import { SessionProvider } from "next-auth/react";
 import { BrandingProvider } from "@/components/branding-provider";
 import { CanvasInit } from "@/components/canvas-init";
-import { DemoConfig } from "@/components/demo-config";
 import { getBrandingInjectScript } from "@/lib/branding/inject-script";
 import type { Locale } from "@/lib/i18n/types";
 import { isSupportedLocale, loadTranslations } from "@/lib/i18n/utils";
@@ -21,11 +19,11 @@ export const metadata: Metadata = {
   title:
     process.env.NEXT_PUBLIC_METADATA_TITLE ||
     process.env.NEXT_PUBLIC_APP_NAME ||
-    "Comune Faenza",
+    "H-FARM college assistant",
   description:
     process.env.NEXT_PUBLIC_METADATA_DESCRIPTION ||
     process.env.NEXT_PUBLIC_APP_DESCRIPTION ||
-    "Assistente virtuale del Comune di Faenza",
+    "AI assistant for H-FARM College students",
 };
 
 export const viewport = {
@@ -45,23 +43,15 @@ const geistMono = Geist_Mono({
 });
 
 const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
-const DARK_THEME_COLOR = "hsl(240deg 10% 3.92%)";
 const THEME_COLOR_SCRIPT = `\
 (function() {
-  var html = document.documentElement;
   var meta = document.querySelector('meta[name="theme-color"]');
   if (!meta) {
     meta = document.createElement('meta');
     meta.setAttribute('name', 'theme-color');
     document.head.appendChild(meta);
   }
-  function updateThemeColor() {
-    var isDark = html.classList.contains('dark');
-    meta.setAttribute('content', isDark ? '${DARK_THEME_COLOR}' : '${LIGHT_THEME_COLOR}');
-  }
-  var observer = new MutationObserver(updateThemeColor);
-  observer.observe(html, { attributes: true, attributeFilter: ['class'] });
-  updateThemeColor();
+  meta.setAttribute('content', '${LIGHT_THEME_COLOR}');
 })();`;
 
 export default async function RootLayout({
@@ -100,27 +90,18 @@ export default async function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          disableTransitionOnChange
-          enableSystem
+        <LanguageProvider
+          initialLocale={locale as Locale}
+          initialTranslations={translations}
         >
-          <LanguageProvider
-            initialLocale={locale as Locale}
-            initialTranslations={translations}
-          >
-            <BrandingProvider>
-              <Toaster position="top-center" />
-              <SessionProvider>
-                <CanvasInit />
-                {children}
-                {/* <BrandConfig /> */}
-                <DemoConfig />
-              </SessionProvider>
-            </BrandingProvider>
-          </LanguageProvider>
-        </ThemeProvider>
+          <BrandingProvider>
+            <Toaster position="top-center" />
+            <SessionProvider>
+              <CanvasInit />
+              {children}
+            </SessionProvider>
+          </BrandingProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

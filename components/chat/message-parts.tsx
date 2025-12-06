@@ -45,7 +45,7 @@ const ChatMessageTextPart = ({
   return (
     <MessageContent
       className={cn(
-        "group-[.is-user]:wrap-break-words group-[.is-user]:rounded-2xl group-[.is-user]:bg-primary group-[.is-user]:px-3! group-[.is-user]:py-2! group-[.is-user]:text-primary-foreground"
+        "group-[.is-user]:wrap-break-words group-[.is-user]:rounded-2xl group-[.is-user]:bg-hf-cyan group-[.is-user]:px-3! group-[.is-user]:py-2! group-[.is-user]:text-white group-[.is-user]:shadow-[var(--shadow-chat-md)]"
       )}
       data-slot="chat-message-text"
     >

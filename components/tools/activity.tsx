@@ -146,21 +146,17 @@ export function ActivityToolProvider({ children }: React.PropsWithChildren) {
     description:
       "Create interactive learning activities like quizzes and flashcards for the user. When an activity is created it is immediately displayed to the user. Do NOT use this for document listing - use loadInvoice tool instead.",
     inputSchema: ActivityToolInputSchema,
-    execute: async (_, opts) => {
+    execute: (_, opts) => {
       const activityId = generateUUID();
       const toolCallId = opts?.toolCallId || activityId;
 
-      const promise = new Promise<ActivityToolOutput>((resolve, reject) => {
-        promiseRegistry.current.set(toolCallId, { resolve, reject });
-      });
-
-      const result = await promise;
-
-      // Note: In a real implementation, this would resolve a promise
-      // For now, we just track that it's been resolved
-      console.log(`Activity ${toolCallId} completed:`, result);
-
-      return result;
+      // Return immediately - activity is rendered by the UI component
+      // The agent doesn't need to wait for the user to complete the quiz/flashcard
+      // Activity completion is tracked via resolveActivity in ActivityToolPlayer
+      return {
+        completed: false,
+        data: { activityId: toolCallId, status: "created" },
+      };
     },
   });
 
@@ -200,6 +196,12 @@ export function useActivityTool(): ActivityToolContextValue {
  */
 export function ActivityTool(props: ChatToolProps) {
   const { part } = props;
+
+  // Activity is ready when the tool input has been fully streamed
+  // This avoids the deadlock where chat waits for tool completion but user can't interact
+  const isActivityReady =
+    part.state === "input-available" || part.state === "output-available";
+
   // Extract input from the part
   const input = part.input
     ? (part.input as z.infer<typeof ActivityToolInputSchema>)
@@ -220,12 +222,15 @@ export function ActivityTool(props: ChatToolProps) {
 
   return (
     <Player store={store}>
-      <ActivityToolPlayer {...props} />
+      <ActivityToolPlayer {...props} disabled={!isActivityReady} />
     </Player>
   );
 }
 
-export function ActivityToolPlayer({ part }: ChatToolProps) {
+export function ActivityToolPlayer({
+  part,
+  disabled,
+}: ChatToolProps & { disabled?: boolean }) {
   const { toolCallId } = part;
   const { resolveActivity, isResolved } = useActivityTool();
   const { state } = usePlayer();
@@ -281,5 +286,7 @@ export function ActivityToolPlayer({ part }: ChatToolProps) {
   }
 
   const Component = getActivityComponent(input.type);
-  return Component ? <Component activity={activity} /> : null;
+  return Component ? (
+    <Component activity={activity} disabled={disabled} />
+  ) : null;
 }

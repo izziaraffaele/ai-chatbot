@@ -16,7 +16,7 @@ import {
   getWidgetKindForArtifact,
   useCanvasTabs,
 } from "@/hooks/use-canvas-tabs";
-import { type WidgetKind, WIDGET_KINDS, widgetRegistry } from "@/lib/canvas";
+import { WIDGET_KINDS, type WidgetKind, widgetRegistry } from "@/lib/canvas";
 import { cn } from "@/lib/utils";
 
 // ============================================================================
@@ -62,17 +62,17 @@ const WIDGET_KIND_ICONS: Record<
 };
 
 // ============================================================================
-// COLORS
+// COLORS - Memoraiz Palette
 // ============================================================================
 
 const TAB_COLORS = {
-  active: "bg-emerald-500 text-white border-emerald-500",
-  pending: "bg-sky-500/80 text-white border-sky-500 animate-pulse",
+  active: "bg-hf-cyan text-white border-hf-cyan",
+  pending: "bg-hf-cyan/80 text-white border-hf-cyan animate-pulse",
   inactive:
-    "bg-muted/50 text-muted-foreground border-border/50 hover:bg-muted/80",
+    "bg-hf-cyan/5 text-hf-deep-blue/70 border-hf-cyan/20 hover:bg-hf-cyan/10",
   iconActive: "text-white",
   iconPending: "text-white",
-  iconInactive: "text-muted-foreground",
+  iconInactive: "text-hf-cyan",
 };
 
 // ============================================================================
@@ -156,12 +156,10 @@ export function CanvasTabs({ className }: CanvasTabsProps) {
 
       switch (direction) {
         case "prev":
-          newIndex =
-            currentIndex <= 0 ? tabs.length - 1 : currentIndex - 1;
+          newIndex = currentIndex <= 0 ? tabs.length - 1 : currentIndex - 1;
           break;
         case "next":
-          newIndex =
-            currentIndex >= tabs.length - 1 ? 0 : currentIndex + 1;
+          newIndex = currentIndex >= tabs.length - 1 ? 0 : currentIndex + 1;
           break;
         case "first":
           newIndex = 0;
@@ -196,13 +194,16 @@ export function CanvasTabs({ className }: CanvasTabsProps) {
   }, []);
 
   // Register tab ref
-  const setTabRef = useCallback((tabId: string, element: HTMLDivElement | null) => {
-    if (element) {
-      tabRefs.current.set(tabId, element);
-    } else {
-      tabRefs.current.delete(tabId);
-    }
-  }, []);
+  const setTabRef = useCallback(
+    (tabId: string, element: HTMLDivElement | null) => {
+      if (element) {
+        tabRefs.current.set(tabId, element);
+      } else {
+        tabRefs.current.delete(tabId);
+      }
+    },
+    []
+  );
 
   if (tabs.length === 0) {
     return null;
@@ -327,7 +328,7 @@ const CanvasTabItem = forwardRef<HTMLDivElement, CanvasTabItemProps>(
         aria-setsize={totalTabs}
         className={cn(
           "group relative flex min-w-0 max-w-[200px] shrink-0 cursor-pointer items-center gap-2 rounded-t-lg border border-b-0 px-3 py-2 text-left outline-none transition-colors",
-          "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
+          "focus-visible:ring-2 focus-visible:ring-hf-cyan focus-visible:ring-offset-1",
           getTabColorClass(),
           (isActive || isPending) && "z-10"
         )}
@@ -365,8 +366,8 @@ const CanvasTabItem = forwardRef<HTMLDivElement, CanvasTabItemProps>(
             aria-label="Preparazione in corso"
             className="relative flex size-2 shrink-0"
           >
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-sky-400 opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-sky-500" />
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-hf-cyan-light opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-hf-cyan" />
           </span>
         )}
 
@@ -374,7 +375,7 @@ const CanvasTabItem = forwardRef<HTMLDivElement, CanvasTabItemProps>(
         {tab.artifact.status === "streaming" && (
           <span
             aria-label="Caricamento in corso"
-            className="size-2 shrink-0 animate-pulse rounded-full bg-amber-400"
+            className="size-2 shrink-0 animate-pulse rounded-full bg-hf-yellow"
           />
         )}
 
@@ -383,10 +384,10 @@ const CanvasTabItem = forwardRef<HTMLDivElement, CanvasTabItemProps>(
           aria-label={`Chiudi ${label}: ${tab.title}`}
           className={cn(
             "ml-1 flex size-5 shrink-0 items-center justify-center rounded-full transition-colors",
-            "focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary",
+            "focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-hf-cyan",
             isActive || isPending
               ? "hover:bg-black/10 dark:hover:bg-white/20"
-              : "opacity-0 hover:bg-muted-foreground/20 group-hover:opacity-100"
+              : "opacity-0 hover:bg-hf-cyan/20 group-hover:opacity-100"
           )}
           onClick={(e) => {
             e.stopPropagation();
@@ -402,7 +403,7 @@ const CanvasTabItem = forwardRef<HTMLDivElement, CanvasTabItemProps>(
         {(isActive || isPending) && (
           <div
             aria-hidden="true"
-            className="absolute right-0 -bottom-px left-0 h-px bg-background dark:bg-muted"
+            className="-bottom-px absolute right-0 left-0 h-px bg-background dark:bg-muted"
           />
         )}
       </motion.div>

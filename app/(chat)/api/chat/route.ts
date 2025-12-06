@@ -134,9 +134,27 @@ async function handleAssistantMessage(params: {
   }
 
   const uiMessages = convertToUIMessages(messagesFromDb);
+
+  // Deduplicate parts to prevent OpenAI API "duplicate item" errors
+  // This happens when the client sends tool results that include parts
+  // already stored in the database (e.g., tool-call parts)
+  const existingParts = uiMessages[lastDbMessageIdx].parts;
+  const existingPartIds = new Set(
+    existingParts
+      .filter((p): p is typeof p & { toolCallId: string } => "toolCallId" in p)
+      .map((p) => p.toolCallId)
+  );
+
+  const newParts = message.parts.filter((p) => {
+    if ("toolCallId" in p) {
+      return !existingPartIds.has((p as { toolCallId: string }).toolCallId);
+    }
+    return true;
+  });
+
   uiMessages[lastDbMessageIdx] = {
     ...uiMessages[lastDbMessageIdx],
-    parts: uiMessages[lastDbMessageIdx].parts.concat(message.parts),
+    parts: existingParts.concat(newParts),
   };
 
   await updateMessageParts({

@@ -103,47 +103,10 @@ const schemaDefaults: DemoConfig = {
   },
   chat: {
     suggestions: [
-      // General AI Capabilities
-      // "Explain quantum computing in simple terms",
-      // "Write a Python script to analyze sales data",
-      // "Help me write a professional email to a client",
-      // "What are the advantages of using Next.js 15?",
-
-      // Document Creation & Artifacts
-      // "Create a business plan for a tech startup",
-      // "Generate a CSV spreadsheet with monthly budget categories",
-      // "Write a markdown guide about React best practices",
-      // "Create a Python script for web scraping",
-
-      // Code Generation
-      // "Implement Dijkstra's algorithm in Python",
-      // "Create a REST API with Express.js",
-      // "Write a React component for a todo list",
-      // "Generate a data visualization using matplotlib",
-
-      // Research & Analysis
-      // "Research the latest trends in AI and machine learning",
-      // "Analyze the benefits of remote work vs office work",
-      // "Compare different cloud hosting providers",
-      // "Summarize key features of modern JavaScript frameworks",
-
-      // Weather & Location Services
-      // "What's the weather like in San Francisco?",
-      // "Check the current weather in London",
-      // "What's the weather forecast for New York this week?",
-      // "Is it raining in Tokyo right now?",
-
-      // Complex Problem Solving
-      // "Help me debug this TypeScript error: Cannot find module",
-      // "Design a database schema for an e-commerce platform",
-      // "Create a comprehensive testing strategy for a web app",
-      // "Optimize this SQL query for better performance",
-
-      // Educational Content
-      "Explain how neural networks work",
-      "Teach me about design patterns in software engineering",
-      "What are the key principles of clean code?",
-      "Introduction to machine learning algorithms",
+      "Create an engaging quiz about H-FARM College",
+      "Summarize the current selected video",
+      "Create a flashcard deck with 7 elements",
+      "Show me the videos",
     ],
     features: {
       webSearch: true,

@@ -78,7 +78,8 @@ export function ChatCanvasThread({
     return (
       <div
         className={cn(
-          "relative flex h-dvh w-full flex-col overflow-hidden bg-muted dark:bg-background",
+          "relative flex h-dvh w-full flex-col overflow-hidden",
+          "bg-gradient-to-br from-hf-lavender-start via-hf-lavender-mid to-hf-beige-end",
           className
         )}
         data-slot="chat-canvas-thread"
@@ -93,7 +94,8 @@ export function ChatCanvasThread({
     <>
       <Panel
         className={cn(
-          "relative flex h-dvh min-w-0 flex-col overflow-hidden bg-muted dark:bg-background",
+          "relative flex h-dvh min-w-0 flex-col overflow-hidden",
+          "bg-gradient-to-br from-hf-lavender-start via-hf-lavender-mid to-hf-beige-end",
           className
         )}
         data-slot="chat-canvas-thread"

@@ -70,6 +70,7 @@ export type LearningContentData = {
 
 const CDN_BASE_URL = "https://cdn.memoraiz.com";
 const CDN_JSON_URL = `${CDN_BASE_URL}/json/HFARM`;
+const CDN_IMAGES_URL = `${CDN_BASE_URL}/images`;
 
 // ============================================================================
 // FUNCTIONS
@@ -83,12 +84,28 @@ const CDN_JSON_URL = `${CDN_BASE_URL}/json/HFARM`;
  *
  * @example
  * buildTranscriptUrl("EDITED - Hybrid Course-20251129 1631-1 W1 L6 We find problems")
- * // Returns: "https://cdn.memoraiz.com/json/HFARM/EDITED+-+Hybrid+Course-20251129+1631-1+W1+L6+We+find+problems.json"
+ * // Returns: "https://cdn.memoraiz.com/json/HFARM/EDITED%2B-%2BHybrid%2BCourse-20251129%2B1631-1%2BW1%2BL6%2BWe%2Bfind%2Bproblems.json"
  */
 export function buildTranscriptUrl(folderName: string): string {
-  // Replace spaces with + for URL encoding (CDN convention)
-  const encodedName = folderName.replaceAll(" ", "+");
+  // Replace spaces with + then URL-encode (+ becomes %2B)
+  const encodedName = encodeURIComponent(folderName.replaceAll(" ", "+"));
   return `${CDN_JSON_URL}/${encodedName}.json`;
+}
+
+/**
+ * Builds the CDN URL for a video thumbnail image
+ *
+ * @param folderName - The folder name from the video metadata
+ * @returns The full CDN URL for the thumbnail
+ *
+ * @example
+ * buildThumbnailUrl("EDITED - Hybrid Course-20251129 1631-1 W1 L6 We find problems")
+ * // Returns: "https://cdn.memoraiz.com/images/EDITED%2B-%2BHybrid%2BCourse-20251129%2B1631-1%2BW1%2BL6%2BWe%2Bfind%2Bproblems_thumbnail.png"
+ */
+export function buildThumbnailUrl(folderName: string): string {
+  // Replace spaces with + then URL-encode (+ becomes %2B)
+  const encodedName = encodeURIComponent(folderName.replaceAll(" ", "+"));
+  return `${CDN_IMAGES_URL}/${encodedName}_thumbnail.png`;
 }
 
 /**
@@ -132,11 +149,11 @@ export async function fetchTranscript(
  *
  * @example
  * buildLearningContentUrl("EDITED - Hybrid Course-20251129 1631-1 W1 L6 We find problems")
- * // Returns: "https://cdn.memoraiz.com/json/HFARM/EDITED+-+Hybrid+Course-20251129+1631-1+W1+L6+We+find+problems_learning_content.json"
+ * // Returns: "https://cdn.memoraiz.com/json/HFARM/EDITED%2B-%2BHybrid%2BCourse-20251129%2B1631-1%2BW1%2BL6%2BWe%2Bfind%2Bproblems_learning_content.json"
  */
 export function buildLearningContentUrl(folderName: string): string {
-  // Replace spaces with + for URL encoding (CDN convention)
-  const encodedName = folderName.replaceAll(" ", "+");
+  // Replace spaces with + then URL-encode (+ becomes %2B)
+  const encodedName = encodeURIComponent(folderName.replaceAll(" ", "+"));
   return `${CDN_JSON_URL}/${encodedName}_learning_content.json`;
 }
 

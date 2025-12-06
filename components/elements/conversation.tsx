@@ -1,17 +1,17 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { ArrowDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { useCallback } from "react";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export type ConversationProps = ComponentProps<typeof StickToBottom>;
 
 export const Conversation = ({ className, ...props }: ConversationProps) => (
   <StickToBottom
-    className={cn("relative flex-1", className)}
+    className={cn("relative flex-1 [transform:translateZ(0)]", className)}
     initial="smooth"
     resize="smooth"
     role="log"
@@ -84,16 +84,19 @@ export const ConversationScrollButton = ({
     !isAtBottom && (
       <Button
         className={cn(
-          "absolute bottom-4 left-[50%] translate-x-[-50%] rounded-full",
+          // Scroll-to-bottom button - white with navy border
+          "-translate-x-1/2 absolute bottom-32 left-[50%] z-10 rounded-full",
+          "border border-hf-deep-blue/10 bg-white text-hf-deep-blue",
+          "shadow-[var(--shadow-chat-lg)] hover:bg-gray-50",
           className
         )}
         onClick={handleScrollToBottom}
         size="icon"
         type="button"
-        variant="outline"
+        variant="ghost"
         {...props}
       >
-        <ArrowDownIcon className="size-4" />
+        <ArrowDownIcon className="size-5" />
       </Button>
     )
   );
