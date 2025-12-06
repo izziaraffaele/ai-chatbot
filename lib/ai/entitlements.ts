@@ -8,20 +8,20 @@ type Entitlements = {
 
 export const entitlementsByUserType: Record<UserType, Entitlements> = {
   /*
-   * For users without an account
+   * For users without an account (guest sessions)
+   * Limited to 50 messages per day per session
    */
   guest: {
-    // TEMPORARY: Set to Infinity for testing (was: 20)
-    maxMessagesPerDay: Number.POSITIVE_INFINITY,
+    maxMessagesPerDay: 50,
     availableChatModelIds: ["chat-model", "chat-model-reasoning"],
   },
 
   /*
    * For users with an account
+   * Limited to 200 messages per day
    */
   regular: {
-    // TEMPORARY: Set to Infinity for testing (was: 100)
-    maxMessagesPerDay: Number.POSITIVE_INFINITY,
+    maxMessagesPerDay: 200,
     availableChatModelIds: ["chat-model", "chat-model-reasoning"],
   },
 

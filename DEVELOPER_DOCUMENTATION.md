@@ -1704,8 +1704,82 @@ The chat input footer follows this layout pattern (left to right):
 
 ---
 
+## AWS Production Deployment
+
+### Overview
+
+The application is configured for deployment to AWS using:
+- **AWS Amplify Hosting**: Managed Next.js SSR hosting
+- **Amazon RDS PostgreSQL**: Database with pgvector extension
+- **CloudWatch**: Interaction logging and monitoring
+
+### Key Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `amplify.yml` | AWS Amplify build configuration for pnpm/Next.js |
+| `scripts/aws/setup-rds.sh` | Automated RDS PostgreSQL setup script |
+| `scripts/aws/setup-cloudwatch.sh` | CloudWatch log group and dashboard setup |
+| `docs/AWS_DEPLOYMENT_GUIDE.md` | Complete deployment guide |
+| `docs/env-production-example.txt` | Production environment variables template |
+
+### Rate Limiting
+
+Session-based rate limiting is configured in `lib/ai/entitlements.ts`:
+
+```typescript
+export const entitlementsByUserType: Record<UserType, Entitlements> = {
+  guest: {
+    maxMessagesPerDay: 50,  // Guest sessions (no login required)
+  },
+  regular: {
+    maxMessagesPerDay: 200, // Registered users
+  },
+};
+```
+
+### Interaction Logging
+
+User interactions are logged to CloudWatch via `lib/analytics/cloudwatch-logger.ts`:
+
+- Log group: `/hfarm/interactions`
+- Data captured: userId, userType, chatId, messageRole, agentId, timestamp, geoHints
+- Retention: 30 days
+
+### Required Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `POSTGRES_URL` | RDS PostgreSQL connection string |
+| `OPENAI_API_KEY` | OpenAI API key for LLM |
+| `AUTH_SECRET` | NextAuth.js secret (32+ chars) |
+| `AUTH_URL` | Production URL for auth callbacks |
+| `AWS_REGION` | AWS region for CloudWatch logging |
+| `NODE_ENV` | Set to `production` |
+
+### Deployment Commands
+
+```bash
+# Set up RDS PostgreSQL
+./scripts/aws/setup-rds.sh
+
+# Set up CloudWatch monitoring
+./scripts/aws/setup-cloudwatch.sh
+
+# Run database migrations
+POSTGRES_URL="..." pnpm db:migrate
+
+# Ingest vector catalog
+POSTGRES_URL="..." pnpm catalog:ingest:hfarm
+```
+
+See `docs/AWS_DEPLOYMENT_GUIDE.md` for complete deployment instructions.
+
+---
+
 ## Related Documentation
 
 - [Mastra Documentation](https://mastra.ai/docs)
 - [H-FARM Official Website](https://www.h-farm.com)
 - [Next.js Documentation](https://nextjs.org/docs)
+- [AWS Amplify Documentation](https://docs.aws.amazon.com/amplify/)

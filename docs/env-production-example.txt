@@ -1,0 +1,42 @@
+# =============================================================================
+# H-FARM Student Assistant - Production Environment Variables
+# =============================================================================
+# Copy this file to .env.local and fill in the values for local development
+# against production services, or add these to AWS Amplify environment variables.
+# =============================================================================
+
+# Database Configuration (Amazon RDS PostgreSQL)
+# Format: postgresql://USERNAME:PASSWORD@HOSTNAME:5432/DATABASE
+POSTGRES_URL="postgresql://hfarm_admin:YOUR_PASSWORD@YOUR_RDS_ENDPOINT.rds.amazonaws.com:5432/hfarm_db"
+
+# OpenAI API Key (required for LLM functionality)
+OPENAI_API_KEY="sk-your-openai-api-key"
+
+# NextAuth.js Configuration
+# Generate with: openssl rand -hex 32
+AUTH_SECRET="your-32-character-secret-here"
+# Set to your production URL (Amplify will provide this)
+AUTH_URL="https://your-app.amplifyapp.com"
+
+# AWS Configuration (for CloudWatch logging)
+AWS_REGION="eu-west-1"
+
+# Environment
+NODE_ENV="production"
+
+# =============================================================================
+# Optional: Additional API Keys (if using other features)
+# =============================================================================
+
+# Google Gemini API Key (for thumbnail generation)
+# GEMINI_API_KEY="your-gemini-key"
+
+# ElevenLabs API Key (for podcast generation)
+# ELEVENLABS_API_KEY="your-elevenlabs-key"
+
+# Replicate API Token (for video transcription)
+# REPLICATE_API_TOKEN="your-replicate-token"
+
+# Redis URL (for resumable streams - optional)
+# REDIS_URL="redis://..."
+

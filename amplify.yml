@@ -1,0 +1,24 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        # Enable corepack for pnpm support
+        - corepack enable
+        - corepack prepare pnpm@9.12.3 --activate
+        # Install dependencies
+        - pnpm install --frozen-lockfile
+        # Run database migrations (requires POSTGRES_URL env var)
+        - pnpm db:migrate
+    build:
+      commands:
+        - pnpm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
+

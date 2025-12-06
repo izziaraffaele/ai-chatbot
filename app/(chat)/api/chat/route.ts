@@ -11,6 +11,7 @@ import { auth, type UserType } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import { titlePrompt } from "@/lib/ai/prompts";
+import { logChatInteraction } from "@/lib/analytics/cloudwatch-logger";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -361,6 +362,20 @@ export async function POST(request: Request) {
         chatAgent,
       });
       uiMessages = [...convertToUIMessages(messagesFromDb), message];
+
+      // Log user interaction for analytics (fire-and-forget)
+      logChatInteraction({
+        userId: session.user.id,
+        userType: session.user.type,
+        chatId: id,
+        messageId: message.id,
+        messageRole: "user",
+        agentId: selectedAgentId,
+        timestamp: new Date().toISOString(),
+        geoHints: { city, country },
+      }).catch(() => {
+        // Silently ignore logging errors
+      });
     } else {
       // Assistant messages
       const chat = await getChatById({ id });
