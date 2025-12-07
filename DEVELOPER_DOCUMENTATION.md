@@ -1720,7 +1720,7 @@ The application is configured for deployment to AWS using:
 | `amplify.yml` | AWS Amplify build configuration for pnpm/Next.js |
 | `scripts/aws/setup-rds.sh` | Automated RDS PostgreSQL setup script |
 | `scripts/aws/setup-cloudwatch.sh` | CloudWatch log group and dashboard setup |
-| `docs/AWS_DEPLOYMENT_GUIDE.md` | Complete deployment guide |
+| `docs/AWS_DEPLOYMENT_GUIDE.md` | Complete deployment guide (note: branch names cannot contain `/`) |
 | `docs/env-production-example.txt` | Production environment variables template |
 
 ### Rate Limiting
