@@ -39,6 +39,7 @@ This guide provides step-by-step instructions to deploy the H-FARM Student Assis
 - GitHub repository with the project code
 - Node.js 20+ and pnpm installed locally
 
+
 ### Automated Setup Scripts
 
 We provide helper scripts in `scripts/aws/`:
