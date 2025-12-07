@@ -102,7 +102,8 @@ CREATE EXTENSION IF NOT EXISTS vector;
 1. Open [AWS Amplify Console](https://console.aws.amazon.com/amplify/)
 2. Click **Create new app**
 3. Select **GitHub** and authorize access
-4. Select your repository and branch (e.g., `main` or `edo/hfarm`)
+4. Select your repository and branch (e.g., `main`, `production`, or `staging`)
+   > ⚠️ **Important**: Branch names **cannot contain forward slashes** (`/`). Use hyphens instead (e.g., `feature-auth` not `feature/auth`). Amplify uses branch names for backend environment names, and slashes are invalid characters.
 5. Amplify will auto-detect Next.js 15
 
 ### Step 2: Configure Build Settings
@@ -138,7 +139,7 @@ In Amplify Console > **App settings** > **Environment variables**, add:
 
 | Variable | Value | Description |
 |----------|-------|-------------|
-| `POSTGRES_URL` | `postgresql://...` | RDS PostgreSQL connection string |
+| `POSTGRES_URL` | `postgresql://...?sslmode=require` | RDS PostgreSQL connection string (SSL required!) |
 | `OPENAI_API_KEY` | `sk-...` | Your OpenAI API key |
 | `AUTH_SECRET` | (generate) | NextAuth.js secret (32+ chars) |
 | `AUTH_URL` | `https://your-app.amplifyapp.com` | Your Amplify app URL |
@@ -281,8 +282,23 @@ Logs are stored in `/hfarm/interactions` log group.
 
 ## Troubleshooting
 
+### Build Fails with "BackendEnvironment name is invalid"
+Branch names containing `/` (forward slashes) are not allowed in Amplify. Rename your branch:
+```bash
+git branch -m feature/myfeature feature-myfeature
+git push origin feature-myfeature
+git push origin --delete feature/myfeature
+```
+Then reconnect the renamed branch in Amplify Console.
+
 ### Build Fails with pnpm Error
 Ensure `amplify.yml` includes corepack commands to enable pnpm.
+
+### Database Connection Error: "no pg_hba.conf entry... no encryption"
+AWS RDS requires SSL connections. Add `?sslmode=require` to your `POSTGRES_URL`:
+```
+postgresql://user:pass@host:5432/db?sslmode=require
+```
 
 ### Database Connection Timeout
 Check RDS security group allows inbound from Amplify (0.0.0.0/0 if publicly accessible).

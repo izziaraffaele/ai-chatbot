@@ -1750,7 +1750,7 @@ User interactions are logged to CloudWatch via `lib/analytics/cloudwatch-logger.
 
 | Variable | Description |
 |----------|-------------|
-| `POSTGRES_URL` | RDS PostgreSQL connection string |
+| `POSTGRES_URL` | RDS PostgreSQL connection string (**must include `?sslmode=require`**) |
 | `OPENAI_API_KEY` | OpenAI API key for LLM |
 | `AUTH_SECRET` | NextAuth.js secret (32+ chars) |
 | `AUTH_URL` | Production URL for auth callbacks |
