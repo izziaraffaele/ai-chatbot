@@ -101,9 +101,14 @@ export const en = {
   // User Menu
   "sidebar.user.signOut": "Sign out",
   "sidebar.user.profile": "Profile",
+  "sidebar.user.login": "Login to your account",
 
   // Sidebar Toggle
   "sidebar.toggleSidebar": "Toggle Sidebar",
+
+  // Theme Actions
+  "sidebar.actions.toggleDark": "Toggle dark mode",
+  "sidebar.actions.toggleLight": "Toggle light mode",
 
   // ============================================================================
   // Settings
@@ -289,6 +294,21 @@ export const en = {
   "success.copiedCsv": "Copied csv to clipboard!",
   "success.deleted": "Deleted successfully",
   "success.created": "Created successfully",
+
+  // ============================================================================
+  // Accessibility Labels
+  // ============================================================================
+
+  "a11y.resizeConsole": "Resize console",
+  "a11y.toggleSidebar": "Toggle Sidebar",
+  "a11y.previousBranch": "Previous branch",
+  "a11y.nextBranch": "Next branch",
+  "a11y.removeAttachment": "Remove attachment",
+  "a11y.uploadFiles": "Upload files",
+  "a11y.submit": "Submit",
+  "a11y.modelContextUsage": "Model context usage",
+  "a11y.flashcard": "Flashcard",
+  "a11y.addCustomTheme": "Add custom theme",
 
   // ============================================================================
   // Common UI Elements

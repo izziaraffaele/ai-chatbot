@@ -82,7 +82,7 @@ export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
   return consoleOutputs.length > 0 ? (
     <>
       <div
-        aria-label="Resize console"
+        aria-label={t("a11y.resizeConsole", "Resize console")}
         aria-orientation="horizontal"
         aria-valuemax={maxHeight}
         aria-valuemin={minHeight}

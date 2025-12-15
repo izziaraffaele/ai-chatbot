@@ -189,3 +189,11 @@ export function chatAgentSystemPrompt(
 
   return sections.join("\n");
 }
+
+export function toolUsageGuidelines(guidelines: string) {
+  return `## Tool Usage Guidelines
+
+- Use the tools provided by the agent to perform tasks.
+- Use multiple tools to perform complex tasks.
+${guidelines}`;
+}

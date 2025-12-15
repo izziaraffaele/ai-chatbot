@@ -1,5 +1,6 @@
 import { getToolName, type ToolUIPart } from "ai";
 import { ActivityTool } from "./activity";
+import { CatalogSearchTool } from "./catalog";
 import { DocumentTool } from "./document";
 import { Fallback } from "./fallback";
 import type { ChatToolProps } from "./types";
@@ -13,6 +14,7 @@ export const ToolUI = {
   updateDocument: DocumentTool,
   requestSuggestions: DocumentTool,
   getWeather: Weather,
+  catalogSearch: CatalogSearchTool,
 };
 
 export const FallbackToolUI = Fallback;

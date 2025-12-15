@@ -96,7 +96,7 @@ export const DemoConfigFieldGroup = ({
         </SheetClose>
         <SheetTitle>{title}</SheetTitle>
       </div>
-      <ScrollArea className="[&_[data-radix-scroll-area-viewport]>div]:!block flex-1">
+      <ScrollArea className="[&_[data-radix-scroll-area-viewport]>div]:block! flex-1">
         <div className="space-y-4 p-4">{children}</div>
       </ScrollArea>
     </SheetContent>

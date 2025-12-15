@@ -9,7 +9,7 @@ import {
   EyeIcon,
 } from "lucide-react";
 import type React from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { codeArtifact } from "@/artifacts/code/client";
 import { sheetArtifact } from "@/artifacts/sheet/client";
 import { textArtifact } from "@/artifacts/text/client";
@@ -63,6 +63,11 @@ export function DocumentArtifact({
   isReadonly = false,
 }: DocumentArtifactProps) {
   const { metadata, setMetadata, setArtifact } = useArtifact();
+
+  console.log(
+    `[DocumentArtifact] Render - status: ${artifact.status}, documentId: ${artifact.documentId}`
+  );
+
   const {
     entries: documents,
     mutate,
@@ -70,6 +75,19 @@ export function DocumentArtifact({
   } = useChatDocument(
     artifact.status === "streaming" ? null : artifact.documentId
   );
+
+  // When artifact status changes from streaming to idle, revalidate documents
+  useEffect(() => {
+    console.log(
+      `[DocumentArtifact] Status change - status: ${artifact.status}, documentId: ${artifact.documentId}`
+    );
+    if (artifact.status === "idle" && artifact.documentId) {
+      console.log(
+        `[DocumentArtifact] Triggering mutate for document: ${artifact.documentId}`
+      );
+      mutate();
+    }
+  }, [artifact.status, artifact.documentId, mutate]);
 
   const savedDocument = useMemo(() => {
     return documents.find((d) => d.id === artifact.documentId);
@@ -81,51 +99,143 @@ export function DocumentArtifact({
 
   // Convert Document[] to ArtifactVersion[]
   const versions = useMemo<ArtifactVersion<string>[]>(() => {
-    if (!Array.isArray(documents)) {
+    // Only convert if documents exist and is an array
+    if (!Array.isArray(documents) || documents.length === 0) {
+      if (!Array.isArray(documents)) {
+        console.log("[DocumentArtifact] Documents is not an array:", documents);
+      }
       return [];
     }
-    return documents.map((doc: Document) => ({
+    console.log(documents);
+    // Create a stable key for the documents to prevent unnecessary re-conversions
+    const documentsKey = documents
+      .map((doc) => `${doc.id}-${doc.createdAt}`)
+      .join("|");
+    console.log(
+      `[DocumentArtifact] Converting documents to versions - count: ${documents.length}, key: ${documentsKey.substring(0, 50)}...`
+    );
+
+    const convertedVersions = documents.map((doc: Document) => ({
       id: doc.id,
       title: doc.title,
       content: doc.content || "",
       createdAt: doc.createdAt,
       metadata: {},
     }));
+    console.log(
+      `[DocumentArtifact] Converted ${convertedVersions.length} versions:`,
+      convertedVersions.map((v) => ({
+        id: v.id,
+        title: v.title,
+        createdAt: v.createdAt,
+      }))
+    );
+    return convertedVersions;
   }, [documents]);
 
-  // Save handler
+  // Debounce ref to prevent multiple saves
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Save handler with debouncing
   const handleSave = useCallback(
-    async (content: string) => {
+    (content: string) => {
+      console.log("[DocumentArtifact] handleSave called:", {
+        hasArtifact: !!artifact,
+        documentId: artifact?.documentId,
+        contentLength: content?.length || 0,
+      });
+
       if (!artifact) {
+        console.log("[DocumentArtifact] No artifact, returning");
         return;
       }
 
-      try {
-        const response = await fetch(
-          `/api/document?id=${artifact.documentId}`,
-          {
-            method: "POST",
-            body: JSON.stringify({
-              title: artifact.title,
-              content,
-              kind: artifact.kind,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to save document");
-        }
-
-        // Revalidate the data to get the latest version
-        await mutate();
-      } catch (error) {
-        console.error("Error saving document:", error);
-        // Optionally show error message to user
+      // Clear existing timeout
+      if (saveTimeoutRef.current) {
+        console.log("[DocumentArtifact] Clearing existing timeout");
+        clearTimeout(saveTimeoutRef.current);
       }
+
+      console.log("[DocumentArtifact] Setting new timeout for 1 second");
+      // Debounce save to prevent multiple rapid saves
+      saveTimeoutRef.current = setTimeout(async () => {
+        try {
+          console.log("[DocumentArtifact] Saving document:", {
+            documentId: artifact.documentId,
+            title: artifact.title,
+            contentLength: content?.length || 0,
+            kind: artifact.kind,
+          });
+
+          const response = await fetch(
+            `/api/document?id=${artifact.documentId}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                title: artifact.title,
+                content,
+                kind: artifact.kind,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error("[DocumentArtifact] Save failed:", errorData);
+            throw new Error(errorData.cause || "Failed to save document");
+          }
+
+          // Get the saved document data to confirm it was created
+          const savedDocumentData = await response.json();
+          console.log("[DocumentArtifact] Save successful:", savedDocumentData);
+
+          // Revalidate the data to get the latest version
+          // Use optimistic update for immediate UI response
+          await mutate(
+            async () => {
+              // Fetch fresh data from server
+              const freshResponse = await fetch(
+                `/api/document?id=${artifact.documentId}`
+              );
+              if (!freshResponse.ok) {
+                throw new Error("Failed to fetch updated document");
+              }
+              return freshResponse.json();
+            },
+            {
+              optimisticData: (currentData) => {
+                // Add the new version optimistically
+                const newVersion = {
+                  id: artifact.documentId, // Keep the same documentId
+                  title: artifact.title,
+                  content,
+                  kind: artifact.kind as "text" | "code" | "sheet",
+                  userId: "", // Will be filled by server response
+                  createdAt: new Date(), // Use Date object to match schema
+                };
+                return [...(currentData || []), newVersion];
+              },
+              rollbackOnError: true,
+              revalidate: true,
+            }
+          );
+
+          // Optional: Show success feedback
+          console.log("Document saved successfully:", savedDocumentData);
+        } catch (error) {
+          console.error("Error saving document:", error);
+          // Re-throw to let the draft system handle the error
+          throw error;
+        }
+      }, 1000); // 1 second debounce
     },
     [artifact, mutate]
   );
+
+  console.log("[DocumentArtifact] Rendering with handleSave:", typeof handleSave);
 
   return (
     <ArtifactVersionProvider initialMode="edit" versions={versions}>

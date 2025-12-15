@@ -243,7 +243,7 @@ export function AssistantChat({
               <MediaArtifact
                 documentId={artifact.documentId}
                 kind={artifact.kind}
-                title={artifact.title || "Untitled"}
+                title={artifact.title || t("artifact.document.untitled", "Untitled")}
               />
             )}
           </ChatCanvasMain>

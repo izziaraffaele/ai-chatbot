@@ -13,6 +13,11 @@ export const createDocumentTool = createTool({
     "Create a document for a writing or content creation activities. This tool will call other functions that will generate the contents of the document based on the title and kind.",
   inputSchema: z.object({
     title: z.string(),
+    context: z
+      .string()
+      .describe(
+        "Context used to generate the document. It must be very specific otherwise the document will be too generic."
+      ),
     kind: z.enum(artifactKinds),
   }),
   outputSchema: z.object({

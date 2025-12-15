@@ -105,9 +105,14 @@ export const it: TranslationDict = {
   // User Menu
   "sidebar.user.signOut": "Esci",
   "sidebar.user.profile": "Profilo",
+  "sidebar.user.login": "Accedi al tuo account",
 
   // Sidebar Toggle
   "sidebar.toggleSidebar": "Mostra/Nascondi Barra Laterale",
+
+  // Theme Actions
+  "sidebar.actions.toggleDark": "Attiva modalità scura",
+  "sidebar.actions.toggleLight": "Attiva modalità chiara",
 
   // ============================================================================
   // Settings
@@ -288,6 +293,21 @@ export const it: TranslationDict = {
   "success.copiedCsv": "CSV copiato negli appunti!",
   "success.deleted": "Eliminato con successo",
   "success.created": "Creato con successo",
+
+  // ============================================================================
+  // Accessibility Labels
+  // ============================================================================
+
+  "a11y.resizeConsole": "Ridimensiona console",
+  "a11y.toggleSidebar": "Mostra/Nascondi Barra Laterale",
+  "a11y.previousBranch": "Ramo precedente",
+  "a11y.nextBranch": "Ramo successivo",
+  "a11y.removeAttachment": "Rimuovi allegato",
+  "a11y.uploadFiles": "Carica file",
+  "a11y.submit": "Invia",
+  "a11y.modelContextUsage": "Utilizzo contesto modello",
+  "a11y.flashcard": "Flashcard",
+  "a11y.addCustomTheme": "Aggiungi tema personalizzato",
 
   // ============================================================================
   // Common UI Elements

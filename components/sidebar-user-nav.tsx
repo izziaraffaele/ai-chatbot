@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/sidebar";
 import { guestRegex } from "@/lib/constants";
 import type { Locale } from "@/lib/i18n/types";
-import { useLanguage } from "@/lib/i18n/use-translations";
+import { useLanguage, useTranslations } from "@/lib/i18n/use-translations";
 import { LANGUAGE_NAMES } from "@/lib/i18n/utils";
 import { LoaderIcon } from "./icons";
 import { toast } from "./toast";
@@ -34,6 +34,7 @@ export function SidebarUserNav({ user }: { user: User }) {
   const { data, status } = useSession();
   const { setTheme, resolvedTheme } = useTheme();
   const { locale, setLocale } = useLanguage();
+  const t = useTranslations();
   const isGuest = guestRegex.test(data?.user?.email ?? "");
 
   // Get avatar service URL from environment or use default
@@ -134,7 +135,9 @@ export function SidebarUserNav({ user }: { user: User }) {
                 }}
                 type="button"
               >
-                {isGuest ? "Login to your account" : "Sign out"}
+                {isGuest
+                  ? t("sidebar.user.login", "Login to your account")
+                  : t("sidebar.user.signOut", "Sign out")}
               </button>
             </DropdownMenuItem>
           </DropdownMenuContent>

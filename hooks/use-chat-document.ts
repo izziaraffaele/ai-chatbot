@@ -14,6 +14,16 @@ export function useChatDocument(documentId: string | null) {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      // Ensure we don't cache stale data for documents
+      refreshInterval: 0,
+      // Add error retry for better resilience
+      onError: (error) => {
+        console.error("SWR error loading document:", error);
+      },
+      // Log successful revalidations for debugging
+      onSuccess: (documentVersions) => {
+        console.log(`Document ${documentId} loaded: ${documentVersions?.length || 0} versions`);
+      },
     }
   );
 

@@ -30,16 +30,22 @@ export function useArtifactStreaming() {
 
   const handleStreamPart = useCallback(
     (delta: DataUIPart<ChatDataTypes>) => {
+      console.log("[useArtifactStreaming] Handling stream part:", delta.type);
+
       // Find artifact definition for custom onStreamPart handler
 
       // Handle standard artifact stream parts
       setArtifact((draftArtifact) => {
+        console.log("[useArtifactStreaming] Current artifact status:", draftArtifact?.status);
+
         if (!draftArtifact) {
+          console.log("[useArtifactStreaming] Creating new artifact with streaming status");
           return { ...initialArtifactData, status: "streaming" };
         }
 
         switch (delta.type) {
           case ARTIFACT_DATA_PART.id:
+            console.log("[useArtifactStreaming] Setting document ID:", delta.data);
             return {
               ...draftArtifact,
               documentId: delta.data,
@@ -47,6 +53,7 @@ export function useArtifactStreaming() {
             };
 
           case ARTIFACT_DATA_PART.title:
+            console.log("[useArtifactStreaming] Setting title:", delta.data);
             return {
               ...draftArtifact,
               title: delta.data,
@@ -54,6 +61,7 @@ export function useArtifactStreaming() {
             };
 
           case ARTIFACT_DATA_PART.kind:
+            console.log("[useArtifactStreaming] Setting kind:", delta.data);
             return {
               ...draftArtifact,
               kind: delta.data,
@@ -61,6 +69,7 @@ export function useArtifactStreaming() {
             };
 
           case ARTIFACT_DATA_PART.clear:
+            console.log("[useArtifactStreaming] Clearing content");
             return {
               ...draftArtifact,
               content: "",
@@ -68,6 +77,7 @@ export function useArtifactStreaming() {
             };
 
           case ARTIFACT_DATA_PART.finish:
+            console.log("[useArtifactStreaming] Finishing streaming - changing status to idle");
             return {
               ...draftArtifact,
               status: "idle",

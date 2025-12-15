@@ -116,6 +116,16 @@ export function ArtifactDraftProvider<T = any>({
   const [isSaving, setIsSaving] = useState(false);
   const isFirstRender = useRef(true);
 
+  // Wrap setContent to add debugging
+  const debugSetContent = useCallback((newContent: T) => {
+    console.log("[ArtifactDraftProvider] setContent called:", {
+      newContentLength: typeof newContent === 'string' ? newContent.length : 'non-string',
+      currentContentLength: typeof content === 'string' ? content.length : 'non-string',
+      contentType: typeof newContent,
+    });
+    setContent(newContent);
+  }, [content]);
+
   // Debounced save callback
   const debouncedSave = useDebounceCallback(async (contentToSave: T) => {
     if (!onSaveAction) {
@@ -140,8 +150,19 @@ export function ArtifactDraftProvider<T = any>({
     }
 
     // Only auto-save if content has changed
+    console.log("[ArtifactDraftProvider] Content change check:", {
+      contentLength: typeof content === 'string' ? content.length : 'non-string',
+      originalContentLength: typeof originalContent === 'string' ? originalContent.length : 'non-string',
+      contentChanged: content !== originalContent,
+      contentType: typeof content,
+      originalContentType: typeof originalContent,
+    });
+
     if (content !== originalContent) {
+      console.log("[ArtifactDraftProvider] Triggering debounced save");
       debouncedSave(content);
+    } else {
+      console.log("[ArtifactDraftProvider] No content change detected, skipping save");
     }
   }, [content, originalContent, debouncedSave]);
 
@@ -177,11 +198,11 @@ export function ArtifactDraftProvider<T = any>({
       originalContent,
       isDirty: content !== originalContent,
       isSaving,
-      setContent,
+      setContent: debugSetContent,
       save,
       reset,
     }),
-    [content, originalContent, isSaving, save, reset]
+    [content, originalContent, isSaving, debugSetContent, save, reset]
   );
 
   return (
@@ -230,10 +251,23 @@ export function ArtifactVersionProvider<T = any>({
   initialMode = "edit",
   children,
 }: ArtifactVersionProviderProps<T>) {
+  console.log("[ArtifactVersionProvider] Rendered with versions:", versions.length);
+
   const [currentIndex, setCurrentIndex] = useState(
     initialIndex === -1 ? versions.length - 1 : initialIndex
   );
   const [mode, setMode] = useState<VersionMode>(initialMode);
+
+  // Auto-navigate to latest version when new versions are added
+  useEffect(() => {
+    console.log(`[ArtifactVersionProvider] Versions length changed: ${versions.length}`);
+    if (versions.length > 0) {
+      const newIndex = versions.length - 1;
+      console.log(`[ArtifactVersionProvider] Auto-navigating to latest version: ${newIndex}`);
+      setCurrentIndex(newIndex);
+      setMode("edit");
+    }
+  }, [versions.length]);
 
   const value = useMemo<ArtifactVersionContextValue<T>>(() => {
     const totalVersions = versions.length;

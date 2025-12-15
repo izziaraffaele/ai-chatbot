@@ -44,12 +44,9 @@ function PureFallback(props: FallbackProps) {
     <Tool className="mb-0" defaultOpen={false}>
       <ToolHeader state={part.state} type={part.type} />
       <ToolContent>
-        {part.state === "input-available" && <ToolInput input={part.input} />}
+        {part.input && <ToolInput input={part.input} />}
         {part.state === "output-available" && Boolean(part.output) && (
-          <ToolOutput
-            errorText={undefined}
-            output={JSON.stringify(part.output)}
-          />
+          <ToolOutput errorText={undefined} output={part.output} />
         )}
       </ToolContent>
     </Tool>

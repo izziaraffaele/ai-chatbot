@@ -20,7 +20,7 @@ export const textDocumentHandler = createDocumentHandler<"text">({
     // Stream text generation from agent
     const stream = await agent.stream(title, {
       system:
-        "Write about the given topic. Markdown is supported. Use headings wherever appropriate.",
+        "Write about the given topic. Markdown is supported. Use headings wherever appropriate. Respond with the content of the document without further explanations.",
     });
 
     // Apply smooth streaming for more natural text delivery
