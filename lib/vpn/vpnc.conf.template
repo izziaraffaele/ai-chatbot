@@ -1,0 +1,36 @@
+# Faenza VPN Configuration for Linux (vpnc)
+#
+# This is a template file. Copy to /etc/vpnc/faenza.conf and fill in credentials.
+# Or set environment variables and let the application generate it automatically.
+#
+# Install vpnc on Ubuntu/Debian:
+#   sudo apt-get install vpnc
+#
+# Install vpnc on Amazon Linux/RHEL:
+#   sudo yum install vpnc
+#
+# Manual connection:
+#   sudo vpnc /etc/vpnc/faenza.conf
+#
+# Disconnect:
+#   sudo vpnc-disconnect
+
+# VPN Gateway (server address)
+IPSec gateway 195.62.179.98
+
+# Group name (IPSec ID)
+IPSec ID Memoraiz
+
+# Group shared secret (replace with actual value from VPN_SHARED_SECRET)
+IPSec secret YOUR_SHARED_SECRET_HERE
+
+# Username (replace with actual value from VPN_USERNAME)
+Xauth username YOUR_USERNAME_HERE
+
+# Password (replace with actual value from VPN_PASSWORD)
+Xauth password YOUR_PASSWORD_HERE
+
+# Optional settings
+# NAT Traversal Mode cisco-udp
+# DPD idle timeout (R) 300
+

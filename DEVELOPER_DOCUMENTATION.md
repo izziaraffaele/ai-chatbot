@@ -23,11 +23,13 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 ### Key Features
 
 - **Assistente Comune**: Official AI assistant for document management
-- **Invoice Knowledge Base**: Access to XML invoice files
+- **Invoice Knowledge Base**: Access to XML invoice files or Oracle database
 - **Intelligent Parsing**: Automatic extraction of invoice metadata
 - **Invoice Validation**: Automatic validation of required fields for invoice liquidation
 - **Document Templates**: Template-based generation for administrative documents (e.g., Comunicazione di Liquidazione)
 - **Italian Interface**: System prompt and interactions in Italian
+- **Dual Data Source**: Support for local XML files and remote Oracle database (SIBAC)
+- **VPN Integration**: Automatic VPN connection for remote database access
 
 ### Key Technologies
 
@@ -36,6 +38,7 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 - **Google Gemini**: Default LLM for chat responses
 - **LibSQL**: Memory storage for conversation history
 - **TypeScript**: Type-safe codebase
+- **OracleDB**: Oracle database connectivity for SIBAC integration
 
 ---
 
@@ -281,6 +284,310 @@ Example: `CSB_IT00185240397_00IS8-[1796150500].xml`
 
 ---
 
+## Oracle Database Integration (SIBAC)
+
+### Overview
+
+The system supports fetching invoice/impegni data from the remote Oracle SIBAC database via VPN connection. This is an alternative to the local XML file storage.
+
+### Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Application   │────▶│   VPN Service   │────▶│  Oracle SIBAC   │
+│   (Next.js)     │     │  (faenza-vpn)   │     │  192.168.0.204  │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                              │
+                              ▼
+                        ┌───────────────┐
+                        │ SIB_V_IMPEGNI │
+                        │   _X_CIG      │
+                        └───────────────┘
+```
+
+### Configuration
+
+Set the following environment variables:
+
+```env
+# Data source selection
+INVOICE_DATA_SOURCE=oracle  # or "local" for XML files
+
+# Oracle Database
+ORACLE_HOST=192.168.0.204
+ORACLE_PORT=1521
+ORACLE_SERVICE_NAME=SIBAC
+ORACLE_USER=cp_ia01  # cp_ia01 through cp_ia08
+ORACLE_PASSWORD=p4ss_ia1
+
+# VPN
+VPN_NAME=faenza vpn
+VPN_AUTO_CONNECT=true
+```
+
+### Key Components
+
+| Component | Path | Description |
+|-----------|------|-------------|
+| VPN Service | `lib/vpn/faenza-vpn.ts` | Manages VPN connection via macOS scutil |
+| Oracle Client | `lib/db/oracle-sibac.ts` | Oracle database connection pool and queries |
+| Oracle Types | `lib/db/oracle-types.ts` | TypeScript types for Oracle data |
+
+### VPN Service (`lib/vpn/faenza-vpn.ts`)
+
+The VPN service supports **cross-platform** operation:
+- **macOS** (local development): Uses native `scutil` for Cisco IPSec VPN
+- **Linux/AWS** (production): Uses `vpnc` for Cisco IPSec VPN
+
+```typescript
+// Check VPN status
+const isConnected = await isVpnConnected();
+
+// Connect to VPN
+const result = await connectVpn();
+// { success: true, status: "connected", message: "VPN connesso" }
+
+// Execute code with VPN (auto-connects if needed)
+const data = await withVpnConnection(async () => {
+  return await fetchOracleData();
+});
+
+// Get VPN info (without sensitive data)
+const info = getVpnInfo();
+// { platform: "darwin", serviceName: "faenza vpn", serverAddress: "...", configured: true }
+```
+
+### Oracle Connection Diagnostics
+
+The system includes comprehensive diagnostics to distinguish between different connection issues:
+
+```typescript
+import { diagnoseOracleConnection } from "@/lib/vpn/faenza-vpn";
+
+const diagnosis = await diagnoseOracleConnection();
+// Returns: {
+//   vpnConnected: boolean,
+//   serverReachable: boolean,
+//   portReachable: boolean,
+//   status: "ok" | "vpn_disconnected" | "server_unreachable" | "port_blocked",
+//   message: string  // Human-readable error message (Italian)
+// }
+```
+
+**Status codes and their meanings:**
+| Status | Description |
+|--------|-------------|
+| `ok` | All checks passed, Oracle is accessible |
+| `vpn_disconnected` | VPN not connected |
+| `server_unreachable` | VPN connected but server doesn't respond to ping |
+| `port_blocked` | Server reachable but port 1521 blocked (firewall or Oracle service down) |
+
+### UI Error Messages
+
+The document selector shows specific error messages based on the diagnostic status:
+- **VPN disconnected**: "VPN non connesso. Connettere al VPN per accedere al database."
+- **Server unreachable**: "Server Oracle non raggiungibile. Verificare la configurazione VPN."
+- **Port blocked**: "Porta Oracle 1521 non raggiungibile. Il servizio Oracle potrebbe essere spento o bloccato dal firewall."
+
+### VPN Environment Variables
+
+```env
+# VPN Configuration
+VPN_NAME="faenza vpn"              # VPN service name (macOS only)
+VPN_SERVER="195.62.179.98"         # VPN server address
+VPN_USERNAME="your_username"       # VPN username
+VPN_PASSWORD="your_password"       # VPN password
+VPN_SHARED_SECRET="your_secret"    # IPSec shared secret
+VPN_GROUP_NAME="Memoraiz"          # IPSec group name
+VPN_AUTO_CONNECT="true"            # Auto-connect when needed
+```
+
+### VPN Setup Scripts
+
+| Script | Platform | Description |
+|--------|----------|-------------|
+| `scripts/setup-vpn-macos.sh` | macOS | Guides macOS VPN profile creation |
+| `scripts/setup-vpn-linux.sh` | Linux | Installs vpnc and creates config |
+
+See `lib/vpn/README.md` for detailed setup instructions.
+
+### Oracle Client (`lib/db/oracle-sibac.ts`)
+
+```typescript
+// List impegni from database
+const impegni = await listImpegni({ limit: 100 });
+
+// Get specific impegno by CIG
+const impegno = await getImpegnoByCig("ABC1234567");
+
+// Validate impegno fields
+const validation = validateImpegno(impegno);
+
+// Discover view schema (useful for initial setup)
+const schema = await discoverViewSchema();
+```
+
+### Database Users
+
+The system connects to **all 8 database views in parallel** to aggregate impegni data from different municipal departments:
+
+| User | View | Tablespace |
+|------|------|------------|
+| cp_ia01 | sib01.SIB_V_IMPEGNI_X_CIG | ak_tasp_sib01 |
+| cp_ia02 | sib02.SIB_V_IMPEGNI_X_CIG | ak_tasp_sib02 |
+| cp_ia03 | sib03.SIB_V_IMPEGNI_X_CIG | ak_tasp_sib03 |
+| cp_ia04 | sib04.SIB_V_IMPEGNI_X_CIG | ak_tasp_sib04 |
+| cp_ia05 | sib05.SIB_V_IMPEGNI_X_CIG | ak_tasp_sib05 |
+| cp_ia06 | sib06.SIB_V_IMPEGNI_X_CIG | ak_tasp_sib06 |
+| cp_ia07 | sib07.SIB_V_IMPEGNI_X_CIG | ak_tasp_sib07 |
+| cp_ia08 | sib08.SIB_V_IMPEGNI_X_CIG | ak_tasp_sib08 |
+
+All users share the password: `p4ss_ia1`
+
+### Multi-View Query Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     listImpegni()                           │
+│                          │                                  │
+│     ┌────────────────────┼────────────────────┐            │
+│     │                    │                    │            │
+│     ▼                    ▼                    ▼            │
+│ ┌─────────┐        ┌─────────┐         ┌─────────┐        │
+│ │ cp_ia01 │        │ cp_ia02 │   ...   │ cp_ia08 │        │
+│ │  pool   │        │  pool   │         │  pool   │        │
+│ └────┬────┘        └────┬────┘         └────┬────┘        │
+│      │                  │                   │              │
+│      ▼                  ▼                   ▼              │
+│  SIB01 view         SIB02 view          SIB08 view        │
+│                          │                                 │
+│     └────────────────────┼────────────────────┘           │
+│                          │                                 │
+│                    Aggregate Results                       │
+│                  (with source prefix)                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Each record includes a source indicator (e.g., `cp_ia01:CIG123456AB`) for traceability.
+
+### Unified Data Access
+
+The knowledge base loader provides unified functions that work with all data sources:
+
+```typescript
+import {
+  getDataSource,
+  listRecordsWithValidation,
+  loadRecord
+} from "@/mastra/utils/knowledge-base-loader";
+
+// Check current data source
+const source = getDataSource(); // "local" | "oracle" | "sibac-shared"
+
+// List all records (works with all sources)
+const records = await listRecordsWithValidation();
+
+// Load specific record (auto-detects source from prefix)
+const record = await loadRecord("sibac-shared:INVOICE_001");
+const record2 = await loadRecord("CIG_OR_FILE_ID");
+// Returns: { metadata, content, validation, source, impegno? }
+```
+
+---
+
+## SIBAC Shared Folder Integration
+
+### Overview
+
+The SIBAC Shared Folder provides automatic file synchronization from the Windows machine's shared folder "SIBAC 01 - Cartella Condivisa" at `192.168.0.204`. The system automatically mounts the SMB share and syncs files to a local directory for processing.
+
+### Automatic SMB Sync
+
+When VPN is connected, the system automatically:
+1. Mounts the Windows SMB share
+2. Copies new/updated files to the local directory
+3. Unmounts after sync
+
+**Key module:** `lib/smb/sibac-share.ts`
+
+```typescript
+import {
+  syncSibacFiles,
+  isSibacShareAccessible,
+  getLocalSibacFileCount,
+} from "@/lib/smb/sibac-share";
+
+// Sync files from Windows share (auto-mounts SMB)
+const result = await syncSibacFiles();
+// Returns: { success, message, filesFound, filesSynced, errors }
+
+// Check if share is accessible
+const status = await isSibacShareAccessible();
+// Returns: { accessible, message }
+
+// Get count of locally synced files
+const count = getLocalSibacFileCount();
+```
+
+### Environment Variables
+
+```bash
+SMB_HOST="192.168.0.204"
+SMB_SHARE_NAME="SIBAC 01 - Cartella Condivisa"
+SMB_USERNAME=""  # Defaults to VPN_USERNAME
+SMB_PASSWORD=""  # Defaults to VPN_PASSWORD
+SMB_DOMAIN="WORKGROUP"
+```
+
+### Manual Access (Fallback)
+
+If automatic sync fails, access via RDP:
+
+```bash
+# Connect via XQuartz + xfreerdp (macOS)
+open -a XQuartz
+export DISPLAY=:0
+xfreerdp /v:192.168.0.204 /u:eprocino /p:YOUR_PASSWORD /cert:ignore
+```
+
+### Local Directory
+
+Files are synced to:
+
+```
+mastra/knowledgebase/sibac-shared/
+```
+
+Supported file formats: `.xml`, `.pdf`, `.doc`, `.docx`
+
+### Key Functions
+
+```typescript
+import {
+  listSibacSharedFiles,
+  loadSibacSharedFile,
+} from "@/mastra/utils/knowledge-base-loader";
+
+// List files from SIBAC shared folder
+const files = listSibacSharedFiles();
+
+// Load a specific file
+const invoice = loadSibacSharedFile("INVOICE_001");
+```
+
+### UI Display
+
+The folder appears as "SIBAC 01 - Cartella Condivisa" with a `FolderSync` icon in the document selector panel, positioned first in the hierarchy.
+
+### Error Handling
+
+The folder displays specific error messages based on status:
+- **VPN disconnected**: "VPN non connesso. Connettere al VPN per sincronizzare i file."
+- **SMB error**: "Impossibile accedere alla cartella condivisa Windows. Verificare le credenziali SMB."
+- **Sync pending**: "Sincronizzazione in corso..."
+
+---
+
 ## Invoice Validation System
 
 ### Overview
@@ -359,14 +666,135 @@ if (!validation.fatturaValida) {
 const fileValidation = validateInvoiceFile("CSB_IT00185240397");
 ```
 
+---
+
+## Hierarchical File System UI
+
+### Overview
+
+The UI fatture panel supports a hierarchical file system view that organizes documents into folders. This allows users to browse:
+- **Database SIBAC**: Files fetched from the Oracle database (when VPN connected)
+- **Fatture Locali (Debug)**: Local XML files for development and debugging
+
+### File System Types
+
+```typescript
+// Base type for file system items
+type FileSystemItemBase = {
+  id: string;
+  name: string;
+  type: "file" | "folder";
+};
+
+// A file in the file system
+type FileSystemFile = FileSystemItemBase & {
+  type: "file";
+  fileId: string;
+  displayName?: string;
+  fatturaValida: boolean;
+  campiMancanti: string[];
+  campiNonValidi: string[];
+  source: "local" | "oracle" | "sibac-shared";
+};
+
+// A folder in the file system
+type FileSystemFolder = FileSystemItemBase & {
+  type: "folder";
+  children: FileSystemItem[];
+  fileCount: number;      // Total files (including subfolders)
+  validCount: number;     // Count of valid files
+  invalidCount: number;   // Count of invalid files
+  defaultExpanded?: boolean;
+  icon?: string;          // "database", "database-off", "hard-drive", "folder-sync"
+  description?: string;
+};
+
+// Root structure for the file system UI
+type FileSystemRoot = {
+  items: FileSystemItem[];
+  totalFiles: number;
+  totalValid: number;
+  totalInvalid: number;
+};
+```
+
+### Getting Hierarchical Data
+
+```typescript
+import { getFileSystemHierarchy } from "@/mastra/utils/knowledge-base-loader";
+
+// Get hierarchical structure with local, Oracle, and SIBAC shared folders
+const fileSystem = await getFileSystemHierarchy();
+
+// Returns:
+// {
+//   items: [
+//     { id: "folder:sibac-shared", name: "SIBAC 01 - Cartella Condivisa", type: "folder", ... },
+//     { id: "folder:oracle", name: "Database SIBAC", type: "folder", ... },
+//     { id: "folder:local", name: "Fatture Locali (Debug)", type: "folder", ... }
+//   ],
+//   totalFiles: 66,
+//   totalValid: 6,
+//   totalInvalid: 60
+// }
+```
+
+### UI Components (Card-Based Navigation)
+
+The document selector (`components/artifacts/document-selector.tsx`) uses a **card-based page navigation** pattern:
+
+**Navigation Pattern:**
+- Files and folders are displayed as **squared cards** (~120x120px) in a responsive grid
+- Clicking a **folder** navigates to a new "page" showing its contents
+- Clicking a **file** opens the invoice detail view in the same side panel
+- A **"Back" button** (Indietro) allows returning to the parent folder
+- Supports both **Grid** and **List** view modes
+
+**Card Components:**
+
+1. **FolderCard** (Grid View): Squared card for folders
+   - Folder icon (colored by type)
+   - Folder name (truncated if long)
+   - File count badge
+
+2. **FolderListItem** (List View): Horizontal item for folders
+   - Folder icon with name and description
+   - File count badge
+
+3. **FileCard** (Grid View): Squared card for files
+   - File icon (colored by validation status)
+   - File name (truncated if long)
+   - Validation dot indicator (green/red)
+
+4. **FileListItem** (List View): Horizontal item for files
+   - File icon with name
+   - Validation badge
+
+**Navigation State:**
+```typescript
+// Current folder being viewed (null = root level)
+const [currentFolder, setCurrentFolder] = useState<FileSystemFolder | null>(null);
+// History stack for back navigation
+const [folderHistory, setFolderHistory] = useState<FileSystemFolder[]>([]);
+```
+
+### Folder Icons
+
+| Icon | Folder Type | Description |
+|------|-------------|-------------|
+| FolderSync | `folder:sibac-shared` | SIBAC 01 - Cartella Condivisa (Windows shared folder) |
+| Database | `folder:oracle` | Oracle SIBAC database |
+| DatabaseZap | `folder:oracle` (disconnected) | VPN not connected |
+| HardDrive | `folder:local` | Local XML files |
+| Folder | default | Generic folder |
+
 ### UI Validation Display
 
-The `LoadInvoiceTool` component (`components/tools/load-invoice.tsx`) displays:
-
-**Document List View:**
-- **Valid invoices**: Green badge "✓ Fattura valida"
-- **Invalid invoices**: Red badge "✗ Fattura non valida"
-- **Header stats**: Shows count of valid/invalid invoices
+**Document Grid/List View:**
+- **Valid files**: Blue icon with green validation dot
+- **Invalid files**: Red icon with red validation dot
+- **Header stats**: Shows count of valid/invalid/total invoices
+- **Back navigation**: Shows current folder name and "Indietro" button
 
 **Document Details View:**
 - Validation badge (green/red)
@@ -510,7 +938,7 @@ GET /api/invoice?fileId={fileId}
 
 ## Data Flow
 
-### Document Listing Flow (with Validation and Side Panel)
+### Document Listing Flow (with Hierarchical File System)
 
 ```
 1. User: "Mostrami i documenti"
@@ -519,24 +947,31 @@ GET /api/invoice?fileId={fileId}
 2. Agent calls loadInvoice({}) - no fileId
          │
          ▼
-3. Tool iterates over all files, validates each one:
-   - loadKnowledgeBaseFile(fileId) → { metadata, content }
-   - validateInvoice(content) → { fatturaValida, campiMancanti, ... }
+3. Tool calls getFileSystemHierarchy():
+   - Gets local files: listKnowledgeBaseFiles() → validate each
+   - Gets Oracle files (if VPN connected): listImpegni() → validate each
+   - Organizes into folders: "Database SIBAC" and "Fatture Locali (Debug)"
          │
          ▼
 4. Tool returns { 
      success: true, 
-     filesWithValidation: [
-       { fileId: "...", fatturaValida: true, campiMancanti: [], campiNonValidi: [] },
-       { fileId: "...", fatturaValida: false, campiMancanti: ["CUP"], campiNonValidi: [] },
-       ...
-     ]
+     fileSystem: {
+       items: [
+         { id: "folder:oracle", name: "Database SIBAC", type: "folder", children: [...], ... },
+         { id: "folder:local", name: "Fatture Locali (Debug)", type: "folder", children: [...], ... }
+       ],
+       totalFiles: 66,
+       totalValid: 6,
+       totalInvalid: 60
+     },
+     filesWithValidation: [...] // Legacy flat format for backward compatibility
    }
          │
          ▼
 5. LoadInvoiceTool UI component:
    - Shows "Documenti Disponibili" card with stats (valid/invalid/total)
    - AUTOMATICALLY opens the side panel (document-selector tab)
+   - Side panel shows hierarchical folder view with expand/collapse
 ```
 
 ### Invoice Analysis Flow (Deep Search via Sub-Agent)
@@ -594,8 +1029,10 @@ mastra/
 │   │   └── index.ts           # Research agent
 │   └── index.ts               # Agent exports
 ├── knowledgebase/
-│   └── faenza/
-│       └── *.xml              # Invoice files
+│   ├── faenza/
+│   │   └── *.xml              # Local invoice files (debug)
+│   └── sibac-shared/
+│       └── *.*                # Files from Windows shared folder
 ├── tools/
 │   ├── index.ts               # Tool exports
 │   ├── load-invoice-tool.ts   # Invoice loading tool
@@ -619,11 +1056,25 @@ app/
 lib/
 ├── ai/
 │   └── agent-config.ts        # UI agent configuration
+├── db/
+│   ├── oracle-sibac.ts        # Oracle SIBAC database client
+│   └── oracle-types.ts        # TypeScript types for Oracle data
+├── vpn/
+│   ├── faenza-vpn.ts          # Cross-platform VPN service (macOS + Linux)
+│   ├── vpnc.conf.template     # Linux vpnc configuration template
+│   └── README.md              # VPN setup documentation
 ├── templates/
 │   ├── index.ts               # Template registry and rendering functions
 │   ├── types.ts               # TypeScript types for templates
 │   └── liquidation-communication.ts  # Comunicazione di Liquidazione template
 └── ...
+
+scripts/
+├── setup-vpn-macos.sh         # macOS VPN setup script
+├── setup-vpn-linux.sh         # Linux/AWS VPN setup script (vpnc)
+├── convert_documents.py       # Document conversion utilities
+├── transcribe_videos.py       # Video transcription script
+└── podcast_creation.py        # Podcast generation script
 
 components/
 ├── artifacts/

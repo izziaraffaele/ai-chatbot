@@ -5,11 +5,17 @@ import {
   Building2,
   CheckCircle2,
   CreditCard,
+  Database,
+  DatabaseZap,
   Files,
   FileText,
+  Folder,
+  FolderSync,
+  HardDrive,
   Hash,
   LayoutGrid,
   List,
+  Loader2,
   MapPin,
   Package,
   Receipt,
@@ -30,6 +36,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
 import { cn } from "@/lib/utils";
+import type {
+  FileSystemFile,
+  FileSystemFolder,
+  FileSystemItem,
+  FileSystemRoot,
+  FolderErrorStatus,
+} from "@/mastra/utils/knowledge-base-loader";
 
 // ============================================================================
 // TYPES
@@ -104,7 +117,6 @@ type FieldStatus = "valid" | "invalid_format" | "missing";
 
 // Regex patterns extracted to top-level to avoid recreation on every render
 const VAT_MATCH_REGEX = /IT\d+/;
-const FILE_ID_PARTS_REGEX = /\[([^\]]+)\]/;
 
 export const DOCUMENT_SELECTOR_KIND = "document-selector" as const;
 
@@ -114,11 +126,17 @@ export const isDocumentSelectorArtifact = (
   kind: string
 ): kind is DocumentSelectorArtifactKind => kind === DOCUMENT_SELECTOR_KIND;
 
+/**
+ * Content type for document selector artifact
+ * Can be either flat list (legacy) or hierarchical file system
+ */
+export type DocumentSelectorContent = FileValidation[] | FileSystemRoot;
+
 export type DocumentSelectorUIArtifact = {
   title: string;
   documentId: string;
   kind: DocumentSelectorArtifactKind;
-  content: FileValidation[];
+  content: DocumentSelectorContent;
   isVisible: boolean;
   status: "streaming" | "idle";
   boundingBox: {
@@ -128,6 +146,20 @@ export type DocumentSelectorUIArtifact = {
     height: number;
   };
 };
+
+/**
+ * Check if content is hierarchical file system
+ */
+function isFileSystemRoot(
+  content: DocumentSelectorContent
+): content is FileSystemRoot {
+  return (
+    content !== null &&
+    typeof content === "object" &&
+    "items" in content &&
+    Array.isArray(content.items)
+  );
+}
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -143,14 +175,6 @@ function getDisplayName(fileId: string): string {
     return parts.slice(0, 2).join("_");
   }
   return fileId.slice(0, 20);
-}
-
-function getCodeFromFileId(fileId: string): string {
-  const bracketMatch = fileId.match(FILE_ID_PARTS_REGEX);
-  if (bracketMatch) {
-    return `A-[${bracketMatch[1]}]`;
-  }
-  return fileId.slice(-12);
 }
 
 /**
@@ -239,6 +263,7 @@ export type DocumentSelectorArtifactProps = {
 /**
  * DocumentSelectorArtifact
  * Displays available documents in a side panel with search, filters, and validation status.
+ * Supports both flat file list and hierarchical folder structure.
  * When a document is clicked, switches to a detail view showing extracted data and original invoice.
  */
 export function DocumentSelectorArtifact({
@@ -252,6 +277,21 @@ export function DocumentSelectorArtifact({
   const [listViewMode, setListViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Folder navigation state (page-based navigation)
+  const [currentFolder, setCurrentFolder] = useState<FileSystemFolder | null>(
+    null
+  );
+  const [folderHistory, setFolderHistory] = useState<FileSystemFolder[]>([]);
+
+  // Lazy loading state
+  const [loadingFolders, setLoadingFolders] = useState<Set<string>>(new Set());
+  const [lazyLoadedChildren, setLazyLoadedChildren] = useState<
+    Record<string, FileSystemItem[]>
+  >({});
+  const [lazyLoadErrors, setLazyLoadErrors] = useState<Record<string, string>>(
+    {}
+  );
+
   // Selected document data
   const [selectedDocument, setSelectedDocument] = useState<InvoiceData | null>(
     null
@@ -259,14 +299,93 @@ export function DocumentSelectorArtifact({
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Get files from active tab artifact content
-  const filesWithValidation = useMemo(() => {
-    const content = activeTab?.artifact.content;
-    if (!content || !Array.isArray(content)) {
+  // Get content from active tab
+  const content = activeTab?.artifact.content as
+    | DocumentSelectorContent
+    | undefined;
+
+  // Determine if we have hierarchical content
+  const isHierarchical = content ? isFileSystemRoot(content) : false;
+
+  // Get files from active tab artifact content (supports both formats)
+  const filesWithValidation = useMemo((): FileValidation[] => {
+    if (!content) {
       return [];
     }
-    return content as FileValidation[];
-  }, [activeTab?.artifact.content]);
+
+    // Hierarchical format - flatten for search/stats
+    if (isFileSystemRoot(content)) {
+      const flattenItems = (items: FileSystemItem[]): FileValidation[] => {
+        const files: FileValidation[] = [];
+        for (const item of items) {
+          if (item.type === "file") {
+            files.push({
+              fileId: item.fileId,
+              fatturaValida: item.fatturaValida,
+              campiMancanti: item.campiMancanti,
+              campiNonValidi: item.campiNonValidi,
+            });
+          } else if (item.type === "folder") {
+            files.push(...flattenItems(item.children));
+          }
+        }
+        return files;
+      };
+      return flattenItems(content.items);
+    }
+
+    // Legacy flat format
+    if (Array.isArray(content)) {
+      return content as FileValidation[];
+    }
+
+    return [];
+  }, [content]);
+
+  // Get file system items (for hierarchical view) with lazy loaded children merged
+  const fileSystemItems = useMemo((): FileSystemItem[] => {
+    if (!content || !isFileSystemRoot(content)) {
+      return [];
+    }
+
+    // Recursively merge lazy loaded children into the tree
+    const mergeChildren = (items: FileSystemItem[]): FileSystemItem[] => {
+      return items.map((item) => {
+        if (item.type !== "folder") {
+          return item;
+        }
+
+        // Check if we have lazy loaded children for this folder
+        const loadedChildren = lazyLoadedChildren[item.id];
+        const error = lazyLoadErrors[item.id];
+        const isFolderLoading = loadingFolders.has(item.id);
+
+        const folder: FileSystemFolder = {
+          ...item,
+          children: loadedChildren
+            ? mergeChildren(loadedChildren)
+            : mergeChildren(item.children),
+          errorMessage: error ?? item.errorMessage,
+          // Update stats from loaded children
+          fileCount: loadedChildren
+            ? loadedChildren.filter((c) => c.type === "file").length +
+              loadedChildren
+                .filter((c) => c.type === "folder")
+                .reduce((sum, f) => sum + (f as FileSystemFolder).fileCount, 0)
+            : item.fileCount,
+        };
+
+        // Mark as loading if applicable
+        if (isFolderLoading) {
+          folder.description = "Caricamento...";
+        }
+
+        return folder;
+      });
+    };
+
+    return mergeChildren(content.items);
+  }, [content, lazyLoadedChildren, lazyLoadErrors, loadingFolders]);
 
   // Filter files by search query
   const filteredFiles = useMemo(() => {
@@ -281,12 +400,205 @@ export function DocumentSelectorArtifact({
     );
   }, [filesWithValidation, searchQuery]);
 
+  // Filter file system items by search query
+  const filterFileSystemItems = useCallback(
+    (items: FileSystemItem[], query: string): FileSystemItem[] => {
+      if (!query) {
+        return items;
+      }
+
+      const lowerQuery = query.toLowerCase();
+      const filtered: FileSystemItem[] = [];
+
+      for (const item of items) {
+        if (item.type === "file") {
+          if (
+            item.name.toLowerCase().includes(lowerQuery) ||
+            item.fileId.toLowerCase().includes(lowerQuery) ||
+            item.displayName?.toLowerCase().includes(lowerQuery)
+          ) {
+            filtered.push(item);
+          }
+        } else if (item.type === "folder") {
+          const filteredChildren = filterFileSystemItems(item.children, query);
+          if (filteredChildren.length > 0) {
+            filtered.push({
+              ...item,
+              children: filteredChildren,
+            });
+          }
+        }
+      }
+
+      return filtered;
+    },
+    []
+  );
+
+  const filteredFileSystemItems = useMemo(() => {
+    return filterFileSystemItems(fileSystemItems, searchQuery);
+  }, [fileSystemItems, searchQuery, filterFileSystemItems]);
+
+  // Get current items to display based on navigation state
+  const currentItems = useMemo((): FileSystemItem[] => {
+    if (!currentFolder) {
+      // At root level - show all top-level items (filtered)
+      return filteredFileSystemItems;
+    }
+
+    // Inside a folder - get its children (with lazy loaded children merged)
+    const loadedChildren = lazyLoadedChildren[currentFolder.id];
+    const children = loadedChildren ?? currentFolder.children;
+
+    // Filter the children by search query
+    return filterFileSystemItems(children, searchQuery);
+  }, [
+    currentFolder,
+    filteredFileSystemItems,
+    lazyLoadedChildren,
+    searchQuery,
+    filterFileSystemItems,
+  ]);
+
+  // Separate folders and files from current items
+  const currentFolders = useMemo(
+    () =>
+      currentItems.filter(
+        (item) => item.type === "folder"
+      ) as FileSystemFolder[],
+    [currentItems]
+  );
+  const currentFiles = useMemo(
+    () =>
+      currentItems.filter((item) => item.type === "file") as FileSystemFile[],
+    [currentItems]
+  );
+
   // Calculate stats
   const validCount = useMemo(
     () => filesWithValidation.filter((f) => f.fatturaValida).length,
     [filesWithValidation]
   );
   const invalidCount = filesWithValidation.length - validCount;
+
+  // Fetch lazy folder contents from API
+  const fetchLazyFolderContents = useCallback(
+    async (folder: FileSystemFolder) => {
+      if (!folder.lazy || folder.lazyPath === undefined) {
+        return;
+      }
+
+      const folderId = folder.id;
+      const lazyPath = folder.lazyPath ?? "";
+
+      // Already loading or loaded
+      if (loadingFolders.has(folderId) || lazyLoadedChildren[folderId]) {
+        return;
+      }
+
+      setLoadingFolders((prev) => new Set(prev).add(folderId));
+      setLazyLoadErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[folderId];
+        return newErrors;
+      });
+
+      try {
+        const response = await fetch(
+          `/api/smb?action=browse&path=${encodeURIComponent(lazyPath)}`
+        );
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error ?? "Failed to load folder");
+        }
+
+        // Convert API entries to FileSystemItem[]
+        const children: FileSystemItem[] = data.entries.map(
+          (entry: {
+            name: string;
+            path: string;
+            type: "file" | "folder";
+            itemCount?: number;
+            displayName?: string;
+          }) => {
+            if (entry.type === "folder") {
+              return {
+                id: `sibac-shared:folder:${entry.path}`,
+                name: entry.name,
+                type: "folder" as const,
+                children: [],
+                fileCount: entry.itemCount ?? 0,
+                validCount: 0,
+                invalidCount: 0,
+                defaultExpanded: false,
+                icon: "folder",
+                lazy: true,
+                lazyPath: entry.path,
+              } satisfies FileSystemFolder;
+            }
+            return {
+              id: `sibac-shared:${entry.path}`,
+              name: entry.displayName ?? entry.name,
+              type: "file" as const,
+              fileId: `sibac-shared:${entry.path}`,
+              displayName: entry.displayName ?? entry.name,
+              fatturaValida: false, // Will be validated on demand
+              campiMancanti: [],
+              campiNonValidi: [],
+              source: "sibac-shared" as const,
+            } satisfies FileSystemFile;
+          }
+        );
+
+        setLazyLoadedChildren((prev) => ({
+          ...prev,
+          [folderId]: children,
+        }));
+      } catch (error) {
+        console.error(
+          `[DocumentSelector] Error loading folder ${folderId}:`,
+          error
+        );
+        setLazyLoadErrors((prev) => ({
+          ...prev,
+          [folderId]: String(error),
+        }));
+      } finally {
+        setLoadingFolders((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(folderId);
+          return newSet;
+        });
+      }
+    },
+    [loadingFolders, lazyLoadedChildren]
+  );
+
+  // Navigate into a folder (page-based navigation)
+  const handleFolderClick = useCallback(
+    (folder: FileSystemFolder) => {
+      // Save current folder to history (if not null)
+      setFolderHistory((prev) =>
+        currentFolder ? [...prev, currentFolder] : prev
+      );
+      setCurrentFolder(folder);
+
+      // Trigger lazy load if needed
+      if (folder.lazy && !lazyLoadedChildren[folder.id]) {
+        fetchLazyFolderContents(folder);
+      }
+    },
+    [currentFolder, lazyLoadedChildren, fetchLazyFolderContents]
+  );
+
+  // Navigate back to parent folder
+  const handleBackNavigation = useCallback(() => {
+    const newHistory = [...folderHistory];
+    const parentFolder = newHistory.pop() ?? null;
+    setFolderHistory(newHistory);
+    setCurrentFolder(parentFolder);
+  }, [folderHistory]);
 
   // Handle close - closes the current tab
   const handleClose = useCallback(() => {
@@ -356,6 +668,16 @@ export function DocumentSelectorArtifact({
     );
   }
 
+  // Check if we're loading the current folder
+  const isCurrentFolderLoading = currentFolder
+    ? loadingFolders.has(currentFolder.id)
+    : false;
+
+  // Get error for current folder
+  const currentFolderError = currentFolder
+    ? lazyLoadErrors[currentFolder.id]
+    : null;
+
   return (
     <ChatArtifact className={cn("h-full rounded-none border-none", className)}>
       <ChatArtifactHeader
@@ -384,6 +706,25 @@ export function DocumentSelectorArtifact({
 
       <ChatArtifactBody>
         <div className="flex h-full flex-col">
+          {/* Back Navigation Header (when inside a folder) */}
+          {currentFolder && (
+            <div className="flex items-center gap-3 border-border border-b bg-muted/30 px-4 py-2">
+              <Button
+                className="gap-2"
+                onClick={handleBackNavigation}
+                size="sm"
+                variant="ghost"
+              >
+                <ArrowLeft className="size-4" />
+                Indietro
+              </Button>
+              <span className="font-medium text-sm">{currentFolder.name}</span>
+              <Badge className="ml-auto text-xs" variant="secondary">
+                {currentFolder.fileCount} elementi
+              </Badge>
+            </div>
+          )}
+
           {/* Search and View Toggle */}
           <div className="flex flex-col gap-3 border-border border-b px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative max-w-md flex-1">
@@ -428,122 +769,514 @@ export function DocumentSelectorArtifact({
           </div>
 
           {/* Loading State */}
-          {isLoading && (
+          {(isLoading || isCurrentFolderLoading) && (
             <div className="flex items-center justify-center p-8">
               <div className="flex items-center gap-3 text-muted-foreground">
-                <div
-                  aria-hidden="true"
-                  className="size-5 animate-spin rounded-full border-2 border-current border-t-transparent"
-                />
-                <output>Caricamento documento...</output>
+                <Loader2 className="size-5 animate-spin" />
+                <output>
+                  {isCurrentFolderLoading
+                    ? "Caricamento contenuti cartella..."
+                    : "Caricamento documento..."}
+                </output>
               </div>
             </div>
           )}
 
           {/* Error State */}
-          {loadError && (
+          {(loadError || currentFolderError) && (
             <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
-              {loadError}
+              {loadError || currentFolderError}
             </div>
           )}
 
           {/* Document Grid/List */}
-          {!isLoading && (
-            <div
-              className={cn(
-                "flex-1 overflow-y-auto p-4",
-                listViewMode === "grid"
-                  ? "grid auto-rows-min grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-                  : "flex flex-col gap-2"
-              )}
-            >
-              {filteredFiles.map((file) => {
-                const displayName = getDisplayName(file.fileId);
-                const code = getCodeFromFileId(file.fileId);
-                const isValid = file.fatturaValida;
-
-                if (listViewMode === "list") {
-                  return (
-                    <button
-                      className="flex items-center gap-4 rounded-lg border border-border bg-card p-3 text-left transition-all hover:bg-accent/50 hover:shadow-sm"
-                      key={file.fileId}
+          {!isLoading && !isCurrentFolderLoading && (
+            <div className="flex-1 overflow-y-auto p-4">
+              {/* Card-based Grid View */}
+              {isHierarchical && listViewMode === "grid" && (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  {/* Render folder cards first */}
+                  {currentFolders.map((folder) => (
+                    <FolderCard
+                      folder={folder}
+                      isLoading={loadingFolders.has(folder.id)}
+                      key={folder.id}
+                      onClick={() => handleFolderClick(folder)}
+                    />
+                  ))}
+                  {/* Render file cards */}
+                  {currentFiles.map((file) => (
+                    <FileCard
+                      file={file}
+                      key={file.id}
                       onClick={() => handleDocumentSelect(file.fileId)}
-                      type="button"
-                    >
-                      <div
-                        className={cn(
-                          "flex size-10 items-center justify-center rounded-lg",
-                          isValid
-                            ? "bg-blue-50 text-blue-500 dark:bg-blue-950 dark:text-blue-400"
-                            : "bg-red-50 text-red-500 dark:bg-red-950 dark:text-red-400"
-                        )}
-                      >
-                        <FileText className="size-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium text-sm">
-                          {displayName}
-                        </p>
-                        <p className="truncate text-muted-foreground text-xs">
-                          {code}
-                        </p>
-                      </div>
-                      <ValidationBadge isValid={isValid} />
-                    </button>
-                  );
-                }
+                    />
+                  ))}
+                </div>
+              )}
 
-                return (
-                  <button
-                    className="flex flex-col rounded-xl border border-border bg-card p-4 text-left transition-all hover:bg-accent/50 hover:shadow-md"
-                    key={file.fileId}
-                    onClick={() => handleDocumentSelect(file.fileId)}
-                    type="button"
-                  >
-                    {/* Card Header */}
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={cn(
-                          "flex size-11 shrink-0 items-center justify-center rounded-lg",
-                          isValid
-                            ? "bg-blue-50 text-blue-500 dark:bg-blue-950 dark:text-blue-400"
-                            : "bg-red-50 text-red-500 dark:bg-red-950 dark:text-red-400"
-                        )}
-                      >
-                        <FileText className="size-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-semibold text-sm leading-tight">
-                          {displayName}
-                        </p>
-                        <p className="mt-0.5 truncate text-muted-foreground text-xs">
-                          {code}
-                        </p>
-                      </div>
-                    </div>
+              {/* Card-based List View */}
+              {isHierarchical && listViewMode === "list" && (
+                <div className="flex flex-col gap-2">
+                  {/* Render folder items first */}
+                  {currentFolders.map((folder) => (
+                    <FolderListItem
+                      folder={folder}
+                      isLoading={loadingFolders.has(folder.id)}
+                      key={folder.id}
+                      onClick={() => handleFolderClick(folder)}
+                    />
+                  ))}
+                  {/* Render file items */}
+                  {currentFiles.map((file) => (
+                    <FileListItem
+                      file={file}
+                      key={file.id}
+                      onClick={() => handleDocumentSelect(file.fileId)}
+                    />
+                  ))}
+                </div>
+              )}
 
-                    {/* Status Badge */}
-                    <div className="mt-3">
-                      <ValidationBadge isValid={isValid} />
-                    </div>
-                  </button>
-                );
-              })}
+              {/* Flat View (Legacy) */}
+              {!isHierarchical && (
+                <div
+                  className={cn(
+                    listViewMode === "grid"
+                      ? "grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+                      : "flex flex-col gap-2"
+                  )}
+                >
+                  {filteredFiles.map((file) => {
+                    const displayName = getDisplayName(file.fileId);
+                    const isValid = file.fatturaValida;
+
+                    if (listViewMode === "list") {
+                      return (
+                        <button
+                          className="flex items-center gap-4 rounded-lg border border-border bg-card p-3 text-left transition-all hover:bg-accent/50 hover:shadow-sm"
+                          key={file.fileId}
+                          onClick={() => handleDocumentSelect(file.fileId)}
+                          type="button"
+                        >
+                          <div
+                            className={cn(
+                              "flex size-10 items-center justify-center rounded-lg",
+                              isValid
+                                ? "bg-blue-50 text-blue-500 dark:bg-blue-950 dark:text-blue-400"
+                                : "bg-red-50 text-red-500 dark:bg-red-950 dark:text-red-400"
+                            )}
+                          >
+                            <FileText className="size-5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium text-sm">
+                              {displayName}
+                            </p>
+                          </div>
+                          <ValidationBadge isValid={isValid} />
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <FileCard
+                        file={{
+                          id: file.fileId,
+                          name: displayName,
+                          type: "file",
+                          fileId: file.fileId,
+                          fatturaValida: file.fatturaValida,
+                          campiMancanti: file.campiMancanti,
+                          campiNonValidi: file.campiNonValidi,
+                          source: "local",
+                        }}
+                        key={file.fileId}
+                        onClick={() => handleDocumentSelect(file.fileId)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Empty state */}
+              {currentItems.length === 0 && !currentFolderError && (
+                <EmptyFolderMessage
+                  currentFolder={currentFolder}
+                  searchQuery={searchQuery}
+                />
+              )}
             </div>
           )}
-
-          {/* Empty filtered state */}
-          {filteredFiles.length === 0 &&
-            filesWithValidation.length > 0 &&
-            !isLoading && (
-              <div className="px-6 pb-6 text-center text-muted-foreground text-sm">
-                Nessun documento trovato con i filtri applicati
-              </div>
-            )}
         </div>
       </ChatArtifactBody>
     </ChatArtifact>
   );
+}
+
+// ============================================================================
+// FOLDER CARD (Squared Card for Grid View)
+// ============================================================================
+
+type FolderCardProps = {
+  folder: FileSystemFolder;
+  onClick: () => void;
+  isLoading?: boolean;
+};
+
+function FolderCard({ folder, onClick, isLoading }: FolderCardProps) {
+  const FolderIcon = getFolderIcon(folder);
+  const colorClasses = getFolderColorClasses(folder);
+
+  return (
+    <button
+      className={cn(
+        "group flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-3 text-center transition-all",
+        "hover:border-primary/50 hover:bg-accent/50 hover:shadow-md",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {/* Folder Icon */}
+      <div
+        className={cn(
+          "flex size-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110",
+          colorClasses.bg
+        )}
+      >
+        {isLoading ? (
+          <Loader2 className={cn("size-6 animate-spin", colorClasses.icon)} />
+        ) : (
+          <FolderIcon className={cn("size-6", colorClasses.icon)} />
+        )}
+      </div>
+
+      {/* Folder Name */}
+      <p className="line-clamp-2 w-full font-medium text-xs leading-tight">
+        {folder.name}
+      </p>
+
+      {/* File Count */}
+      <Badge className="text-[10px]" variant="secondary">
+        {folder.fileCount} file
+      </Badge>
+    </button>
+  );
+}
+
+// ============================================================================
+// FOLDER LIST ITEM (Horizontal item for List View)
+// ============================================================================
+
+type FolderListItemProps = {
+  folder: FileSystemFolder;
+  onClick: () => void;
+  isLoading?: boolean;
+};
+
+function FolderListItem({ folder, onClick, isLoading }: FolderListItemProps) {
+  const FolderIcon = getFolderIcon(folder);
+  const colorClasses = getFolderColorClasses(folder);
+
+  return (
+    <button
+      className={cn(
+        "flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-all",
+        "hover:border-primary/50 hover:bg-accent/50 hover:shadow-sm"
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {/* Folder Icon */}
+      <div
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-lg",
+          colorClasses.bg
+        )}
+      >
+        {isLoading ? (
+          <Loader2 className={cn("size-5 animate-spin", colorClasses.icon)} />
+        ) : (
+          <FolderIcon className={cn("size-5", colorClasses.icon)} />
+        )}
+      </div>
+
+      {/* Folder Info */}
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium text-sm">{folder.name}</p>
+        {folder.description && (
+          <p className="truncate text-muted-foreground text-xs">
+            {folder.description}
+          </p>
+        )}
+      </div>
+
+      {/* File Count Badge */}
+      <Badge className="text-xs" variant="secondary">
+        {folder.fileCount} file
+      </Badge>
+    </button>
+  );
+}
+
+// ============================================================================
+// FOLDER HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Get the appropriate icon component for a folder based on its type
+ */
+function getFolderIcon(folder: FileSystemFolder) {
+  if (folder.icon === "database") {
+    return Database;
+  }
+  if (folder.icon === "database-off") {
+    return DatabaseZap;
+  }
+  if (folder.icon === "folder-sync") {
+    return FolderSync;
+  }
+  if (folder.id === "folder:local") {
+    return HardDrive;
+  }
+  return Folder;
+}
+
+/**
+ * Get color classes for a folder based on its type
+ */
+function getFolderColorClasses(folder: FileSystemFolder): {
+  bg: string;
+  icon: string;
+} {
+  const isSibacShared = folder.id === "folder:sibac-shared";
+  const isOracle = folder.id === "folder:oracle";
+
+  if (isSibacShared || folder.icon === "folder-sync") {
+    return {
+      bg: "bg-blue-100 dark:bg-blue-950",
+      icon: "text-blue-600 dark:text-blue-400",
+    };
+  }
+  if (
+    isOracle ||
+    folder.icon === "database" ||
+    folder.icon === "database-off"
+  ) {
+    return {
+      bg: "bg-purple-100 dark:bg-purple-950",
+      icon: "text-purple-600 dark:text-purple-400",
+    };
+  }
+  return {
+    bg: "bg-amber-100 dark:bg-amber-950",
+    icon: "text-amber-600 dark:text-amber-400",
+  };
+}
+
+// ============================================================================
+// FILE CARD (Squared Card for Grid View)
+// ============================================================================
+
+type FileCardProps = {
+  file: FileSystemFile;
+  onClick: () => void;
+};
+
+function FileCard({ file, onClick }: FileCardProps) {
+  const displayName = file.displayName ?? file.name;
+  const isValid = file.fatturaValida;
+
+  return (
+    <button
+      className={cn(
+        "group flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-3 text-center transition-all",
+        "hover:border-primary/50 hover:bg-accent/50 hover:shadow-md",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {/* File Icon with validation color */}
+      <div
+        className={cn(
+          "flex size-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110",
+          isValid
+            ? "bg-blue-100 dark:bg-blue-950"
+            : "bg-red-100 dark:bg-red-950"
+        )}
+      >
+        <FileText
+          className={cn(
+            "size-6",
+            isValid
+              ? "text-blue-600 dark:text-blue-400"
+              : "text-red-600 dark:text-red-400"
+          )}
+        />
+      </div>
+
+      {/* File Name */}
+      <p className="line-clamp-2 w-full font-medium text-xs leading-tight">
+        {displayName}
+      </p>
+
+      {/* Validation Indicator (small dot) */}
+      <div
+        className={cn(
+          "size-2.5 rounded-full",
+          isValid ? "bg-emerald-500" : "bg-red-500"
+        )}
+        title={isValid ? "Fattura valida" : "Fattura non valida"}
+      />
+    </button>
+  );
+}
+
+// ============================================================================
+// FILE LIST ITEM (Horizontal item for List View)
+// ============================================================================
+
+type FileListItemProps = {
+  file: FileSystemFile;
+  onClick: () => void;
+};
+
+function FileListItem({ file, onClick }: FileListItemProps) {
+  const displayName = file.displayName ?? file.name;
+  const isValid = file.fatturaValida;
+  const isOracle = file.source === "oracle";
+
+  return (
+    <button
+      className={cn(
+        "flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-all",
+        "hover:border-primary/50 hover:bg-accent/50 hover:shadow-sm"
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {/* File Icon */}
+      <div
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-lg",
+          isValid
+            ? "bg-blue-100 dark:bg-blue-950"
+            : "bg-red-100 dark:bg-red-950"
+        )}
+      >
+        <FileText
+          className={cn(
+            "size-5",
+            isValid
+              ? "text-blue-600 dark:text-blue-400"
+              : "text-red-600 dark:text-red-400"
+          )}
+        />
+      </div>
+
+      {/* File Info */}
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium text-sm">{displayName}</p>
+        {isOracle && (
+          <p className="truncate text-muted-foreground text-xs">Database</p>
+        )}
+      </div>
+
+      {/* Validation Badge */}
+      <ValidationBadge isValid={isValid} />
+    </button>
+  );
+}
+
+// ============================================================================
+// EMPTY FOLDER MESSAGE
+// ============================================================================
+
+type EmptyFolderMessageProps = {
+  currentFolder: FileSystemFolder | null;
+  searchQuery: string;
+};
+
+function EmptyFolderMessage({
+  currentFolder,
+  searchQuery,
+}: EmptyFolderMessageProps) {
+  // If searching, show search-specific message
+  if (searchQuery) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+        <Search className="mb-3 size-10 opacity-50" />
+        <p className="font-medium">Nessun risultato trovato</p>
+        <p className="text-sm">Prova con un termine di ricerca diverso</p>
+      </div>
+    );
+  }
+
+  // Show folder-specific empty messages
+  const isOracleFolder = currentFolder?.id === "folder:oracle";
+  const isSibacSharedFolder = currentFolder?.id === "folder:sibac-shared";
+
+  let message = "Nessun documento in questa cartella.";
+  if (currentFolder?.errorMessage) {
+    message = currentFolder.errorMessage;
+  } else if (isOracleFolder) {
+    message = getOracleErrorMessage(currentFolder?.errorStatus);
+  } else if (isSibacSharedFolder) {
+    message = getSibacErrorMessage(currentFolder?.errorStatus);
+  } else if (!currentFolder) {
+    message = "Nessun documento disponibile.";
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+      <Folder className="mb-3 size-10 opacity-50" />
+      <p className="max-w-xs text-sm">{message}</p>
+    </div>
+  );
+}
+
+// ============================================================================
+// ERROR MESSAGE HELPERS
+// ============================================================================
+
+/**
+ * Get appropriate error message for Oracle folder based on error status
+ */
+function getOracleErrorMessage(errorStatus?: FolderErrorStatus): string {
+  switch (errorStatus) {
+    case "vpn_disconnected":
+      return "VPN non connesso. Connettere al VPN per accedere al database.";
+    case "server_unreachable":
+      return "Server Oracle non raggiungibile. Verificare la configurazione VPN.";
+    case "port_blocked":
+      return "Porta Oracle 1521 non raggiungibile. Il servizio Oracle potrebbe essere spento o bloccato dal firewall.";
+    case "unknown_error":
+      return "Errore di connessione al database. Riprovare più tardi.";
+    case "ok":
+      return "Nessun impegno trovato nel database.";
+    default:
+      return "Nessun documento disponibile. Verificare la connessione VPN.";
+  }
+}
+
+/**
+ * Get appropriate error message for SIBAC shared folder based on error status
+ */
+function getSibacErrorMessage(errorStatus?: FolderErrorStatus): string {
+  switch (errorStatus) {
+    case "vpn_disconnected":
+      return "VPN non connesso. Connettere al VPN per sincronizzare i file.";
+    case "smb_error":
+      return "Impossibile accedere alla cartella condivisa Windows. Verificare le credenziali SMB.";
+    case "sync_pending":
+      return "Sincronizzazione in corso...";
+    case "ok":
+      return "Nessun file nella cartella condivisa.";
+    default:
+      return "Nessun file nella cartella condivisa. Copiare i file da Windows (192.168.0.204).";
+  }
 }
 
 // ============================================================================

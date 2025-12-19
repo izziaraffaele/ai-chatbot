@@ -74,6 +74,43 @@ type InvoiceValidationResult = {
 };
 
 /**
+ * File system types from knowledge-base-loader
+ */
+type FileSystemFile = {
+  id: string;
+  name: string;
+  type: "file";
+  fileId: string;
+  displayName?: string;
+  fatturaValida: boolean;
+  campiMancanti: string[];
+  campiNonValidi: string[];
+  source: "local" | "oracle";
+};
+
+type FileSystemFolder = {
+  id: string;
+  name: string;
+  type: "folder";
+  children: FileSystemItem[];
+  fileCount: number;
+  validCount: number;
+  invalidCount: number;
+  defaultExpanded?: boolean;
+  icon?: string;
+  description?: string;
+};
+
+type FileSystemItem = FileSystemFile | FileSystemFolder;
+
+type FileSystemRoot = {
+  items: FileSystemItem[];
+  totalFiles: number;
+  totalValid: number;
+  totalInvalid: number;
+};
+
+/**
  * LoadInvoice Tool Output structure
  */
 type LoadInvoiceOutput = {
@@ -95,6 +132,7 @@ type LoadInvoiceOutput = {
   content?: string;
   availableFiles?: string[];
   filesWithValidation?: FileValidation[];
+  fileSystem?: FileSystemRoot;
   validation?: InvoiceValidationResult;
 };
 
@@ -115,6 +153,9 @@ function PureLoadInvoiceTool({ part }: ChatToolProps) {
   // new file sets to trigger a fresh auto-open
   const autoOpenedForSignatureRef = useRef<string | null>(null);
 
+  // Get file system hierarchy (new format) or fall back to flat list (legacy)
+  const fileSystem = output?.fileSystem ?? null;
+
   // Get files for the selector (either with validation or legacy)
   const filesWithValidation = useMemo(() => {
     if (output?.filesWithValidation && output.filesWithValidation.length > 0) {
@@ -131,16 +172,36 @@ function PureLoadInvoiceTool({ part }: ChatToolProps) {
     return null;
   }, [output?.filesWithValidation, output?.availableFiles]);
 
+  // Determine what content to use for the panel
+  // Prefer hierarchical file system, fall back to flat list
+  const panelContent = useMemo(() => {
+    if (fileSystem) {
+      return fileSystem;
+    }
+    return filesWithValidation;
+  }, [fileSystem, filesWithValidation]);
+
   // Create a signature for the current file set to track auto-open state
   const filesSignature = useMemo(() => {
+    if (fileSystem) {
+      return `fs:${fileSystem.totalFiles}:${fileSystem.items[0]?.id || ""}`;
+    }
     if (!filesWithValidation) {
       return null;
     }
     return `${filesWithValidation.length}:${filesWithValidation[0]?.fileId || ""}`;
-  }, [filesWithValidation]);
+  }, [fileSystem, filesWithValidation]);
 
   // Calculate stats for the collapsed view
   const stats = useMemo(() => {
+    // Prefer stats from file system if available
+    if (fileSystem) {
+      return {
+        valid: fileSystem.totalValid,
+        invalid: fileSystem.totalInvalid,
+        total: fileSystem.totalFiles,
+      };
+    }
     if (!filesWithValidation) {
       return null;
     }
@@ -152,11 +213,11 @@ function PureLoadInvoiceTool({ part }: ChatToolProps) {
       invalid: filesWithValidation.length - validCount,
       total: filesWithValidation.length,
     };
-  }, [filesWithValidation]);
+  }, [fileSystem, filesWithValidation]);
 
   // Handle click to open the panel
   const handleOpenPanel = useCallback(() => {
-    if (!filesWithValidation) {
+    if (!panelContent) {
       return;
     }
 
@@ -171,7 +232,7 @@ function PureLoadInvoiceTool({ part }: ChatToolProps) {
       {
         documentId: "document-selector",
         kind: DOCUMENT_SELECTOR_KIND,
-        content: filesWithValidation,
+        content: panelContent,
         title: "UI fatture",
         isVisible: true,
         status: "idle",
@@ -184,12 +245,12 @@ function PureLoadInvoiceTool({ part }: ChatToolProps) {
       },
       "UI fatture"
     );
-  }, [filesWithValidation, openTab]);
+  }, [panelContent, openTab]);
 
   // AUTO-OPEN: When files are available, automatically open the document selector panel
   useEffect(() => {
-    // Only auto-open if we have files and haven't already opened for this signature
-    if (!filesWithValidation || !filesSignature) {
+    // Only auto-open if we have content and haven't already opened for this signature
+    if (!panelContent || !filesSignature) {
       return;
     }
 
@@ -201,12 +262,12 @@ function PureLoadInvoiceTool({ part }: ChatToolProps) {
     // Mark as opened for this file set
     autoOpenedForSignatureRef.current = filesSignature;
 
-    // Open the panel
+    // Open the panel with hierarchical or flat content
     openTab(
       {
         documentId: "document-selector",
         kind: DOCUMENT_SELECTOR_KIND,
-        content: filesWithValidation,
+        content: panelContent,
         title: "UI fatture",
         isVisible: true,
         status: "idle",
@@ -219,7 +280,7 @@ function PureLoadInvoiceTool({ part }: ChatToolProps) {
       },
       "UI fatture"
     );
-  }, [filesWithValidation, filesSignature, openTab]);
+  }, [panelContent, filesSignature, openTab]);
 
   // If no output yet (streaming), show loading
   if (!output) {
@@ -239,8 +300,8 @@ function PureLoadInvoiceTool({ part }: ChatToolProps) {
     );
   }
 
-  // If filesWithValidation returned - show collapsed view with button to re-open panel
-  if (filesWithValidation && stats) {
+  // If files/fileSystem returned - show collapsed view with button to re-open panel
+  if (panelContent && stats) {
     // Show collapsed view when panel is open, or a clickable card to re-open
     return (
       <div ref={hitboxRef}>

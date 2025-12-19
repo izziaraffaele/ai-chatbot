@@ -2,18 +2,18 @@
  * Load Invoice Tool
  *
  * Allows the chat agent to load invoice files from the Faenza knowledge base.
- * The tool supports partial matching for flexible file lookups.
+ * Supports both local XML files and remote Oracle database as data sources.
  * Includes validation for required invoice fields (IBAN, CIG, CUP, etc.)
  */
 
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 import {
+  findRecordSuggestions,
+  getDataSource,
+  getFileSystemHierarchy,
   type InvoiceMetadata,
-  listKnowledgeBaseFiles,
-  loadKnowledgeBaseFile,
-  VALIDATION_FIELD_NAMES,
-  validateInvoice,
+  loadRecord,
 } from "../utils/knowledge-base-loader";
 import { setLoadedInvoice } from "../utils/runtime-utils";
 
@@ -45,9 +45,61 @@ const validationSchema = z.object({
  */
 const fileWithValidationSchema = z.object({
   fileId: z.string(),
+  displayName: z.string().optional(),
   fatturaValida: z.boolean(),
   campiMancanti: z.array(z.string()),
   campiNonValidi: z.array(z.string()),
+});
+
+/**
+ * File system file schema
+ */
+const fileSystemFileSchema: z.ZodType<unknown> = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.literal("file"),
+  fileId: z.string(),
+  displayName: z.string().optional(),
+  fatturaValida: z.boolean(),
+  campiMancanti: z.array(z.string()),
+  campiNonValidi: z.array(z.string()),
+  source: z.enum(["local", "oracle"]),
+});
+
+/**
+ * File system folder schema (recursive)
+ */
+const fileSystemFolderSchema: z.ZodType<unknown> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    type: z.literal("folder"),
+    children: z.array(z.union([fileSystemFileSchema, fileSystemFolderSchema])),
+    fileCount: z.number(),
+    validCount: z.number(),
+    invalidCount: z.number(),
+    defaultExpanded: z.boolean().optional(),
+    icon: z.string().optional(),
+    description: z.string().optional(),
+  })
+);
+
+/**
+ * File system item schema
+ */
+const fileSystemItemSchema = z.union([
+  fileSystemFileSchema,
+  fileSystemFolderSchema,
+]);
+
+/**
+ * File system root schema
+ */
+const fileSystemRootSchema = z.object({
+  items: z.array(fileSystemItemSchema),
+  totalFiles: z.number(),
+  totalValid: z.number(),
+  totalInvalid: z.number(),
 });
 
 /**
@@ -76,9 +128,11 @@ const invoiceOutputSchema = z.object({
   originalSize: z.number().optional(),
   // List of available files (legacy, kept for compatibility)
   availableFiles: z.array(z.string()).optional(),
-  // NEW: Files with validation status
+  // Files with validation status (legacy flat format)
   filesWithValidation: z.array(fileWithValidationSchema).optional(),
-  // NEW: Validation details for loaded invoice
+  // NEW: Hierarchical file system structure
+  fileSystem: fileSystemRootSchema.optional(),
+  // Validation details for loaded invoice
   validation: validationSchema.optional(),
 });
 
@@ -87,8 +141,8 @@ export type LoadInvoiceOutput = z.infer<typeof invoiceOutputSchema>;
 /**
  * Load Invoice Tool
  *
- * Loads an invoice XML file from the Faenza knowledge base by file ID.
- * Supports partial matching - you can provide part of the file name.
+ * Loads invoice data from the configured data source (local XML files or Oracle database).
+ * Supports partial matching for flexible file lookups.
  *
  * When listing files (no fileId), returns validation status for each file.
  * When loading a file, returns full validation details.
@@ -103,132 +157,140 @@ export type LoadInvoiceOutput = z.infer<typeof invoiceOutputSchema>;
  * - Codice PA: present and valid format (6-7 alphanumeric chars)
  * - Codice Fiscale: present and valid format (11 digits or 16 chars)
  *
- * Example inputs:
- * - "CSB_IT00185240397_00IS8-[1796150500]" (full ID)
- * - "CSB_IT00185240397" (partial ID)
- * - "00185240397" (VAT number only)
+ * Data sources:
+ * - "local": XML invoice files from mastra/knowledgebase/faenza/
+ * - "oracle": SIB_V_IMPEGNI_X_CIG view from SIBAC database (via VPN)
  */
 export const loadInvoiceTool = createTool({
   id: "loadInvoice",
-  description: `Load an invoice file from the Faenza knowledge base with validation.
+  description: `Load an invoice or impegno from the Faenza knowledge base with validation.
 Provide a file identifier (can be partial - the tool will find matching files).
-Use this tool when the user wants to work on, analyze, or view a specific invoice.
-Examples of valid inputs: "CSB_IT00185240397_00IS8", "CSB_IT00185240397", or just the VAT number "00185240397".
-If no fileId is provided, returns a list of available invoice files with their validation status.
+Use this tool when the user wants to work on, analyze, or view a specific invoice or impegno.
+For local XML files: use file names like "CSB_IT00185240397_00IS8" or VAT numbers.
+For Oracle database: use CIG codes or impegno identifiers.
+If no fileId is provided, returns a list of available records with their validation status.
 
-The tool validates each invoice for:
+The tool validates each record for:
 - IBAN, CIG, CUP (presence and format)
 - Codice Fornitore, Importo, Descrizione (presence)
 - Codice PA, Codice Fiscale (presence and format)
 
 Returns fatturaValida=true only if ALL fields are present and valid.
-For invalid invoices, campiMancanti lists missing fields and campiNonValidi lists fields with invalid format.`,
+For invalid records, campiMancanti lists missing fields and campiNonValidi lists fields with invalid format.`,
   inputSchema: z.object({
     fileId: z
       .string()
       .optional()
       .describe(
-        "The invoice file identifier (partial or full). If omitted, lists all available files with validation status."
+        "The invoice/impegno identifier (partial or full). If omitted, lists all available records with validation status."
       ),
   }),
   outputSchema: invoiceOutputSchema,
   execute: async ({ context, runtimeContext }) => {
     const { fileId } = context as { fileId?: string };
+    const dataSource = getDataSource();
 
-    // Mastra requires async execute, await here to satisfy linter
-    const availableFiles = await Promise.resolve(listKnowledgeBaseFiles());
+    console.log(`[LoadInvoice] Using data source: ${dataSource}`);
 
-    // If no fileId provided, list available files with validation status
+    // If no fileId provided, list available files with hierarchical structure
     if (!fileId) {
-      const filesWithValidation = availableFiles.map((id) => {
-        const invoice = loadKnowledgeBaseFile(id);
-        if (invoice) {
-          const validation = validateInvoice(invoice.content);
-          return {
-            fileId: id,
-            fatturaValida: validation.fatturaValida,
-            campiMancanti: validation.campiMancanti.map(
-              (field) => VALIDATION_FIELD_NAMES[field] || field
-            ),
-            campiNonValidi: validation.campiNonValidi.map(
-              (field) => VALIDATION_FIELD_NAMES[field] || field
-            ),
-          };
-        }
-        return {
-          fileId: id,
-          fatturaValida: false,
-          campiMancanti: ["Impossibile caricare il file"],
-          campiNonValidi: [],
+      try {
+        // Get hierarchical file system with both local and Oracle folders
+        const fileSystem = await getFileSystemHierarchy();
+
+        // Also extract flat list for backward compatibility
+        const flattenFiles = (
+          items: typeof fileSystem.items
+        ): typeof fileSystem.items => {
+          const files: typeof fileSystem.items = [];
+          for (const item of items) {
+            if (item.type === "file") {
+              files.push(item);
+            } else if (item.type === "folder") {
+              files.push(...flattenFiles(item.children));
+            }
+          }
+          return files;
         };
-      });
+
+        const allFiles = flattenFiles(fileSystem.items);
+        const filesWithValidation = allFiles
+          .filter((f): f is typeof f & { type: "file" } => f.type === "file")
+          .map((f) => ({
+            fileId: f.fileId,
+            displayName: f.displayName,
+            fatturaValida: f.fatturaValida,
+            campiMancanti: f.campiMancanti,
+            campiNonValidi: f.campiNonValidi,
+          }));
+        const availableFiles = filesWithValidation.map((f) => f.fileId);
+
+        return {
+          success: true,
+          availableFiles,
+          filesWithValidation,
+          fileSystem,
+          metadata: undefined,
+          content: undefined,
+        };
+      } catch (error) {
+        console.error("[LoadInvoice] Error listing records:", error);
+        return {
+          success: false,
+          error: `Errore nel caricamento dei documenti: ${error}`,
+        };
+      }
+    }
+
+    // Try to load the record
+    try {
+      const record = await loadRecord(fileId);
+
+      if (!record) {
+        // Find suggestions
+        const suggestions = await findRecordSuggestions(fileId);
+
+        return {
+          success: false,
+          error: `Nessun documento trovato per "${fileId}".${
+            suggestions.length > 0
+              ? ` Forse intendevi: ${suggestions.join(", ")}?`
+              : " Usa questo strumento senza fileId per vedere tutti i documenti disponibili."
+          }`,
+          availableFiles: suggestions.length > 0 ? suggestions : [],
+        };
+      }
+
+      // Store the loaded invoice in runtime context for use by document templates
+      if (runtimeContext) {
+        setLoadedInvoice(runtimeContext, {
+          metadata: record.metadata,
+          validation: record.validation,
+          content: record.content,
+        });
+      }
+
+      // Check if content needs to be truncated to prevent agent stream errors
+      const originalSize = record.content.length;
+      const isTruncated = originalSize > MAX_CONTENT_SIZE;
+      const content = isTruncated
+        ? `${record.content.slice(0, MAX_CONTENT_SIZE)}\n\n<!-- CONTENT TRUNCATED: Original size ${originalSize} characters. Showing first ${MAX_CONTENT_SIZE} characters. -->`
+        : record.content;
 
       return {
         success: true,
-        availableFiles,
-        filesWithValidation,
-        metadata: undefined,
-        content: undefined,
+        metadata: record.metadata as InvoiceMetadata,
+        content,
+        truncated: isTruncated,
+        originalSize: isTruncated ? originalSize : undefined,
+        validation: record.validation,
       };
-    }
-
-    // Try to load the invoice
-    const invoice = loadKnowledgeBaseFile(fileId);
-
-    if (!invoice) {
-      // Find similar files for suggestions
-      const searchTerm = fileId.toUpperCase();
-      const suggestions = availableFiles
-        .filter((f) => f.toUpperCase().includes(searchTerm.slice(0, 10)))
-        .slice(0, 5);
-
+    } catch (error) {
+      console.error("[LoadInvoice] Error loading record:", error);
       return {
         success: false,
-        error: `No invoice found matching "${fileId}".${
-          suggestions.length > 0
-            ? ` Did you mean one of these: ${suggestions.join(", ")}?`
-            : " Use this tool without a fileId to see all available files."
-        }`,
-        availableFiles:
-          suggestions.length > 0 ? suggestions : availableFiles.slice(0, 10),
+        error: `Errore nel caricamento del documento: ${error}`,
       };
     }
-
-    // Validate the invoice
-    const validation = validateInvoice(invoice.content);
-
-    // Store the loaded invoice in runtime context for use by document templates
-    if (runtimeContext) {
-      setLoadedInvoice(runtimeContext, {
-        metadata: invoice.metadata,
-        validation,
-        content: invoice.content,
-      });
-    }
-
-    // Check if content needs to be truncated to prevent agent stream errors
-    const originalSize = invoice.content.length;
-    const isTruncated = originalSize > MAX_CONTENT_SIZE;
-    const content = isTruncated
-      ? `${invoice.content.slice(0, MAX_CONTENT_SIZE)}\n\n<!-- CONTENT TRUNCATED: Original size ${originalSize} characters. Showing first ${MAX_CONTENT_SIZE} characters. -->`
-      : invoice.content;
-
-    return {
-      success: true,
-      metadata: invoice.metadata as InvoiceMetadata,
-      content,
-      truncated: isTruncated,
-      originalSize: isTruncated ? originalSize : undefined,
-      validation: {
-        ...validation,
-        // Convert field keys to human-readable Italian names for display
-        campiMancanti: validation.campiMancanti.map(
-          (field) => VALIDATION_FIELD_NAMES[field] || field
-        ),
-        campiNonValidi: validation.campiNonValidi.map(
-          (field) => VALIDATION_FIELD_NAMES[field] || field
-        ),
-      },
-    };
   },
 });
