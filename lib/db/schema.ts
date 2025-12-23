@@ -90,7 +90,7 @@ export const document = pgTable(
     createdAt: timestamp("createdAt").notNull(),
     title: text("title").notNull(),
     content: text("content"),
-    kind: varchar("text", { enum: ["text", "code", "image", "sheet"] })
+    kind: varchar("text", { enum: ["text", "code", "image", "sheet", "builder", "pf-builder"] })
       .notNull()
       .default("text"),
     userId: uuid("userId")
@@ -150,3 +150,40 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+// ============================================================================
+// Training Path Tables
+// ============================================================================
+
+export const trainingPath = pgTable("TrainingPath", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  titolo: text("titolo").notNull(),
+  settore: text("settore").notNull(),
+  figura: text("figura").notNull(),
+  figuraDescrizione: text("figuraDescrizione"),
+  durataComplessiva: json("durataComplessiva").$type<number | null>(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  chatId: uuid("chatId").references(() => chat.id),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type TrainingPath = InferSelectModel<typeof trainingPath>;
+
+export const trainingModule = pgTable("TrainingModule", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  trainingPathId: uuid("trainingPathId")
+    .notNull()
+    .references(() => trainingPath.id, { onDelete: "cascade" }),
+  adaId: text("adaId").notNull(),
+  adaName: text("adaName").notNull(),
+  capacita: json("capacita").$type<string[]>().notNull(),
+  conoscenze: json("conoscenze").$type<string[]>().notNull(),
+  durata: json("durata").$type<number | null>(),
+  ordine: json("ordine").$type<number>().notNull(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export type TrainingModule = InferSelectModel<typeof trainingModule>;

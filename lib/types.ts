@@ -47,6 +47,8 @@ export type ChatDataTypes = {
   usage: AppUsage;
   // mastra-specific
   "tool-agent": AgentDataPart["data"];
+  // builder-specific
+  "builder-init": { id: string; title: string; initialState?: unknown };
 };
 
 export type ChatMessage = UIMessage<MessageMetadata, ChatDataTypes, ChatTools>;

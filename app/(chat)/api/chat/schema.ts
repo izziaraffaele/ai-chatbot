@@ -29,12 +29,49 @@ const assistantMessageSchema = z.object({
   metadata: messageMetadataSchema.optional(),
 });
 
+/**
+ * PF Builder state snapshot schema
+ * Represents the current state of the PF Builder for chat context
+ */
+const pfBuilderUfSnapshotSchema = z.object({
+  id: z.string(),
+  nome: z.string(),
+  descrizione: z.string().optional(),
+  settore: z.string().nullable(),
+  figura: z.string().nullable(),
+  figuraDescrizione: z.string().optional(),
+  adaCount: z.number(),
+  adaNames: z.array(z.string()),
+  isComplete: z.boolean(),
+});
+
+export const pfBuilderStateSnapshotSchema = z.object({
+  isActive: z.boolean(),
+  step: z.enum([
+    "SELECT_TYPE",
+    "UF_INPUT",
+    "UF_SECTOR",
+    "UF_FIGURE",
+    "UF_ADA",
+    "ADA_DETAILS",
+    "SUMMARY",
+  ]),
+  tipo: z.enum(["qualifica", "certificazione"]).nullable(),
+  titolo: z.string(),
+  unitaFormative: z.array(pfBuilderUfSnapshotSchema),
+});
+
+export type PFBuilderStateSnapshotAPI = z.infer<
+  typeof pfBuilderStateSnapshotSchema
+>;
+
 export const postRequestBodySchema = z.object({
   id: z.uuid(),
   message: z.union([userMessageSchema, assistantMessageSchema]),
   selectedVisibilityType: z.enum(["public", "private"]),
   runtimeConfig: RuntimeConfigSchema.partial(),
   tools: z.record(z.string(), z.any()).optional(),
+  pfBuilderState: pfBuilderStateSnapshotSchema.optional(),
 });
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

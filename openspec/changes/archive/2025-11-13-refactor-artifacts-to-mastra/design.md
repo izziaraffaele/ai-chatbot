@@ -60,7 +60,7 @@ The chat endpoint has been successfully migrated to Mastra agents, providing a u
 ```typescript
 export const codeDocumentHandler = createDocumentHandler<'code'>({
   kind: 'code',
-  model: 'google/gemini-2.5-flash', // optional, per-handler model selection
+  model: 'openai/gpt-4.1', // optional, per-handler model selection
   onCreateDocument: async ({ agent, ... }) => { ... },
   onUpdateDocument: async ({ agent, ... }) => { ... },
 });

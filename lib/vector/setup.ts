@@ -2,7 +2,7 @@ import path from "node:path";
 import { config } from "dotenv";
 import { VECTOR_INDEX } from "../constants";
 import { getDefaultEmbeddingModel } from "./embeddings";
-import { seed as seedSchoolrCatalog } from "./seed/schoolr-catalog";
+import { seed as seedFigureProfessionali } from "./seed/figure-professionali";
 import { getDefaultVectorStore } from "./store";
 
 config({
@@ -13,16 +13,21 @@ const run = async () => {
   const store = getDefaultVectorStore();
   const model = getDefaultEmbeddingModel();
 
-  try {
-    await seedSchoolrCatalog({
-      model,
-      store,
-      fileInput: path.join(process.cwd(), "data", "schoolr-lessons.json"),
-      indexName: VECTOR_INDEX.schoolr.catalog,
-    });
-  } catch (e) {
-    console.error(e);
-  }
+  // Seed professional figures catalog from Regione Toscana data
+  console.log("\n📚 Seeding Figure Professionali catalog...\n");
+  await seedFigureProfessionali({
+    model,
+    store,
+    dataDir: path.join(
+      process.cwd(),
+      "data",
+      "output",
+      "figureProfessionali Regione Toscana"
+    ),
+    indexName: VECTOR_INDEX.figureProfessionali.catalog,
+  });
+
+  console.log("\n✅ Vector store setup complete!\n");
 };
 
 run()
@@ -30,7 +35,7 @@ run()
     process.exit(0);
   })
   .catch((err) => {
-    console.error("❌ Migration failed");
+    console.error("❌ Setup failed");
     console.error(err);
     process.exit(1);
   });

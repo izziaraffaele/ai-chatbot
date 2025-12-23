@@ -29,8 +29,14 @@ export const updateDocumentTool = createTool({
 
     const document = await getDocumentById({ id });
 
-    if (!document || document.kind === "image") {
-      throw new Error("Document not found");
+    // Skip image and builder documents (not editable)
+    if (
+      !document ||
+      document.kind === "image" ||
+      document.kind === "builder" ||
+      document.kind === "pf-builder"
+    ) {
+      throw new Error("Document not found or not editable");
     }
 
     await writer?.write({
@@ -59,10 +65,11 @@ export const updateDocumentTool = createTool({
 
     await writer?.write({ type: "data-finish", data: null, transient: true });
 
+    // After filtering, document.kind is a valid editable artifact kind
     return {
       id,
       title: document.title,
-      kind: document.kind,
+      kind: document.kind as (typeof artifactKinds)[number],
       content: "The document has been updated successfully.",
     };
   },

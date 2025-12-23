@@ -8,13 +8,13 @@ import { basicSetup } from "codemirror";
 import { memo, useEffect, useRef } from "react";
 import type { Suggestion } from "@/lib/db/schema";
 
-type EditorProps = {
+export type EditorProps = {
   content: string;
   onSaveContent: (updatedContent: string, debounce: boolean) => void;
   status: "streaming" | "idle";
   isCurrentVersion: boolean;
   currentVersionIndex: number;
-  suggestions: Suggestion[];
+  suggestions?: Suggestion[];
 };
 
 function PureCodeEditor({ content, onSaveContent, status }: EditorProps) {

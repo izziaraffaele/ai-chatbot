@@ -363,7 +363,7 @@ The system SHALL provide a Mastra research agent configured with Google search c
 
 - **WHEN** the research agent is instantiated
 - **THEN** the model SHALL be configurable at runtime
-- **AND** SHALL default to `google/gemini-2.5-flash` or a semantically equivalent Google model
+- **AND** SHALL default to `openai/gpt-4.1` or a semantically equivalent Google model
 - **AND** the model override SHALL be passed at agent invocation time
 - **AND** allows experimenting with different model variants (e.g., Pro for complex research)
 

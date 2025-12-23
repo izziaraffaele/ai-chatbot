@@ -92,7 +92,7 @@ function getEnvironmentDefaults(): Record<string, unknown> {
  */
 const schemaDefaults: DemoConfig = {
   assistant: {
-    name: "Assistant",
+    name: "Assistente interno Pegaso",
     description: "AI assistant",
     roles: [],
     tone: "friendly",

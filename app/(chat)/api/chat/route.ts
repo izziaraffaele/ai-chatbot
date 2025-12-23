@@ -18,6 +18,7 @@ import {
   getChatById,
   getMessageCountByUserId,
   getMessagesByChatId,
+  getUserById,
   saveChat,
   saveMessages,
   updateChatLastContextById,
@@ -293,12 +294,24 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { id, message, runtimeConfig, selectedVisibilityType, tools } =
-      requestBody;
+    const {
+      id,
+      message,
+      runtimeConfig,
+      selectedVisibilityType,
+      tools,
+      pfBuilderState,
+    } = requestBody;
 
     // 2. Authenticate session
     const session = await auth();
     if (!session?.user) {
+      return new ChatSDKError("unauthorized:chat").toResponse();
+    }
+
+    // 2.1 Verify user exists in database (handles stale sessions after DB reset)
+    const dbUser = await getUserById(session.user.id);
+    if (!dbUser) {
       return new ChatSDKError("unauthorized:chat").toResponse();
     }
 
@@ -317,6 +330,7 @@ export async function POST(request: Request) {
     const runtimeContext = createToolContext(session, {
       geoHints: { longitude, latitude, city, country },
       config: runtimeConfig,
+      pfBuilderState,
     });
 
     // 5. Handle message based on type

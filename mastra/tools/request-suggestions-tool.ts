@@ -32,9 +32,16 @@ export const requestSuggestionsTool = createTool({
 
     const document = await getDocumentById({ id: documentId });
 
-    if (!document || !document.content || document.kind === "image") {
+    // Check for invalid or non-editable document types
+    if (
+      !document ||
+      !document.content ||
+      document.kind === "image" ||
+      document.kind === "builder" ||
+      document.kind === "pf-builder"
+    ) {
       return {
-        error: "Document not found",
+        error: "Document not found or does not support suggestions",
       };
     }
 
@@ -91,10 +98,11 @@ export const requestSuggestionsTool = createTool({
       });
     }
 
+    // After filtering, document.kind is a valid artifact kind for suggestions
     return {
       id: documentId,
       title: document.title,
-      kind: document.kind,
+      kind: document.kind as (typeof artifactKinds)[number],
       message: "Suggestions have been added to the document",
     };
   },

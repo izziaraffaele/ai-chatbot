@@ -1,6 +1,7 @@
 import { Agent } from "@mastra/core/agent";
 import type { ToolStream } from "@mastra/core/tools";
 import type { Session } from "next-auth";
+import { builderDocumentHandler } from "@/artifacts/builder/server";
 import { codeDocumentHandler } from "@/artifacts/code/server";
 import { sheetDocumentHandler } from "@/artifacts/sheet/server";
 import { textDocumentHandler } from "@/artifacts/text/server";
@@ -65,7 +66,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
   const getDocumentExpert = (): Agent => {
     if (!documentExpert) {
       const artifactModel =
-        config.model || process.env.ARTIFACT_MODEL || "google/gemini-2.5-flash";
+        config.model || process.env.ARTIFACT_MODEL || "openai/gpt-4.1";
 
       documentExpert = new Agent({
         name: `${config.kind}-document-expert`,
@@ -131,6 +132,7 @@ export const documentHandlersByArtifactKind: DocumentHandler[] = [
   textDocumentHandler,
   codeDocumentHandler,
   sheetDocumentHandler,
+  builderDocumentHandler,
 ];
 
-export const artifactKinds = ["text", "code", "sheet"] as const;
+export const artifactKinds = ["text", "code", "sheet", "builder"] as const;

@@ -166,9 +166,13 @@ function PureDocumentTool(props: DocumentToolProps) {
     return <LoadingDocumentSkeleton />;
   }
 
-  if (document.kind === "image") {
+  // Skip non-document artifact kinds (they have their own dedicated components)
+  if (document.kind === "image" || document.kind === "builder") {
     return null;
   }
+
+  // After filtering, we know it's a document artifact kind
+  const documentKindForContent = document.kind as DocumentArtifactKind;
 
   return (
     <div className="relative w-full cursor-pointer">
@@ -190,7 +194,7 @@ function PureDocumentTool(props: DocumentToolProps) {
 
       <DocumentContent
         content={document.content?.slice(0, 500)}
-        kind={document.kind}
+        kind={documentKindForContent}
       />
     </div>
   );

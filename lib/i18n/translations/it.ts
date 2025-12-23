@@ -382,4 +382,112 @@ export const it: TranslationDict = {
   "message.actions.downvoteError": "Impossibile votare negativamente.",
   "message.copyError": "Non c'è testo da copiare!",
   "message.copySuccess": "Copiato negli appunti!",
+
+  // ============================================================================
+  // PF Builder (Percorso Formativo Builder)
+  // ============================================================================
+
+  "pfBuilder.title": "Nuovo Percorso Formativo",
+  "pfBuilder.subtitle": "Costruisci il tuo percorso formativo professionale",
+  "pfBuilder.selectType.title": "Crea un nuovo Percorso Formativo",
+  "pfBuilder.selectType.subtitle":
+    "Seleziona il tipo di percorso che vuoi creare",
+  "pfBuilder.qualifica.title": "Qualifica",
+  "pfBuilder.qualifica.description":
+    "Percorso formativo per ottenere una qualifica professionale riconosciuta dalla Regione Toscana",
+  "pfBuilder.certificazione.title": "Certificazione",
+  "pfBuilder.certificazione.description":
+    "Percorso formativo per ottenere una certificazione di competenze specifiche",
+  "pfBuilder.certificazione.comingSoon": "Prossimamente",
+  "pfBuilder.ufInput.addTitle": "Aggiungi Unità Formativa",
+  "pfBuilder.ufInput.placeholder": "Nome dell'Unità Formativa",
+  "pfBuilder.ufInput.emptyState": "Nessuna Unità Formativa aggiunta.",
+  "pfBuilder.ufInput.emptyHint":
+    "Usa il form sopra o scrivi in chat per aggiungerne una.",
+  "pfBuilder.ufInput.configure": "Configura",
+  "pfBuilder.ufInput.edit": "Modifica",
+  "pfBuilder.ufInput.sectorNotSelected": "Settore non selezionato",
+  "pfBuilder.ufInput.clickToAddTitle": "Clicca per aggiungere un titolo",
+  "pfBuilder.ufInput.clickToEditTitle": "Clicca per modificare il titolo",
+  "pfBuilder.ufInput.titlePlaceholder": "Nome del Percorso Formativo",
+
+  // PF Builder - Sector Step
+  "pfBuilder.sector.loadError": "Errore nel caricamento dei settori",
+  "pfBuilder.sector.title": "Seleziona i Settori",
+  "pfBuilder.sector.description": "Assegna un settore a ogni Unità Formativa",
+  "pfBuilder.sector.selectPlaceholder": "Seleziona settore...",
+  "pfBuilder.sector.noUf": "Nessuna Unità Formativa da configurare",
+  "pfBuilder.sector.validationErrorSingular":
+    "Seleziona un settore per l'Unità Formativa rimanente",
+  "pfBuilder.sector.validationError":
+    "Seleziona un settore per tutte le Unità Formative rimanenti",
+
+  // PF Builder - Figure Step
+  "pfBuilder.figure.loadError": "Errore nel caricamento delle figure",
+  "pfBuilder.figure.title": "Seleziona le Figure Professionali",
+  "pfBuilder.figure.description":
+    "Assegna una figura professionale a ogni Unità Formativa",
+  "pfBuilder.figure.selectPlaceholder": "Seleziona figura professionale...",
+  "pfBuilder.figure.searchPlaceholder": "Cerca figura...",
+  "pfBuilder.figure.noResults": "Nessuna figura trovata",
+  "pfBuilder.figure.noUf": "Nessuna Unità Formativa da configurare",
+  "pfBuilder.figure.hideDescription": "Nascondi descrizione",
+  "pfBuilder.figure.showDescription": "Mostra descrizione",
+  "pfBuilder.figure.validationErrorSingular":
+    "Seleziona una figura per l'Unità Formativa rimanente",
+  "pfBuilder.figure.validationError":
+    "Seleziona una figura per tutte le Unità Formative rimanenti",
+
+  // PF Builder - ADA Step
+  "pfBuilder.ada.loadError": "Errore nel caricamento delle ADA",
+  "pfBuilder.ada.title": "Seleziona le Aree di Attività (ADA)",
+  "pfBuilder.ada.description": "Assegna almeno un'ADA a ogni Unità Formativa",
+  "pfBuilder.ada.noAdaForFigure": "Nessuna ADA disponibile per questa figura",
+  "pfBuilder.ada.ucCode": "Codice UC",
+  "pfBuilder.ada.noUf": "Nessuna Unità Formativa da configurare",
+  "pfBuilder.ada.validationErrorSingular":
+    "Seleziona almeno un'ADA per l'Unità Formativa rimanente",
+  "pfBuilder.ada.validationError":
+    "Seleziona almeno un'ADA per tutte le Unità Formative rimanenti",
+
+  // PF Builder - Summary Step
+  "pfBuilder.summary.title": "Riepilogo",
+  "pfBuilder.summary.type": "Tipo",
+  "pfBuilder.summary.titleRequired":
+    "Inserisci un titolo per il Percorso Formativo",
+  "pfBuilder.summary.ufCount": "Unità Formative",
+  "pfBuilder.summary.capacitaCount": "Capacità",
+  "pfBuilder.summary.conoscenzeCount": "Conoscenze",
+  "pfBuilder.summary.ufList": "Unità Formative",
+  "pfBuilder.summary.expandAll": "Espandi tutto",
+  "pfBuilder.summary.collapseAll": "Comprimi tutto",
+  "pfBuilder.summary.noUf": "Nessuna Unità Formativa",
+  "pfBuilder.summary.edit": "Modifica",
+  "pfBuilder.summary.createDocument": "Crea Documento",
+  "pfBuilder.summary.complete": "Crea Percorso Formativo",
+  "pfBuilder.summary.documentCreated": "Documento creato con successo!",
+  "pfBuilder.summary.documentError": "Errore nella creazione del documento",
+
+  // PF Builder - Error Messages (Edge Cases)
+  "pfBuilder.errors.duplicateUf":
+    "Esiste già un'Unità Formativa con questo nome",
+  "pfBuilder.errors.emptyUfName": "Inserisci un nome per l'Unità Formativa",
+  "pfBuilder.errors.noFiguresForSector":
+    "Nessuna figura professionale disponibile per il settore '{sector}'. Seleziona un altro settore.",
+  "pfBuilder.errors.noAdaForFigure":
+    "Nessuna Area di Attività (ADA) disponibile per la figura '{figure}'. Seleziona un'altra figura professionale.",
+  "pfBuilder.errors.adaDetailsNotFound":
+    "Dettagli non disponibili per questa ADA. Puoi procedere senza selezionare capacità e conoscenze.",
+  "pfBuilder.errors.dataLoadFailed":
+    "Errore nel caricamento dei dati. Riprova più tardi.",
+
+  // PF Builder - ADA Details Step (Edge Cases)
+  "pfBuilder.adaDetails.noCapacita":
+    "Nessuna capacità disponibile per questa ADA",
+  "pfBuilder.adaDetails.noConoscenze":
+    "Nessuna conoscenza disponibile per questa ADA",
+  "pfBuilder.adaDetails.emptyStateTitle": "Dettagli non disponibili",
+  "pfBuilder.adaDetails.emptyStateDescription":
+    "I dettagli per questa ADA non sono disponibili nel catalogo. Puoi procedere comunque.",
+  "pfBuilder.adaDetails.proceedAnyway": "Procedi comunque",
 };

@@ -66,7 +66,7 @@ function getEnvironmentDefaults(): Record<string, unknown> {
  */
 const schemaDefaults: RuntimeConfig = {
   assistant: {
-    name: "Assistant",
+    name: "Assistente interno Pegaso",
     description: "AI assistant",
     tone: "friendly",
     roles: [],

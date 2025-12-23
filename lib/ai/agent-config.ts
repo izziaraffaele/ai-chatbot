@@ -15,18 +15,9 @@ export type AgentConfig = {
 
 /**
  * Available agent configurations
- * Currently supports the Research agent for web search and synthesis
+ * Currently empty - sub-agents can be added here as needed
  */
-export const AGENT_CONFIGS: Record<string, AgentConfig> = {
-  researcher: {
-    id: "researcher",
-    name: "Researcher",
-    description: "Specializes in web research and synthesis",
-    avatar: "🔍",
-    color: "blue",
-    registryId: "researchAgent",
-  },
-} as const;
+export const AGENT_CONFIGS: Record<string, AgentConfig> = {} as const;
 
 /**
  * Get all available agents
@@ -43,11 +34,11 @@ export function getAgentConfig(id: string): AgentConfig | undefined {
 }
 
 /**
- * Get default agent (first available)
+ * Get default agent (first available, or undefined if none)
  */
-export function getDefaultAgent(): AgentConfig {
+export function getDefaultAgent(): AgentConfig | undefined {
   const agents = getAvailableAgents();
-  return agents[0] || AGENT_CONFIGS.research;
+  return agents.at(0);
 }
 
 export function getAgentConfigByRegistryId(

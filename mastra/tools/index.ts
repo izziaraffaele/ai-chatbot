@@ -9,6 +9,8 @@
  */
 
 import { createDocumentTool } from "./create-document-tool";
+import { createPFBuilderTool } from "./create-pf-builder-tool";
+import { createTrainingPathTool } from "./create-training-path-tool";
 import { requestSuggestionsTool } from "./request-suggestions-tool";
 import { updateDocumentTool } from "./update-document-tool";
 import { getWeatherTool } from "./weather-tool";
@@ -19,6 +21,8 @@ import { getWeatherTool } from "./weather-tool";
  */
 export type GetWeatherTool = typeof getWeatherTool;
 export type CreateDocumentTool = typeof createDocumentTool;
+export type CreateTrainingPathTool = typeof createTrainingPathTool;
+export type CreatePFBuilderTool = typeof createPFBuilderTool;
 export type UpdateDocumentTool = typeof updateDocumentTool;
 export type RequestSuggestionsTool = typeof requestSuggestionsTool;
 
@@ -28,6 +32,8 @@ export type RequestSuggestionsTool = typeof requestSuggestionsTool;
 export type MastraToolTypes =
   | GetWeatherTool
   | CreateDocumentTool
+  | CreateTrainingPathTool
+  | CreatePFBuilderTool
   | UpdateDocumentTool
   | RequestSuggestionsTool;
 
@@ -38,6 +44,8 @@ export type MastraToolTypes =
 export const mastraTools = {
   getWeather: getWeatherTool,
   createDocument: createDocumentTool,
+  createTrainingPath: createTrainingPathTool,
+  createPFBuilder: createPFBuilderTool,
   updateDocument: updateDocumentTool,
   requestSuggestions: requestSuggestionsTool,
 };
@@ -48,6 +56,8 @@ export const mastraTools = {
 export const TOOL_NAMES = {
   GET_WEATHER: "getWeather",
   CREATE_DOCUMENT: "createDocument",
+  CREATE_TRAINING_PATH: "createTrainingPath",
+  CREATE_PF_BUILDER: "createPFBuilder",
   UPDATE_DOCUMENT: "updateDocument",
   REQUEST_SUGGESTIONS: "requestSuggestions",
 } as const;

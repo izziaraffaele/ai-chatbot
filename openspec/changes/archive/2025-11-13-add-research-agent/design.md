@@ -75,7 +75,7 @@ Current state:
 - Per-session isolation prevents cross-session data leakage
 
 ### 5. Model Selection
-**Decision:** Configurable at runtime, with reasonable default (e.g., `google/gemini-2.5-flash`).
+**Decision:** Configurable at runtime, with reasonable default (e.g., `openai/gpt-4.1`).
 
 **Rationale:**
 - Matches chat agent pattern for consistency

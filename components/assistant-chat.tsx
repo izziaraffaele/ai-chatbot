@@ -8,8 +8,10 @@ import { useArtifactStreaming } from "@/hooks/use-artifact-streaming";
 import { useAssistant } from "@/hooks/use-assistant";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useTranslations } from "@/lib/i18n/use-translations";
+import { BuilderArtifact, isBuilderArtifact } from "./artifacts/builder";
 import { DocumentArtifact, isDocumentArtifact } from "./artifacts/document";
 import { isMediaArtifact, MediaArtifact } from "./artifacts/media";
+import { isPFBuilderArtifact, PFBuilderArtifact } from "./artifacts/pf-builder";
 import { ChatCanvas, ChatCanvasMain, ChatCanvasThread } from "./chat/canvas";
 import {
   ChatComposerAction,
@@ -221,7 +223,8 @@ export function AssistantChat({
         </ChatThread>
 
         {/* Artifact Canvas View */}
-        <ChatCanvas isVisible={artifact.isVisible}>
+        {/* Force canvas visible when PF Builder is active */}
+        <ChatCanvas isVisible={artifact.isVisible || isPFBuilderArtifact(artifact.kind)}>
           {/* Message thread sidebar */}
           <ChatCanvasThread isCurrentVersion={true}>
             <ChatThreadContent className="pt-20">
@@ -245,6 +248,12 @@ export function AssistantChat({
                 kind={artifact.kind}
                 title={artifact.title || t("artifact.document.untitled", "Untitled")}
               />
+            )}
+            {isBuilderArtifact(artifact.kind) && (
+              <BuilderArtifact artifact={artifact} isReadonly={isReadonly} />
+            )}
+            {isPFBuilderArtifact(artifact.kind) && (
+              <PFBuilderArtifact artifact={artifact} isReadonly={isReadonly} />
             )}
           </ChatCanvasMain>
         </ChatCanvas>

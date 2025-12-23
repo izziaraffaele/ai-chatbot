@@ -15,6 +15,7 @@ const ARTIFACT_DATA_PART = {
   textDelta: "data-textDelta",
   codeDelta: "data-codeDelta",
   sheetDelta: "data-sheetDelta",
+  builderInit: "data-builder-init",
 } as const;
 
 /**
@@ -96,6 +97,16 @@ export function useArtifactStreaming() {
                 draftArtifact.content.length < 450
                   ? true
                   : draftArtifact.isVisible,
+            };
+
+          case ARTIFACT_DATA_PART.builderInit:
+            // Builder artifact: show immediately, no streaming content
+            console.log("[useArtifactStreaming] Builder init:", delta.data);
+            return {
+              ...draftArtifact,
+              status: "idle",
+              isVisible: true,
+              content: JSON.stringify((delta.data as any)?.initialState || {}),
             };
 
           default:

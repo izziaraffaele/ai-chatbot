@@ -14,8 +14,14 @@ export const artifactDefinitions = [
 ];
 
 // All artifact kinds
-export type ArtifactKind = DocumentArtifactKind | MediaArtifactKind;
+export type ArtifactKind =
+  | DocumentArtifactKind
+  | MediaArtifactKind
+  | "builder"
+  | "pf-builder";
 
 // UIArtifact types for different categories
 export type DocumentUIArtifact = UIArtifact<DocumentArtifactKind, string>;
 export type MediaUIArtifact = UIArtifact<MediaArtifactKind, string>;
+export type BuilderUIArtifact = UIArtifact<"builder", string>;
+export type PFBuilderUIArtifact = UIArtifact<"pf-builder", string>;

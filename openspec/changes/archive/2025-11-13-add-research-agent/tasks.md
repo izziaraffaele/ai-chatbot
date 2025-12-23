@@ -12,7 +12,7 @@
   - Import Google search tool from `@ai-sdk/google`
   - Configure agent with system prompt
   - Enable memory using LibSQL storage (consistent with chat agent)
-  - Set default model to `google/gemini-2.5-flash`
+  - Set default model to `openai/gpt-4.1`
   - Document that this is for agent-to-agent use only (JSDoc comment)
 
 - [x] 1.3 Export research agent from `mastra/agents/index.ts`

@@ -1,0 +1,3782 @@
+{
+  "Addetta/o all'assistenza di base (DGR 934 del 31/07/2023) (529)": [
+    {
+      "denominazione_ada": "Assistenza alla persona nelle attività di vita quotidiana",
+      "uc": "2263"
+    },
+    {
+      "denominazione_ada": "Presa in carico della persona volta all'accompagnamento per la fruizione dei servizi e supporto all'integrazione sociale",
+      "uc": "2262"
+    },
+    {
+      "denominazione_ada": "Supporto nell'attuazione del piano assistenziale personalizzato",
+      "uc": "2265"
+    },
+    {
+      "denominazione_ada": "Supporto per la sicurezza e la prevenzione dei rischi nell'assistenza alla persona",
+      "uc": "2264"
+    }
+  ],
+  "Addetta/o alla costruzione di manufatti in legno per il teatro e lo spettacolo dal vivo (524)": [
+    {
+      "denominazione_ada": "Interpretazione di disegni e bozzetti per la realizzazione di manufatti lignei di scena",
+      "uc": "2241"
+    },
+    {
+      "denominazione_ada": "Preparazione attrezzature e materiali per la lavorazione materiali lignei per la produzione teatrale",
+      "uc": "2242"
+    },
+    {
+      "denominazione_ada": "Realizzazione degli elementi lignei per la scena teatrale",
+      "uc": "2244"
+    }
+  ],
+  "Addetta/o alla costruzione in ferro di manufatti per il teatro e lo spettacolo dal vivo (525)": [
+    {
+      "denominazione_ada": "Interpretazione di disegni, modelli e prototipi per la realizzazione di elementi in ferro per scenografie teatrali",
+      "uc": "2254"
+    },
+    {
+      "denominazione_ada": "Lavorazione dei materiali metallici di scena",
+      "uc": "2256"
+    },
+    {
+      "denominazione_ada": "Organizzare l'attività e predisporre l'ambiente laboratoriale e gli strumenti di lavoro",
+      "uc": "2255"
+    }
+  ],
+  "Addetta/o alla progettazione e realizzazione di manufatti in ceramica con tecniche tradizionali e innovative (533)": [
+    {
+      "denominazione_ada": "Essiccamento e cottura del manufatto ceramico",
+      "uc": "2282"
+    },
+    {
+      "denominazione_ada": "Modellazione degli impasti e produzione seriale",
+      "uc": "2281"
+    },
+    {
+      "denominazione_ada": "Progettazione del manufatto ceramico con l'utilizzo di tecnologie innovative",
+      "uc": "2284"
+    },
+    {
+      "denominazione_ada": "Smaltatura e decorazione del manufatto ceramico",
+      "uc": "2283"
+    },
+    {
+      "denominazione_ada": "Trattamento impasti",
+      "uc": "2280"
+    }
+  ],
+  "Addetta/o alle operazioni subacquee in acquacoltura (528)": [
+    {
+      "denominazione_ada": "Alimentazione e sviluppo dei pesci e controllo/manutenzione degli impanti",
+      "uc": "2261"
+    },
+    {
+      "denominazione_ada": "Attivazione delle procedure di emergenza e primo soccorso nelle operazioni subacquee in ambiente marino",
+      "uc": "2260"
+    },
+    {
+      "denominazione_ada": "Gestione delle attrezzature subacquee",
+      "uc": "2259"
+    },
+    {
+      "denominazione_ada": "Gestione delle operazioni subacquee in ambiente marino",
+      "uc": "2257"
+    },
+    {
+      "denominazione_ada": "Gestione delle procedure di immersione in ambiente marino",
+      "uc": "2258"
+    }
+  ],
+  "Addetto agli interventi tecnici ed agronomici sulle coltivazioni e alla gestione di impianti, macchine ed attrezzature (129)": [
+    {
+      "denominazione_ada": "Conduzione delle produzioni arboree, erbacee ed ortofloricole",
+      "uc": "1050"
+    },
+    {
+      "denominazione_ada": "Gestione impianti, macchine ed attrezzature",
+      "uc": "1051"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi di sviluppo dei processi",
+      "uc": "1801"
+    },
+    {
+      "denominazione_ada": "Produzione aziendale: dalla trasformazione alla vendita dei prodotti",
+      "uc": "1802"
+    },
+    {
+      "denominazione_ada": "Verifica e controllo delle attività",
+      "uc": "1052"
+    }
+  ],
+  "Addetto al controllo di impianti e attrezzature per gli allevamenti ittici e all'alimentazione e monitoraggio dello sviluppo dei pesci (139)": [
+    {
+      "denominazione_ada": "Alimentazione e sviluppo dei pesci",
+      "uc": "1055"
+    },
+    {
+      "denominazione_ada": "Controllo e pulizia dell'impianto produttivo",
+      "uc": "1056"
+    },
+    {
+      "denominazione_ada": "Funzionalità degli impianti e delle attrezzature",
+      "uc": "1054"
+    }
+  ],
+  "Addetto al montaggio meccanizzato della tomaia (76)": [
+    {
+      "denominazione_ada": "Montatura della tomaia nella forma",
+      "uc": "607"
+    },
+    {
+      "denominazione_ada": "Premontatura della tomaia nella forma",
+      "uc": "606"
+    },
+    {
+      "denominazione_ada": "Preparazione della tomaia alla montatura",
+      "uc": "605"
+    },
+    {
+      "denominazione_ada": "Rifinitura della calzatura",
+      "uc": "609"
+    },
+    {
+      "denominazione_ada": "Suolatura con attacco della suola alla tomaia",
+      "uc": "608"
+    }
+  ],
+  "Addetto al pareggio, ferratura dello zoccolo equino/bovino e forgiatura dei ferri (Maniscalco) (519)": [
+    {
+      "denominazione_ada": "Forgiatura dei ferri",
+      "uc": "2220"
+    },
+    {
+      "denominazione_ada": "Gestione del ruolo professionale del maniscalco",
+      "uc": "2222"
+    },
+    {
+      "denominazione_ada": "Pareggio e ferratura degli zoccoli",
+      "uc": "2221"
+    },
+    {
+      "denominazione_ada": "Valutazione dell'arto e del piede equino e bovino",
+      "uc": "2219"
+    }
+  ],
+  "Addetto al posizionamento e alla movimentazione delle lastre, predisposizione di sistemi di assemblaggio e imballaggio di materiali lapidei (399)": [
+    {
+      "denominazione_ada": "Posizionamento e movimentazione delle lastre nella struttura di assemblaggio",
+      "uc": "1783"
+    },
+    {
+      "denominazione_ada": "Predisposizione dei sistemi di assemblaggio di materiali lapidei",
+      "uc": "1782"
+    },
+    {
+      "denominazione_ada": "Predisposizione di sistemi di imballaggio per prodotti finiti di marmo e granito",
+      "uc": "1784"
+    }
+  ],
+  "Addetto al servizio di accoglienza, all'acquisizione di prenotazioni, alla gestione dei reclami ed all'espletamento delle attività di segreteria amministrativa (252)": [
+    {
+      "denominazione_ada": "Acquisire le prenotazioni",
+      "uc": "543"
+    },
+    {
+      "denominazione_ada": "Espletamento dell'attività di segreteria amministrativa",
+      "uc": "1773"
+    },
+    {
+      "denominazione_ada": "Gestione dell'accoglienza",
+      "uc": "541"
+    }
+  ],
+  "Addetto al supporto nei contesti di apprendimento, alla gestione della comunicazione e alla rilevazione delle esigenze di studenti e docenti (27)": [
+    {
+      "denominazione_ada": "Gestione della comunicazione in presenza e on line",
+      "uc": "791"
+    },
+    {
+      "denominazione_ada": "Organizzazione e gestione logistica delle sedi di svolgimento delle lezioni o dello stage",
+      "uc": "789"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione dei materiali didattici e delle strumentazioni necessarie",
+      "uc": "786"
+    },
+    {
+      "denominazione_ada": "Rilevazione delle esigenze degli studenti e dei docenti",
+      "uc": "793"
+    }
+  ],
+  "Addetto al taglio e alla prima trasformazione dei prodotti lapidei (310)": [
+    {
+      "denominazione_ada": "Avvio dei telai e controllo delle operazioni di taglio",
+      "uc": "1215"
+    },
+    {
+      "denominazione_ada": "Manutenzione dei telai",
+      "uc": "1216"
+    },
+    {
+      "denominazione_ada": "Preparazione dei carrelli",
+      "uc": "1219"
+    },
+    {
+      "denominazione_ada": "Trasformazione di blocchi di marmo e granito in lastre",
+      "uc": "1220"
+    }
+  ],
+  "Addetto al taglio, al supporto delle attività specialistiche di cava e alla manutenzione delle macchine tagliatrici (402)": [
+    {
+      "denominazione_ada": "Esecuzione dei fori da taglio mediante relativi strumenti specialistici",
+      "uc": "1674"
+    },
+    {
+      "denominazione_ada": "Esecuzione dell'ordinaria manutenzione delle macchine tagliatrici",
+      "uc": "1670"
+    },
+    {
+      "denominazione_ada": "Supporto alle attività specialistiche di cava",
+      "uc": "1676"
+    },
+    {
+      "denominazione_ada": "Taglio al monte e riquadratura dei blocchi",
+      "uc": "1672"
+    }
+  ],
+  "Addetto al trattamento, alla lavorazione e alla conservazione di materie prime, semilavorati e prodotti chimici (404)": [
+    {
+      "denominazione_ada": "Lavorazione e controllo dei semilavorati/prodotti chimici",
+      "uc": "1799"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi di lavorazione della produzione chimica",
+      "uc": "1797"
+    },
+    {
+      "denominazione_ada": "Trattamento delle materie prime",
+      "uc": "1798"
+    }
+  ],
+  "Addetto al trattamento, alla lavorazione e alla conservazione di materie prime, semilavorati e prodotti chimici nelle aziende conciarie\n (494)": [
+    {
+      "denominazione_ada": "Lavorazione e controllo dei semilavorati/prodotti chimici",
+      "uc": "1799"
+    },
+    {
+      "denominazione_ada": "Manipolazione dei prodotti chimici riferiti all'industria conciaria",
+      "uc": "2113"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi di lavorazione della produzione chimica",
+      "uc": "1797"
+    },
+    {
+      "denominazione_ada": "Trattamento delle materie prime",
+      "uc": "1798"
+    }
+  ],
+  "Addetto all'accoglienza, allo sviluppo e alla fidelizzazione della clientela (6)": [
+    {
+      "denominazione_ada": "Adempimento delle comuni operazioni bancarie allo sportello",
+      "uc": "202"
+    },
+    {
+      "denominazione_ada": "Rinvio della clientela a servizi specifici della banca",
+      "uc": "210"
+    },
+    {
+      "denominazione_ada": "Soluzione dei reclami relativi alle pratiche bancarie",
+      "uc": "206"
+    },
+    {
+      "denominazione_ada": "Svolgimento delle attività di back office relative alle operazioni di cassa",
+      "uc": "212"
+    }
+  ],
+  "Addetto all'allestimento del laboratorio e alla produzione e vendita del gelato (495)": [
+    {
+      "denominazione_ada": "Allestimento e rifornimento del banco e del locale adibito alla vendita",
+      "uc": "450"
+    },
+    {
+      "denominazione_ada": "Cura del processo di vendita",
+      "uc": "451"
+    },
+    {
+      "denominazione_ada": "Gestione degli ordini e stoccaggio degli approvvigionamenti",
+      "uc": "449"
+    },
+    {
+      "denominazione_ada": "Produzione di gelati",
+      "uc": "2115"
+    },
+    {
+      "denominazione_ada": "Pulizia e manutenzione delle attrezzature, delle dotazioni e dell'area di vendita",
+      "uc": "452"
+    },
+    {
+      "denominazione_ada": "Realizzazione della gelatura",
+      "uc": "2114"
+    }
+  ],
+  "Addetto all'approvvigionamento della cucina, conservazione e trattamento delle materie prime e alla preparazione dei pasti (413)": [
+    {
+      "denominazione_ada": "Approvvigionamento materie prime",
+      "uc": "1703"
+    },
+    {
+      "denominazione_ada": "Conservazione e stoccaggio delle materie prime",
+      "uc": "1706"
+    },
+    {
+      "denominazione_ada": "Cura degli ambienti delle attrezzature ed utensili",
+      "uc": "1707"
+    },
+    {
+      "denominazione_ada": "Predisposizione di menu' semplici",
+      "uc": "1696"
+    },
+    {
+      "denominazione_ada": "Preparazione piatti",
+      "uc": "1710"
+    },
+    {
+      "denominazione_ada": "Trattamento delle materie prime e dei semilavorati",
+      "uc": "1708"
+    }
+  ],
+  "Addetto all'approvvigionamento della cucina, conservazione e trattamento delle materie prime e alla preparazione e distribuzione di pietanze e bevande (412)": [
+    {
+      "denominazione_ada": "Approvvigionamento materie prime",
+      "uc": "1703"
+    },
+    {
+      "denominazione_ada": "Conservazione e stoccaggio delle materie prime",
+      "uc": "1706"
+    },
+    {
+      "denominazione_ada": "Cura degli ambienti delle attrezzature ed utensili",
+      "uc": "1707"
+    },
+    {
+      "denominazione_ada": "Distribuzione pasti e bevande",
+      "uc": "1711"
+    },
+    {
+      "denominazione_ada": "Preparazione e somministrazione di bevande e snack",
+      "uc": "1712"
+    },
+    {
+      "denominazione_ada": "Trattamento delle materie prime e dei semilavorati",
+      "uc": "1708"
+    }
+  ],
+  "Addetto all'assistenza della clientela, alla realizzazione dei servizi di bordo e alle operazioni di ormeggio e disormeggio - Hostess/Steward del diporto (498)": [
+    {
+      "denominazione_ada": "Approvvigionamento materie prime",
+      "uc": "1703"
+    },
+    {
+      "denominazione_ada": "Assistenza nelle operazioni di ormeggio e disormeggio",
+      "uc": "1923"
+    },
+    {
+      "denominazione_ada": "Gestione dei servizi di accoglienza ed assistenza",
+      "uc": "1924"
+    },
+    {
+      "denominazione_ada": "Preparazione e somministrazione di bevande e snack",
+      "uc": "1712"
+    },
+    {
+      "denominazione_ada": "Riassetto degli ambienti a bordo",
+      "uc": "2123"
+    }
+  ],
+  "Addetto all'ideazione, esecuzione e interpretazione di coreografie in spettacoli di danza e balletti classici (436)": [
+    {
+      "denominazione_ada": "Esecuzione e interpretazione delle coreografie",
+      "uc": "1904"
+    },
+    {
+      "denominazione_ada": "Ideazione e realizzazione di coreografie",
+      "uc": "1906"
+    },
+    {
+      "denominazione_ada": "Relazione e interazione con le altre figure coinvolte nella produzione ballettistica",
+      "uc": "1905"
+    }
+  ],
+  "Addetto all'imbracatura, stabilizzazione, movimentazione e inventario di materiali lapidei (309)": [
+    {
+      "denominazione_ada": "Imbracatura e stabilizzazione dei materiali lapidei",
+      "uc": "1791"
+    },
+    {
+      "denominazione_ada": "Inventario dei materiali lapidei",
+      "uc": "1165"
+    },
+    {
+      "denominazione_ada": "Movimentazione dei materiali con mezzi meccanici",
+      "uc": "1163"
+    },
+    {
+      "denominazione_ada": "Movimentazione dei materiali in laboratorio",
+      "uc": "1792"
+    }
+  ],
+  "Addetto all'informazione, accompagnamento e tutoraggio nei percorsi formativi e di orientamento e inserimento al lavoro (421)": [
+    {
+      "denominazione_ada": "Accompagnamento e tutorato per l'orientamento al lavoro e l'inserimento/reinserimento lavorativo",
+      "uc": "1851"
+    },
+    {
+      "denominazione_ada": "Assistenza nella ricerca e gestione delle informazioni",
+      "uc": "1849"
+    },
+    {
+      "denominazione_ada": "Reperimento di informazioni e gestione di sistemi integrati di documentazione",
+      "uc": "1846"
+    },
+    {
+      "denominazione_ada": "Tutoraggio, monitoraggio e prevenzione del disagio",
+      "uc": "1850"
+    }
+  ],
+  "Addetto all'installazione, manutenzione e riparazione di apparecchi elettrici ed elettronici di auto, moto, camion e autobus (321)": [
+    {
+      "denominazione_ada": "Assistenza alla clientela",
+      "uc": "1686"
+    },
+    {
+      "denominazione_ada": "Configurazione dei requisiti tecnici degli apparati elettrici ed elettronici dell'autoveicolo",
+      "uc": "1689"
+    },
+    {
+      "denominazione_ada": "Diagnosi tecnica e strumentale degli apparati elettrici ed elettronici dell'autoveicolo",
+      "uc": "1687"
+    },
+    {
+      "denominazione_ada": "Realizzazione dell'intervento alle apparecchiature elettriche ed elettroniche",
+      "uc": "1688"
+    }
+  ],
+  "Addetto all'organizzazione del processo di lavorazione grafica, di elaborazione di un prodotto grafico e di produzione e allestimento degli stampati (410)": [
+    {
+      "denominazione_ada": "Elaborazione di un prodotto grafico",
+      "uc": "1817"
+    },
+    {
+      "denominazione_ada": "Elaborazioni di file grafici",
+      "uc": "1818"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione del processo di lavorazione grafica",
+      "uc": "1816"
+    },
+    {
+      "denominazione_ada": "Produzione e allestimento di stampati",
+      "uc": "1819"
+    }
+  ],
+  "Addetto all'organizzazione del processo di lavorazione grafica, di elaborazione di un prodotto grafico e di realizzazione di prodotti multimediali (411)": [
+    {
+      "denominazione_ada": "Elaborazione di un prodotto grafico",
+      "uc": "1817"
+    },
+    {
+      "denominazione_ada": "Elaborazioni di file grafici",
+      "uc": "1818"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione del processo di lavorazione grafica",
+      "uc": "1816"
+    },
+    {
+      "denominazione_ada": "Realizzazione di prodotti multimediali",
+      "uc": "1820"
+    }
+  ],
+  "Addetto all'organizzazione e gestione delle attività di segreteria, all'accoglienza e alle informazioni (377)": [
+    {
+      "denominazione_ada": "Accoglienza",
+      "uc": "1638"
+    },
+    {
+      "denominazione_ada": "Gestione dei flussi informativi",
+      "uc": "1639"
+    },
+    {
+      "denominazione_ada": "Organizzazione di riunioni e trasferte",
+      "uc": "1642"
+    },
+    {
+      "denominazione_ada": "Redazione testi e comunicazioni formali",
+      "uc": "1641"
+    },
+    {
+      "denominazione_ada": "Registrazione ed archiviazione documenti",
+      "uc": "1640"
+    }
+  ],
+  "Addetto alla comunicazione, alla promozione di servizi/prodotti di una struttura pubblica o privata e alla facilitazione di servizi telematici (214)": [
+    {
+      "denominazione_ada": "Gestione del front office e back office",
+      "uc": "351"
+    },
+    {
+      "denominazione_ada": "Gestione della promozione dei servizi e dell'immagine dell'ente",
+      "uc": "356"
+    },
+    {
+      "denominazione_ada": "Gestione delle informazioni attraverso il supporto delle tecnologie informatiche",
+      "uc": "353"
+    },
+    {
+      "denominazione_ada": "Mediazione e facilitazione dei servizi on line",
+      "uc": "1774"
+    }
+  ],
+  "Addetto alla conduzione di impianti di lavorazione e confezionamento di prodotti agroalimentari (242)": [
+    {
+      "denominazione_ada": "Conduzione delle macchine di confezionamento",
+      "uc": "879"
+    },
+    {
+      "denominazione_ada": "Controllo delle codifiche per la tracciabilità",
+      "uc": "880"
+    },
+    {
+      "denominazione_ada": "Svolgere i controlli in processo",
+      "uc": "881"
+    }
+  ],
+  "Addetto alla conduzione di macchine motrici e all'impiego di macchine operatrici (135)": [
+    {
+      "denominazione_ada": "Conduzione macchine motrici",
+      "uc": "1091"
+    },
+    {
+      "denominazione_ada": "Efficienza e sicurezza del cantiere",
+      "uc": "1094"
+    },
+    {
+      "denominazione_ada": "Impiego delle macchine operatrici",
+      "uc": "1092"
+    },
+    {
+      "denominazione_ada": "Verifiche di accoppiamento e controllo dell'utensile",
+      "uc": "1093"
+    }
+  ],
+  "Addetto alla conduzione di veicoli destinati al trasporto di persone (142)": [
+    {
+      "denominazione_ada": "Conduzione di tram o autobus",
+      "uc": "565"
+    },
+    {
+      "denominazione_ada": "Manutenzione del mezzo in uso",
+      "uc": "1006"
+    },
+    {
+      "denominazione_ada": "Rapporto con altri settori dell'azienda e con la clientela",
+      "uc": "523"
+    },
+    {
+      "denominazione_ada": "Uso in condizioni di sicurezza del mezzo",
+      "uc": "889"
+    }
+  ],
+  "Addetto alla conduzione e alle operazioni di manovra di mezzi di sollevamento e/o traino (carrelli, ralle, reach stacker) (450)": [
+    {
+      "denominazione_ada": "Conduzione di carrelli, reach stacker e ralle",
+      "uc": "1955"
+    },
+    {
+      "denominazione_ada": "Movimentazione di merci con carrello sino a 32 tons, reach stacker - ralla TT/B - TR/B",
+      "uc": "1954"
+    },
+    {
+      "denominazione_ada": "Sicurezza sui luoghi di lavoro per le imprese del settore portuale e logistico",
+      "uc": "1948"
+    },
+    {
+      "denominazione_ada": "Verifica delle funzionalità tecniche del mezzo di sollevamento e/o traino ed utilizzo di supporti informativi nelle operazioni di movimentazione, carico/scarico della merce",
+      "uc": "1953"
+    }
+  ],
+  "Addetto alla conduzione e manovra di gru portuali (Gru transtainer, portainer, MHC-RTG) (449)": [
+    {
+      "denominazione_ada": "Manovra e movimentazione degli apparecchi/impianti di sollevamento portuale (gru di bordo, transtainer, portainer, MHC)",
+      "uc": "1952"
+    },
+    {
+      "denominazione_ada": "Manutenzione ordinaria degli impianti portuali di sollevamento (gru portuali)",
+      "uc": "1951"
+    },
+    {
+      "denominazione_ada": "Movimentazione della merce nelle operazioni di sbarco ed imbarco",
+      "uc": "1950"
+    },
+    {
+      "denominazione_ada": "Sicurezza sui luoghi di lavoro per le imprese del settore portuale e logistico",
+      "uc": "1948"
+    },
+    {
+      "denominazione_ada": "Verifica delle funzionalità tecniche del mezzo: Gru Portuale di bordo, di piazzale transtainer, di banchina portainer, MHC",
+      "uc": "1949"
+    }
+  ],
+  "Addetto alla cura, alla preparazione ed allenamento del cavallo (397)": [
+    {
+      "denominazione_ada": "Accudire il cavallo",
+      "uc": "1775"
+    },
+    {
+      "denominazione_ada": "Allenamento del cavallo in sella",
+      "uc": "1777"
+    },
+    {
+      "denominazione_ada": "Preparazione del cavallo e allenamento a mano",
+      "uc": "1776"
+    }
+  ],
+  "Addetto alla definizione, alla fabbricazione e al montaggio di infissi, telai e serramenti (508)": [
+    {
+      "denominazione_ada": "Analisi della richiesta del cliente e definizione di infissi, telai e serramenti",
+      "uc": "2159"
+    },
+    {
+      "denominazione_ada": "Fabbricazione del serramento",
+      "uc": "2160"
+    },
+    {
+      "denominazione_ada": "Trasporto, montaggio ed installazione del serramento",
+      "uc": "2161"
+    }
+  ],
+  "Addetto alla fabbricazione e trasformazione della pasta/carta e del cartone (110)": [
+    {
+      "denominazione_ada": "Fabbricazione del cartone",
+      "uc": "91"
+    },
+    {
+      "denominazione_ada": "Fabbricazione della pasta/carta",
+      "uc": "69"
+    },
+    {
+      "denominazione_ada": "Preparazione della carta",
+      "uc": "96"
+    },
+    {
+      "denominazione_ada": "Trasformazione dell'impasto in carta",
+      "uc": "244"
+    }
+  ],
+  "Addetto alla frantumazione di materiali lapidei (312)": [
+    {
+      "denominazione_ada": "Avvio e conduzione dei nastri di alimentazione del materiale",
+      "uc": "1128"
+    },
+    {
+      "denominazione_ada": "Controllo delle vasche del riciclo dell'acqua per il lavaggio del materiale",
+      "uc": "1129"
+    },
+    {
+      "denominazione_ada": "Messa in funzione dei silos di deposito del materiale",
+      "uc": "1132"
+    },
+    {
+      "denominazione_ada": "Pulizia del piazzale e dei box destinati alla raccolta del materiale frantumato",
+      "uc": "1133"
+    }
+  ],
+  "Addetto alla gestione di macchine formatrici (354)": [
+    {
+      "denominazione_ada": "Collaborazione con la manutenzione macchine",
+      "uc": "1553"
+    },
+    {
+      "denominazione_ada": "Eliminazione degli inceppi",
+      "uc": "1554"
+    },
+    {
+      "denominazione_ada": "Eliminazione difetti degli articoli",
+      "uc": "1555"
+    },
+    {
+      "denominazione_ada": "Gestione della macchina formatrice",
+      "uc": "1552"
+    },
+    {
+      "denominazione_ada": "Lubrificazione della macchina formatrice",
+      "uc": "1551"
+    }
+  ],
+  "Addetto alla gestione e al controllo delle operazioni di incasso e pagamento (7)": [
+    {
+      "denominazione_ada": "Consulenza e supervisione delle operazioni incassi e pagamenti",
+      "uc": "216"
+    },
+    {
+      "denominazione_ada": "Elaborazione delle richieste di incassi e pagamenti",
+      "uc": "214"
+    },
+    {
+      "denominazione_ada": "Predisposizione e supervisione delle deleghe dei processi bancari a soggetti esterni",
+      "uc": "217"
+    }
+  ],
+  "Addetto alla gestione e verifica delle composizioni chimiche del vetro e delle caratteristiche fisiche degli oggetti (368)": [
+    {
+      "denominazione_ada": "Gestione delle composizioni chimiche",
+      "uc": "1548"
+    },
+    {
+      "denominazione_ada": "Organizzazione del laboratorio",
+      "uc": "1549"
+    },
+    {
+      "denominazione_ada": "Verifica delle composizioni",
+      "uc": "1550"
+    }
+  ],
+  "Addetto alla gestione, conduzione e manutenzione di impianti di depurazione delle acque e del sistema idrico di captazione, adduzione e distribuzione (45)": [
+    {
+      "denominazione_ada": "Conduzione impianti di depurazione delle acque",
+      "uc": "743"
+    },
+    {
+      "denominazione_ada": "Controllo della qualità dell'acqua",
+      "uc": "745"
+    },
+    {
+      "denominazione_ada": "Manutenzione del sistema di captazione, adduzione e distribuzione dell'acqua",
+      "uc": "2184"
+    },
+    {
+      "denominazione_ada": "Manutenzione impianti di depurazione delle acque",
+      "uc": "744"
+    }
+  ],
+  "Addetto alla gestione, conduzione e manutenzione di impianti di trattamento e smaltimento dei rifiuti (46)": [
+    {
+      "denominazione_ada": "Conduzione impianti",
+      "uc": "796"
+    },
+    {
+      "denominazione_ada": "Controllo e verifica emissioni",
+      "uc": "798"
+    },
+    {
+      "denominazione_ada": "Manutenzione impianti",
+      "uc": "797"
+    }
+  ],
+  "Addetto alla lavorazione dei prodotti e alla commercializzazione dei prodotti di carne e salumi (35)": [
+    {
+      "denominazione_ada": "Allestimento e rifornimento del banco e del locale adibito alla vendita",
+      "uc": "411"
+    },
+    {
+      "denominazione_ada": "Cura del processo di vendita al Cliente",
+      "uc": "412"
+    },
+    {
+      "denominazione_ada": "Gestione degli ordini e stoccaggio degli approvvigionamenti",
+      "uc": "410"
+    },
+    {
+      "denominazione_ada": "Preparazione di prodotti alimentari freschi (carni, salumi, formaggi, ecc.)",
+      "uc": "409"
+    },
+    {
+      "denominazione_ada": "Pulizia e manutenzione delle attrezzature, delle dotazioni e dell'area di vendita",
+      "uc": "413"
+    }
+  ],
+  "Addetto alla lavorazione dell'alabastro\n (467)": [
+    {
+      "denominazione_ada": "\"Verifica della correttezza del prodotto in alabatro finito \"",
+      "uc": "2020"
+    },
+    {
+      "denominazione_ada": "Disegno e supporto alla realizzazione degli elementi di base del prodotto in alabastro",
+      "uc": "2017"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi del processo delle lavorazioni artistiche",
+      "uc": "2016"
+    },
+    {
+      "denominazione_ada": "Realizzazione del manufatto/bene artistico",
+      "uc": "2018"
+    },
+    {
+      "denominazione_ada": "Rifinitura del manufatto in alabastro",
+      "uc": "2019"
+    }
+  ],
+  "Addetto alla lavorazione e alla commercializzazione dei prodotti  della panificazione/pasticceria (34)": [
+    {
+      "denominazione_ada": "Allestimento e rifornimento del banco e del locale adibito alla vendita",
+      "uc": "450"
+    },
+    {
+      "denominazione_ada": "Cura del processo di vendita",
+      "uc": "451"
+    },
+    {
+      "denominazione_ada": "Gestione degli ordini e stoccaggio degli approvvigionamenti",
+      "uc": "449"
+    },
+    {
+      "denominazione_ada": "Preparazione di prodotti panari, dolciari, da forno",
+      "uc": "448"
+    },
+    {
+      "denominazione_ada": "Pulizia e manutenzione delle attrezzature, delle dotazioni e dell'area di vendita",
+      "uc": "452"
+    }
+  ],
+  "Addetto alla lavorazione, costruzione e riparazione di parti meccaniche (351)": [
+    {
+      "denominazione_ada": "Attrezzaggio della macchina utensile",
+      "uc": "1447"
+    },
+    {
+      "denominazione_ada": "Compilazione della documentazione richiesta",
+      "uc": "1446"
+    },
+    {
+      "denominazione_ada": "Controllo della rispondenza del pezzo prodotto con le specifiche richieste",
+      "uc": "1449"
+    },
+    {
+      "denominazione_ada": "Esecuzione del pezzo meccanico alle macchine utensili",
+      "uc": "1448"
+    },
+    {
+      "denominazione_ada": "Operazioni di saldatura e riparazione di parte meccanica",
+      "uc": "1519"
+    }
+  ],
+  "Addetto alla lucidatura e levigatura di materiali lapidei (311)": [
+    {
+      "denominazione_ada": "Conduzione delle macchine lucidatrici",
+      "uc": "1101"
+    },
+    {
+      "denominazione_ada": "Intervento sulle anomalie tecnologiche, metodologiche e di sicurezza del ciclo di lavoro",
+      "uc": "1103"
+    },
+    {
+      "denominazione_ada": "Rifinizione del manufatto facendo uso di utensili specifici a mano",
+      "uc": "1121"
+    },
+    {
+      "denominazione_ada": "Verifica della rispondenza qualitativa del prodotto finito",
+      "uc": "1120"
+    }
+  ],
+  "Addetto alla manutenzione di impianti elettrici (348)": [
+    {
+      "denominazione_ada": "Assistenza all'avviamento della macchina",
+      "uc": "1477"
+    },
+    {
+      "denominazione_ada": "Esecuzione attività di diagnostica",
+      "uc": "1444"
+    },
+    {
+      "denominazione_ada": "Esecuzione interventi a guasto",
+      "uc": "1478"
+    },
+    {
+      "denominazione_ada": "Esecuzione interventi di manutenzione programmata",
+      "uc": "1479"
+    },
+    {
+      "denominazione_ada": "Registrazione degli interventi eseguiti",
+      "uc": "1480"
+    }
+  ],
+  "Addetto alla manutenzione di macchinari destinati alla produzione (349)": [
+    {
+      "denominazione_ada": "Assistenza all'avviamento della macchina",
+      "uc": "1441"
+    },
+    {
+      "denominazione_ada": "Esecuzione di interventi di manutenzione preventiva",
+      "uc": "1442"
+    },
+    {
+      "denominazione_ada": "Esecuzione interventi a guasto",
+      "uc": "1438"
+    },
+    {
+      "denominazione_ada": "Esecuzione interventi di manutenzione programmata",
+      "uc": "1440"
+    },
+    {
+      "denominazione_ada": "Registrazione degli interventi eseguiti",
+      "uc": "1443"
+    }
+  ],
+  "Addetto alla messa in sicurezza e preparazione del cantiere di cava, alla escavazione, alla predisposizione di strade di arroccamento e manutenzione dei mezzi semoventi (314)": [
+    {
+      "denominazione_ada": "Escavazione di materiali rocciosi e lapidei",
+      "uc": "1623"
+    },
+    {
+      "denominazione_ada": "Esecuzione dell'ordinaria manutenzione dei mezzi semoventi",
+      "uc": "1661"
+    },
+    {
+      "denominazione_ada": "Messa in sicurezza e preparazione del cantiere di cava",
+      "uc": "1668"
+    },
+    {
+      "denominazione_ada": "Predisposizione delle strade di arroccamento",
+      "uc": "1662"
+    }
+  ],
+  "Addetto alla predisposizione di siti per l'uso di esplosivi in cava, brillamento mine, prelievo e trasporto di esplosivi (400)": [
+    {
+      "denominazione_ada": "Brillamento mine tramite inneschi elettrici",
+      "uc": "1786"
+    },
+    {
+      "denominazione_ada": "Predisposizione dei siti per l'uso dell'esplosivo in cava",
+      "uc": "1785"
+    },
+    {
+      "denominazione_ada": "Prelievo e trasporto esplosivi",
+      "uc": "1787"
+    }
+  ],
+  "Addetto alla preparazione dei macchinari, al posizionamento del pellame e alla verifica dei parametri impostati e dei risultati attesi (462)": [
+    {
+      "denominazione_ada": "Posizionamento del pellame nel macchinario",
+      "uc": "1997"
+    },
+    {
+      "denominazione_ada": "Preparazione, regolazione e messa a punto del macchinario da utilizzare",
+      "uc": "1996"
+    },
+    {
+      "denominazione_ada": "Verifica in itinere sulla macchina e sul pellame dei parametri impostati e dei risultati attesi",
+      "uc": "1998"
+    }
+  ],
+  "Addetto alla preparazione, installazione, controllo e manutenzione degli impianti elettronici (409)": [
+    {
+      "denominazione_ada": "Assemblaggio e configurazione di personal computer",
+      "uc": "1812"
+    },
+    {
+      "denominazione_ada": "Controllo dell'impianto elettronico",
+      "uc": "1813"
+    },
+    {
+      "denominazione_ada": "Installazione e configurazione di impianti elettronici",
+      "uc": "1815"
+    },
+    {
+      "denominazione_ada": "Manutenzione dell'impianto elettronico",
+      "uc": "1814"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione del processo di installazione e manutenzione di impianti elettronici",
+      "uc": "1811"
+    }
+  ],
+  "Addetto alla preparazione, installazione, manutenzione e controllo degli impianti elettrici (408)": [
+    {
+      "denominazione_ada": "Controllo dell'impianto elettrico",
+      "uc": "1809"
+    },
+    {
+      "denominazione_ada": "Installazione dell'impianto elettrico",
+      "uc": "1808"
+    },
+    {
+      "denominazione_ada": "Manutenzione dell'impianto elettrico",
+      "uc": "1810"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione del processo di realizzazione dell'impianto elettrico",
+      "uc": "1807"
+    }
+  ],
+  "Addetto alla preparazione, installazione, manutenzione e controllo degli impianti termo-idraulici e simili (407)": [
+    {
+      "denominazione_ada": "Controllo degli impianti termoidraulici e simili",
+      "uc": "2169"
+    },
+    {
+      "denominazione_ada": "Installazione degli impianti termoidraulici e simili",
+      "uc": "2170"
+    },
+    {
+      "denominazione_ada": "Manutenzione degli impianti termoidraulici e simili",
+      "uc": "2171"
+    },
+    {
+      "denominazione_ada": "Preparazione e organizzazione del processo di realizzazione degli impianti termoidraulici e simili",
+      "uc": "2172"
+    }
+  ],
+  "Addetto alla pulitura, bonifica e consolidamento delle pareti rocciose e all'esecuzione e messa in opera di sistemi di protezione e monitoraggio (316)": [
+    {
+      "denominazione_ada": "Bonifica e consolidamento delle pareti rocciose",
+      "uc": "1789"
+    },
+    {
+      "denominazione_ada": "Esecuzione e messa in opera di sistemi attivi di protezione e monitoraggio",
+      "uc": "1790"
+    },
+    {
+      "denominazione_ada": "Pulitura delle pareti rocciose",
+      "uc": "1788"
+    }
+  ],
+  "Addetto alla realizzazione di interviste telefoniche e alla vendita di prodotti/servizi nell'ambito di call center (378)": [
+    {
+      "denominazione_ada": "Erogazione di informazioni via telefono",
+      "uc": "1643"
+    },
+    {
+      "denominazione_ada": "Gestione dell'intervista telefonica con il cliente",
+      "uc": "1644"
+    },
+    {
+      "denominazione_ada": "Vendita telefonica di prodotti/servizi",
+      "uc": "1645"
+    }
+  ],
+  "Addetto alla realizzazione di lavori di rivestimento/piastrellatura di superfici con materiali ceramici, marmo, pietra naturale, cotto, legno o assimilabili (233)": [
+    {
+      "denominazione_ada": "Posa dei pavimenti e dei rivestimenti",
+      "uc": "1072"
+    },
+    {
+      "denominazione_ada": "Posa in opera e ristrutturazione di pavimenti e rivestimenti in legno",
+      "uc": "2210"
+    },
+    {
+      "denominazione_ada": "Preparazione dell'area da pavimentare",
+      "uc": "1070"
+    },
+    {
+      "denominazione_ada": "Preparazione di malte e collanti",
+      "uc": "1071"
+    },
+    {
+      "denominazione_ada": "Stuccatura, pulizia e finitura delle superfici pavimentate/rivestite",
+      "uc": "1073"
+    }
+  ],
+  "Addetto alla realizzazione di macchine festive/carri del carnevale\n\n (475)": [
+    {
+      "denominazione_ada": "Disegno e supporto alla progettazione della struttura meccanica e l'automazione del carro festivo",
+      "uc": "2041"
+    },
+    {
+      "denominazione_ada": "Lavorazione della cartapesta",
+      "uc": "2043"
+    },
+    {
+      "denominazione_ada": "Lavorazioni di assemblaggio di parti meccaniche attraverso processi di saldatura",
+      "uc": "2040"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi del processo delle lavorazioni artistiche",
+      "uc": "2039"
+    },
+    {
+      "denominazione_ada": "Preparazione dello stampo",
+      "uc": "2042"
+    }
+  ],
+  "Addetto alla realizzazione di manufatti lignei (393)": [
+    {
+      "denominazione_ada": "Adattamento estetico del prodotto ligneo d'arredo",
+      "uc": "1750"
+    },
+    {
+      "denominazione_ada": "Lavorazione dei materiali lignei",
+      "uc": "1749"
+    },
+    {
+      "denominazione_ada": "Preparazione dei macchinari ed utensili del legno",
+      "uc": "1748"
+    },
+    {
+      "denominazione_ada": "Selezione dei materiali lignei",
+      "uc": "1747"
+    }
+  ],
+  "Addetto alla realizzazione di manufatti lignei nell'artigianato artistico con tecniche di doratura e decorazione\n (470)": [
+    {
+      "denominazione_ada": "Finitura e adattamento del manufatti di artigianato artistico",
+      "uc": "2021"
+    },
+    {
+      "denominazione_ada": "Lavorazioni e tecniche della doratura e della decoarzione",
+      "uc": "2026"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi del processo delle lavorazion i artistiche",
+      "uc": "2023"
+    },
+    {
+      "denominazione_ada": "Selezione dei materiali lignei",
+      "uc": "2024"
+    },
+    {
+      "denominazione_ada": "Selezione dei materiali per la doratura e la decorazione",
+      "uc": "2027"
+    }
+  ],
+  "Addetto alla realizzazione di manufatti lignei nell'artigianato artistico con tecniche di ebanisteria\n (471)": [
+    {
+      "denominazione_ada": "Finitura e adattamento del manufatti di artigianato artistico",
+      "uc": "2021"
+    },
+    {
+      "denominazione_ada": "Lavorazione dei materiali lignei",
+      "uc": "2028"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi del processo delle lavorazion i artistiche",
+      "uc": "2023"
+    },
+    {
+      "denominazione_ada": "Selezione dei materiali lignei",
+      "uc": "2024"
+    }
+  ],
+  "Addetto alla realizzazione di manufatti lignei nell'artigianato artistico con tecniche di intaglio\n (468)": [
+    {
+      "denominazione_ada": "Finitura e adattamento del manufatti di artigianato artistico",
+      "uc": "2021"
+    },
+    {
+      "denominazione_ada": "Lavorazioni e tecniche di intaglio",
+      "uc": "2022"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi del processo delle lavorazion i artistiche",
+      "uc": "2023"
+    },
+    {
+      "denominazione_ada": "Selezione dei materiali lignei",
+      "uc": "2024"
+    }
+  ],
+  "Addetto alla realizzazione di manufatti lignei nell'artigianato artistico con tecniche di intarsio\n (469)": [
+    {
+      "denominazione_ada": "Finitura e adattamento del manufatti di artigianato artistico",
+      "uc": "2021"
+    },
+    {
+      "denominazione_ada": "Lavorazioni e tecniche delle tarsie ligne (intarsi lignei)",
+      "uc": "2025"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi del processo delle lavorazion i artistiche",
+      "uc": "2023"
+    },
+    {
+      "denominazione_ada": "Selezione dei materiali lignei",
+      "uc": "2024"
+    }
+  ],
+  "Addetto alla realizzazione di manufatti lignei nell'artigianato artistico con tecniche di tornitura\n (472)": [
+    {
+      "denominazione_ada": "Finitura e adattamento del manufatti di artigianato artistico",
+      "uc": "2021"
+    },
+    {
+      "denominazione_ada": "Lavorazione e tecniche della tornitura",
+      "uc": "2029"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi del processo delle lavorazion i artistiche",
+      "uc": "2023"
+    },
+    {
+      "denominazione_ada": "Selezione dei materiali lignei",
+      "uc": "2024"
+    }
+  ],
+  "Addetto alla realizzazione di opere murarie (229)": [
+    {
+      "denominazione_ada": "Assistenza muraria per la realizzazione di impianti tecnologici e serramenti",
+      "uc": "2176"
+    },
+    {
+      "denominazione_ada": "Demolizione di opere esistenti",
+      "uc": "953"
+    },
+    {
+      "denominazione_ada": "Intonacatura delle superfici e altre operazioni di finitura edilizia",
+      "uc": "2177"
+    },
+    {
+      "denominazione_ada": "Organizzazione del cantiere e delle aree di lavoro",
+      "uc": "954"
+    },
+    {
+      "denominazione_ada": "Preparazione di malte e calcestruzzi",
+      "uc": "2178"
+    },
+    {
+      "denominazione_ada": "Realizzazione e consolidamento di opere murarie e altre lavorazioni connesse",
+      "uc": "2179"
+    }
+  ],
+  "Addetto alla realizzazione di prototipi e alla lavorazione di prodotti di pelletteria (281)": [
+    {
+      "denominazione_ada": "Definizione delle specifiche tecniche nel corso del processo di realizzazione di prototipi e campioni",
+      "uc": "1200"
+    },
+    {
+      "denominazione_ada": "Individuazione del ciclo e delle modalità di produzione di prototipi da realizzare",
+      "uc": "1029"
+    },
+    {
+      "denominazione_ada": "Manutenzione ordinaria di strumenti, utensili, attrezzature e macchinari per la lavorazione di prodotti in pelle",
+      "uc": "2156"
+    },
+    {
+      "denominazione_ada": "Realizzazione di prototipi e campioni",
+      "uc": "1031"
+    },
+    {
+      "denominazione_ada": "Supporto tecnico nella fase di produzione industriale",
+      "uc": "1034"
+    }
+  ],
+  "Addetto alla realizzazione di stampe serigrafiche a colori su supporti di varia natura (106)": [
+    {
+      "denominazione_ada": "Confezione del prodotto finito",
+      "uc": "535"
+    },
+    {
+      "denominazione_ada": "Organizzazione dell'impianto di stampa",
+      "uc": "530"
+    },
+    {
+      "denominazione_ada": "Preparazione del supporto per la stampa",
+      "uc": "533"
+    },
+    {
+      "denominazione_ada": "Preparazione del telaio per la stampa serigrafica",
+      "uc": "532"
+    },
+    {
+      "denominazione_ada": "Stampa serigrafica",
+      "uc": "1437"
+    }
+  ],
+  "Addetto alla realizzazione di strutture civili e industriali in calcestruzzo armato (230)": [
+    {
+      "denominazione_ada": "Confezionamento e getto dei calcestruzzi",
+      "uc": "1068"
+    },
+    {
+      "denominazione_ada": "Disarmo delle strutture di cemento armato realizzate",
+      "uc": "1069"
+    },
+    {
+      "denominazione_ada": "Esecuzione di operazioni di consolidamento strutturale e recupero di opere in cemento armato",
+      "uc": "2209"
+    },
+    {
+      "denominazione_ada": "Realizzazione in opera di casseforme e montaggio di casserature prefabbricate",
+      "uc": "1067"
+    },
+    {
+      "denominazione_ada": "Taglio, sagomatura e montaggio delle armature in acciaio",
+      "uc": "1066"
+    }
+  ],
+  "Addetto alla realizzazione e alla finitura di capi di maglieria e al controllo qualità sul prodotto finito (492)": [
+    {
+      "denominazione_ada": "Assemblaggio del capo di maglieria - rimaglio",
+      "uc": "2105"
+    },
+    {
+      "denominazione_ada": "Confezione e finitura del capo di maglieria",
+      "uc": "2107"
+    },
+    {
+      "denominazione_ada": "Controllo qualità ed intervento sul capo",
+      "uc": "2106"
+    },
+    {
+      "denominazione_ada": "Realizzazione di capi in maglieria",
+      "uc": "2104"
+    }
+  ],
+  "Addetto alla realizzazione e manutenzione di giardini (137)": [
+    {
+      "denominazione_ada": "Concimazione",
+      "uc": "144"
+    },
+    {
+      "denominazione_ada": "Difesa delle piante",
+      "uc": "145"
+    },
+    {
+      "denominazione_ada": "Irrigazione delle aree a verde",
+      "uc": "106"
+    },
+    {
+      "denominazione_ada": "Lavorazioni del terreno nelle aree a verde",
+      "uc": "101"
+    },
+    {
+      "denominazione_ada": "Potatura e sfalci",
+      "uc": "146"
+    }
+  ],
+  "Addetto alla realizzazione e rifinitura di capi di abbigliamento su misura dell'artigianato artistico\n (473)": [
+    {
+      "denominazione_ada": "Cucitura a macchina di confezioni",
+      "uc": "2030"
+    },
+    {
+      "denominazione_ada": "Cuciture per punti particolari",
+      "uc": "2031"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi del processo delle lavorazioni artistiche",
+      "uc": "2035"
+    },
+    {
+      "denominazione_ada": "Realizzare dei cartamodelli",
+      "uc": "2032"
+    },
+    {
+      "denominazione_ada": "Realizzazione di lavori speciali di sartoria artigianale artistica",
+      "uc": "2034"
+    },
+    {
+      "denominazione_ada": "Realizzazione di prototipi e campioni",
+      "uc": "2033"
+    }
+  ],
+  "Addetto alla realizzazione, rifinitura e stiratura di capi di abbigliamento (74)": [
+    {
+      "denominazione_ada": "Controllo pezzi e passaggio al cucito",
+      "uc": "630"
+    },
+    {
+      "denominazione_ada": "Cucitura a macchina di confezioni",
+      "uc": "632"
+    },
+    {
+      "denominazione_ada": "Cuciture per punti particolari",
+      "uc": "634"
+    },
+    {
+      "denominazione_ada": "Realizzazione dei cartamodelli",
+      "uc": "989"
+    },
+    {
+      "denominazione_ada": "Rifinitura del capo confezionato",
+      "uc": "635"
+    }
+  ],
+  "Addetto alla riparazione di autoveicoli e autoarticolati (388)": [
+    {
+      "denominazione_ada": "Assistenza alla clientela",
+      "uc": "1697"
+    },
+    {
+      "denominazione_ada": "Diagnosi tecnica e strumentale del guasto dell'autoveicolo o dell'autoarticolato",
+      "uc": "1698"
+    },
+    {
+      "denominazione_ada": "Manutenzione dell'autoveicolo o dell'autoarticolato",
+      "uc": "1700"
+    },
+    {
+      "denominazione_ada": "Realizzazione della riparazione e collaudo dell'autoveicolo o dell'autoarticolato",
+      "uc": "1699"
+    }
+  ],
+  "Addetto alla riparazione, sostituzione e verniciatura di elementi della carrozzeria degli autoveicoli (318)": [
+    {
+      "denominazione_ada": "Assistenza alla clientela",
+      "uc": "1681"
+    },
+    {
+      "denominazione_ada": "Diagnosi del danno del telaio e della carrozzeria",
+      "uc": "1682"
+    },
+    {
+      "denominazione_ada": "Lavorazione di carrozzeria e del telaio dell'autoveicolo",
+      "uc": "1684"
+    },
+    {
+      "denominazione_ada": "Smontaggio e assemblaggio degli organi meccanici e delle parti accessorie della carrozzeria",
+      "uc": "1683"
+    },
+    {
+      "denominazione_ada": "Verniciatura dell'autoveicolo",
+      "uc": "1685"
+    }
+  ],
+  "Addetto alla verifica del processo di lavorazione del pellame, al caricamento dei macchinari, alla selezione, classificazione e stoccaggio delle pelli grezze e wet-blue (460)": [
+    {
+      "denominazione_ada": "Caricamento dei macchinari per l'avvio del processo di concia ed esecuzione del processo",
+      "uc": "1989"
+    },
+    {
+      "denominazione_ada": "Predisposizione area di stoccaggio della pelle grezza e/o wet-blue e sua gestione",
+      "uc": "1991"
+    },
+    {
+      "denominazione_ada": "Selezione e classificazione delle pelli grezze e wet-blue",
+      "uc": "1990"
+    },
+    {
+      "denominazione_ada": "Verifica della conformità del processo di lavorazione eseguito sul pellame",
+      "uc": "1988"
+    }
+  ],
+  "Addetto alle attività di assistenza e consulenza turistica al banco e/o al telefono (251)": [
+    {
+      "denominazione_ada": "Espletamento dell'attività di segreteria amministrativa",
+      "uc": "1773"
+    },
+    {
+      "denominazione_ada": "Organizzazione della vendita dei servizi/pacchetti turistici",
+      "uc": "479"
+    },
+    {
+      "denominazione_ada": "Presentazione delle offerte",
+      "uc": "477"
+    }
+  ],
+  "Addetto alle attività di gestione e controllo della contabilità del magazzino (140)": [
+    {
+      "denominazione_ada": "Gestione del processo contabile",
+      "uc": "531"
+    },
+    {
+      "denominazione_ada": "Gestione e controllo dei movimenti delle merci nel magazzino",
+      "uc": "1465"
+    },
+    {
+      "denominazione_ada": "Operazioni di inventario periodico e di fine anno",
+      "uc": "1466"
+    }
+  ],
+  "Addetto alle attività di prima accoglienza, informazione e assistenza ai clienti di agenzia assicurativa (332)": [
+    {
+      "denominazione_ada": "Assistenza in caso di sinistro",
+      "uc": "1364"
+    },
+    {
+      "denominazione_ada": "Incasso titoli e gestione portafoglio",
+      "uc": "1362"
+    },
+    {
+      "denominazione_ada": "Vendita di prodotti semplici",
+      "uc": "1363"
+    }
+  ],
+  "Addetto alle attività di protezione ambientale, raccolta e spazzamento dei rifiuti e di sanificazione dei contenitori (51)": [
+    {
+      "denominazione_ada": "Esecuzione delle attività accessorie per la pulizia delle aree pubbliche",
+      "uc": "742"
+    },
+    {
+      "denominazione_ada": "Raccolta dei rifiuti pericolosi, tossici e nocivi",
+      "uc": "741"
+    },
+    {
+      "denominazione_ada": "Raccolta e spazzamento manuale dei rifiuti",
+      "uc": "148"
+    },
+    {
+      "denominazione_ada": "Raccolta e spazzamento meccanizzato dei rifiuti",
+      "uc": "740"
+    },
+    {
+      "denominazione_ada": "Sanificazione dei contenitori dei rifiuti solidi e organici",
+      "uc": "2188"
+    }
+  ],
+  "Addetto alle lavorazioni del marmo (428)": [
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi del processo delle lavorazioni artistiche",
+      "uc": "1800"
+    },
+    {
+      "denominazione_ada": "Progettazione e realizzazione degli elementi di base del prodotto in marmo",
+      "uc": "1870"
+    },
+    {
+      "denominazione_ada": "Realizzazione del manufatto/bene artistico",
+      "uc": "1871"
+    },
+    {
+      "denominazione_ada": "Rifinitura del manufatto in marmo",
+      "uc": "1872"
+    },
+    {
+      "denominazione_ada": "Verifica della correttezza del prodotto in marmo finito",
+      "uc": "1873"
+    }
+  ],
+  "Addetto alle lavorazioni orafe (340)": [
+    {
+      "denominazione_ada": "Attrezzaggio e conduzione del parco macchine ad alta automazione per la produzione di serie di componenti in metalli preziosi",
+      "uc": "1421"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi del processo delle lavorazioni artistiche",
+      "uc": "1800"
+    },
+    {
+      "denominazione_ada": "Preparazione del materiale grezzo attraverso la fusione del metallo",
+      "uc": "1758"
+    },
+    {
+      "denominazione_ada": "Produzione di semilavorati in metalli preziosi",
+      "uc": "1460"
+    },
+    {
+      "denominazione_ada": "Progettazione e realizzazione degli elementi di base del gioiello (semiprodotti)",
+      "uc": "1759"
+    },
+    {
+      "denominazione_ada": "Rifinitura, lucidatura e smaltatura del prodotto",
+      "uc": "1760"
+    }
+  ],
+  "Addetto alle operazioni di accoglienza/accompagnamento in manifestazioni congressuali, fiere, convegni (hostess) (207)": [
+    {
+      "denominazione_ada": "Accoglienza partecipanti all'evento",
+      "uc": "235"
+    },
+    {
+      "denominazione_ada": "Gestione del front office",
+      "uc": "234"
+    },
+    {
+      "denominazione_ada": "Realizzazione delle attività di segreteria organizzativa",
+      "uc": "236"
+    },
+    {
+      "denominazione_ada": "Svolgimento delle attività dirette all'assistenza clienti",
+      "uc": "237"
+    }
+  ],
+  "Addetto alle operazioni di alimentazione, avviamento e funzionamento di macchine utilizzate nel processo produttivo (71)": [
+    {
+      "denominazione_ada": "Alimentazione delle macchine",
+      "uc": "692"
+    },
+    {
+      "denominazione_ada": "Avviamento della produzione",
+      "uc": "696"
+    },
+    {
+      "denominazione_ada": "Controllo della produzione",
+      "uc": "699"
+    },
+    {
+      "denominazione_ada": "Segnalazione guasti e defezioni tessuto",
+      "uc": "701"
+    }
+  ],
+  "Addetto alle operazioni di apertura/chiusura della cassa e di assistenza di base alla clientela (13)": [
+    {
+      "denominazione_ada": "Apertura e chiusura della cassa",
+      "uc": "414"
+    },
+    {
+      "denominazione_ada": "Assistenza di base alla clientela",
+      "uc": "415"
+    },
+    {
+      "denominazione_ada": "Registrazione delle vendite, operazioni di cassa e di gestione delle modalità alternative di pagamento",
+      "uc": "416"
+    }
+  ],
+  "Addetto alle operazioni di approvvigionamento e di immagazzinamento della merce (152)": [
+    {
+      "denominazione_ada": "Controllo sui materiali in arrivo",
+      "uc": "64"
+    },
+    {
+      "denominazione_ada": "Gestione dei rapporti con i fornitori e/o grossisti esterni",
+      "uc": "65"
+    },
+    {
+      "denominazione_ada": "Gestione delle scorte e degli acquisti su previsione",
+      "uc": "66"
+    },
+    {
+      "denominazione_ada": "Gestione delle varie fasi dell'approvvigionamento dei materiali necessari all'azienda",
+      "uc": "63"
+    }
+  ],
+  "Addetto alle operazioni di assistenza, orientamento, informazione del cliente e all'allestimento e rifornimento degli scaffali (17)": [
+    {
+      "denominazione_ada": "Allestimento e rifornimento degli scaffali e delle isole promozionali",
+      "uc": "419"
+    },
+    {
+      "denominazione_ada": "Cura del processo di vendita al Cliente",
+      "uc": "420"
+    },
+    {
+      "denominazione_ada": "Gestione degli ordini per il magazzino centrale e/o per i fornitori diretti",
+      "uc": "417"
+    },
+    {
+      "denominazione_ada": "Ricevimento, controllo e stoccaggio della merce",
+      "uc": "418"
+    }
+  ],
+  "Addetto alle operazioni di attrezzaggio delle macchine, di saldatura e di controllo della qualità dei processi di saldatura (416)": [
+    {
+      "denominazione_ada": "Attrezzaggio e saldatura ad arco elettrico",
+      "uc": "1830"
+    },
+    {
+      "denominazione_ada": "Attrezzaggio macchina per saldatura a TIG",
+      "uc": "1832"
+    },
+    {
+      "denominazione_ada": "Controllo della qualità della saldatura",
+      "uc": "1828"
+    },
+    {
+      "denominazione_ada": "Lavorazioni di assemblaggio di parti meccaniche attraverso processi di saldatura",
+      "uc": "1829"
+    },
+    {
+      "denominazione_ada": "Saldatura con gas, saldobrasatura, saldatura MIG MAG",
+      "uc": "1831"
+    }
+  ],
+  "Addetto alle operazioni di confezionamento e imballaggio dei prodotti (150)": [
+    {
+      "denominazione_ada": "Esecuzione del confezionamento",
+      "uc": "548"
+    },
+    {
+      "denominazione_ada": "Imballaggio prodotti confezionati",
+      "uc": "550"
+    },
+    {
+      "denominazione_ada": "Prelievo del materiale di confezionamento",
+      "uc": "497"
+    },
+    {
+      "denominazione_ada": "Preparazione dell'attività di confezionamento per ogni lotto di prodotti",
+      "uc": "545"
+    }
+  ],
+  "Addetto alle operazioni di consegna e alla conduzione di veicoli destinati al trasporto di merci (143)": [
+    {
+      "denominazione_ada": "Acquisizione e programmazione della attività di trasporto",
+      "uc": "563"
+    },
+    {
+      "denominazione_ada": "Esecuzione dell'attività di trasporto",
+      "uc": "536"
+    },
+    {
+      "denominazione_ada": "Rapporti con altri settori dell'azienda e con la clientela",
+      "uc": "537"
+    }
+  ],
+  "Addetto alle operazioni di finissaggio (82)": [
+    {
+      "denominazione_ada": "Esecuzione sulle attività di lavorazione",
+      "uc": "501"
+    },
+    {
+      "denominazione_ada": "Predisposizione dei prodotti da utilizzare",
+      "uc": "499"
+    },
+    {
+      "denominazione_ada": "Verifica dei parametri della lavorazione",
+      "uc": "906"
+    }
+  ],
+  "Addetto alle operazioni di imbarco/sbarco e rizzaggio e derizzaggio (448)": [
+    {
+      "denominazione_ada": "Conduzione e manovra dei mezzi meccanici semplici (bob cat, ruspe, etc.)",
+      "uc": "1947"
+    },
+    {
+      "denominazione_ada": "Implementazione delle procedure operative di carico- scarico, comprese le attività di rizzaggio, derizzaggio e fardaggio di merce varia",
+      "uc": "1946"
+    },
+    {
+      "denominazione_ada": "Implementazione delle procedure operative di carico- scarico, rizzaggio- derizzaggio di merce unitizzata",
+      "uc": "1945"
+    },
+    {
+      "denominazione_ada": "Sicurezza sui luoghi di lavoro per le imprese del settore portuale e logistico",
+      "uc": "1948"
+    }
+  ],
+  "Addetto alle operazioni di innesto e potatura (131)": [
+    {
+      "denominazione_ada": "Controllo e gestione della sicurezza",
+      "uc": "877"
+    },
+    {
+      "denominazione_ada": "Innesto",
+      "uc": "1158"
+    },
+    {
+      "denominazione_ada": "Potatura",
+      "uc": "876"
+    }
+  ],
+  "Addetto alle operazioni di intonacatura, stuccatura, gessatura e isolamento (234)": [
+    {
+      "denominazione_ada": "Installazione di sistemi di isolamento termico e acustico dell'involucro edilizio opaco",
+      "uc": "2173"
+    },
+    {
+      "denominazione_ada": "Intonacatura delle superfici e altre operazioni di finitura edilizia",
+      "uc": "2177"
+    },
+    {
+      "denominazione_ada": "Preparazione dei supporti murari",
+      "uc": "1115"
+    },
+    {
+      "denominazione_ada": "Preparazione di malte e calcestruzzi",
+      "uc": "2178"
+    },
+    {
+      "denominazione_ada": "Realizzazione delle opere di finitura delle superfici",
+      "uc": "1118"
+    },
+    {
+      "denominazione_ada": "Recupero e consolidamento delle superfici intonacate e degli elementi decorativi",
+      "uc": "1119"
+    }
+  ],
+  "Addetto alle operazioni di masticiatura, cucitura e taglio di pelle/tessuto (282)": [
+    {
+      "denominazione_ada": "Aggiuntatura semilavorati",
+      "uc": "650"
+    },
+    {
+      "denominazione_ada": "Cucitura delle parti assemblate e messa in fodera",
+      "uc": "651"
+    },
+    {
+      "denominazione_ada": "Masticiatura delle parti da assemblare",
+      "uc": "649"
+    },
+    {
+      "denominazione_ada": "Riunitura di semilavorati e fodere",
+      "uc": "653"
+    },
+    {
+      "denominazione_ada": "Sbassatura della pelle tranciata",
+      "uc": "644"
+    },
+    {
+      "denominazione_ada": "Scarnitura pellami e smussatura rinforzi",
+      "uc": "647"
+    }
+  ],
+  "Addetto alle operazioni di montaggio, finitura e manutenzione di imbarcazioni da diporto (403)": [
+    {
+      "denominazione_ada": "Manutenzione ordinaria e straordinaria dell'imbarcazione da diporto",
+      "uc": "1796"
+    },
+    {
+      "denominazione_ada": "Montaggio delle componenti di uno scafo",
+      "uc": "1794"
+    },
+    {
+      "denominazione_ada": "Operazioni di finitura e completamento dello scafo",
+      "uc": "1795"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle operazioni di realizzazione di uno scafo",
+      "uc": "1793"
+    }
+  ],
+  "Addetto alle operazioni di navigazione, pesca e prima preparazione del pescato e di controllo degli impianti di acquacoltura/maricoltura (415)": [
+    {
+      "denominazione_ada": "Assistere alla gestione, al controllo e alla pulizia degli impianti e delle attrezzature di acquacoltura/maricoltura",
+      "uc": "1827"
+    },
+    {
+      "denominazione_ada": "Gestione delle operazioni di pesca/raccolta e prima preparazione del pescato",
+      "uc": "1826"
+    },
+    {
+      "denominazione_ada": "Navigazione e conduzione dell'apparato motore",
+      "uc": "1825"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione dei processi di lavoro",
+      "uc": "1824"
+    }
+  ],
+  "Addetto alle operazioni di pittura, stuccatura, rifinitura e decorazione edilizia (232)": [
+    {
+      "denominazione_ada": "Preparazione dei supporti per la realizzazione di opere di tinteggiatura nuove o di recupero",
+      "uc": "1028"
+    },
+    {
+      "denominazione_ada": "Preparazione della postazione di lavoro",
+      "uc": "1022"
+    },
+    {
+      "denominazione_ada": "Realizzazione del lavoro di finitura, tinteggiatura, verniciatura, doratura e laccatura",
+      "uc": "1043"
+    },
+    {
+      "denominazione_ada": "Realizzazione del preventivo",
+      "uc": "1020"
+    },
+    {
+      "denominazione_ada": "Realizzazione di rivestimenti murali",
+      "uc": "1778"
+    }
+  ],
+  "Addetto alle operazioni di realizzazione di prototipi di abbigliamento (307)": [
+    {
+      "denominazione_ada": "Definizione delle specifiche tecniche",
+      "uc": "1204"
+    },
+    {
+      "denominazione_ada": "Individuazione del ciclo e delle modalità di produzione di prototipi da realizzare",
+      "uc": "1201"
+    },
+    {
+      "denominazione_ada": "Realizzazione di prototipi e campioni",
+      "uc": "1202"
+    },
+    {
+      "denominazione_ada": "Supporto tecnico nella fase di produzione industriale",
+      "uc": "1203"
+    }
+  ],
+  "Addetto alle operazioni di rifinizione delle pelli (83)": [
+    {
+      "denominazione_ada": "Avvio del pellame lavorato alle successive fasi produttive",
+      "uc": "866"
+    },
+    {
+      "denominazione_ada": "Predisposizione dei materiali e dei macchinari per il processo di rifinizione",
+      "uc": "863"
+    },
+    {
+      "denominazione_ada": "Rifinizione del pellame semilavorato",
+      "uc": "864"
+    },
+    {
+      "denominazione_ada": "Verifica della conformità del processo di rifinizione eseguito",
+      "uc": "865"
+    }
+  ],
+  "Addetto alle operazioni di rilegatura, riparazione e restauro di libri e riviste (109)": [
+    {
+      "denominazione_ada": "Accoppiamento del fascicolo con la copertina",
+      "uc": "492"
+    },
+    {
+      "denominazione_ada": "Creazione del fascicolo",
+      "uc": "493"
+    },
+    {
+      "denominazione_ada": "Legatura dei fogli/fascicoli",
+      "uc": "494"
+    },
+    {
+      "denominazione_ada": "Rifilatura del prodotto finito",
+      "uc": "495"
+    }
+  ],
+  "Addetto alle operazioni di scavo, carico, scarico, conglomeramento di cemento e trasporto di materiali (235)": [
+    {
+      "denominazione_ada": "Esecuzione lavori di scavo, carico, scarico",
+      "uc": "405"
+    },
+    {
+      "denominazione_ada": "Esecuzione lavori di trasporto materiali tramite macchine di sollevamento",
+      "uc": "2211"
+    },
+    {
+      "denominazione_ada": "Gestione controllo qualità delle macchine",
+      "uc": "1004"
+    },
+    {
+      "denominazione_ada": "Gestione della sicurezza nei cantieri per l'uso delle macchine operatrici",
+      "uc": "407"
+    }
+  ],
+  "Addetto alle operazioni di selezione delle pelli finite (276)": [
+    {
+      "denominazione_ada": "Assegnazione delle pelli alle diverse categorie qualitative",
+      "uc": "556"
+    },
+    {
+      "denominazione_ada": "Selezione del pellame lavorato",
+      "uc": "560"
+    },
+    {
+      "denominazione_ada": "Valutazione preliminare delle pelli",
+      "uc": "555"
+    }
+  ],
+  "Addetto alle operazioni di spedizione (149)": [
+    {
+      "denominazione_ada": "Carico dei mezzi di trasporto",
+      "uc": "584"
+    },
+    {
+      "denominazione_ada": "Generazione della documentazione di accompagnamento",
+      "uc": "583"
+    },
+    {
+      "denominazione_ada": "Organizzazione dell'arrivo dei mezzi",
+      "uc": "587"
+    },
+    {
+      "denominazione_ada": "Preparazione della spedizione",
+      "uc": "582"
+    }
+  ],
+  "Addetto alle operazioni di taglio multifunzione (66)": [
+    {
+      "denominazione_ada": "Taglio automatico-tecnologico di materia prima per prototipi avanzati e campioni",
+      "uc": "1196"
+    },
+    {
+      "denominazione_ada": "Taglio automatico-tecnologico di materie prime per la produzione",
+      "uc": "1197"
+    },
+    {
+      "denominazione_ada": "Taglio manuale di materie prime complesse o pregiate per campioni speciali o per la produzione in piccole serie",
+      "uc": "1195"
+    },
+    {
+      "denominazione_ada": "Taglio manuale o meccanico di materia prima per primi prototipi",
+      "uc": "1194"
+    }
+  ],
+  "Addetto alle operazioni di tintoria (81)": [
+    {
+      "denominazione_ada": "Esecuzione delle attività di tintura in continuo, a stoccaggio e in overflow",
+      "uc": "667"
+    },
+    {
+      "denominazione_ada": "Esecuzione delle attività di tintura in jet a riempimento parziale e totale del bagno",
+      "uc": "687"
+    },
+    {
+      "denominazione_ada": "Esecuzione delle attività di tintura in jigger",
+      "uc": "688"
+    },
+    {
+      "denominazione_ada": "Predisposizione dei parametri della tintura",
+      "uc": "666"
+    },
+    {
+      "denominazione_ada": "Verifica dei parametri della lavorazione",
+      "uc": "673"
+    }
+  ],
+  "Addetto alle operazioni ed alle procedure amministrative (372)": [
+    {
+      "denominazione_ada": "Acquisizione, archiviazione, registrazione della documentazione amministrativo contabile",
+      "uc": "1585"
+    },
+    {
+      "denominazione_ada": "Predisposizione del sistema per la gestione delle attività amministrative",
+      "uc": "1582"
+    },
+    {
+      "denominazione_ada": "Redazione ed emissione dei documenti di vendita ed acquisto",
+      "uc": "1586"
+    },
+    {
+      "denominazione_ada": "Valutazione della correttezza delle attività amministrative nella relazione con servizi e interlocutori interni/esterni all'azienda",
+      "uc": "1587"
+    }
+  ],
+  "Addetto alle operazioni relative alla silvicoltura, alla salvaguardia dell'ambiente e alla gestione di impianti, macchinari ed attrezzature (406)": [
+    {
+      "denominazione_ada": "Conduzione delle produzioni arboree, erbacee ed ortofloricole",
+      "uc": "1050"
+    },
+    {
+      "denominazione_ada": "Cura delle superfici boschive e protezione del terreno",
+      "uc": "1804"
+    },
+    {
+      "denominazione_ada": "Gestione impianti, macchine ed attrezzature",
+      "uc": "1051"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi di sviluppo dei processi",
+      "uc": "1801"
+    },
+    {
+      "denominazione_ada": "Produzione aziendale: dalla trasformazione alla vendita dei prodotti",
+      "uc": "1802"
+    },
+    {
+      "denominazione_ada": "Verifica e controllo delle attività",
+      "uc": "1052"
+    }
+  ],
+  "Addetto alle operazioni relative alle specie faunistiche e alla gestione di impianti, macchine ed attrezzature (405)": [
+    {
+      "denominazione_ada": "Conduzione delle produzioni arboree, erbacee ed ortofloricole",
+      "uc": "1050"
+    },
+    {
+      "denominazione_ada": "Gestione impianti, macchine ed attrezzature",
+      "uc": "1051"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle fasi di sviluppo dei processi",
+      "uc": "1801"
+    },
+    {
+      "denominazione_ada": "Produzione aziendale: dalla trasformazione alla vendita dei prodotti",
+      "uc": "1802"
+    },
+    {
+      "denominazione_ada": "Selezione ed allevamento della fauna compresi gli animali domestici",
+      "uc": "1803"
+    },
+    {
+      "denominazione_ada": "Verifica e controllo delle attività",
+      "uc": "1052"
+    }
+  ],
+  "Esperta/o di valutazione degli apprendimenti e delle competenze (EVAC) (516)": [
+    {
+      "denominazione_ada": "Pianificazione del processo di valutazione ai fini della dichiarazione degli apprendimenti, della validazione e della certificazione delle competenze",
+      "uc": "2207"
+    },
+    {
+      "denominazione_ada": "Realizzazione delle prove di valutazione in coerenza ai dispositivi adottati nei servizi regionali per la dichiarazione degli apprendimenti, l'individuazione, la validazione e la certificazione delle competenze",
+      "uc": "2208"
+    }
+  ],
+  "Responsabile del coordinamento degli artisti e movimentazione del palcoscenico e dell'esecuzione e interpretazione del repetorio lirico, sinfonico e ballettistico (437)": [
+    {
+      "denominazione_ada": "Coordinamento degli artisti e della movimentazione tecnica del palcoscenico per le produzioni di spettacoli dal vivo",
+      "uc": "1909"
+    },
+    {
+      "denominazione_ada": "Direzione musicale di palcoscenico",
+      "uc": "1908"
+    },
+    {
+      "denominazione_ada": "Esecuzione e interpretazione del repertorio lirico, sinfonico e ballettistico",
+      "uc": "1907"
+    }
+  ],
+  "Responsabile del coordinamento dei reparti dell'organizzazione e della gestione del personale di struttura turistica (245)": [
+    {
+      "denominazione_ada": "Gestione dei rapporti",
+      "uc": "588"
+    },
+    {
+      "denominazione_ada": "Gestione del personale",
+      "uc": "591"
+    },
+    {
+      "denominazione_ada": "Organizzazione e supervisione dei reparti della struttura ricettiva",
+      "uc": "581"
+    },
+    {
+      "denominazione_ada": "Pianificazione delle attività",
+      "uc": "597"
+    },
+    {
+      "denominazione_ada": "Politiche di promozione",
+      "uc": "579"
+    }
+  ],
+  "Responsabile del coordinamento delle attività di palcoscenico (90)": [
+    {
+      "denominazione_ada": "Consulenza tecnica alla produzione",
+      "uc": "938"
+    },
+    {
+      "denominazione_ada": "Coordinamento dell'allestimento e delle prove",
+      "uc": "940"
+    },
+    {
+      "denominazione_ada": "Coordinamento della prova generale e delle rappresentazioni (controllo e regolazione)",
+      "uc": "942"
+    }
+  ],
+  "Responsabile del coordinamento delle attività di sviluppo di collezione (61)": [
+    {
+      "denominazione_ada": "Gestione del processo di definizione della collezione",
+      "uc": "1244"
+    },
+    {
+      "denominazione_ada": "Gestione del processo di sviluppo del campionario",
+      "uc": "1243"
+    },
+    {
+      "denominazione_ada": "Organizzazione del processo di sviluppo della collezione",
+      "uc": "1242"
+    },
+    {
+      "denominazione_ada": "Predisposizione delle linee-guida per lo sviluppo della collezione",
+      "uc": "1241"
+    }
+  ],
+  "Responsabile del coordinamento di attività di accertamento, valutazione e liquidazione dei danni a cose e/o a persone (333)": [
+    {
+      "denominazione_ada": "Attività amministrative e organizzative",
+      "uc": "1402"
+    },
+    {
+      "denominazione_ada": "Liquidazione di sinistri complessi/gravi",
+      "uc": "1401"
+    },
+    {
+      "denominazione_ada": "Organizzazione del lavoro e gestione risorse umane",
+      "uc": "1403"
+    }
+  ],
+  "Responsabile del marketing e delle strategie commerciali per la vendita online di prodotti o servizi (169)": [
+    {
+      "denominazione_ada": "Analisi dei requisiti e del contesto competitivo",
+      "uc": "867"
+    },
+    {
+      "denominazione_ada": "Assistenza e customer management",
+      "uc": "870"
+    },
+    {
+      "denominazione_ada": "Definizione del piano di marketing",
+      "uc": "868"
+    },
+    {
+      "denominazione_ada": "Organizzazione delle vendite",
+      "uc": "869"
+    },
+    {
+      "denominazione_ada": "Sviluppo dell'applicazione di e-business",
+      "uc": "894"
+    }
+  ],
+  "Responsabile dell'acquisto - Buyer\n (466)": [
+    {
+      "denominazione_ada": "Configurazione Parco Fornitori",
+      "uc": "2014"
+    },
+    {
+      "denominazione_ada": "Gestione dei processi on line",
+      "uc": "2015"
+    },
+    {
+      "denominazione_ada": "Gestione del processo di acquisto - approvvigionamento",
+      "uc": "2012"
+    },
+    {
+      "denominazione_ada": "Gestione trattative di acquisto",
+      "uc": "2011"
+    },
+    {
+      "denominazione_ada": "Ottimizzazione del processo di acquisto aziendale",
+      "uc": "2013"
+    },
+    {
+      "denominazione_ada": "Rappresentazione mercato di riferimento",
+      "uc": "2010"
+    }
+  ],
+  "Responsabile dell'analisi dei requisiti e della convalida e definizione del sistema informativo (Analista di sistemi-Systems Analyst) (480)": [
+    {
+      "denominazione_ada": "Analisi dei requisiti, delle funzionalità e delle prestazioni del sistema informativo",
+      "uc": "2061"
+    },
+    {
+      "denominazione_ada": "Convalida del disegno del sistema informativo",
+      "uc": "2060"
+    },
+    {
+      "denominazione_ada": "Definizione del disegno e del sistema software",
+      "uc": "2058"
+    },
+    {
+      "denominazione_ada": "Definizione della metodologia di sviluppo del sistema informativo",
+      "uc": "2059"
+    }
+  ],
+  "Responsabile dell'analisi dei rischi e della gestione e manutenzione della sicurezza di un sistema informativo (Specialista della sicurezza informatica-ICT Security Specialist) (485)": [
+    {
+      "denominazione_ada": "Analisi dei rischi per la sicurezza del sistema informativo",
+      "uc": "2078"
+    },
+    {
+      "denominazione_ada": "Definizione ed adozione delle misure organizzative per la sicurezza del sistema informativo",
+      "uc": "2080"
+    },
+    {
+      "denominazione_ada": "Gestione della sicurezza e manutenzione del sistema",
+      "uc": "2081"
+    },
+    {
+      "denominazione_ada": "Progettazione ed implementazione delle misure tecniche per la sicurezza del sistema informativo",
+      "uc": "2079"
+    }
+  ],
+  "Responsabile dell'attuazione delle politiche commerciali e del coordinamento delle forze di vendita (379)": [
+    {
+      "denominazione_ada": "Coordinamento della forza di vendita",
+      "uc": "1647"
+    },
+    {
+      "denominazione_ada": "Gestione della trattativa commerciale",
+      "uc": "1649"
+    },
+    {
+      "denominazione_ada": "Traduzione operativa della strategia commerciale",
+      "uc": "1646"
+    },
+    {
+      "denominazione_ada": "Valutazione dell'andamento di mercato dei propri prodotti/servizi",
+      "uc": "1648"
+    }
+  ],
+  "Responsabile dell'implementazione, del coordinamento e controllo del piano dei lavori di refit/manutenzione e dello sviluppo organizzativo nei cantieri nautici (530)": [
+    {
+      "denominazione_ada": "Configurazione dell'offerta commerciale sulla base delle richieste del cliente",
+      "uc": "2267"
+    },
+    {
+      "denominazione_ada": "Controllo degli interventi eseguiti",
+      "uc": "2269"
+    },
+    {
+      "denominazione_ada": "Coordinamento dei lavori di refitting navale e nautico",
+      "uc": "2268"
+    },
+    {
+      "denominazione_ada": "Sviluppo del progetto esecutivo dei lavori di refit/manutenzione dell'imbarcazione",
+      "uc": "2266"
+    },
+    {
+      "denominazione_ada": "Sviluppo organizzativo in ambito nautico/navale",
+      "uc": "2270"
+    }
+  ],
+  "Responsabile dell'organizzazione delle operazioni di approvvigionamento, trasporto, movimentazione e stoccaggio della merce (153)": [
+    {
+      "denominazione_ada": "Organizzazione della gestione degli ordini e delle consegne",
+      "uc": "337"
+    },
+    {
+      "denominazione_ada": "Organizzazione delle operazioni di trasporto, movimentazione e stoccaggio",
+      "uc": "335"
+    },
+    {
+      "denominazione_ada": "Progettazione e organizzazione delle fasi di approvvigionamento",
+      "uc": "332"
+    },
+    {
+      "denominazione_ada": "Programmazione/pianificazione dei lotti di produzione",
+      "uc": "334"
+    }
+  ],
+  "Responsabile dell'organizzazione e del coordinamento della produzione artistica (220)": [
+    {
+      "denominazione_ada": "Coordinamento della progettazione esecutiva",
+      "uc": "825"
+    },
+    {
+      "denominazione_ada": "Direzione della fase di allestimento e lavorazione/produzione",
+      "uc": "828"
+    },
+    {
+      "denominazione_ada": "Gestione delle risorse finanziarie, organizzative e tecnologiche di imprese creative e culturali (teatri/enti/associazioni)",
+      "uc": "1987"
+    },
+    {
+      "denominazione_ada": "Verifica conclusiva della produzione realizzata",
+      "uc": "829"
+    }
+  ],
+  "Responsabile della definizione dei requisiti strutturali e funzionali dei processi, dell'individuazione delle aree di miglioramento e gestione del processo di sviluppo del business (Analista di Business-Business Analyst) (488)": [
+    {
+      "denominazione_ada": "Definizione dei requisiti strutturali e funzionali per i processi collegati ai servizi ICT",
+      "uc": "2091"
+    },
+    {
+      "denominazione_ada": "Gestione del processo di sviluppo del business in ambito ICT",
+      "uc": "2090"
+    },
+    {
+      "denominazione_ada": "Identificazione delle aree di miglioramento del sistema informativo",
+      "uc": "2089"
+    }
+  ],
+  "Responsabile della definizione dell'architettura di impresa e dell'implementazione di soluzioni innovative ICT (Enterprise Architect) (486)": [
+    {
+      "denominazione_ada": "Costruzione ed implementazione di soluzioni innovative di lungo termine",
+      "uc": "2084"
+    },
+    {
+      "denominazione_ada": "Identificazione dei requisiti di processo collegati ai servizi ICT",
+      "uc": "2083"
+    },
+    {
+      "denominazione_ada": "Identificazione delle aree di miglioramento dei processi di business",
+      "uc": "2082"
+    }
+  ],
+  "Responsabile della definizione, individuazione e sviluppo di soluzioni ICT (ICT Consultant) (477)": [
+    {
+      "denominazione_ada": "Individuazione di un prototipo di sistema informativo aziendale",
+      "uc": "2048"
+    },
+    {
+      "denominazione_ada": "Progettazione della soluzione ICT",
+      "uc": "2047"
+    },
+    {
+      "denominazione_ada": "Sviluppo di un modello aziendale da realizzare tramite innovazioni IT",
+      "uc": "2049"
+    }
+  ],
+  "Responsabile della direzione e del coordinamento delle strategie di marketing e di comunicazione (56)": [
+    {
+      "denominazione_ada": "Gestione della comunicazione",
+      "uc": "1298"
+    },
+    {
+      "denominazione_ada": "Gestione dello sviluppo della collezione",
+      "uc": "1295"
+    },
+    {
+      "denominazione_ada": "Pianificazione di marketing di brand/linea",
+      "uc": "1294"
+    },
+    {
+      "denominazione_ada": "Vendita e post-vendita della collezione",
+      "uc": "1297"
+    }
+  ],
+  "Responsabile della direzione, organizzazione e gestione del punto vendita (16)": [
+    {
+      "denominazione_ada": "Assicurazione del livello dei sevizi di supporto alla vendita",
+      "uc": "434"
+    },
+    {
+      "denominazione_ada": "Coordinamento dei piani di merchandising e dei piani promozionali",
+      "uc": "432"
+    },
+    {
+      "denominazione_ada": "Gestione del personale della filiale/negozio",
+      "uc": "433"
+    },
+    {
+      "denominazione_ada": "Gestione delle relazioni interne/esterne all'azienda",
+      "uc": "435"
+    },
+    {
+      "denominazione_ada": "Gestione economica della filiale/negozio e controllo dei risultati di vendita",
+      "uc": "431"
+    }
+  ],
+  "Responsabile della gestione dell'impresa e dell'organizzazione delle attività di magazzinaggio e/o trasporto (146)": [
+    {
+      "denominazione_ada": "Contrattazione della fornitura di servizi logistici",
+      "uc": "522"
+    },
+    {
+      "denominazione_ada": "Coordinamento delle attività di area",
+      "uc": "637"
+    },
+    {
+      "denominazione_ada": "Monitoraggio di costi, ricavi e livello di servizio",
+      "uc": "750"
+    }
+  ],
+  "Responsabile della gestione della lavorazione conto terzi (57)": [
+    {
+      "denominazione_ada": "Collaborazione nelle fasi di produzione, consegna e fatturazione",
+      "uc": "1312"
+    },
+    {
+      "denominazione_ada": "Gestione delle attività di sviluppo di nuovi prodotti per i clienti",
+      "uc": "1307"
+    },
+    {
+      "denominazione_ada": "Negoziazione di contratti di fornitura",
+      "uc": "1304"
+    },
+    {
+      "denominazione_ada": "Pianificazione e sviluppo del business",
+      "uc": "1313"
+    }
+  ],
+  "Responsabile della gestione delle relazioni e delle risorse della struttura formativa, del monitoraggio e dell'analisi del contesto socio- economico (19)": [
+    {
+      "denominazione_ada": "Analisi del contesto socio- economico in termini di fabbisogni formativi e mercato del lavoro",
+      "uc": "28"
+    },
+    {
+      "denominazione_ada": "Gestione delle relazioni locali con le imprese, le istituzioni e gli attori locali",
+      "uc": "250"
+    },
+    {
+      "denominazione_ada": "Gestione delle risorse finanziarie, umane e tecnologiche della struttura formativa",
+      "uc": "1854"
+    },
+    {
+      "denominazione_ada": "Monitoraggio delle azioni e dei programmi di formazione e di orientamento",
+      "uc": "290"
+    }
+  ],
+  "Responsabile della gestione delle risorse umane (376)": [
+    {
+      "denominazione_ada": "Acquisizione di risorse umane",
+      "uc": "1633"
+    },
+    {
+      "denominazione_ada": "Formazione del personale",
+      "uc": "1634"
+    },
+    {
+      "denominazione_ada": "Gestione degli esuberi",
+      "uc": "1637"
+    },
+    {
+      "denominazione_ada": "Gestione delle relazioni sindacali",
+      "uc": "1636"
+    },
+    {
+      "denominazione_ada": "Gestione delle risorse umane",
+      "uc": "1635"
+    }
+  ],
+  "Responsabile della gestione di call center (167)": [
+    {
+      "denominazione_ada": "Gestione operativa del call center",
+      "uc": "1321"
+    },
+    {
+      "denominazione_ada": "Implementazione tecnologica del call center",
+      "uc": "1319"
+    },
+    {
+      "denominazione_ada": "Organizzazione del call center",
+      "uc": "1320"
+    },
+    {
+      "denominazione_ada": "Progettazione del call center",
+      "uc": "1318"
+    }
+  ],
+  "Responsabile della gestione di progetti complessi nel settore delle costruzioni (222)": [
+    {
+      "denominazione_ada": "Definizione del progetto di massima",
+      "uc": "1130"
+    },
+    {
+      "denominazione_ada": "Elaborazione piano approvigionamenti",
+      "uc": "1135"
+    },
+    {
+      "denominazione_ada": "Programmazione e controllo",
+      "uc": "1131"
+    },
+    {
+      "denominazione_ada": "Rispetto del budget di commessa",
+      "uc": "1137"
+    }
+  ],
+  "Responsabile della gestione di reti informatiche locali (Lan) o geografiche (Wan) (174)": [
+    {
+      "denominazione_ada": "Aggiornamento e manutenzione della rete informatica",
+      "uc": "1010"
+    },
+    {
+      "denominazione_ada": "Amministrazione della rete",
+      "uc": "1009"
+    },
+    {
+      "denominazione_ada": "Assistenza agli utenti della rete",
+      "uc": "1011"
+    },
+    {
+      "denominazione_ada": "Progettazione della rete",
+      "uc": "1007"
+    },
+    {
+      "denominazione_ada": "Realizzazione della rete",
+      "uc": "1008"
+    }
+  ],
+  "Responsabile della gestione e del controllo degli aspetti produttivi dell'impresa agricola (121)": [
+    {
+      "denominazione_ada": "Gestione delle risorse produttive",
+      "uc": "748"
+    },
+    {
+      "denominazione_ada": "Organizzazione generale dell'impresa",
+      "uc": "752"
+    },
+    {
+      "denominazione_ada": "Promozione dei prodotti e dei servizi",
+      "uc": "753"
+    },
+    {
+      "denominazione_ada": "Relazioni interne ed esterne",
+      "uc": "751"
+    }
+  ],
+  "Responsabile della gestione e del controllo di agenzia di credito (4)": [
+    {
+      "denominazione_ada": "Attuazione delle strategie commerciali",
+      "uc": "73"
+    },
+    {
+      "denominazione_ada": "Gestione dei rapporti con la direzione generale",
+      "uc": "71"
+    },
+    {
+      "denominazione_ada": "Gestione e coordinamento delle risorse umane",
+      "uc": "70"
+    },
+    {
+      "denominazione_ada": "Supervisione dell'attività della filiale nel suo complesso",
+      "uc": "72"
+    }
+  ],
+  "Responsabile della gestione, definizione e implementazione del sistema informativo e della manutenzione e aggiornamento dell'architettura software (Amministratore di sistemi-Systems Administrator) (479)": [
+    {
+      "denominazione_ada": "Definizione dei requisiti del sistema informativo e delle sue singole componenti",
+      "uc": "2054"
+    },
+    {
+      "denominazione_ada": "Definizione e gestione della sicurezza del sistema informativo",
+      "uc": "2057"
+    },
+    {
+      "denominazione_ada": "Definizione ed implementazione dell'infrastruttura del sistema informativo e delle sue componenti",
+      "uc": "2055"
+    },
+    {
+      "denominazione_ada": "Manutenzione e aggiornamento dell'architettura software",
+      "uc": "2056"
+    }
+  ],
+  "Responsabile della gestione, promozione e valorizzazione delle destinazioni turistiche - Destination Manager (504)": [
+    {
+      "denominazione_ada": "Analisi del territorio di riferimento",
+      "uc": "366"
+    },
+    {
+      "denominazione_ada": "Analisi e gestione dei problemi",
+      "uc": "2152"
+    },
+    {
+      "denominazione_ada": "Coordinamento degli stakeholders",
+      "uc": "2150"
+    },
+    {
+      "denominazione_ada": "Progettazione di offerte turistiche territoriali",
+      "uc": "2149"
+    },
+    {
+      "denominazione_ada": "Promozione del territorio",
+      "uc": "2151"
+    }
+  ],
+  "Responsabile della ideazione/ricostruzione di scene teatrali ed ambienti in cui si svolgono spettacoli musicali (96)": [
+    {
+      "denominazione_ada": "Ideazione di arredi, ambientazioni e scenografie",
+      "uc": "907"
+    },
+    {
+      "denominazione_ada": "Progettazione della scenografia",
+      "uc": "908"
+    },
+    {
+      "denominazione_ada": "Selezione degli ambienti in cui girare le scene (cinema e tv)",
+      "uc": "909"
+    },
+    {
+      "denominazione_ada": "Supervisione all'allestimento teatrale o alle riprese cinematografiche",
+      "uc": "910"
+    }
+  ],
+  "Responsabile della pianificazione e gestione del sistema di conformità alle regole, dell'implemetazione dei processi e della formazione del personale (464)": [
+    {
+      "denominazione_ada": "Formazione del personale",
+      "uc": "1634"
+    },
+    {
+      "denominazione_ada": "Gestione del cambiamento organizzativo",
+      "uc": "1866"
+    },
+    {
+      "denominazione_ada": "Gestione della leadership nella Compliance",
+      "uc": "2004"
+    },
+    {
+      "denominazione_ada": "Implementazione dei processi e verifica/valutazione della performance dell'organizzazione",
+      "uc": "2005"
+    },
+    {
+      "denominazione_ada": "Pianificazione del sistema in adeguamento alle regole",
+      "uc": "2003"
+    }
+  ],
+  "Responsabile della pianificazione e valorizzazione dell'attività agrituristica (247)": [
+    {
+      "denominazione_ada": "Erogazione dei servizi",
+      "uc": "835"
+    },
+    {
+      "denominazione_ada": "Organizzazione dell'attività agrituristica",
+      "uc": "834"
+    },
+    {
+      "denominazione_ada": "Valorizzazione dell'attività agrituristica",
+      "uc": "837"
+    }
+  ],
+  "Responsabile della pianificazione, elaborazione e gestione di un progetto di sviluppo aziendale (Project manager) (484)": [
+    {
+      "denominazione_ada": "Assicurare la conformità del progetto alle specifiche",
+      "uc": "2077"
+    },
+    {
+      "denominazione_ada": "Definizione della metodologia di intervento per la realizzazione di un progetto",
+      "uc": "2075"
+    },
+    {
+      "denominazione_ada": "Gestione di un singolo progetto o di un portfolio di progetti",
+      "uc": "2076"
+    }
+  ],
+  "Responsabile della pianificazione, programmazione e coordinamento del sistema di contabilità (375)": [
+    {
+      "denominazione_ada": "Controllo dell'andamento economico-finanziario",
+      "uc": "1632"
+    },
+    {
+      "denominazione_ada": "Pianificazione e programmazione del sistema di contabilità aziendale",
+      "uc": "1629"
+    },
+    {
+      "denominazione_ada": "Supervisione del bilancio aziendale",
+      "uc": "1631"
+    },
+    {
+      "denominazione_ada": "Supervisione e coordinamento dell'area amministrazione e contabilità",
+      "uc": "1630"
+    }
+  ],
+  "Responsabile della progettazione di procedure software e applicazioni informatiche (171)": [
+    {
+      "denominazione_ada": "Analisi dei requisiti",
+      "uc": "761"
+    },
+    {
+      "denominazione_ada": "Metodologie di sviluppo del software",
+      "uc": "762"
+    },
+    {
+      "denominazione_ada": "Progettazione del software",
+      "uc": "764"
+    },
+    {
+      "denominazione_ada": "Qualità del software",
+      "uc": "765"
+    },
+    {
+      "denominazione_ada": "Testing e manutenzione del software",
+      "uc": "763"
+    }
+  ],
+  "Responsabile della progettazione e dello sviluppo di programmi informatici (172)": [
+    {
+      "denominazione_ada": "Aggiornamento e manutenzione del software",
+      "uc": "402"
+    },
+    {
+      "denominazione_ada": "Analisi dei requisiti",
+      "uc": "114"
+    },
+    {
+      "denominazione_ada": "Consegna ed installazione del software",
+      "uc": "400"
+    },
+    {
+      "denominazione_ada": "Progettazione del software",
+      "uc": "383"
+    },
+    {
+      "denominazione_ada": "Sviluppo del software",
+      "uc": "392"
+    },
+    {
+      "denominazione_ada": "Testing del software",
+      "uc": "397"
+    }
+  ],
+  "Responsabile della progettazione e pianificazione di strategie di comunicazione, della gestione di ufficio stampa, attività promozionali e risorse umane (205)": [
+    {
+      "denominazione_ada": "Gestione delle risorse umane e materiali impiegate nei processi comunicativi esterni",
+      "uc": "854"
+    },
+    {
+      "denominazione_ada": "Gestione delle risorse umane e materiali impiegate nei processi comunicativi interni",
+      "uc": "18"
+    },
+    {
+      "denominazione_ada": "Organizzazione e gestione degli eventi e delle attività promozionali",
+      "uc": "226"
+    },
+    {
+      "denominazione_ada": "Organizzazione e gestione dell'Ufficio stampa",
+      "uc": "225"
+    },
+    {
+      "denominazione_ada": "Pianificazione delle fasi operative per la realizzazione e controllo del Piano di Comunicazione",
+      "uc": "222"
+    },
+    {
+      "denominazione_ada": "Progettazione e pianificazione della strategia di comunicazione",
+      "uc": "16"
+    }
+  ],
+  "Responsabile della progettazione e realizzazione degli interventi di manutenzione e della predisposizione e controllo del budget di manutenzione (347)": [
+    {
+      "denominazione_ada": "Aggiornamento documentazione tecnica",
+      "uc": "1450"
+    },
+    {
+      "denominazione_ada": "Controllo del budget di manutenzione",
+      "uc": "1451"
+    },
+    {
+      "denominazione_ada": "Predisposizione del budget di manutenzione",
+      "uc": "1452"
+    },
+    {
+      "denominazione_ada": "Progettazione delle politiche di manutenzione",
+      "uc": "1453"
+    },
+    {
+      "denominazione_ada": "Realizzazione degli interventi di manutenzione migliorativa",
+      "uc": "1455"
+    },
+    {
+      "denominazione_ada": "Realizzazione degli interventi di manutenzione preventiva e a guasto",
+      "uc": "1454"
+    }
+  ],
+  "Responsabile della progettazione, gestione e direzione per la cooperazione internazionale e le organizzazioni non profit (507)": [
+    {
+      "denominazione_ada": "Direzione dei settori di organismi non profit",
+      "uc": "2157"
+    },
+    {
+      "denominazione_ada": "Gestione di un singolo progetto o di un portfolio di progetti",
+      "uc": "2076"
+    },
+    {
+      "denominazione_ada": "Negoziazione in contesti interculturali",
+      "uc": "2158"
+    },
+    {
+      "denominazione_ada": "Progettazione in campo europeo",
+      "uc": "1839"
+    }
+  ],
+  "Responsabile della progettazione, gestione, organizzazione e promozione  di centro commerciale (15)": [
+    {
+      "denominazione_ada": "Gestione dell'immobile e della superficie di vendita",
+      "uc": "427"
+    },
+    {
+      "denominazione_ada": "Gestione delle relazioni interne/esterne all'azienda",
+      "uc": "430"
+    },
+    {
+      "denominazione_ada": "Organizzazione complessiva del centro",
+      "uc": "428"
+    },
+    {
+      "denominazione_ada": "Progettazione ed avviamento del centro commerciale",
+      "uc": "426"
+    },
+    {
+      "denominazione_ada": "Promozione del centro commerciale",
+      "uc": "429"
+    }
+  ],
+  "Responsabile della progettazione, manutenzione e amministrazione della rete (Specialista di rete-Network Specialist) (490)": [
+    {
+      "denominazione_ada": "Aggiornamento e manutenzione della rete informatica",
+      "uc": "2099"
+    },
+    {
+      "denominazione_ada": "Amministrazione della rete",
+      "uc": "2098"
+    },
+    {
+      "denominazione_ada": "Progettazione della rete",
+      "uc": "2097"
+    },
+    {
+      "denominazione_ada": "Verifica della qualità dei servizi nelle reti informatiche",
+      "uc": "2100"
+    }
+  ],
+  "Responsabile della programmazione dei lavori, della elaborazione del piano di approvvigionamento e del controllo del piano di produzione nel settore nautico - Project manager della nautica (500)": [
+    {
+      "denominazione_ada": "Controllo del piano di produzione",
+      "uc": "2137"
+    },
+    {
+      "denominazione_ada": "Coordinamento del personale e valutazione dello stato di avanzamento dei lavori",
+      "uc": "2135"
+    },
+    {
+      "denominazione_ada": "Elaborazione del piano approvvigionamento e fornitura",
+      "uc": "2136"
+    },
+    {
+      "denominazione_ada": "Predisposizione documentazione tecnica di prodotto",
+      "uc": "2125"
+    },
+    {
+      "denominazione_ada": "Programmazione e pianificazione dei lavori",
+      "uc": "2134"
+    }
+  ],
+  "Responsabile della programmazione delle attività di vendita/acquisto e della gestione delle attività di marketing e comunicazione di un'area merceologica (215)": [
+    {
+      "denominazione_ada": "Gestione delle attività di marketing e comunicazione",
+      "uc": "439"
+    },
+    {
+      "denominazione_ada": "Programmazione delle attività di acquisto e degli assortimenti",
+      "uc": "10"
+    },
+    {
+      "denominazione_ada": "Programmazione delle attività di vendita e merchandising dei prodotti dell'area merceologica di riferimento",
+      "uc": "442"
+    }
+  ],
+  "Responsabile della programmazione e promozione delle vendite, approvvigionamento e gestione degli ordini, controllo della gestione amministrativa (11)": [
+    {
+      "denominazione_ada": "Approvvigionamento e gestione ordini",
+      "uc": "437"
+    },
+    {
+      "denominazione_ada": "Controllo della gestione amministrativa",
+      "uc": "440"
+    },
+    {
+      "denominazione_ada": "Coordinamento e sviluppo delle risorse umane",
+      "uc": "443"
+    },
+    {
+      "denominazione_ada": "Cura del processo di vendita",
+      "uc": "441"
+    },
+    {
+      "denominazione_ada": "Monitoraggio, analisi e valutazione delle vendite",
+      "uc": "438"
+    },
+    {
+      "denominazione_ada": "Programmazione della vendita e della promozione del servizio",
+      "uc": "37"
+    }
+  ],
+  "Responsabile della programmazione, organizzazione, gestione e controllo  delle attività di magazzino (147)": [
+    {
+      "denominazione_ada": "Controllo e organizzazione delle attività amministrative di magazzino",
+      "uc": "662"
+    },
+    {
+      "denominazione_ada": "Garanzia del rispetto del livello di servizio e dei budget dei costi del magazzino",
+      "uc": "664"
+    },
+    {
+      "denominazione_ada": "Gestione e organizzazione delle attività operative di magazzino",
+      "uc": "660"
+    },
+    {
+      "denominazione_ada": "Programmazione delle attività interne in funzione degli accordi con i clienti e con altri operatori logistici",
+      "uc": "658"
+    }
+  ],
+  "Responsabile della programmazione, organizzazione, gestione e esecuzione del processo di produzione (78)": [
+    {
+      "denominazione_ada": "Analisi della situazione aziendale e pianificazione dell'attivià",
+      "uc": "586"
+    },
+    {
+      "denominazione_ada": "Cooordinamento delle risorse umane impegnate nella produzione",
+      "uc": "593"
+    },
+    {
+      "denominazione_ada": "Programmazione e coordinamento delle fasi produttive",
+      "uc": "599"
+    },
+    {
+      "denominazione_ada": "Valutazione del grado di efficienza ed efficacia della produzione",
+      "uc": "598"
+    }
+  ],
+  "Responsabile della realizzazione di copioni e sceneggiature (87)": [
+    {
+      "denominazione_ada": "\"Trattamento\" della sceneggiatura (cinema e tv)",
+      "uc": "914"
+    },
+    {
+      "denominazione_ada": "Elaborazione della scaletta (cinema e tv)",
+      "uc": "903"
+    },
+    {
+      "denominazione_ada": "Stesura del copione (spettacolo) o della sceneggiatura (cinema tv)",
+      "uc": "904"
+    },
+    {
+      "denominazione_ada": "Stesura del soggetto (spettacolo, cinema, tv)",
+      "uc": "902"
+    }
+  ],
+  "Responsabile della realizzazione di orchestre strumentali infantili e giovanili, dell'arrangiamento e dell'analisi di repertori infantili e giovanili e della pianificazione di prodotti musicali (456)": [
+    {
+      "denominazione_ada": "Analisi dei percorsi musicali per bambini e adolescenti",
+      "uc": "1974"
+    },
+    {
+      "denominazione_ada": "Arrangiamento di repertori elementari per orchestre infantili e giovanili",
+      "uc": "1973"
+    },
+    {
+      "denominazione_ada": "Pianificazione, realizzazione e promozione di attività e prodotti musicali",
+      "uc": "1967"
+    },
+    {
+      "denominazione_ada": "Realizzazione di orchestre strumentali infantili e giovanili",
+      "uc": "1972"
+    }
+  ],
+  "Responsabile della regia teatrale, cinematografica, televisiva (86)": [
+    {
+      "denominazione_ada": "Coordinamento della pre-produzione teatrale/del film/dello spettacolo",
+      "uc": "896"
+    },
+    {
+      "denominazione_ada": "Ideazione della rappresentazione teatrale/del film/dello spettacolo televisivo",
+      "uc": "9"
+    },
+    {
+      "denominazione_ada": "Presidio del montaggio della pellicola o delle riprese in digitale (post produzione cinema e tv)",
+      "uc": "899"
+    },
+    {
+      "denominazione_ada": "Realizzazione della produzione (spettacolo/film/programma tv ecc.)",
+      "uc": "897"
+    }
+  ],
+  "Responsabile della sicurezza di reti informatiche e della protezione di dati (179)": [
+    {
+      "denominazione_ada": "Analisi dei rischi per la sicurezza del sistema informativo",
+      "uc": "1140"
+    },
+    {
+      "denominazione_ada": "Definizione ed adozione delle misure organizzative per la sicurezza del sistema informativo",
+      "uc": "1142"
+    },
+    {
+      "denominazione_ada": "Gestione degli aspetti legali ed amministrativi legati alla sicurezza dei sistemi informativi",
+      "uc": "1144"
+    },
+    {
+      "denominazione_ada": "Gestione della sicurezza e manutenzione del sistema",
+      "uc": "1143"
+    },
+    {
+      "denominazione_ada": "Progettazione ed implementazione delle misure tecniche per la sicurezza del sistema informativo",
+      "uc": "1141"
+    }
+  ],
+  "Responsabile delle attività commerciali di un reparto/settore merceologico all'interno di strutture di grandi dimensioni (12)": [
+    {
+      "denominazione_ada": "Controllo degli stock, della rotazione delle scorte e del flusso delle merci",
+      "uc": "422"
+    },
+    {
+      "denominazione_ada": "Gestione economica del reparto e controllo dei risultati di vendita",
+      "uc": "425"
+    },
+    {
+      "denominazione_ada": "Partecipazione alla costruzione e presentazione dell'offerta",
+      "uc": "423"
+    },
+    {
+      "denominazione_ada": "Pianificazione e supervisione del lavoro della propria squadra",
+      "uc": "424"
+    },
+    {
+      "denominazione_ada": "Programmazione e realizzazione degli ordini e degli approvvigionamenti",
+      "uc": "421"
+    }
+  ],
+  "Responsabile delle attività di analisi, progettazione e aggiornamento di sistemi informativi (170)": [
+    {
+      "denominazione_ada": "Aggiornamento dell'architettura del sistema informativo",
+      "uc": "518"
+    },
+    {
+      "denominazione_ada": "Analisi dei requisiti e delle prestazioni attese del sistema informativo",
+      "uc": "515"
+    },
+    {
+      "denominazione_ada": "Pianificazione strategica del sistema informativo",
+      "uc": "755"
+    },
+    {
+      "denominazione_ada": "Progettazione dell'architettura per la sicurezza dei dati",
+      "uc": "754"
+    },
+    {
+      "denominazione_ada": "Progettazione e aggiornamento architettura hardware",
+      "uc": "516"
+    },
+    {
+      "denominazione_ada": "Progettazione e aggiornamento architettura software",
+      "uc": "517"
+    }
+  ],
+  "Responsabile delle attività di ideazione, progettazione e presentazione di collezione di calzature (58)": [
+    {
+      "denominazione_ada": "Avvio della produzione della collezione",
+      "uc": "686"
+    },
+    {
+      "denominazione_ada": "Definizione della collezione",
+      "uc": "1218"
+    },
+    {
+      "denominazione_ada": "Gestione della presentazione del prodotto al mercato",
+      "uc": "689"
+    },
+    {
+      "denominazione_ada": "Ideazione della collezione e dei modelli",
+      "uc": "680"
+    },
+    {
+      "denominazione_ada": "Progettazione del campionario della collezione",
+      "uc": "684"
+    }
+  ],
+  "Responsabile delle attività di ideazione, progettazione e presentazione di collezione e/o modello di pelletteria/abbigliamento (62)": [
+    {
+      "denominazione_ada": "Avvio della produzione della collezione",
+      "uc": "994"
+    },
+    {
+      "denominazione_ada": "Definizione della collezione",
+      "uc": "1217"
+    },
+    {
+      "denominazione_ada": "Gestione della presentazione del prodotto al mercato",
+      "uc": "995"
+    },
+    {
+      "denominazione_ada": "Ideazione della collezione e dei modelli",
+      "uc": "992"
+    },
+    {
+      "denominazione_ada": "Progettazione di modelli",
+      "uc": "993"
+    }
+  ],
+  "Responsabile delle attività di implementazione, installazione, personalizzazione e manutenzione di sistemi integrati per la gestione aziendale (183)": [
+    {
+      "denominazione_ada": "Analisi dei processi aziendali e dei requisiti del sistema ERP",
+      "uc": "1208"
+    },
+    {
+      "denominazione_ada": "Implementazione del sistema ERP",
+      "uc": "1212"
+    },
+    {
+      "denominazione_ada": "Manutenzione del sistema ed assistenza agli utenti",
+      "uc": "1213"
+    },
+    {
+      "denominazione_ada": "Progettazione del sistema ERP",
+      "uc": "1211"
+    }
+  ],
+  "Responsabile delle attività di pianificazione, programmazione e controllo del processo produttivo (389)": [
+    {
+      "denominazione_ada": "Controllo degli acquisti",
+      "uc": "1721"
+    },
+    {
+      "denominazione_ada": "Gestione del magazzino",
+      "uc": "1722"
+    },
+    {
+      "denominazione_ada": "Organizzazione della produzione",
+      "uc": "1718"
+    },
+    {
+      "denominazione_ada": "Pianificazione degli ordini",
+      "uc": "1720"
+    }
+  ],
+  "Responsabile delle attività di programmazione, implementazione e monitoraggio dell'immagazzinamento e di trasporto e spedizione della merce (154)": [
+    {
+      "denominazione_ada": "Analisi delle infrastrutture logistiche esistenti",
+      "uc": "670"
+    },
+    {
+      "denominazione_ada": "Gestione ed organizzazione delle infrastrutture logistiche",
+      "uc": "133"
+    },
+    {
+      "denominazione_ada": "Preventivazione costi e simulazione dei processi e dei servizi nei trasporti",
+      "uc": "135"
+    },
+    {
+      "denominazione_ada": "Utilizzo di tecniche della logistica e del supply chain management (gestione della catena di fornitura)",
+      "uc": "137"
+    },
+    {
+      "denominazione_ada": "Utilizzo e gestione delle principali leve del marketing e del customer care",
+      "uc": "134"
+    }
+  ],
+  "Responsabile dello sviluppo organizzativo e commerciale di punti vendita e venditori diretti (325)": [
+    {
+      "denominazione_ada": "Analisi del portafoglio e del posizionamento commerciale",
+      "uc": "1386"
+    },
+    {
+      "denominazione_ada": "Azioni di sviluppo commerciale e di sostegno alla motivazione personale dei venditori",
+      "uc": "1390"
+    },
+    {
+      "denominazione_ada": "Azioni di sviluppo organizzativo",
+      "uc": "1389"
+    },
+    {
+      "denominazione_ada": "Dimensionamento, sviluppo e redditività delle reti di vendita",
+      "uc": "1387"
+    }
+  ],
+  "Responsabile di direzione e coordinamento del funzionamento di strutture sportive/centri benessere (163)": [
+    {
+      "denominazione_ada": "Direzione e coordinamento delle attività della struttura",
+      "uc": "263"
+    },
+    {
+      "denominazione_ada": "Gestione dei rapporti con la committenza, con il territorio e l'ambiente",
+      "uc": "268"
+    },
+    {
+      "denominazione_ada": "Gestione e coordinamento delle risorse umane",
+      "uc": "265"
+    },
+    {
+      "denominazione_ada": "Supervisione della gestione amministrativa e finanziaria della struttura relativa al settore di riferimento",
+      "uc": "271"
+    },
+    {
+      "denominazione_ada": "Supervisione sulla corretta applicazione delle regole di sicurezza e delle procedure di qualità",
+      "uc": "273"
+    }
+  ],
+  "Responsabile di progettazione e pianificazione della strategia comunicativa, campagna pubblicitaria, sponsorizzazioni e attività promozionali (210)": [
+    {
+      "denominazione_ada": "Progettazione e pianificazione della campagna pubblicitaria",
+      "uc": "384"
+    },
+    {
+      "denominazione_ada": "Progettazione e pianificazione della strategia comunicativa",
+      "uc": "382"
+    },
+    {
+      "denominazione_ada": "Progettazione e pianificazione delle sponsorizzazioni e delle attività promozionali",
+      "uc": "386"
+    },
+    {
+      "denominazione_ada": "Ricerche e analisi di mercato",
+      "uc": "381"
+    }
+  ],
+  "Responsabile di struttura/servizio sociale o socio- sanitario (430)": [
+    {
+      "denominazione_ada": "Analisi, valutazione e miglioramento delle performances della struttura e/o del servizio",
+      "uc": "1883"
+    },
+    {
+      "denominazione_ada": "Attuazione e monitoraggio dei processi di funzionamento del/la servizio/struttura",
+      "uc": "1882"
+    },
+    {
+      "denominazione_ada": "Coordinamento delle politiche di gestione del personale del/la struttura/servizio",
+      "uc": "1880"
+    },
+    {
+      "denominazione_ada": "Gestione del rapporto con il cliente, i Servizi Pubblici e gli stakeholders",
+      "uc": "1881"
+    },
+    {
+      "denominazione_ada": "Pianificazione tecnico- organizzativa e finanziaria del/la struttura/servizio",
+      "uc": "1879"
+    }
+  ],
+  "Responsabile per il coordinamento, l'attuazione e l'implementazione di processi e azioni sostenibili in base ai principi della Green e Blue Economy (Green Manager) (518)": [
+    {
+      "denominazione_ada": "Analisi e monitoraggio delle attività produttive e dei processi aziendali in base ai principi della Green e Blue Economy",
+      "uc": "2216"
+    },
+    {
+      "denominazione_ada": "Analisi e monitoraggio di sistemi di gestione ambientale",
+      "uc": "162"
+    },
+    {
+      "denominazione_ada": "Business modeling e planning e pianificazione delle attività",
+      "uc": "2218"
+    },
+    {
+      "denominazione_ada": "Gestione di un singolo progetto o di un portfolio di progetti",
+      "uc": "2076"
+    },
+    {
+      "denominazione_ada": "Orientamento e consulenza agli enti locali e alle imprese",
+      "uc": "2217"
+    },
+    {
+      "denominazione_ada": "Valutazione dell'impatto ambientale",
+      "uc": "809"
+    }
+  ],
+  "Tecnica/o del sostegno all'autonomia personale, alla comunicazione e all'inclusione sociale a favore di soggetti con disabilità (452)": [
+    {
+      "denominazione_ada": "Collaborazione alla definizione del piano di sostegno personalizzato",
+      "uc": "1960"
+    },
+    {
+      "denominazione_ada": "Identificazione delle aree di intervento",
+      "uc": "1959"
+    },
+    {
+      "denominazione_ada": "Miglioramento dell'intervento di sostegno",
+      "uc": "1963"
+    },
+    {
+      "denominazione_ada": "Realizzazione di interventi per lo sviluppo delle autonomie e della comunicazione",
+      "uc": "1961"
+    },
+    {
+      "denominazione_ada": "Sostegno allo sviluppo di processi di inclusione del soggetto nei gruppi sociali presenti nel suo contesto di riferimento",
+      "uc": "1962"
+    }
+  ],
+  "Tecnica/o dell'ordinamento e della conservazione del materiale librario e documentale, della gestione della biblioteca e dell'erogazione dei servizi all'utenza (527)": [
+    {
+      "denominazione_ada": "Conservazione del materiale librario e documentale",
+      "uc": "2245"
+    },
+    {
+      "denominazione_ada": "Erogazione all'utenza dei servizi della biblioteca",
+      "uc": "2247"
+    },
+    {
+      "denominazione_ada": "Gestione della biblioteca",
+      "uc": "2246"
+    },
+    {
+      "denominazione_ada": "Ordinamento e descrizione del materiale librario e documentale",
+      "uc": "2243"
+    }
+  ],
+  "Tecnica/o della modellazione, realizzazione, rifinitura e manutenzione dei costumi di scena (526)": [
+    {
+      "denominazione_ada": "Decorazione e rifinitura dei costumi di scena",
+      "uc": "2252"
+    },
+    {
+      "denominazione_ada": "Individuazione delle tecniche sartoriali per una corretta realizzazione dei costumi di scena",
+      "uc": "2249"
+    },
+    {
+      "denominazione_ada": "Manutenzione dei costumi di scena",
+      "uc": "2253"
+    },
+    {
+      "denominazione_ada": "Modellazione dei costumi di scena",
+      "uc": "2248"
+    },
+    {
+      "denominazione_ada": "Sottostrutture e confezionamento dei costumi di scena",
+      "uc": "2251"
+    },
+    {
+      "denominazione_ada": "Taglio del tessuto per unabito o un costume di scena",
+      "uc": "2250"
+    }
+  ],
+  "Tecnica/o della predisposizione dei bozzetti, gestione dell'area di lavoro, realizzazione dei decori e del ripristino delle facciate (Pittore decoratore) (532)": [
+    {
+      "denominazione_ada": "Gestione dell'area di lavoro/del cantiere per i lavori di nuovi decori o di recupero di decori esistenti",
+      "uc": "2277"
+    },
+    {
+      "denominazione_ada": "Predisposizione dei bozzetti del decoro",
+      "uc": "2276"
+    },
+    {
+      "denominazione_ada": "Preparazione dei supporti per la realizzazione di opere di tinteggiatura nuove o di recupero",
+      "uc": "1028"
+    },
+    {
+      "denominazione_ada": "Realizzazione del preventivo",
+      "uc": "1020"
+    },
+    {
+      "denominazione_ada": "Realizzazione di decorazioni pittoriche",
+      "uc": "2278"
+    },
+    {
+      "denominazione_ada": "Realizzazione di intonaci decorativi",
+      "uc": "2279"
+    }
+  ],
+  "Tecnica/o della predisposizione, manutenzione, conduzione di Sistemi Aeromobili a Pilotaggio Remoto (UAS, Unmanned Aircraft System) e dell'elaborazione dei dati rilevati (534)": [
+    {
+      "denominazione_ada": "Conduzione di un UAS",
+      "uc": "2286"
+    },
+    {
+      "denominazione_ada": "Predisposizione e manutenzione dell'UAS",
+      "uc": "2285"
+    },
+    {
+      "denominazione_ada": "Restituzioni dati rilevati",
+      "uc": "2288"
+    },
+    {
+      "denominazione_ada": "Rilevazione dati con UAS",
+      "uc": "2287"
+    }
+  ],
+  "Tecnico dei processi chimici in oreficeria (341)": [
+    {
+      "denominazione_ada": "Controllo del titolo dei metalli preziosi puri e delle leghe",
+      "uc": "1482"
+    },
+    {
+      "denominazione_ada": "Messa a punto e composizione dei bagni galvanici per il trattamento superficiale dei metalli preziosi",
+      "uc": "1484"
+    },
+    {
+      "denominazione_ada": "Monitoraggio del processo di elettrodeposizione galvanica per il trattamento superficiale dei metalli preziosi",
+      "uc": "1765"
+    },
+    {
+      "denominazione_ada": "Smaltimento dei rifiuti di lavorazione",
+      "uc": "1485"
+    }
+  ],
+  "Tecnico del controllo della qualità (384)": [
+    {
+      "denominazione_ada": "CQ degli approvvigionamenti, dei processi e dei prodotti",
+      "uc": "1665"
+    },
+    {
+      "denominazione_ada": "Monitoraggio e supervisione del sistema di CQ",
+      "uc": "1666"
+    },
+    {
+      "denominazione_ada": "Pianificazione delle strategie per il CQ",
+      "uc": "1663"
+    },
+    {
+      "denominazione_ada": "Programmazione e realizzazione delle analisi quantitative e qualitative dei dati a supporto del CQ",
+      "uc": "1664"
+    }
+  ],
+  "Tecnico del controllo della qualità alimentare (238)": [
+    {
+      "denominazione_ada": "Codificazione delle caratteristiche chimiche e organolettiche dei prodotti",
+      "uc": "746"
+    },
+    {
+      "denominazione_ada": "Controllo qualità degli approvvigionamenti di M.P. (Materie Prime)",
+      "uc": "22"
+    },
+    {
+      "denominazione_ada": "Pianificazione dei sistemi per il CQ (Controllo Qualità)",
+      "uc": "52"
+    }
+  ],
+  "Tecnico del controllo della rete e degli impianti di trasmissione di energia elettrica e della installazione, gestione e manutenzione degli impianti elettrici a bassa e media tensione (509)": [
+    {
+      "denominazione_ada": "Controllo della capacità di trasmissione della rete",
+      "uc": "2162"
+    },
+    {
+      "denominazione_ada": "Gestione e manutenzione degli impianti di media tensione",
+      "uc": "2163"
+    },
+    {
+      "denominazione_ada": "Installazione e manutenzione del differenziale elettrico",
+      "uc": "2165"
+    },
+    {
+      "denominazione_ada": "Manutenzione degli impianti di bassa tensione",
+      "uc": "2164"
+    }
+  ],
+  "Tecnico del coordinamento degli artisti, dell'accompagnamento musicale e della preparazione di gruppi corali (Maestro collaboratore) (457)": [
+    {
+      "denominazione_ada": "Accompagnamento degli artisti in scena e coordinamento delle attività di palcoscenico per le produzioni di spettacoli dal vivo",
+      "uc": "1975"
+    },
+    {
+      "denominazione_ada": "Accompagnamento musicale per il repertorio lirico-sinfonico e ballettistico",
+      "uc": "1976"
+    },
+    {
+      "denominazione_ada": "Preparazione di gruppi corali in qualità di maestro collaboratore",
+      "uc": "1977"
+    }
+  ],
+  "Tecnico del coordinamento dei processi di sviluppo stilistico, realizzazione di prototipi/campioni e presentazione del prodotto sul mercato (303)": [
+    {
+      "denominazione_ada": "Gestione della presentazione del prodotto al mercato",
+      "uc": "1252"
+    },
+    {
+      "denominazione_ada": "Guida nella progettazione di modelli",
+      "uc": "1228"
+    },
+    {
+      "denominazione_ada": "Ideazione della collezione e dei modelli",
+      "uc": "1225"
+    },
+    {
+      "denominazione_ada": "Partecipazione alla definizione della collezione",
+      "uc": "1253"
+    },
+    {
+      "denominazione_ada": "Partecipazione alla fase di avvio della produzione della collezione",
+      "uc": "1473"
+    }
+  ],
+  "Tecnico del coordinamento delle fasi di realizzazione di attività progettuali e della gestione delle risorse umane (28)": [
+    {
+      "denominazione_ada": "Monitoraggio e valutazione delle attività",
+      "uc": "724"
+    },
+    {
+      "denominazione_ada": "Organizzazione e gestione risorse umane",
+      "uc": "720"
+    },
+    {
+      "denominazione_ada": "Pianificazione e organizzazione delle attività",
+      "uc": "716"
+    }
+  ],
+  "Tecnico del disegno di prodotti industriali attraverso l'utilizzo di tecnologie informatiche (345)": [
+    {
+      "denominazione_ada": "Affinamento, modifica e ridefinizione del disegno",
+      "uc": "1456"
+    },
+    {
+      "denominazione_ada": "Esecuzione del disegno del pezzo (o macchina o impianto)",
+      "uc": "1457"
+    },
+    {
+      "denominazione_ada": "Impostazione a CAD dei parametri che definiscono le specifiche tecniche del pezzo",
+      "uc": "1505"
+    },
+    {
+      "denominazione_ada": "Programmazione di sistemi CAM",
+      "uc": "1458"
+    }
+  ],
+  "Tecnico del monitoraggio e della manutenzione della rete primaria gas, degli impianti e della rete di distribuzione gas (510)": [
+    {
+      "denominazione_ada": "Manutenzione degli impianti e della rete primaria gas",
+      "uc": "2167"
+    },
+    {
+      "denominazione_ada": "Manutenzione della rete di distribuzione del gas",
+      "uc": "2168"
+    },
+    {
+      "denominazione_ada": "Monitoraggio degli impianti e della rete gas",
+      "uc": "2166"
+    }
+  ],
+  "Tecnico dell'analisi dei fabbisogni in campo sociale e della progettazione di interventi/servizi sociali e socio-sanitari (443)": [
+    {
+      "denominazione_ada": "Analisi della domanda sociale nel territorio di riferimento e delle opportunità di finanziamento",
+      "uc": "1927"
+    },
+    {
+      "denominazione_ada": "Ideazione e pianificazione delle attività di progettazione",
+      "uc": "1928"
+    },
+    {
+      "denominazione_ada": "Partecipazione alla definizione del budget del progetto",
+      "uc": "1930"
+    },
+    {
+      "denominazione_ada": "Progettazione in campo europeo",
+      "uc": "1839"
+    },
+    {
+      "denominazione_ada": "Redazione e presentazione del progetto secondo le specifiche normative, del bando di finanziamento o capitolato di gara",
+      "uc": "1929"
+    }
+  ],
+  "Tecnico dell'analisi dei fabbisogni individuali, della consulenza per lo sviluppo dell'esperienza formativa/lavorativa e della validazione delle esperienze (419)": [
+    {
+      "denominazione_ada": "Analisi dei fabbisogni e progettazione di percorsi/azioni di consulenza",
+      "uc": "1837"
+    },
+    {
+      "denominazione_ada": "Consulenza per la scelta e lo sviluppo della progettualità",
+      "uc": "1838"
+    },
+    {
+      "denominazione_ada": "Gestione della relazione d'aiuto",
+      "uc": "1841"
+    },
+    {
+      "denominazione_ada": "Validazione delle esperienze per apprendimenti conseguiti in contesti non formali ed informali",
+      "uc": "1842"
+    }
+  ],
+  "Tecnico dell'analisi dei fabbisogni, della programmazione didattica e della realizzazione di interventi formativi in ambito ICT (Docente ICT-ICT Trainer) (478)": [
+    {
+      "denominazione_ada": "Analisi dei fabbisogni",
+      "uc": "2050"
+    },
+    {
+      "denominazione_ada": "Programmazione didattica",
+      "uc": "2051"
+    },
+    {
+      "denominazione_ada": "Realizzazione degli interventi formativi",
+      "uc": "2052"
+    },
+    {
+      "denominazione_ada": "Valutazione degli apprendimenti",
+      "uc": "2053"
+    }
+  ],
+  "Tecnico dell'analisi del territorio agro-forestale e della progettazione e pianificazione di interventi in aree boschive e forestali (512)": [
+    {
+      "denominazione_ada": "Analisi del territorio agro-forestale",
+      "uc": "2180"
+    },
+    {
+      "denominazione_ada": "Pianificazione degli interventi agro-forestali e del suolo",
+      "uc": "2182"
+    },
+    {
+      "denominazione_ada": "Progettazione di interventi sul territorio agro-forestale",
+      "uc": "2181"
+    }
+  ],
+  "Tecnico dell'analisi e interpretazione del disegno, della modellazione del prototipo, scelta delle pietre preziose e realizzazione del gioiello (432)": [
+    {
+      "denominazione_ada": "Modellazione del prezioso",
+      "uc": "1891"
+    },
+    {
+      "denominazione_ada": "Realizzazione del prodotto",
+      "uc": "1892"
+    },
+    {
+      "denominazione_ada": "Selezione e scelta delle pietre preziose",
+      "uc": "1890"
+    },
+    {
+      "denominazione_ada": "Studio del disegno tecnico",
+      "uc": "1889"
+    }
+  ],
+  "Tecnico dell'analisi e trascrizione di segnali fonici e di gestione della perizia di trascrizione in ambito forense (414)": [
+    {
+      "denominazione_ada": "Analisi del segnale audio",
+      "uc": "1822"
+    },
+    {
+      "denominazione_ada": "Perizia di trascrizione",
+      "uc": "1823"
+    },
+    {
+      "denominazione_ada": "Trascrizione di segnali fonici in ambito forense",
+      "uc": "1821"
+    }
+  ],
+  "Tecnico dell'automazione dei processi produttivi (350)": [
+    {
+      "denominazione_ada": "Automazione del processo produttivo",
+      "uc": "1572"
+    },
+    {
+      "denominazione_ada": "Documentazione degli interventi eseguiti",
+      "uc": "1571"
+    },
+    {
+      "denominazione_ada": "Riparazione o manutenzione dei componenti automatici",
+      "uc": "1573"
+    },
+    {
+      "denominazione_ada": "Studio di miglioramenti produttivi",
+      "uc": "1574"
+    }
+  ],
+  "Tecnico dell'educazione e della riabilitazione in Orientamento e Mobilità e Autonomia Personale per disabili visivi (431)": [
+    {
+      "denominazione_ada": "Attività di ricerca, divulgazione, informazione e formazione",
+      "uc": "1888"
+    },
+    {
+      "denominazione_ada": "Attuazione di training riabilitativi",
+      "uc": "1885"
+    },
+    {
+      "denominazione_ada": "Modifica del contesto ambientale e sociale",
+      "uc": "1887"
+    },
+    {
+      "denominazione_ada": "Pianificazione dell'intervento riabilitativo",
+      "uc": "1884"
+    },
+    {
+      "denominazione_ada": "Valutazione delle capacità e della performance",
+      "uc": "1886"
+    }
+  ],
+  "Tecnico dell'elaborazione del piano di sicurezza aziendale, pianificazione dei programmi di adeguamento e manutenzione, formazione ed informazione sulla sicurezza in azienda (39)": [
+    {
+      "denominazione_ada": "Aggiornamento e comunicazione sulla normativa nazionale, comunitaria e regionale sulla salute e sicurezza nei luoghi di lavoro",
+      "uc": "109"
+    },
+    {
+      "denominazione_ada": "Elaborazione del piano di sicurezza aziendale",
+      "uc": "111"
+    },
+    {
+      "denominazione_ada": "Formazione ed informazione sulla sicurezza in azienda",
+      "uc": "113"
+    },
+    {
+      "denominazione_ada": "Pianificazione dei programmi di adeguamento e manutenzione",
+      "uc": "112"
+    }
+  ],
+  "Tecnico dell'elaborazione delle strategie di comunicazione (211)": [
+    {
+      "denominazione_ada": "Analisi di mercato e delle richieste del Cliente (analisi di fattibilità e produttività)",
+      "uc": "218"
+    },
+    {
+      "denominazione_ada": "Organizzazione e gestione delle risorse produttive",
+      "uc": "220"
+    },
+    {
+      "denominazione_ada": "Programmazione del piano di comunicazione",
+      "uc": "219"
+    }
+  ],
+  "Tecnico dell'esecuzione e interpretazione del repertorio solistico e della pianificazione di prodotti musicali (458)": [
+    {
+      "denominazione_ada": "Esecuzione e interpretazione del repertorio solistico",
+      "uc": "1979"
+    },
+    {
+      "denominazione_ada": "Esecuzione e interpretazione del repertorio solistico con orchestra",
+      "uc": "1978"
+    },
+    {
+      "denominazione_ada": "Pianificazione, realizzazione e promozione di attività e prodotti musicali",
+      "uc": "1967"
+    }
+  ],
+  "Tecnico dell'esecuzione e interpretazione del repertorio vocale dalla musica antica a quella contemporanea (459)": [
+    {
+      "denominazione_ada": "Esecuzione e interpretazione del repertorio vocale dalla musica antica alla musica contemporanea",
+      "uc": "1984"
+    },
+    {
+      "denominazione_ada": "Interpretazione dei principali ruoli del repertorio lirico-operistico e del teatro musicale",
+      "uc": "1985"
+    },
+    {
+      "denominazione_ada": "Interpretazione del repertorio vocale in ambito sinfonico e liederistico",
+      "uc": "1986"
+    },
+    {
+      "denominazione_ada": "Pianificazione, realizzazione e promozione di attività e prodotti musicali",
+      "uc": "1967"
+    }
+  ],
+  "Tecnico dell'esecuzione e interpretazione di repertori orchestrali e strumentali, dell'applicazione di tecniche strumentali e della pianificazione di prodotti musicali (Professore d'orchestra) (438)": [
+    {
+      "denominazione_ada": "Acquisizione e applicazione di tecniche strumentali",
+      "uc": "1983"
+    },
+    {
+      "denominazione_ada": "Esecuzione e interpretazione del repertorio orchestrale nel ruolo di prima parte",
+      "uc": "1982"
+    },
+    {
+      "denominazione_ada": "Esecuzione e interpretazione del repertorio per ensemble strumentali",
+      "uc": "1981"
+    },
+    {
+      "denominazione_ada": "Esecuzione e interpretazione di repertori orchestrali, sia in ambito sinfonico che teatrale",
+      "uc": "1980"
+    },
+    {
+      "denominazione_ada": "Pianificazione, realizzazione e promozione di attività e prodotti musicali",
+      "uc": "1967"
+    }
+  ]
+}

@@ -42,6 +42,10 @@ import {
   serializeClientTools,
 } from "@/lib/ai/client-tools";
 import { ChatSDKError } from "@/lib/errors";
+import {
+  logPFBuilderChatRequest,
+  usePFBuilderStateSnapshot,
+} from "@/lib/pf-builder";
 import { createChatTransport } from "@/lib/runtime";
 import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
@@ -122,10 +126,31 @@ export function useChatController({
   // streaming
   const { setDataStream } = useDataStream();
 
+  // PF Builder state snapshot (for chat context awareness)
+  const pfBuilderSnapshot = usePFBuilderStateSnapshot();
+  const pfBuilderSnapshotRef = useRef(pfBuilderSnapshot);
+
+  // Keep the ref updated with latest snapshot
+  useEffect(() => {
+    pfBuilderSnapshotRef.current = pfBuilderSnapshot;
+  }, [pfBuilderSnapshot]);
+
   const transport = useRef(
     createChatTransport({
       api,
       prepareSendMessagesRequest(request) {
+        // Get the current builder state snapshot
+        const currentBuilderState = pfBuilderSnapshotRef.current;
+
+        // Log in dev mode
+        if (currentBuilderState.isActive) {
+          logPFBuilderChatRequest({
+            isActive: currentBuilderState.isActive,
+            step: currentBuilderState.step,
+            ufCount: currentBuilderState.unitaFormative.length,
+          });
+        }
+
         return {
           body: {
             id: request.id,
@@ -133,6 +158,9 @@ export function useChatController({
             selectedVisibilityType: visibilityType,
             runtimeConfig,
             tools: serializeClientTools(registry.getTools()),
+            pfBuilderState: currentBuilderState.isActive
+              ? currentBuilderState
+              : undefined,
             ...request.body,
           },
         };

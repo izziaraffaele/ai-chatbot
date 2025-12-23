@@ -16,4 +16,7 @@ export const VECTOR_INDEX = {
   schoolr: {
     catalog: "schoolr_catalog",
   },
+  figureProfessionali: {
+    catalog: "figure_professionali_catalog",
+  },
 };

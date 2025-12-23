@@ -28,6 +28,10 @@ import {
   type Suggestion,
   stream,
   suggestion,
+  trainingModule,
+  trainingPath,
+  type TrainingModule,
+  type TrainingPath,
   type User,
   user,
   vote,
@@ -49,6 +53,18 @@ export async function getUser(email: string): Promise<User[]> {
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to get user by email"
+    );
+  }
+}
+
+export async function getUserById(id: string): Promise<User | null> {
+  try {
+    const [foundUser] = await db.select().from(user).where(eq(user.id, id));
+    return foundUser ?? null;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get user by id"
     );
   }
 }
@@ -614,6 +630,171 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to get stream ids by chat id"
+    );
+  }
+}
+
+// ============================================================================
+// Training Path Queries
+// ============================================================================
+
+export type SaveTrainingPathInput = {
+  id?: string;
+  titolo: string;
+  settore: string;
+  figura: string;
+  figuraDescrizione?: string;
+  durataComplessiva?: number;
+  userId: string;
+  chatId?: string;
+  moduli: Array<{
+    adaId: string;
+    adaName: string;
+    capacita: string[];
+    conoscenze: string[];
+    durata?: number;
+    ordine: number;
+  }>;
+};
+
+export async function saveTrainingPath({
+  id,
+  titolo,
+  settore,
+  figura,
+  figuraDescrizione,
+  durataComplessiva,
+  userId,
+  chatId,
+  moduli,
+}: SaveTrainingPathInput): Promise<TrainingPath> {
+  try {
+    // Insert or update training path
+    const [savedPath] = await db
+      .insert(trainingPath)
+      .values({
+        id: id || generateUUID(),
+        titolo,
+        settore,
+        figura,
+        figuraDescrizione,
+        durataComplessiva,
+        userId,
+        chatId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: trainingPath.id,
+        set: {
+          titolo,
+          settore,
+          figura,
+          figuraDescrizione,
+          durataComplessiva,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+
+    // Delete existing modules and insert new ones
+    await db
+      .delete(trainingModule)
+      .where(eq(trainingModule.trainingPathId, savedPath.id));
+
+    if (moduli.length > 0) {
+      await db.insert(trainingModule).values(
+        moduli.map((m) => ({
+          trainingPathId: savedPath.id,
+          adaId: m.adaId,
+          adaName: m.adaName,
+          capacita: m.capacita,
+          conoscenze: m.conoscenze,
+          durata: m.durata,
+          ordine: m.ordine,
+          createdAt: new Date(),
+        }))
+      );
+    }
+
+    return savedPath;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to save training path"
+    );
+  }
+}
+
+export async function getTrainingPathById({
+  id,
+}: {
+  id: string;
+}): Promise<(TrainingPath & { moduli: TrainingModule[] }) | null> {
+  try {
+    const [path] = await db
+      .select()
+      .from(trainingPath)
+      .where(eq(trainingPath.id, id));
+
+    if (!path) {
+      return null;
+    }
+
+    const moduli = await db
+      .select()
+      .from(trainingModule)
+      .where(eq(trainingModule.trainingPathId, id))
+      .orderBy(asc(trainingModule.ordine));
+
+    return { ...path, moduli };
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get training path by id"
+    );
+  }
+}
+
+export async function getTrainingPathsByUserId({
+  userId,
+  limit = 10,
+}: {
+  userId: string;
+  limit?: number;
+}): Promise<TrainingPath[]> {
+  try {
+    return await db
+      .select()
+      .from(trainingPath)
+      .where(eq(trainingPath.userId, userId))
+      .orderBy(desc(trainingPath.createdAt))
+      .limit(limit);
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get training paths by user id"
+    );
+  }
+}
+
+export async function deleteTrainingPathById({
+  id,
+}: {
+  id: string;
+}): Promise<TrainingPath | null> {
+  try {
+    // Modules are deleted automatically via cascade
+    const [deleted] = await db
+      .delete(trainingPath)
+      .where(eq(trainingPath.id, id))
+      .returning();
+
+    return deleted || null;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to delete training path"
     );
   }
 }

@@ -375,6 +375,110 @@ export const en = {
 
   "message.copyError": "There's no text to copy!",
   "message.copySuccess": "Copied to clipboard!",
+
+  // ============================================================================
+  // PF Builder (Percorso Formativo Builder)
+  // ============================================================================
+
+  "pfBuilder.title": "New Training Path",
+  "pfBuilder.subtitle": "Build your professional training path",
+  "pfBuilder.selectType.title": "Create a new Training Path",
+  "pfBuilder.selectType.subtitle": "Select the type of path you want to create",
+  "pfBuilder.qualifica.title": "Qualification",
+  "pfBuilder.qualifica.description":
+    "Training path to obtain a professional qualification recognized by Regione Toscana",
+  "pfBuilder.certificazione.title": "Certification",
+  "pfBuilder.certificazione.description":
+    "Training path to obtain a certification of specific competencies",
+  "pfBuilder.certificazione.comingSoon": "Coming Soon",
+  "pfBuilder.ufInput.addTitle": "Add Training Unit",
+  "pfBuilder.ufInput.placeholder": "Training Unit Name",
+  "pfBuilder.ufInput.emptyState": "No Training Units added.",
+  "pfBuilder.ufInput.emptyHint":
+    "Use the form above or write in chat to add one.",
+  "pfBuilder.ufInput.configure": "Configure",
+  "pfBuilder.ufInput.edit": "Edit",
+  "pfBuilder.ufInput.sectorNotSelected": "Sector not selected",
+  "pfBuilder.ufInput.clickToAddTitle": "Click to add a title",
+  "pfBuilder.ufInput.clickToEditTitle": "Click to edit the title",
+  "pfBuilder.ufInput.titlePlaceholder": "Training Path Name",
+
+  // PF Builder - Sector Step
+  "pfBuilder.sector.loadError": "Error loading sectors",
+  "pfBuilder.sector.title": "Select Sectors",
+  "pfBuilder.sector.description": "Assign a sector to each Training Unit",
+  "pfBuilder.sector.selectPlaceholder": "Select sector...",
+  "pfBuilder.sector.noUf": "No Training Units to configure",
+  "pfBuilder.sector.validationErrorSingular":
+    "Select a sector for the remaining Training Unit",
+  "pfBuilder.sector.validationError":
+    "Select a sector for all remaining Training Units",
+
+  // PF Builder - Figure Step
+  "pfBuilder.figure.loadError": "Error loading professional figures",
+  "pfBuilder.figure.title": "Select Professional Figures",
+  "pfBuilder.figure.description":
+    "Assign a professional figure to each Training Unit",
+  "pfBuilder.figure.selectPlaceholder": "Select professional figure...",
+  "pfBuilder.figure.searchPlaceholder": "Search figure...",
+  "pfBuilder.figure.noResults": "No figures found",
+  "pfBuilder.figure.noUf": "No Training Units to configure",
+  "pfBuilder.figure.hideDescription": "Hide description",
+  "pfBuilder.figure.showDescription": "Show description",
+  "pfBuilder.figure.validationErrorSingular":
+    "Select a figure for the remaining Training Unit",
+  "pfBuilder.figure.validationError":
+    "Select a figure for all remaining Training Units",
+
+  // PF Builder - ADA Step
+  "pfBuilder.ada.loadError": "Error loading ADA data",
+  "pfBuilder.ada.title": "Select Activity Areas (ADA)",
+  "pfBuilder.ada.description": "Assign at least one ADA to each Training Unit",
+  "pfBuilder.ada.noAdaForFigure": "No ADA available for this figure",
+  "pfBuilder.ada.ucCode": "UC Code",
+  "pfBuilder.ada.noUf": "No Training Units to configure",
+  "pfBuilder.ada.validationErrorSingular":
+    "Select at least one ADA for the remaining Training Unit",
+  "pfBuilder.ada.validationError":
+    "Select at least one ADA for all remaining Training Units",
+
+  // PF Builder - Summary Step
+  "pfBuilder.summary.title": "Summary",
+  "pfBuilder.summary.type": "Type",
+  "pfBuilder.summary.titleRequired": "Enter a title for the Training Path",
+  "pfBuilder.summary.ufCount": "Training Units",
+  "pfBuilder.summary.capacitaCount": "Skills",
+  "pfBuilder.summary.conoscenzeCount": "Knowledge",
+  "pfBuilder.summary.ufList": "Training Units",
+  "pfBuilder.summary.expandAll": "Expand all",
+  "pfBuilder.summary.collapseAll": "Collapse all",
+  "pfBuilder.summary.noUf": "No Training Units",
+  "pfBuilder.summary.edit": "Edit",
+  "pfBuilder.summary.createDocument": "Create Document",
+  "pfBuilder.summary.complete": "Create Training Path",
+  "pfBuilder.summary.documentCreated": "Document created successfully!",
+  "pfBuilder.summary.documentError": "Error creating document",
+
+  // PF Builder - Error Messages (Edge Cases)
+  "pfBuilder.errors.duplicateUf":
+    "A Training Unit with this name already exists",
+  "pfBuilder.errors.emptyUfName": "Enter a name for the Training Unit",
+  "pfBuilder.errors.noFiguresForSector":
+    "No professional figures available for sector '{sector}'. Select a different sector.",
+  "pfBuilder.errors.noAdaForFigure":
+    "No Activity Areas (ADA) available for figure '{figure}'. Select a different professional figure.",
+  "pfBuilder.errors.adaDetailsNotFound":
+    "Details not available for this ADA. You can proceed without selecting skills and knowledge.",
+  "pfBuilder.errors.dataLoadFailed":
+    "Error loading data. Please try again later.",
+
+  // PF Builder - ADA Details Step (Edge Cases)
+  "pfBuilder.adaDetails.noCapacita": "No skills available for this ADA",
+  "pfBuilder.adaDetails.noConoscenze": "No knowledge available for this ADA",
+  "pfBuilder.adaDetails.emptyStateTitle": "Details not available",
+  "pfBuilder.adaDetails.emptyStateDescription":
+    "Details for this ADA are not available in the catalog. You can proceed anyway.",
+  "pfBuilder.adaDetails.proceedAnyway": "Proceed anyway",
 } as const;
 
 export type TranslationKey = keyof typeof en;

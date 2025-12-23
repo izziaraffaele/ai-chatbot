@@ -134,7 +134,7 @@ export function DocumentArtifact({
   }, [documents]);
 
   // Debounce ref to prevent multiple saves
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   // Save handler with debouncing
   const handleSave = useCallback(

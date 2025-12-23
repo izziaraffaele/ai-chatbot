@@ -1,6 +1,7 @@
 import { RuntimeContext } from "@mastra/core/runtime-context";
 import type { Geo } from "@vercel/functions";
 import type { Session } from "next-auth";
+import type { PFBuilderStateSnapshotAPI } from "@/app/(chat)/api/chat/schema";
 import {
   runtimeConfig as defaultRuntimeConfig,
   runtimeConfig,
@@ -45,6 +46,18 @@ export const getRuntimeConfig = (ctx: RuntimeContext): RuntimeConfig => {
   return RuntimeConfigSchema.parse(_runtimeConfig);
 };
 
+/**
+ * Get the PF Builder state snapshot from context
+ */
+export const getPFBuilderState = (
+  ctx: RuntimeContext
+): PFBuilderStateSnapshotAPI | null => {
+  const state = ctx.get("pfBuilderState") as
+    | PFBuilderStateSnapshotAPI
+    | undefined;
+  return state ?? null;
+};
+
 // ============================================================================
 // BUILDERS: Functions to create RuntimeContext with injected values
 // ============================================================================
@@ -54,6 +67,7 @@ export const getRuntimeConfig = (ctx: RuntimeContext): RuntimeConfig => {
  *
  * @param session - User session for authentication and user identification
  * @param geoHints - Geolocation hints from request for system prompt customization
+ * @param pfBuilderState - Optional PF Builder state snapshot for chat context
  * @returns RuntimeContext configured with session and geo hints
  *
  * @example
@@ -71,10 +85,11 @@ export function createToolContext(
   args: {
     geoHints?: Partial<Geo>;
     config?: Partial<RuntimeConfig>;
+    pfBuilderState?: PFBuilderStateSnapshotAPI;
   } = {}
 ): RuntimeContext {
   const context = new RuntimeContext();
-  const { geoHints, config = {} } = args;
+  const { geoHints, config = {}, pfBuilderState } = args;
 
   // Inject session for tool authentication and user context
   if (session) {
@@ -89,6 +104,11 @@ export function createToolContext(
   // Inject runtime config
   context.set("config", deepMerge(runtimeConfig, config));
 
+  // Inject PF Builder state if available
+  if (pfBuilderState) {
+    context.set("pfBuilderState", pfBuilderState);
+  }
+
   return context;
 }
 
@@ -101,7 +121,11 @@ export function createToolContext(
  * @returns RuntimeContext configured with geo hints only
  */
 export function createGuestToolContext(
-  args: { geoHints?: Partial<Geo>; config?: RuntimeConfig } = {}
+  args: {
+    geoHints?: Partial<Geo>;
+    config?: RuntimeConfig;
+    pfBuilderState?: PFBuilderStateSnapshotAPI;
+  } = {}
 ): RuntimeContext {
   return createToolContext(null, args);
 }
