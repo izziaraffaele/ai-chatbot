@@ -263,7 +263,23 @@ const bando = loadBandoByIdOrSlug("sport");
 // Returns: { id, slug, title, content, ... }
 ```
 
-#### 2. File System Browser (`mastra/utils/fondazione-fs-loader.ts`)
+#### 2. Knowledge Base Loader (`mastra/utils/knowledge-base-loader.ts`)
+
+```typescript
+// Load an invoice file from the knowledge base
+const invoice = loadKnowledgeBaseFile("invoice-001.xml");
+// Returns: { metadata: InvoiceMetadata, content: string } | null
+
+// Validate an invoice's content
+const validation = validateInvoice(invoiceContent);
+// Returns: { isValid: boolean, checks: ValidationCheck[], summary?: string }
+
+// List all invoice files
+const files = listKnowledgeBaseFiles();
+// Returns: string[]
+```
+
+#### 3. File System Browser (`mastra/utils/fondazione-fs-loader.ts`)
 
 ```typescript
 // List directory contents
@@ -508,6 +524,7 @@ mastra/
 ├── utils/
 │   ├── fondazione-kb-loader.ts   # Fondazione KB utilities
 │   ├── fondazione-fs-loader.ts   # FS browser utilities
+│   ├── knowledge-base-loader.ts  # Invoice loading & validation
 │   ├── catalog-config.ts         # Catalog configuration
 │   ├── catalog-ingest.ts         # Ingestion utility
 │   └── runtime-utils.ts          # Runtime context
@@ -539,6 +556,58 @@ components/
 │   └── agent-selector.tsx     # Agent selection UI
 └── tools/
     └── fondazione-browser.tsx # Fondazione browser tool component
+
+lib/
+├── templates/
+│   ├── index.ts                       # Template registry and rendering
+│   └── liquidation-communication.ts   # Liquidation document template
+└── ...                                # Other utility modules
+```
+
+---
+
+## Template System
+
+The template system allows generating structured documents from data (e.g., invoices) using predefined templates.
+
+### Key Components
+
+```typescript
+// lib/templates/index.ts
+export type TemplateContext = {
+  metadata: InvoiceMetadata;
+  validation: InvoiceValidation;
+  content: string;
+};
+
+export const templateRegistry: TemplateRegistry;
+export function renderTemplate(template: Template, context: TemplateContext): RenderResult;
+```
+
+### Adding a New Template
+
+1. Create a new file in `lib/templates/`:
+
+```typescript
+// lib/templates/my-template.ts
+import { templateRegistry } from "./index";
+
+templateRegistry.register({
+  id: "my-template",
+  name: "My Template",
+  kind: "text",
+  keywords: ["keyword1", "keyword2"],
+  template: `# Document Title
+
+**Field**: {{metadata.field}}
+`,
+});
+```
+
+2. Import the template in `artifacts/text/server.ts` to ensure it's registered:
+
+```typescript
+import "@/lib/templates/my-template";
 ```
 
 ---
