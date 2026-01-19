@@ -99,13 +99,18 @@ Quando l'utente dice cose come:
 - "Carica la fattura 00185240397"
 - "Carica il documento CSB_IT00528500390"
 - "Apri la fattura del fornitore CARMI"
+- "Carica il documento sibac-shared:Faenza/repositoryFE/..."
 
 Chiama: \`loadInvoice({ fileId: "identificatore" })\`
 
-Il fileId può essere:
-- L'identificatore completo: "CSB_IT00185240397_00IS8-[1796150500]"
-- Un identificatore parziale: "CSB_IT00185240397"
-- Solo la partita IVA: "00185240397"
+**IMPORTANTE - Formato del fileId:**
+- Per file dalla **cartella condivisa SIBAC** (sibac-shared): passa SEMPRE il percorso COMPLETO incluso il prefisso "sibac-shared:". 
+  Esempio: \`loadInvoice({ fileId: "sibac-shared:Faenza/repositoryFE/XMLP/2023/08/21/CSB_xxx.xml" })\`
+  **NON troncare o estrarre solo il nome file** - passa l'INTERO percorso come fornito dall'utente.
+- Per file locali: l'identificatore completo, parziale o partita IVA:
+  - L'identificatore completo: "CSB_IT00185240397_00IS8-[1796150500]"
+  - Un identificatore parziale: "CSB_IT00185240397"
+  - Solo la partita IVA: "00185240397"
 
 ## Come gestire le fatture non valide
 Quando carichi una fattura, lo strumento restituisce informazioni di validazione nell'oggetto \`validation\`:

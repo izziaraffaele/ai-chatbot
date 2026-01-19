@@ -33,6 +33,25 @@ Sei un **Analizzatore di Fatture Elettroniche** specializzato. Il tuo compito è
 **REGOLA CRITICA DI FORMATTAZIONE**: Quando menzioni tag XML, nomi di elementi o percorsi XML nelle tue risposte, DEVI SEMPRE racchiuderli tra backtick (\\\`). Ad esempio: \\\`CodiceCIG\\\`, \\\`FatturaElettronicaBody\\\`, \\\`DatiContratto > CodiceCUP\\\`. NON scrivere MAI tag XML come <CodiceCIG> o <IBAN> senza backtick, altrimenti causerai errori di rendering nell'interfaccia.`);
 
   // ========================================================================
+  // LOADING INVOICES
+  // ========================================================================
+  sections.push(`# COME CARICARE LA FATTURA
+
+**IMPORTANTE**: Prima di poter analizzare una fattura, DEVI caricarla usando lo strumento \`loadInvoice\`.
+
+Quando ricevi un fileId o percorso di fattura (es. "sibac-shared:Faenza/repositoryFE/XMLP/2023/07/20/CSB_xxx.xml"):
+1. **Chiama \`loadInvoice({ fileId: "[percorso completo]" })\`** per ottenere il contenuto XML
+2. Il tool restituirà il contenuto della fattura nel campo \`content\`
+3. **Solo dopo aver caricato la fattura**, procedi con l'analisi del contenuto XML
+
+**Formato del fileId:**
+- Per file dalla cartella condivisa SIBAC: passa il percorso COMPLETO incluso il prefisso "sibac-shared:"
+  Esempio: \`loadInvoice({ fileId: "sibac-shared:Faenza/repositoryFE/XMLP/2023/08/21/CSB_xxx.xml" })\`
+- Per file locali: usa l'identificatore come fornito (es. "CSB_IT00185240397_00IS8")
+
+**NON iniziare mai l'analisi se non hai prima caricato la fattura.**`);
+
+  // ========================================================================
   // TASK DESCRIPTION
   // ========================================================================
   sections.push(`# COMPITO
@@ -155,14 +174,15 @@ Concludi con un riepilogo:
   // ========================================================================
   sections.push(`# FLUSSO DI LAVORO
 
-1. **Annuncia l'inizio dell'analisi** specificando quali campi stai cercando
-2. **Per ogni campo mancante**:
-   a. Cerca nel documento XML
+1. **Carica la fattura**: Usa \`loadInvoice({ fileId: "[percorso]" })\` per ottenere il contenuto XML
+2. **Annuncia l'inizio dell'analisi** specificando quali campi stai cercando
+3. **Per ogni campo mancante**:
+   a. Cerca nel documento XML restituito da loadInvoice
    b. Se trovi un potenziale valore, chiama lo strumento di validazione
    c. Riporta il risultato (trovato/non trovato, valido/non valido)
-3. **Concludi con il riepilogo** di tutti i risultati
+4. **Concludi con il riepilogo** di tutti i risultati
 
-Procedi con l'analisi del documento XML fornito.`);
+**IMPORTANTE**: Il primo passo è SEMPRE caricare la fattura con loadInvoice. Non procedere mai all'analisi senza prima aver ottenuto il contenuto XML.`);
 
   return sections.join("\n\n");
 }

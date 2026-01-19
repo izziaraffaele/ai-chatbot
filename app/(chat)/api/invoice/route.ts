@@ -13,6 +13,9 @@ import {
   loadRecord,
 } from "@/mastra/utils/knowledge-base-loader";
 
+// Ensure this route runs in Node.js runtime (not Edge) since it uses filesystem operations
+export const runtime = "nodejs";
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const fileId = searchParams.get("fileId");
@@ -48,6 +51,7 @@ export async function GET(request: Request) {
     return Response.json(
       {
         success: true,
+        recordId: record.recordId,
         metadata: record.metadata,
         content: record.content,
         validation: record.validation,

@@ -107,6 +107,8 @@ const fileSystemRootSchema = z.object({
  */
 const invoiceOutputSchema = z.object({
   success: z.boolean(),
+  /** Canonical record identifier for re-loading (e.g., "sibac-shared:path/to/file.xml") */
+  recordId: z.string().optional(),
   error: z.string().optional(),
   metadata: z
     .object({
@@ -164,10 +166,16 @@ export type LoadInvoiceOutput = z.infer<typeof invoiceOutputSchema>;
 export const loadInvoiceTool = createTool({
   id: "loadInvoice",
   description: `Load an invoice or impegno from the Faenza knowledge base with validation.
-Provide a file identifier (can be partial - the tool will find matching files).
+Provide a file identifier to load a specific document.
 Use this tool when the user wants to work on, analyze, or view a specific invoice or impegno.
-For local XML files: use file names like "CSB_IT00185240397_00IS8" or VAT numbers.
-For Oracle database: use CIG codes or impegno identifiers.
+
+IMPORTANT: File identifier formats:
+- For SIBAC shared files: ALWAYS pass the COMPLETE path starting with "sibac-shared:" prefix.
+  Example: "sibac-shared:Faenza/repositoryFE/XMLP/2023/08/21/CSB_xxx.xml"
+  NEVER truncate or extract just the filename - pass the ENTIRE string as provided by the user.
+- For local XML files: use file names like "CSB_IT00185240397_00IS8" or VAT numbers.
+- For Oracle database: use CIG codes or impegno identifiers.
+
 If no fileId is provided, returns a list of available records with their validation status.
 
 The tool validates each record for:
@@ -182,7 +190,7 @@ For invalid records, campiMancanti lists missing fields and campiNonValidi lists
       .string()
       .optional()
       .describe(
-        "The invoice/impegno identifier (partial or full). If omitted, lists all available records with validation status."
+        "The invoice/impegno identifier. For sibac-shared files, pass the COMPLETE path including 'sibac-shared:' prefix (e.g., 'sibac-shared:Faenza/repositoryFE/XMLP/2023/file.xml'). NEVER truncate paths - pass them exactly as provided."
       ),
   }),
   outputSchema: invoiceOutputSchema,
@@ -244,7 +252,16 @@ For invalid records, campiMancanti lists missing fields and campiNonValidi lists
 
     // Try to load the record
     try {
-      const record = await loadRecord(fileId);
+      console.log(`[LoadInvoice] Attempting to load: ${fileId}`);
+      let record = await loadRecord(fileId);
+
+      // Fallback: if not found and fileId looks like a filename (not a full path),
+      // try searching in sibac-shared with the filename
+      if (!record && !fileId.includes("/") && !fileId.startsWith("sibac-shared:")) {
+        console.log(`[LoadInvoice] Not found, trying sibac-shared fallback for: ${fileId}`);
+        // Try with sibac-shared prefix (simple filename case)
+        record = await loadRecord(`sibac-shared:${fileId}`);
+      }
 
       if (!record) {
         // Find suggestions
@@ -279,6 +296,7 @@ For invalid records, campiMancanti lists missing fields and campiNonValidi lists
 
       return {
         success: true,
+        recordId: record.recordId,
         metadata: record.metadata as InvoiceMetadata,
         content,
         truncated: isTruncated,

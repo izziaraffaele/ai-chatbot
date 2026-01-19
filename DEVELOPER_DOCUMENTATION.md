@@ -6,13 +6,20 @@
 2. [Architecture](#architecture)
 3. [Agents](#agents)
 4. [Knowledge Base System](#knowledge-base-system)
-5. [Invoice Validation System](#invoice-validation-system)
-6. [Document Template System](#document-template-system)
-7. [Tools Reference](#tools-reference)
-8. [Data Flow](#data-flow)
-9. [File Structure](#file-structure)
-10. [Adding New Features](#adding-new-features)
-11. [Troubleshooting](#troubleshooting)
+5. [Oracle Database Integration](#oracle-database-integration-sibac)
+6. [SIBAC Shared Folder Integration](#sibac-shared-folder-integration)
+7. [Invoice Validation System](#invoice-validation-system)
+8. [Hierarchical File System UI](#hierarchical-file-system-ui)
+9. [Document Template System](#document-template-system)
+10. [Canvas Widget System](#canvas-widget-system)
+11. [Activity System](#activity-system)
+12. [Activity Tracking System](#activity-tracking-system)
+13. [Tools Reference](#tools-reference)
+14. [Hooks Reference](#hooks-reference)
+15. [Data Flow](#data-flow)
+16. [File Structure](#file-structure)
+17. [Adding New Features](#adding-new-features)
+18. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -34,11 +41,18 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 ### Key Technologies
 
 - **Next.js 15**: React framework with App Router
-- **Mastra**: AI agent framework for tool orchestration
-- **Google Gemini**: Default LLM for chat responses
+- **Mastra Framework**: AI agent framework for tool orchestration
+  - `@mastra/core`: Core agent and tool definitions
+  - `@mastra/ai-sdk`: Integration with Vercel AI SDK for streaming
+  - `@mastra/memory`: Conversation memory management
+  - `@mastra/libsql`: LibSQL storage adapter for memory persistence
+  - `@mastra/client-js`: Client-side tool creation utilities
+- **OpenAI GPT-5.1**: Default LLM for chat responses (via `openai/gpt-5.1` model)
+- **Vercel AI SDK**: Streaming responses and UI message handling (`ai` package v5)
 - **LibSQL**: Memory storage for conversation history
 - **TypeScript**: Type-safe codebase
 - **OracleDB**: Oracle database connectivity for SIBAC integration
+- **Drizzle ORM**: Database schema and migrations for PostgreSQL
 
 ---
 
@@ -81,7 +95,8 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 │  │                    Assistente Comune Agent                            │   │
 │  │  mastra/agents/faenza/invoices-manager/                               │   │
 │  │  - Identity: Comune di Faenza official assistant                      │   │
-│  │  - Tool: loadInvoice (document access)                                │   │
+│  │  - Tools: createDocument, updateDocument, requestSuggestions,         │   │
+│  │           loadInvoice                                                 │   │
 │  │  - Memory: LibSQL for conversation history                            │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
 │                                       │                                      │
@@ -116,6 +131,9 @@ The primary agent for Comune di Faenza, developed by MemorAIz.
 - List available documents in the knowledge base (automatically shows an interactive document selector widget)
 - Load and display specific documents when requested
 - Help users understand and work with invoice documents
+- Create new documents (text, code, spreadsheets) in the canvas
+- Update existing documents with AI-assisted editing
+- Request AI suggestions for document improvements
 
 **Configuration:**
 
@@ -125,13 +143,18 @@ export const chatAgent = new Agent({
   instructions: ({ runtimeContext }) => {
     const config = getRuntimeConfig(runtimeContext);
     const geoHints = getGeoHints(runtimeContext);
-    return chatAgentSystemPrompt(config, geoHints);
+    const canvasContext = getCanvasContext(runtimeContext);
+    return chatAgentSystemPrompt(config, geoHints, canvasContext);
   },
   model: "openai/gpt-5.1",
   // Sub-agent for deep invoice analysis
   agents: { invoiceAnalyzerAgent },
   tools: {
-    // Backend tool that actually reads documents from the knowledge base
+    // Document creation and editing tools
+    createDocument: mastraTools.createDocument,
+    updateDocument: mastraTools.updateDocument,
+    requestSuggestions: mastraTools.requestSuggestions,
+    // Invoice management tool
     loadInvoice: mastraTools.loadInvoice,
   },
   memory: new Memory({
@@ -146,26 +169,33 @@ The chat agent acts as a "routing agent" that can delegate invoice analysis task
 **System Prompt Structure:**
 1. **Identity**: "Assistente Ufficiale del Comune di Faenza" by MemorAIz
 2. **Primary Task**: Document listing and selection
-3. **Tool Usage**: Instructions for `loadInvoice` tool
-4. **Document Format**: FatturaElettronica XML guide
-5. **Communication Style**: Professional Italian
-6. **Greeting**: Welcome message template
+3. **Tool Usage**: Instructions for all tools:
+   - `loadInvoice` - Invoice/document access
+   - `createDocument` - Create new documents (text, code, sheet)
+   - `updateDocument` - Edit existing documents
+   - `requestSuggestions` - AI-powered document suggestions
+4. **Canvas Context**: Awareness of currently active document in the canvas
+5. **Document Format**: FatturaElettronica XML guide
+6. **Communication Style**: Professional Italian
+7. **Greeting**: Welcome message template
 
 ### Invoice Analyzer Agent (`mastra/agents/faenza/invoice-analyzer-agent/`)
 
 A specialized sub-agent for deep analysis of invoice XML documents. This agent is **called by the chat agent** when users click "Analizza Fattura" on an invalid invoice. The button sends an automatic message to the chat, and the chat agent delegates to this sub-agent to search for missing fields in non-standard XML locations.
 
 **Purpose:**
+- **Load invoice content** using `loadInvoice` tool (can access all sources including SIBAC shared)
 - Search entire XML document for missing required fields
 - Extract potential values from non-standard locations
-- Validate extracted values using specialized tools
+- Validate extracted values using specialized validation tools
 - Return analysis results that appear in the chat conversation
 
 **How it's called:**
 1. User clicks "Analizza Fattura" button
 2. UI sends message: "Analizza la fattura [fileId] per trovare i seguenti campi mancanti: [fields]"
 3. Chat agent receives message and delegates to `invoiceAnalyzerAgent`
-4. Analysis results appear in the chat thread
+4. Sub-agent loads the invoice using `loadInvoice` tool, then analyzes content
+5. Analysis results appear in the chat thread
 
 **Configuration:**
 
@@ -178,21 +208,32 @@ export const invoiceAnalyzerAgent = new Agent({
     campi mancanti come IBAN, CIG, CUP, Codice Fiscale, o Codice PA.`,
   instructions: invoiceAnalyzerSystemPrompt([...missingFields]),
   model: "openai/gpt-5.1",
-  tools: invoiceValidationTools,
+  tools: {
+    ...invoiceValidationTools,
+    loadInvoice: loadInvoiceTool,  // Can load invoices from all sources
+  },
 });
 
 // Factory function for custom missing fields (optional)
 const customAnalyzer = createInvoiceAnalyzerAgent(["CUP", "IBAN"]);
 ```
 
-**Validation Tools:**
-| Tool | Purpose | Regex Pattern |
-|------|---------|---------------|
-| `validateIban` | Validates Italian IBAN | `^IT\d{2}[A-Z0-9]{23}$` |
-| `validateCig` | Validates CIG code | `^[A-Z0-9]{10}$` |
-| `validateCup` | Validates CUP code | `^[A-Z0-9]{15}$` |
+**Tools:**
+
+| Tool | Purpose | Description |
+|------|---------|-------------|
+| `loadInvoice` | Load invoice content | Loads invoice from any source (local, Oracle, sibac-shared) |
+| `validateIban` | Validates Italian IBAN | Pattern: `^IT\d{2}[A-Z0-9]{23}$` |
+| `validateCig` | Validates CIG code | Pattern: `^[A-Z0-9]{10}$` |
+| `validateCup` | Validates CUP code | Pattern: `^[A-Z0-9]{15}$` |
 | `validateCodiceFiscale` | Validates Italian tax code | Company: `^\d{11}$` / Individual: 16 chars |
-| `validateCodicePa` | Validates PA code | `^[A-Z0-9]{6,7}$` |
+| `validateCodicePa` | Validates PA code | Pattern: `^[A-Z0-9]{6,7}$` |
+
+**Workflow:**
+1. **Load invoice first**: Call `loadInvoice({ fileId: "sibac-shared:Faenza/repositoryFE/..." })` to get XML content
+2. **Analyze XML**: Search for missing fields in returned content
+3. **Validate findings**: Use validation tools to verify extracted values
+4. **Report results**: Stream findings back to chat
 
 **Note:** The legacy API endpoint `POST /api/analyze-invoice` still exists but is no longer used by the UI. The sub-agent approach is preferred as it keeps the conversation context intact.
 
@@ -490,7 +531,8 @@ const records = await listRecordsWithValidation();
 // Load specific record (auto-detects source from prefix)
 const record = await loadRecord("sibac-shared:INVOICE_001");
 const record2 = await loadRecord("CIG_OR_FILE_ID");
-// Returns: { metadata, content, validation, source, impegno? }
+// Returns: { recordId, metadata, content, validation, source, impegno? }
+// recordId is the canonical identifier for re-loading (e.g., "sibac-shared:path/to/file.xml")
 ```
 
 ---
@@ -566,14 +608,27 @@ Supported file formats: `.xml`, `.pdf`, `.doc`, `.docx`
 import {
   listSibacSharedFiles,
   loadSibacSharedFile,
+  loadRecord,
 } from "@/mastra/utils/knowledge-base-loader";
 
 // List files from SIBAC shared folder
 const files = listSibacSharedFiles();
 
-// Load a specific file
+// Load a specific file by name (legacy)
 const invoice = loadSibacSharedFile("INVOICE_001");
+
+// Load a file using canonical record ID (recommended)
+// Supports nested paths like "sibac-shared:Faenza/repositoryFE/XMLP/2023/file.xml"
+const record = await loadRecord("sibac-shared:path/to/file.xml");
+// Returns: { recordId, metadata, content, validation, source }
 ```
+
+### Canonical Record IDs
+
+SIBAC shared files use canonical record IDs with the format `sibac-shared:<relative-path>`. This ensures:
+- **Consistent identification**: The same ID works for loading and analysis
+- **Nested path support**: Files in subdirectories are correctly identified
+- **Path traversal protection**: Security checks prevent `../` escape attempts
 
 ### UI Display
 
@@ -850,11 +905,83 @@ type TemplateContext = {
 
 ### Assistente Comune Tools
 
+The chat agent has access to the following tools for document management and creation:
+
 | Tool | Description | Input |
 |------|-------------|-------|
+| `createDocument` | Create a new document (text, code, sheet) with optional template | `{ title: string, kind: ArtifactKind, invoiceFileId?: string }` |
+| `updateDocument` | Update an existing document with AI-assisted changes | `{ id: string, description: string }` |
+| `requestSuggestions` | Request AI suggestions for document improvements | `{ documentId: string }` |
 | `loadInvoice` | Load invoice from knowledge base | `{ fileId?: string }` |
 
-**Note:** The Assistente Comune has only one **backend tool** – `loadInvoice`. Its sole purpose is document management.
+### Tool Details
+
+#### createDocument
+
+Creates a new document in the canvas with streaming content generation.
+
+```typescript
+// Input
+{
+  title: string;                    // Document title
+  kind: "text" | "code" | "sheet";  // Document type
+  invoiceFileId?: string;           // Optional invoice ID for template-based generation
+}
+
+// Output
+{
+  id: string;      // Generated document ID
+  title: string;
+  kind: ArtifactKind;
+  content: string; // Confirmation message
+}
+```
+
+**Template Integration:** When `invoiceFileId` is provided, the tool loads the invoice data and uses it for template-based document generation (e.g., "Comunicazione di Liquidazione").
+
+#### updateDocument
+
+Updates an existing document based on a natural language description.
+
+```typescript
+// Input
+{
+  id: string;          // Document ID to update
+  description: string; // Description of changes to make
+}
+
+// Output
+{
+  id: string;
+  title: string;
+  kind: ArtifactKind;
+  content: string; // Confirmation message
+}
+```
+
+#### requestSuggestions
+
+Requests AI-powered suggestions for improving a document.
+
+```typescript
+// Input
+{
+  documentId: string; // Document ID
+}
+
+// Output (success)
+{
+  id: string;
+  title: string;
+  kind: ArtifactKind;
+  message: string;
+}
+
+// Output (error)
+{
+  error: string;
+}
+```
 
 ### Invoice Analyzer Tools (`mastra/tools/invoice-validation-tools.ts`)
 
@@ -893,6 +1020,8 @@ The `loadInvoice` tool has a built-in UI component (`LoadInvoiceTool` in `compon
 // Input
 {
   fileId?: string  // Optional: partial or full invoice identifier
+  // For SIBAC shared files, pass the COMPLETE path: "sibac-shared:Faenza/repositoryFE/.../file.xml"
+  // For local files: "CSB_IT00185240397_00IS8" or partial like "00185240397"
 }
 
 // Output (when listing files)
@@ -906,6 +1035,7 @@ The `loadInvoice` tool has a built-in UI component (`LoadInvoiceTool` in `compon
 // Output (when loading specific file)
 {
   success: boolean,
+  recordId?: string,                            // Canonical ID for re-loading (NEW)
   metadata?: InvoiceMetadata,                   // Extracted invoice details
   content?: string,                             // Raw XML content
   validation?: InvoiceValidation,               // Validation result
@@ -914,6 +1044,11 @@ The `loadInvoice` tool has a built-in UI component (`LoadInvoiceTool` in `compon
   error?: string
 }
 ```
+
+**File Identifier Formats:**
+- **SIBAC shared files**: Must include the full path with prefix: `sibac-shared:Faenza/repositoryFE/XMLP/2023/08/21/CSB_xxx.xml`
+- **Local XML files**: Can use full name, partial ID, or VAT number
+- **Oracle database**: Use CIG codes or impegno identifiers
 
 ### Invoice API Endpoint
 
@@ -933,6 +1068,240 @@ GET /api/invoice?fileId={fileId}
   validation: InvoiceValidation    // Validation results with human-readable field names
 }
 ```
+
+---
+
+## Hooks Reference
+
+The application provides a comprehensive set of React hooks for state management, AI integration, and UI interactions.
+
+### Canvas & Tab Hooks
+
+#### useCanvasTabs
+
+Manages multi-tab state for the canvas panel. Supports opening, closing, switching, and updating tabs.
+
+```typescript
+import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
+
+function MyComponent() {
+  const {
+    // State
+    tabs,              // All open tabs
+    activeTabId,       // Currently active tab ID
+    activeTab,         // Active tab data
+    hasOpenTabs,       // Whether any tabs are open
+    isCanvasVisible,   // Whether canvas should be shown
+    
+    // Actions
+    openTab,           // Open a new tab
+    closeTab,          // Close a tab by ID
+    switchTab,         // Switch to a specific tab
+    closeAllTabs,      // Close all tabs
+    updateTabContent,  // Update tab content
+    updateTabStatus,   // Update tab status
+  } = useCanvasTabs();
+}
+```
+
+**Direct Mutation Functions** (for streaming sync):
+
+```typescript
+import {
+  mutateTabByDocumentId,
+  openPendingTab,
+  bindPendingTabToDocument,
+  wasDocumentClosedByUser,
+} from "@/hooks/use-canvas-tabs";
+
+// Update tab without hook context (for streaming)
+mutateTabByDocumentId("doc-123", {
+  content: "New content",
+  status: "idle",
+});
+
+// Open a pending tab before document ID is known
+const pendingId = openPendingTab("toolcall-abc", "text", "New Document");
+
+// Bind pending tab to actual document ID
+bindPendingTabToDocument(pendingId, "doc-123");
+```
+
+### AI & Agent Hooks
+
+#### useAssistantAction
+
+Registers client-side AI actions (tools) from React components with automatic lifecycle management.
+
+```typescript
+import { useAssistantAction } from "@/hooks/use-assistant-action";
+import { createTool } from "@mastra/client-js";
+import { z } from "zod";
+
+function MyComponent() {
+  const myAction = createTool({
+    id: "myCustomAction",
+    description: "Performs a custom action",
+    inputSchema: z.object({
+      input: z.string(),
+    }),
+    execute: async ({ context }) => {
+      return { result: `Processed: ${context.input}` };
+    },
+  });
+
+  // Register on mount, deregister on unmount
+  useAssistantAction(myAction);
+
+  return <div>Component with custom action</div>;
+}
+```
+
+#### useClientTools
+
+Provides direct access to the assistant actions registry.
+
+```typescript
+import { useClientTools } from "@/hooks/use-client-tools";
+
+function MyComponent() {
+  const registry = useClientTools();
+  
+  // Get all registered tools
+  const tools = registry.getTools();
+  
+  // Manually register/deregister (prefer useAssistantAction)
+  registry.register(myTool);
+  registry.deregister("toolId");
+}
+```
+
+#### useSelectedAgent
+
+Manages the currently selected AI agent in the UI.
+
+```typescript
+import { useSelectedAgent } from "@/hooks/use-selected-agent";
+
+function AgentPicker() {
+  const { selectedAgent, setSelectedAgent, agents } = useSelectedAgent();
+  
+  return (
+    <select
+      value={selectedAgent.id}
+      onChange={(e) => setSelectedAgent(e.target.value)}
+    >
+      {agents.map(agent => (
+        <option key={agent.id} value={agent.id}>{agent.name}</option>
+      ))}
+    </select>
+  );
+}
+```
+
+### Document & Artifact Hooks
+
+#### useArtifactStreaming
+
+Handles streaming of artifact content from AI tools.
+
+```typescript
+import { useArtifactStreaming } from "@/hooks/use-artifact-streaming";
+
+function ArtifactViewer() {
+  const { streamingContent, status } = useArtifactStreaming({
+    documentId: "doc-123",
+    onContentUpdate: (content) => console.log("New content:", content),
+  });
+}
+```
+
+#### useChatDocument
+
+Manages document state within the chat context.
+
+```typescript
+import { useChatDocument } from "@/hooks/use-chat-document";
+
+function DocumentEditor() {
+  const {
+    document,
+    isLoading,
+    saveDocument,
+    updateContent,
+  } = useChatDocument("doc-123");
+}
+```
+
+### UI & Configuration Hooks
+
+#### useRuntimeConfig
+
+Accesses runtime configuration for the chat interface.
+
+```typescript
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
+
+function ConfiguredComponent() {
+  const { config, updateConfig } = useRuntimeConfig();
+  
+  // Access branding, feature flags, etc.
+  console.log(config.branding.name);
+}
+```
+
+#### useBranding
+
+Provides branding configuration (name, logo, colors).
+
+```typescript
+import { useBranding } from "@/hooks/use-branding";
+
+function BrandedHeader() {
+  const { name, logo, primaryColor } = useBranding();
+  
+  return (
+    <header style={{ backgroundColor: primaryColor }}>
+      <img src={logo} alt={name} />
+    </header>
+  );
+}
+```
+
+#### useMobile
+
+Detects mobile viewport for responsive layouts.
+
+```typescript
+import { useMobile } from "@/hooks/use-mobile";
+
+function ResponsiveLayout() {
+  const isMobile = useMobile();
+  
+  return isMobile ? <MobileLayout /> : <DesktopLayout />;
+}
+```
+
+### All Available Hooks
+
+| Hook | Purpose | Location |
+|------|---------|----------|
+| `useCanvasTabs` | Multi-tab canvas state management | `hooks/use-canvas-tabs.ts` |
+| `useAssistantAction` | Register client-side AI actions | `hooks/use-assistant-action.ts` |
+| `useClientTools` | Access assistant actions registry | `hooks/use-client-tools.ts` |
+| `useSelectedAgent` | Agent selection state | `hooks/use-selected-agent.ts` |
+| `useArtifactStreaming` | Handle artifact streaming | `hooks/use-artifact-streaming.ts` |
+| `useArtifact` | Artifact state management | `hooks/use-artifact.ts` |
+| `useChatDocument` | Document state in chat | `hooks/use-chat-document.ts` |
+| `useChatVisibility` | Chat visibility controls | `hooks/use-chat-visibility.ts` |
+| `useChatVotes` | Message voting functionality | `hooks/use-chat-votes.ts` |
+| `useRuntimeConfig` | Runtime configuration | `hooks/use-runtime-config.ts` |
+| `useBranding` | Branding configuration | `hooks/use-branding.ts` |
+| `useDemoConfig` | Demo mode configuration | `hooks/use-demo-config.ts` |
+| `useMessages` | Chat messages management | `hooks/use-messages.tsx` |
+| `useMobile` | Mobile viewport detection | `hooks/use-mobile.ts` |
+| `useDebouncedSave` | Debounced save operations | `hooks/use-debounced-save.ts` |
+| `useScrollToBottom` | Auto-scroll functionality | `hooks/use-scroll-to-bottom.tsx` |
 
 ---
 
@@ -984,6 +1353,7 @@ When an invoice is invalid and the user clicks "Analizza Fattura":
          ▼
 2. UI component sends automatic message to chat:
    "Analizza la fattura [fileId] per trovare i seguenti campi mancanti: [elenco]"
+   Note: fileId includes full canonical ID (e.g., "sibac-shared:Faenza/repositoryFE/...")
          │
          ▼
 3. Chat Agent (routing agent) receives the message
@@ -996,14 +1366,20 @@ When an invoice is invalid and the user clicks "Analizza Fattura":
    - Sub-agent receives the analysis request with fileId and missing fields
          │
          ▼
-5. Invoice Analyzer Agent streams analysis:
-   a. Reads entire XML document
-   b. Uses LLM to search for potential values (CUP, CIG, IBAN, etc.)
-   c. Calls validation tools → { isValid: true/false, ... }
+5. Invoice Analyzer Agent loads the invoice:
+   - Calls loadInvoice({ fileId: "sibac-shared:Faenza/repositoryFE/..." })
+   - Gets full XML content from the response
+   - Works with all sources: local, Oracle, SIBAC shared folder
+         │
+         ▼
+6. Invoice Analyzer Agent analyzes content:
+   a. Searches XML content for missing fields
+   b. Uses LLM to find values in non-standard locations
+   c. Calls validation tools (validateCig, validateCup, etc.)
    d. Repeats for each missing field
          │
          ▼
-6. Results appear in chat thread:
+7. Results appear in chat thread:
    ✅ CUP trovato e validato: J81B21000690001
       Posizione: DatiContratto > CodiceCUP
    
@@ -1026,67 +1402,230 @@ mastra/
 │   │       ├── index.ts           # Invoice Analyzer Agent + factory function
 │   │       └── system-prompt.ts   # Analysis-focused Italian prompt
 │   ├── research-agent/
-│   │   └── index.ts           # Research agent
-│   └── index.ts               # Agent exports
+│   │   ├── index.ts               # Research agent
+│   │   └── system-prompt.ts       # Research agent prompt
+│   └── index.ts                   # Agent exports and types
 ├── knowledgebase/
 │   ├── faenza/
-│   │   └── *.xml              # Local invoice files (debug)
+│   │   └── *.xml                  # Local invoice files (debug)
 │   └── sibac-shared/
-│       └── *.*                # Files from Windows shared folder
+│       └── *.*                    # Files from Windows shared folder
 ├── tools/
-│   ├── index.ts               # Tool exports
-│   ├── load-invoice-tool.ts   # Invoice loading tool
-│   ├── invoice-validation-tools.ts  # Validation tools for analyzer
-│   └── ...                    # Other tools
+│   ├── index.ts                   # Tool exports and types
+│   ├── create-document-tool.ts    # Document creation tool
+│   ├── update-document-tool.ts    # Document update tool
+│   ├── request-suggestions-tool.ts # AI suggestions tool
+│   ├── load-invoice-tool.ts       # Invoice loading tool
+│   ├── invoice-validation-tools.ts # Validation tools for analyzer
+│   └── weather-tool.ts            # Weather information tool
 ├── utils/
-│   ├── knowledge-base-loader.ts    # Faenza KB utilities + validation
-│   └── runtime-utils.ts            # Runtime context
-└── index.ts                   # Mastra instance
+│   ├── knowledge-base-loader.ts   # Faenza KB utilities + validation
+│   ├── runtime-utils.ts           # Runtime context helpers
+│   └── stream-utils.ts            # Streaming utilities
+├── vectors/
+│   ├── index.ts                   # Vector store exports
+│   ├── embedder.ts                # Embedding utilities
+│   └── pgvector.ts                # PostgreSQL vector store
+└── index.ts                       # Mastra instance
 
 app/
+├── (auth)/
+│   ├── actions.ts                 # Auth server actions
+│   ├── auth.ts                    # NextAuth configuration
+│   ├── login/
+│   │   └── page.tsx               # Login page
+│   ├── register/
+│   │   └── page.tsx               # Registration page
+│   └── api/
+│       └── auth/
+│           └── [...nextauth]/     # NextAuth API routes
 ├── (chat)/
+│   ├── page.tsx                   # Main chat page
+│   ├── chat/
+│   │   └── [id]/
+│   │       └── page.tsx           # Chat session page
 │   └── api/
 │       ├── chat/
-│       │   └── route.ts       # Main chat endpoint
+│       │   ├── route.ts           # Main chat endpoint
+│       │   └── schema.ts          # Request validation schemas
 │       ├── invoice/
-│       │   └── route.ts       # Direct invoice loading API for detail view
-│       └── analyze-invoice/
-│           └── route.ts       # Invoice analysis streaming endpoint
+│       │   └── route.ts           # Direct invoice loading API
+│       ├── analyze-invoice/
+│       │   └── route.ts           # Invoice analysis endpoint
+│       ├── document/
+│       │   └── route.ts           # Document CRUD endpoint
+│       ├── history/
+│       │   └── route.ts           # Chat history endpoint
+│       ├── suggestions/
+│       │   └── route.ts           # Suggestions endpoint
+│       └── smb/
+│           └── route.ts           # SMB share endpoint
 
 lib/
 ├── ai/
-│   └── agent-config.ts        # UI agent configuration
+│   ├── agent-config.ts            # UI agent configuration
+│   ├── client-tools.ts            # Client-side tool registry
+│   ├── entitlements.ts            # Rate limiting and entitlements
+│   ├── models.ts                  # Model configuration
+│   ├── models.mock.ts             # Mock models for testing
+│   └── prompts.ts                 # System prompts
+├── activity-tracking/             # NEW: Activity attempt tracking
+│   ├── index.ts                   # Module exports
+│   ├── store.ts                   # AttemptStore class
+│   ├── events.ts                  # ActivityEvent dispatcher
+│   ├── errors.ts                  # AttemptError types
+│   ├── types.ts                   # TypeScript interfaces
+│   └── validation.ts              # Validation utilities
+├── canvas/                        # NEW: Widget registry system
+│   ├── index.ts                   # Module exports
+│   ├── widget-registry.ts         # Widget type registry
+│   ├── widget-context.tsx         # Widget React context
+│   ├── widget-definitions.tsx     # Built-in widget definitions
+│   └── visible-content-store.ts   # Visible content tracking
 ├── db/
-│   ├── oracle-sibac.ts        # Oracle SIBAC database client
-│   └── oracle-types.ts        # TypeScript types for Oracle data
+│   ├── schema.ts                  # Drizzle database schema
+│   ├── queries.ts                 # Database query functions
+│   ├── utils.ts                   # Database utilities
+│   ├── migrate.ts                 # Migration runner
+│   ├── oracle-sibac.ts            # Oracle SIBAC client
+│   ├── oracle-types.ts            # Oracle type definitions
+│   └── migrations/                # Drizzle migrations
+├── i18n/                          # Internationalization
+│   ├── context.tsx                # Translation context
+│   ├── use-translations.ts        # Translation hook
+│   ├── types.ts                   # i18n types
+│   ├── utils.ts                   # i18n utilities
+│   └── translations/
+│       ├── en.ts                  # English translations
+│       └── it.ts                  # Italian translations
+├── smb/
+│   └── sibac-share.ts             # SMB share integration
 ├── vpn/
-│   ├── faenza-vpn.ts          # Cross-platform VPN service (macOS + Linux)
-│   ├── vpnc.conf.template     # Linux vpnc configuration template
-│   └── README.md              # VPN setup documentation
+│   ├── faenza-vpn.ts              # Cross-platform VPN service
+│   ├── vpnc.conf.template         # Linux vpnc config template
+│   └── README.md                  # VPN setup documentation
 ├── templates/
-│   ├── index.ts               # Template registry and rendering functions
-│   ├── types.ts               # TypeScript types for templates
-│   └── liquidation-communication.ts  # Comunicazione di Liquidazione template
-└── ...
+│   ├── index.ts                   # Template registry
+│   ├── types.ts                   # Template types
+│   └── liquidation-communication.ts # Liquidation template
+├── artifacts/
+│   └── server.ts                  # Server-side artifact handling
+├── branding/
+│   ├── inject-script.ts           # Branding injection
+│   └── theme-presets.ts           # Theme configuration
+├── editor/                        # ProseMirror editor
+│   ├── config.ts
+│   ├── functions.tsx
+│   └── ...
+├── constants.ts                   # Application constants
+├── errors.ts                      # Error types
+├── types.ts                       # Shared TypeScript types
+├── utils.ts                       # Utility functions
+├── usage.ts                       # Usage tracking types
+└── tokenlens.ts                   # Token usage enrichment
 
-scripts/
-├── setup-vpn-macos.sh         # macOS VPN setup script
-├── setup-vpn-linux.sh         # Linux/AWS VPN setup script (vpnc)
-├── convert_documents.py       # Document conversion utilities
-├── transcribe_videos.py       # Video transcription script
-└── podcast_creation.py        # Podcast generation script
+hooks/
+├── use-canvas-tabs.ts             # Multi-tab canvas management
+├── use-assistant-action.ts        # Client-side AI action registration
+├── use-client-tools.ts            # Client tools registry access
+├── use-artifact-streaming.ts      # Artifact streaming handler
+├── use-artifact.ts                # Artifact state management
+├── use-chat-document.ts           # Document state in chat
+├── use-selected-agent.ts          # Agent selection state
+├── use-runtime-config.ts          # Runtime configuration
+├── use-branding.ts                # Branding configuration
+├── use-demo-config.ts             # Demo mode configuration
+├── use-chat-visibility.ts         # Chat visibility controls
+├── use-chat-votes.ts              # Message voting
+├── use-messages.tsx               # Chat messages management
+├── use-mobile.ts                  # Mobile viewport detection
+├── use-debounced-save.ts          # Debounced save operations
+└── use-scroll-to-bottom.tsx       # Auto-scroll functionality
 
 components/
+├── activities/                    # NEW: Interactive activities
+│   ├── index.ts                   # Activity registry and exports
+│   ├── README.md                  # Activities documentation
+│   ├── flashcards/
+│   │   ├── index.tsx              # FlashcardActivity component
+│   │   ├── components.tsx         # Flashcard sub-components
+│   │   ├── player.tsx             # State management context
+│   │   └── schema.tsx             # Zod schemas and types
+│   ├── quiz/
+│   │   ├── index.tsx              # QuizActivity component
+│   │   ├── components.tsx         # Quiz sub-components
+│   │   ├── player.tsx             # State management context
+│   │   └── schema.tsx             # Zod schemas and types
+│   └── document-selector/
+│       ├── index.tsx              # Document selector activity
+│       └── schema.tsx             # Document selector schemas
 ├── artifacts/
-│   ├── document.tsx           # Document artifacts (text, code, sheet)
-│   ├── document-selector.tsx  # Document selector side panel artifact
-│   └── index.ts               # Artifact exports and types
+│   ├── index.ts                   # Artifact exports and types
+│   ├── document.tsx               # Document artifact renderer
+│   ├── document-selector.tsx      # Document selector panel
+│   ├── markdown-viewer.tsx        # Markdown viewer
+│   └── media.tsx                  # Media artifacts
 ├── chat/
-│   ├── canvas.tsx             # Resizable canvas layout
-│   ├── canvas-tabs.tsx        # Tab bar component for multi-tab canvas
-│   └── agent-selector.tsx     # Agent selection UI
-└── tools/
-    └── load-invoice.tsx       # Invoice UI (auto-opens side panel, shows details)
+│   ├── canvas.tsx                 # Resizable canvas layout
+│   ├── canvas-tabs.tsx            # Multi-tab bar component
+│   ├── canvas-widget.tsx          # Widget container
+│   ├── agent-selector.tsx         # Agent selection UI
+│   ├── composer.tsx               # Message composer
+│   ├── context.tsx                # Chat context provider
+│   ├── thread.tsx                 # Message thread
+│   ├── message.tsx                # Message component
+│   ├── message-parts.tsx          # Message part renderers
+│   ├── streaming.tsx              # Streaming state management
+│   ├── suggestions.tsx            # AI suggestions UI
+│   └── ...
+├── elements/                      # AI Elements UI components
+│   ├── conversation.tsx           # Conversation wrapper
+│   ├── message.tsx                # Message element
+│   ├── response.tsx               # AI response element
+│   ├── reasoning.tsx              # Reasoning display
+│   ├── tool.tsx                   # Tool invocation display
+│   ├── code-block.tsx             # Code block renderer
+│   └── ...
+├── tools/
+│   ├── index.tsx                  # Tool component exports
+│   ├── types.ts                   # Tool component types
+│   ├── load-invoice.tsx           # Invoice tool UI
+│   ├── document.tsx               # Document tool UI
+│   ├── activity.tsx               # Activity tool UI
+│   ├── weather.tsx                # Weather tool UI
+│   └── fallback.tsx               # Fallback tool UI
+├── ui/                            # shadcn/ui components
+│   ├── button.tsx
+│   ├── card.tsx
+│   ├── dialog.tsx
+│   └── ... (30+ components)
+├── demo-config/                   # Demo configuration panel
+│   ├── index.tsx
+│   ├── panel.tsx
+│   └── ...
+└── ... (other top-level components)
+
+scripts/
+├── setup-vpn-macos.sh             # macOS VPN setup script
+├── setup-vpn-linux.sh             # Linux/AWS VPN setup script
+└── diagnose-typescript.sh         # TypeScript diagnostics
+
+tests/
+├── e2e/                           # End-to-end tests
+│   ├── chat.test.ts
+│   ├── artifacts.test.ts
+│   └── ...
+├── routes/                        # Route tests
+│   ├── chat.test.ts
+│   └── document.test.ts
+├── unit/                          # Unit tests
+│   └── invoice-parser.test.ts
+├── pages/                         # Page object models
+│   ├── chat.ts
+│   ├── auth.ts
+│   └── artifact.ts
+├── fixtures.ts                    # Test fixtures
+└── helpers.ts                     # Test helpers
 ```
 
 ---
@@ -1144,9 +1683,56 @@ function extractMetadata(content: string, fileName: string): InvoiceMetadata {
 
 ---
 
-## Canvas Tab System
+## Canvas Widget System
 
-The canvas panel (right side of the application) supports a multi-tab system that allows users to work with multiple documents and widgets simultaneously.
+The canvas panel (right side of the application) implements a comprehensive widget registry system that allows users to work with multiple documents and widgets simultaneously. The system is designed for extensibility and provides streaming support for AI-generated content.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      Canvas Component                            │
+│  components/chat/canvas.tsx                                      │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                    Canvas Tabs                           │    │
+│  │  components/chat/canvas-tabs.tsx                         │    │
+│  │  [Tab 1] [Tab 2] [Tab 3] ...                            │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                              │                                   │
+│                              ▼                                   │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                   Widget Registry                        │    │
+│  │  lib/canvas/widget-registry.ts                          │    │
+│  │  - Lookup widget definition by kind                     │    │
+│  │  - Get renderer component                               │    │
+│  │  - Check streaming support                              │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                              │                                   │
+│                              ▼                                   │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                  Widget Context Provider                 │    │
+│  │  lib/canvas/widget-context.tsx                          │    │
+│  │  - Provides widget state to renderers                   │    │
+│  │  - Manages content, status, metadata                    │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                              │                                   │
+│                              ▼                                   │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                   Widget Renderer                        │    │
+│  │  (TextEditor, CodeEditor, SheetEditor, etc.)            │    │
+│  └─────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Components
+
+| Component | Path | Description |
+|-----------|------|-------------|
+| **Widget Registry** | `lib/canvas/widget-registry.ts` | Centralized registry for widget type definitions |
+| **Widget Context** | `lib/canvas/widget-context.tsx` | React context provider for widget state |
+| **Widget Definitions** | `lib/canvas/widget-definitions.tsx` | Built-in widget type configurations |
+| **Visible Content Store** | `lib/canvas/visible-content-store.ts` | Tracks visible content in active widgets |
 
 ### Widget Kinds
 
@@ -1158,6 +1744,486 @@ The canvas panel (right side of the application) supports a multi-tab system tha
 | `image` | Immagine | Yes | No | Image |
 | `markdown-viewer` | Visualizzatore Markdown | Yes | No | BookOpenText |
 | `document-selector` | Selettore documenti | No | No | LayoutGrid |
+
+### Widget Status Lifecycle
+
+```typescript
+type WidgetStatus = "pending" | "idle" | "streaming" | "error";
+```
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Tab opened before document ID is known (waiting for stream to start) |
+| `idle` | Tab is ready and not actively streaming |
+| `streaming` | Content is being streamed to the tab |
+| `error` | An error occurred |
+
+### Widget Registry API
+
+```typescript
+import { widgetRegistry, WIDGET_KINDS } from "@/lib/canvas";
+
+// Register a custom widget
+widgetRegistry.register({
+  kind: "my-widget",
+  label: "My Custom Widget",
+  icon: MyIcon,
+  renderer: MyWidgetRenderer,
+  allowMultiple: true,
+  supportsStreaming: false,
+  defaultContent: "",
+});
+
+// Get widget definition
+const definition = widgetRegistry.get(WIDGET_KINDS.TEXT);
+
+// Check capabilities
+const canStream = widgetRegistry.supportsStreaming("text"); // true
+const allowsMultiple = widgetRegistry.allowsMultiple("document-selector"); // false
+
+// Get renderer component
+const Renderer = widgetRegistry.getRenderer("code");
+```
+
+### Widget Context Hooks
+
+```typescript
+import {
+  useWidgetContext,
+  useWidgetIdentity,
+  useWidgetContent,
+  useWidgetStatus,
+  useWidgetActions,
+  useWidgetMeta,
+} from "@/lib/canvas";
+
+function MyWidgetRenderer() {
+  // Full context access
+  const ctx = useWidgetContext();
+  
+  // Selective access (performance optimized)
+  const { tabId, documentId, title } = useWidgetIdentity();
+  const { content, onContentChange } = useWidgetContent();
+  const { status } = useWidgetStatus();
+  const { onClose } = useWidgetActions();
+  const { meta } = useWidgetMeta();
+  
+  return <div>...</div>;
+}
+```
+
+### Tab Data Structure
+
+```typescript
+type CanvasTabData<TContent = unknown, TMeta = unknown> = {
+  id: string;           // Unique tab identifier
+  kind: WidgetKind;     // Widget type
+  documentId: string;   // Document identifier (for persistence/streaming)
+  title: string;        // Tab title
+  content: TContent;    // Widget content
+  status: WidgetStatus; // Current status
+  createdAt: number;    // Creation timestamp
+  meta?: TMeta;         // Optional metadata
+};
+```
+
+### Visible Content Store
+
+The visible content store tracks what content is currently visible in the canvas, enabling the AI to be aware of the user's context:
+
+```typescript
+import {
+  setVisibleContent,
+  getVisibleContent,
+  clearVisibleContent,
+  subscribeToVisibleContent,
+} from "@/lib/canvas";
+
+// Set visible content for a tab
+setVisibleContent("tab-123", {
+  kind: "text",
+  documentId: "doc-456",
+  content: "Document content here...",
+});
+
+// Get visible content
+const content = getVisibleContent("tab-123");
+
+// Subscribe to changes
+const unsubscribe = subscribeToVisibleContent("tab-123", (content) => {
+  console.log("Content changed:", content);
+});
+```
+
+### Adding a Custom Widget
+
+1. Define the widget in `lib/canvas/widget-definitions.tsx`:
+
+```typescript
+export const myWidgetDefinition: WidgetDefinition<"my-widget", MyContent> = {
+  kind: "my-widget",
+  label: "My Widget",
+  icon: MyIcon,
+  renderer: MyWidgetRenderer,
+  allowMultiple: true,
+  supportsStreaming: false,
+  defaultContent: { /* initial content */ },
+};
+```
+
+2. Register in `registerBuiltInWidgets()`:
+
+```typescript
+export function registerBuiltInWidgets() {
+  // ... existing registrations
+  widgetRegistry.register(myWidgetDefinition);
+}
+```
+
+3. Create the renderer component:
+
+```typescript
+function MyWidgetRenderer(props: WidgetRendererProps<MyContent>) {
+  const { content, onContentChange, status } = props;
+  
+  return (
+    <div className="p-4">
+      {/* Widget UI */}
+    </div>
+  );
+}
+```
+
+---
+
+## Activity System
+
+The Activity System provides interactive learning experiences that can be generated by AI and rendered within the chat. Activities include flashcards for study sessions and quizzes for knowledge assessment.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     AI Model Generation                          │
+│  - Generates ModelActivity with minimal schema                  │
+│  - Uses Zod schemas for validation                              │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Activity Registry                             │
+│  components/activities/index.ts                                  │
+│  - Maps activity types to components, schemas, converters       │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   Conversion (toUI)                              │
+│  - ModelActivity → UIActivity                                   │
+│  - Validates and transforms AI output for UI                    │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  Activity Component                              │
+│  - FlashcardActivity or QuizActivity                            │
+│  - Welcome, study/play, and completion screens                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Activity Registry
+
+The registry maps activity types to their components, schemas, and conversion functions:
+
+```typescript
+import { activities, isValidActivityType, getActivityComponent } from "@/components/activities";
+
+// Available activity types
+const activityTypes = Object.keys(activities); // ["flashcard", "quiz"]
+
+// Check if a type is valid
+if (isValidActivityType("flashcard")) {
+  const Component = getActivityComponent("flashcard");
+}
+
+// Get schema for AI generation
+const schema = getActivitySchema("quiz");
+```
+
+### Activity Types
+
+| Type | Component | Purpose |
+|------|-----------|---------|
+| `flashcard` | `FlashcardActivity` | Study sessions with front/back cards |
+| `quiz` | `QuizActivity` | Multiple-choice knowledge assessment |
+
+### Model vs UI Activity Types
+
+Activities have two type variants:
+
+1. **ModelActivity** - Minimal schema for AI generation (auto-generated IDs, simpler structure)
+2. **UIActivity** - Full schema for UI components (required IDs, complete structure)
+
+```typescript
+// Model activity (from AI)
+type ModelActivity<T extends string, P> = {
+  id?: string;           // Auto-generated if not provided
+  type: T;
+  payload: P;
+  title: string;
+  description?: string;
+  difficulty?: "easy" | "medium" | "hard";
+  objectives?: string[];
+};
+
+// UI activity (for components)
+type UIActivity<T extends string, P> = {
+  id: string;            // Required
+  type: T;
+  payload: P;
+  title: string;
+  description?: string;
+  difficulty?: "easy" | "medium" | "hard";
+  objectives: string[];  // Required (can be empty array)
+};
+```
+
+### Flashcard Activity
+
+**Schema (Model - for AI generation):**
+
+```typescript
+const ModelFlashcardSchema = z.object({
+  id: z.string().default(generateUUID),
+  front: z.string().describe("Question or prompt"),
+  back: z.string().describe("Answer or explanation"),
+  hint: z.string().describe("Guide without giving away the answer"),
+  explanation: z.string().optional(),
+});
+```
+
+**Component Usage:**
+
+```typescript
+import { FlashcardActivity } from "@/components/activities";
+
+<FlashcardActivity
+  activity={uiFlashcardActivity}
+  shuffle={true}
+  showHints={true}
+  trackConfidence={true}
+  defaultScreen="welcome"
+/>
+```
+
+**Screens:**
+- **Welcome Screen**: Shows card count, estimated time, start button
+- **Study Screen**: Card display with flip, navigation, confidence rating
+- **End Screen**: Statistics, confidence distribution, restart option
+
+### Quiz Activity
+
+**Schema (Model - for AI generation):**
+
+```typescript
+const ModelQuizQuestionSchema = z.object({
+  id: z.string().default(generateUUID),
+  question: z.string().describe("Clear, specific question"),
+  choices: z.array(z.string()).min(2).max(6),
+  correctAnswerIndex: z.number().describe("Index of correct choice"),
+  explanation: z.string().optional(),
+});
+```
+
+**Component Usage:**
+
+```typescript
+import { QuizActivity } from "@/components/activities";
+
+<QuizActivity
+  activity={uiQuizActivity}
+  shuffle={true}
+  showExplanations={true}
+  defaultScreen="welcome"
+/>
+```
+
+### Conversion Functions
+
+Each activity type has a `toUI` function that converts AI-generated data to UI format:
+
+```typescript
+import { toChatActivity } from "@/components/activities";
+
+// Convert model activity to UI activity
+const uiActivity = toChatActivity("flashcard", modelFlashcardActivity);
+const quizUI = toChatActivity("quiz", modelQuizActivity);
+```
+
+### Adding a New Activity Type
+
+1. Create the activity folder in `components/activities/`:
+
+```
+components/activities/my-activity/
+├── index.tsx         # Main activity component
+├── components.tsx    # Sub-components
+├── player.tsx        # State management context
+└── schema.tsx        # Zod schemas and types
+```
+
+2. Define schemas in `schema.tsx`:
+
+```typescript
+// Model schema (for AI)
+export const ModelMyActivitySchema = z.object({
+  id: z.string().default(generateUUID),
+  // ... fields
+});
+
+// UI schema (for components)
+export const UIMyActivitySchema = z.object({
+  id: z.string(),
+  // ... fields
+});
+
+// Conversion function
+export function toUIMyActivity(source: ModelMyActivity): UIMyActivity {
+  // Transform model to UI format
+}
+```
+
+3. Register in `components/activities/index.ts`:
+
+```typescript
+import { MyActivity } from "./my-activity";
+import { ModelMyActivitySchema, toUIMyActivity } from "./my-activity/schema";
+
+export const activities = {
+  // ... existing
+  "my-activity": defineActivity({
+    type: "my-activity",
+    Component: MyActivity,
+    schema: z.array(ModelMyActivitySchema),
+    toUI: toUIMyActivity,
+  }),
+};
+```
+
+---
+
+## Activity Tracking System
+
+The Activity Tracking System provides state management for interactive activities, tracking user attempts, progress, and scores.
+
+### Overview
+
+Located in `lib/activity-tracking/`, this system provides:
+- Attempt lifecycle management (start, complete, cancel)
+- Event dispatching for activity state changes
+- Score tracking and validation
+- Subscription-based state updates
+
+### Key Components
+
+| Component | Path | Description |
+|-----------|------|-------------|
+| **AttemptStore** | `lib/activity-tracking/store.ts` | Main state management class |
+| **ActivityEvent** | `lib/activity-tracking/events.ts` | Custom event dispatching |
+| **AttemptError** | `lib/activity-tracking/errors.ts` | Error types for attempt operations |
+
+### Attempt States
+
+```typescript
+type AttemptStatus = "pending" | "in_progress" | "completed" | "cancelled";
+```
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Initial state, attempt not yet started |
+| `in_progress` | User is actively working on the activity |
+| `completed` | Activity finished (with or without score) |
+| `cancelled` | User cancelled the activity |
+
+### Using the AttemptStore
+
+```typescript
+import { createAttemptStore } from "@/lib/activity-tracking";
+
+// Create a store for an activity
+const store = createAttemptStore<StartData, CompleteData>(
+  "flashcards-session-123",  // Activity ID
+  "flashcard"                 // Activity type
+);
+
+// Start an attempt
+store.start({ shuffled: true, cardCount: 10 });
+
+// Get current state
+const state = store.getState();
+// { status: "in_progress", startedAt: Date, ... }
+
+// Complete the attempt
+store.complete({
+  score: { correct: 8, total: 10 },
+  timeSpent: 120,
+});
+
+// Subscribe to state changes
+const unsubscribe = store.subscribe((state, event) => {
+  console.log("State changed:", state, event);
+});
+```
+
+### Attempt Interface
+
+```typescript
+type Attempt<START = unknown, COMPLETE = unknown> = {
+  id: string;
+  activityId: string;
+  activityType: string;
+  status: AttemptStatus;
+  startedAt?: Date;
+  completedAt?: Date;
+  startData?: START;
+  completeData?: COMPLETE;
+  score?: AttemptScore;
+};
+
+type AttemptScore = {
+  correct: number;
+  total: number;
+  percentage?: number;
+};
+```
+
+### Event System
+
+The `ActivityEvent` class provides custom event dispatching:
+
+```typescript
+import { ActivityEvent } from "@/lib/activity-tracking";
+
+// Events are dispatched on state changes
+// - "attempt:start"
+// - "attempt:complete"
+// - "attempt:cancel"
+// - "attempt:reset"
+```
+
+### Error Handling
+
+```typescript
+import { AttemptError } from "@/lib/activity-tracking";
+
+try {
+  store.start(data);
+} catch (error) {
+  if (error instanceof AttemptError) {
+    console.error("Attempt error:", error.code, error.message);
+  }
+}
+```
 
 ---
 

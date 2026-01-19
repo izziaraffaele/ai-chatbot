@@ -115,6 +115,8 @@ type FileSystemRoot = {
  */
 type LoadInvoiceOutput = {
   success: boolean;
+  /** Canonical record identifier for re-loading (e.g., "sibac-shared:path/to/file.xml") */
+  recordId?: string;
   error?: string;
   metadata?: {
     fileId: string;
@@ -342,6 +344,7 @@ function PureLoadInvoiceTool({ part }: ChatToolProps) {
     return (
       <InvoiceDetails
         metadata={output.metadata}
+        recordId={output.recordId}
         validation={output.validation}
       />
     );
@@ -399,9 +402,12 @@ function ValidationBadge({ isValid }: { isValid: boolean }) {
  */
 function InvoiceDetails({
   metadata,
+  recordId,
   validation,
 }: {
   metadata: NonNullable<LoadInvoiceOutput["metadata"]>;
+  /** Canonical record identifier for re-loading */
+  recordId?: string;
   validation?: InvoiceValidationResult;
 }) {
   const { chat } = useChatRuntime();
@@ -455,16 +461,17 @@ function InvoiceDetails({
 
     setAnalysisRequested(true);
 
-    // Build the analysis request message
+    // Build the analysis request message using canonical recordId for accurate loading
     const missingFieldsList = validation.campiMancanti.join(", ");
-    const message = `Analizza la fattura ${metadata.fileId} per trovare i seguenti campi mancanti: ${missingFieldsList}`;
+    const documentId = recordId ?? metadata.fileId;
+    const message = `Analizza la fattura ${documentId} per trovare i seguenti campi mancanti: ${missingFieldsList}`;
 
     // Send the message to the chat agent
     chat.sendMessage({
       role: "user",
       parts: [{ type: "text", text: message }],
     });
-  }, [chat, metadata.fileId, validation?.campiMancanti]);
+  }, [chat, metadata.fileId, recordId, validation?.campiMancanti]);
 
   // Toggle expand/collapse for non-current documents
   const handleToggleExpand = useCallback(() => {

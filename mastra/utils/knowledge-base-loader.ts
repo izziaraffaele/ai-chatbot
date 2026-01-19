@@ -7,7 +7,7 @@
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve, sep } from "node:path";
 import type { ImpegnoForUI } from "@/lib/db/oracle-types";
 import { readSibacFile } from "@/lib/smb/sibac-share";
 
@@ -663,6 +663,8 @@ export type FileSystemRoot = {
  * Loaded record (unified format for both local and Oracle sources)
  */
 export type LoadedRecord = {
+  /** Canonical record identifier for re-loading (e.g., "sibac-shared:Faenza/.../file.xml") */
+  recordId: string;
   metadata: InvoiceMetadata;
   content: string;
   validation: InvoiceValidation;
@@ -783,6 +785,7 @@ export async function loadRecord(
         };
 
     return {
+      recordId, // Preserve the canonical ID for re-loading
       metadata: invoice.metadata,
       content: invoice.content,
       validation: {
@@ -818,6 +821,7 @@ export async function loadRecord(
       const content = JSON.stringify(impegno.rawRecord, null, 2);
 
       return {
+        recordId: `oracle:${impegno.fileId}`, // Canonical ID for Oracle records
         metadata,
         content,
         validation,
@@ -839,6 +843,7 @@ export async function loadRecord(
   const validation = validateInvoice(invoice.content);
 
   return {
+    recordId: invoice.metadata.fileId, // Use the resolved fileId for local files
     metadata: invoice.metadata,
     content: invoice.content,
     validation: {
@@ -925,6 +930,14 @@ export function listSibacSharedFiles(): string[] {
 async function fetchFromSmbShare(
   filePath: string
 ): Promise<LoadedInvoice | null> {
+  // Security: block obvious path traversal attempts
+  if (filePath.startsWith("..") || filePath.includes("/../")) {
+    console.error(
+      `[KB] Path traversal attempt blocked in SMB fetch: ${filePath}`
+    );
+    return null;
+  }
+
   try {
     console.log(`[KB] Fetching from SMB: ${filePath}`);
     const result = await readSibacFile(filePath);
@@ -968,7 +981,16 @@ export function loadSibacSharedFile(fileId: string): LoadedInvoice | null {
     // Check if fileId is a full path (contains /)
     if (fileId.includes("/")) {
       // Direct path - construct full file path
-      const filePath = join(SIBAC_SHARED_PATH, fileId);
+      const filePath = resolve(SIBAC_SHARED_PATH, fileId);
+
+      // Security: prevent path traversal attacks (e.g., ../../../etc/passwd)
+      if (
+        !filePath.startsWith(SIBAC_SHARED_PATH + sep) &&
+        filePath !== SIBAC_SHARED_PATH
+      ) {
+        console.error(`[KB] Path traversal attempt blocked: ${fileId}`);
+        return null;
+      }
 
       // Check if file exists
       if (!existsSync(filePath)) {

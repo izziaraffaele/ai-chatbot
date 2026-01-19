@@ -17,6 +17,7 @@
 
 import { Agent } from "@mastra/core/agent";
 import { invoiceValidationTools } from "../../../tools/invoice-validation-tools";
+import { loadInvoiceTool } from "../../../tools/load-invoice-tool";
 import { invoiceAnalyzerSystemPrompt } from "./system-prompt";
 
 /**
@@ -40,7 +41,10 @@ export function createInvoiceAnalyzerAgent(missingFields: string[]): Agent {
     name: "Invoice Analyzer",
     instructions: invoiceAnalyzerSystemPrompt(missingFields),
     model: "openai/gpt-5.1",
-    tools: invoiceValidationTools,
+    tools: {
+      ...invoiceValidationTools,
+      loadInvoice: loadInvoiceTool,
+    },
     // No memory - this is a stateless analysis agent
   });
 }
@@ -70,5 +74,8 @@ export const invoiceAnalyzerAgent = new Agent({
     "Codice Destinatario PA",
   ]),
   model: "openai/gpt-5.1",
-  tools: invoiceValidationTools,
+  tools: {
+    ...invoiceValidationTools,
+    loadInvoice: loadInvoiceTool,
+  },
 });
