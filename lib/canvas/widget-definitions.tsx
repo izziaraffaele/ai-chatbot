@@ -3,6 +3,7 @@
 import {
   BookOpenText,
   Code2,
+  Database,
   FileSpreadsheet,
   FileText,
   Image,
@@ -38,6 +39,12 @@ const LazyDocumentSelectorArtifact = lazy(() =>
 const LazyMarkdownViewerArtifact = lazy(() =>
   import("@/components/artifacts/markdown-viewer").then((mod) => ({
     default: mod.MarkdownViewerArtifact,
+  }))
+);
+
+const LazySibacViewsExplorerArtifact = lazy(() =>
+  import("@/components/artifacts/sibac-views-explorer").then((mod) => ({
+    default: mod.SibacViewsExplorerArtifact,
   }))
 );
 
@@ -175,6 +182,19 @@ const MarkdownViewerRenderer = memo(function MarkdownViewerRenderer({
   );
 });
 
+/**
+ * Adapter for SIBAC Views Explorer widget
+ */
+const SibacViewsExplorerRenderer = memo(function SibacViewsExplorerRenderer({
+  className,
+}: WidgetRendererProps<unknown>) {
+  return (
+    <Suspense fallback={<WidgetLoadingFallback />}>
+      <LazySibacViewsExplorerArtifact className={className} />
+    </Suspense>
+  );
+});
+
 // ============================================================================
 // WIDGET DEFINITIONS
 // ============================================================================
@@ -306,6 +326,28 @@ export const markdownViewerWidgetDefinition: WidgetDefinition<
   },
 };
 
+/**
+ * SIBAC Views Explorer Widget Definition
+ * Database view browser for SIB_V_IMPEGNI_X_CIG Oracle views
+ */
+export const sibacViewsExplorerWidgetDefinition: WidgetDefinition<
+  typeof WIDGET_KINDS.SIBAC_VIEWS_EXPLORER,
+  unknown
+> = {
+  kind: WIDGET_KINDS.SIBAC_VIEWS_EXPLORER,
+  label: "Esplora Viste SIBAC",
+  icon: Database,
+  renderer: SibacViewsExplorerRenderer,
+  allowMultiple: true,
+  supportsStreaming: false,
+  defaultContent: null,
+  tabColor: {
+    active: "bg-purple-500 text-white border-purple-500",
+    inactive: "bg-muted/50 text-muted-foreground border-border/50",
+    icon: "text-white",
+  },
+};
+
 // ============================================================================
 // REGISTRATION
 // ============================================================================
@@ -321,6 +363,7 @@ export function registerBuiltInWidgets(): void {
   widgetRegistry.register(imageWidgetDefinition);
   widgetRegistry.register(markdownViewerWidgetDefinition);
   widgetRegistry.register(documentSelectorWidgetDefinition);
+  widgetRegistry.register(sibacViewsExplorerWidgetDefinition);
 }
 
 /**
@@ -333,4 +376,5 @@ export const builtInWidgetDefinitions = [
   imageWidgetDefinition,
   markdownViewerWidgetDefinition,
   documentSelectorWidgetDefinition,
+  sibacViewsExplorerWidgetDefinition,
 ];

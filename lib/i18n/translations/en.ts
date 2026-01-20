@@ -164,6 +164,14 @@ export const en = {
   "artifact.document.readonlyError":
     "Viewing files in shared chats is currently not supported.",
 
+  // Document Export
+  "document.downloadDoc": "Download .docx",
+  "document.downloadTxt": "Download .txt",
+  "document.downloadWord": "Word",
+  "document.exportError": "Export failed",
+  "document.saveFirstToExport": "Save the document before exporting",
+  "document.liquidationDocument": "Liquidation Document",
+
   // Console
   "console.title": "Console",
   "console.initializing": "Initializing...",
@@ -355,6 +363,39 @@ export const en = {
 
   "message.copyError": "There's no text to copy!",
   "message.copySuccess": "Copied to clipboard!",
+
+  // ============================================================================
+  // SIBAC Views Explorer
+  // ============================================================================
+
+  "sibacViews.title": "SIBAC Views",
+  "sibacViews.subtitle": "Explore Oracle SIBAC views",
+  "sibacViews.cardTitle": "Explore SIBAC Views",
+  "sibacViews.cardDescription": "View Oracle database data",
+  "sibacViews.cardBadge": "Oracle",
+  "sibacViews.status.connected": "Connected",
+  "sibacViews.status.disconnected": "Disconnected",
+  "sibacViews.status.checking": "Checking...",
+  "sibacViews.status.vpnDisconnected": "VPN not connected. Connect to VPN to access the database.",
+  "sibacViews.status.serverUnreachable": "Oracle server unreachable. Check VPN configuration.",
+  "sibacViews.status.portBlocked": "Oracle port 1521 unreachable. The Oracle service may be down or blocked by firewall.",
+  "sibacViews.userSelector.all": "All (Aggregated)",
+  "sibacViews.search.placeholder": "Search CIG...",
+  "sibacViews.search.button": "Search",
+  "sibacViews.table.rows": "rows",
+  "sibacViews.table.noData": "No records found",
+  "sibacViews.table.noDataCig": "No results for CIG:",
+  "sibacViews.pagination.page": "Page",
+  "sibacViews.pagination.records": "records",
+  "sibacViews.pagination.filter": "Filter CIG:",
+  "sibacViews.pagination.previous": "Previous",
+  "sibacViews.pagination.next": "Next",
+  "sibacViews.detail.title": "View Record",
+  "sibacViews.detail.subtitle": "Record detail",
+  "sibacViews.detail.close": "Close",
+  "sibacViews.loading.data": "Loading data...",
+  "sibacViews.loading.connection": "Checking connection...",
+  "sibacViews.error.invalidUser": "Invalid user: {user}. Allowed users: cp_ia01 - cp_ia08",
 } as const;
 
 export type TranslationKey = keyof typeof en;

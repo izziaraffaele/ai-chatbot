@@ -2,7 +2,10 @@
  * Oracle SIBAC Database Client
  *
  * Provides connection and query functions for the SIBAC Oracle database.
- * Connects via VPN to access all 8 SIB_V_IMPEGNI_X_CIG views (sib01-sib08).
+ * Connects via VPN (and optionally SSH tunnel) to access all 8 SIB_V_IMPEGNI_X_CIG views (sib01-sib08).
+ *
+ * When SSH_TUNNEL_ENABLED=true, connections are routed through an SSH tunnel
+ * to bypass firewall restrictions on port 1521.
  */
 
 import oracledb from "oracledb";
@@ -14,7 +17,13 @@ import {
   isValidIBAN,
   VALIDATION_FIELD_NAMES,
 } from "@/mastra/utils/knowledge-base-loader";
-import { withVpnConnection } from "../vpn/faenza-vpn";
+import { withVpnConnection } from "../vpn/faenza-vpn"; // Used in withOracleConnection wrapper
+import {
+  getEffectiveOracleHost,
+  getEffectiveOraclePort,
+  isSshTunnelEnabled,
+  withSshTunnel,
+} from "../vpn/ssh-tunnel";
 import {
   type ImpegniQueryOptions,
   type ImpegnoForUI,
@@ -25,7 +34,12 @@ import {
   type OracleColumnInfo,
   type OracleUser,
   type SchemaDiscoveryResult,
+  SIBAC_VIEW_NAME,
   USER_VIEW_MAPPING,
+  VIEW_DATA_MAX_LIMIT,
+  type ViewDataQueryOptions,
+  type ViewDataResult,
+  type ViewTarget,
 } from "./oracle-types";
 
 // oracledb 6.x uses Thin mode by default (no Oracle Client installation required)
@@ -42,11 +56,31 @@ const pools: Map<OracleUser, oracledb.Pool> = new Map();
 const poolInitializing: Map<OracleUser, boolean> = new Map();
 
 /**
+ * Combined wrapper that ensures VPN and SSH tunnel (if enabled) are connected
+ * before executing database operations.
+ */
+function withOracleConnection<T>(callback: () => Promise<T>): Promise<T> {
+  // First, ensure VPN is connected
+  return withVpnConnection(() => {
+    // Then, ensure SSH tunnel is connected (if enabled)
+    return withSshTunnel(callback);
+  });
+}
+
+/**
  * Get Oracle connection configuration from environment
+ *
+ * When SSH tunnel is enabled and connected, uses localhost and the tunnel port
+ * instead of the direct Oracle host/port.
  */
 function getConnectionConfig(user?: OracleUser) {
-  const host = process.env.ORACLE_HOST ?? "192.168.0.204";
-  const port = Number.parseInt(process.env.ORACLE_PORT ?? "1521", 10);
+  // Use SSH tunnel's effective host/port when tunnel is enabled
+  const host = isSshTunnelEnabled()
+    ? getEffectiveOracleHost()
+    : (process.env.ORACLE_HOST ?? "192.168.0.204");
+  const port = isSshTunnelEnabled()
+    ? getEffectiveOraclePort()
+    : Number.parseInt(process.env.ORACLE_PORT ?? "1521", 10);
   const serviceName = process.env.ORACLE_SERVICE_NAME ?? "SIBAC";
   const selectedUser =
     user ?? ((process.env.ORACLE_USER ?? "cp_ia01") as OracleUser);
@@ -149,12 +183,12 @@ export async function closeAllPools(): Promise<void> {
 /**
  * Discover the schema of the SIB_V_IMPEGNI_X_CIG view
  */
-export async function discoverViewSchema(
+export function discoverViewSchema(
   user?: OracleUser
 ): Promise<SchemaDiscoveryResult> {
   const targetUser = user ?? "cp_ia01";
 
-  return withVpnConnection(async () => {
+  return withOracleConnection(async () => {
     const connection = await getConnectionForUser(targetUser);
     const viewName = USER_VIEW_MAPPING[targetUser] ?? "SIB_V_IMPEGNI_X_CIG";
 
@@ -288,10 +322,10 @@ async function queryImpegniForUser(
  *
  * Queries all 8 views (sib01-sib08) in parallel and aggregates results.
  */
-export async function listImpegni(
+export function listImpegni(
   options: ImpegniQueryOptions = {}
 ): Promise<ImpegnoForUI[]> {
-  return withVpnConnection(async () => {
+  return withOracleConnection(async () => {
     console.log("[Oracle] Querying all 8 views in parallel...");
 
     // Query all views in parallel
@@ -331,11 +365,11 @@ export async function listImpegni(
 /**
  * List impegni from a single user's view only
  */
-export async function listImpegniForUser(
+export function listImpegniForUser(
   user: OracleUser,
   options: ImpegniQueryOptions = {}
 ): Promise<ImpegnoForUI[]> {
-  return withVpnConnection(async () => {
+  return withOracleConnection(async () => {
     const result = await queryImpegniForUser(user, options);
     if (result.error) {
       throw new Error(result.error);
@@ -546,7 +580,7 @@ export async function testAllConnections(): Promise<{
   results: Array<{ user: OracleUser; success: boolean; message: string }>;
 }> {
   try {
-    return await withVpnConnection(async () => {
+    return await withOracleConnection(async () => {
       const results: Array<{
         user: OracleUser;
         success: boolean;
@@ -604,7 +638,7 @@ export async function testConnection(user?: OracleUser): Promise<{
   const targetUser = user ?? "cp_ia01";
 
   try {
-    return await withVpnConnection(async () => {
+    return await withOracleConnection(async () => {
       const connection = await getConnectionForUser(targetUser);
 
       try {
@@ -635,4 +669,185 @@ export async function testConnection(user?: OracleUser): Promise<{
       message: `Connessione fallita: ${error}`,
     };
   }
+}
+
+// ============================================================================
+// VIEW BROWSING FUNCTIONS (for SIBAC Views Explorer widget)
+// ============================================================================
+
+/**
+ * Get list of available view targets
+ *
+ * Returns the static allowlist of Oracle users and their corresponding views.
+ * This is used by the Views Explorer widget to populate the user dropdown.
+ */
+export function getAvailableViews(): ViewTarget[] {
+  return ORACLE_USERS.map((user) => ({
+    id: `${user}.${SIBAC_VIEW_NAME}`,
+    user,
+    name: SIBAC_VIEW_NAME,
+    fullPath: USER_VIEW_MAPPING[user],
+  }));
+}
+
+/**
+ * Validate that a user is in the allowlist
+ */
+export function isValidOracleUser(user: string): user is OracleUser {
+  return ORACLE_USERS.includes(user as OracleUser);
+}
+
+/**
+ * Query raw view data for a single user with pagination
+ *
+ * Returns raw ImpegnoRecord objects (not mapped to UI format) for direct table display.
+ */
+async function queryViewDataForUser(
+  user: OracleUser,
+  options: ViewDataQueryOptions = {}
+): Promise<ViewDataResult> {
+  try {
+    const connection = await getConnectionForUser(user);
+
+    try {
+      // Build the query with bind variables only
+      let query = `SELECT * FROM ${SIBAC_VIEW_NAME}`;
+      const binds: Record<string, string | number> = {};
+      const conditions: string[] = [];
+
+      // CIG filter (exact match)
+      if (options.cig) {
+        conditions.push("CIG = :cig");
+        binds.cig = options.cig.toUpperCase();
+      }
+
+      if (conditions.length > 0) {
+        query += ` WHERE ${conditions.join(" AND ")}`;
+      }
+
+      // Deterministic ordering - default by CIG, fallback to ROWNUM
+      const orderBy = options.orderBy ?? "CIG";
+      const orderDir = options.orderDir ?? "ASC";
+      query += ` ORDER BY ${orderBy} ${orderDir} NULLS LAST`;
+
+      // Clamp limit to max
+      const limit = Math.min(options.limit ?? 50, VIEW_DATA_MAX_LIMIT);
+      const offset = options.offset ?? 0;
+      query += ` OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY`;
+
+      const result = await connection.execute(query, binds, {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+      });
+
+      const rows = (result.rows ?? []) as ImpegnoRecord[];
+      console.log(
+        `[Oracle] ${user}: Retrieved ${rows.length} raw records for view browsing`
+      );
+
+      return {
+        success: true,
+        user,
+        view: SIBAC_VIEW_NAME,
+        limit,
+        offset,
+        rows,
+      };
+    } finally {
+      await connection.close();
+    }
+  } catch (error) {
+    console.error(`[Oracle] View data query failed for ${user}:`, error);
+    return {
+      success: false,
+      user,
+      view: SIBAC_VIEW_NAME,
+      limit: options.limit ?? 50,
+      offset: options.offset ?? 0,
+      rows: [],
+      error: String(error),
+    };
+  }
+}
+
+/**
+ * List raw view data from a single user's view
+ *
+ * Use this for single-user view browsing in the explorer widget.
+ */
+export function listViewData(
+  user: OracleUser,
+  options: ViewDataQueryOptions = {}
+): Promise<ViewDataResult> {
+  return withOracleConnection(async () => {
+    return await queryViewDataForUser(user, options);
+  });
+}
+
+/**
+ * List raw view data from ALL users (aggregated)
+ *
+ * Queries all 8 views in parallel and merges results.
+ * Each row includes a sourceUser field to indicate origin.
+ */
+export function listViewDataAllUsers(
+  options: ViewDataQueryOptions = {}
+): Promise<ViewDataResult> {
+  return withOracleConnection(async () => {
+    console.log("[Oracle] Querying all 8 views for raw data browsing...");
+
+    // Calculate per-view limit to distribute across all users
+    const totalLimit = Math.min(options.limit ?? 50, VIEW_DATA_MAX_LIMIT);
+    const perViewLimit = Math.ceil(totalLimit / ORACLE_USERS.length);
+    const perViewOptions: ViewDataQueryOptions = {
+      ...options,
+      limit: perViewLimit,
+    };
+
+    // Query all views in parallel
+    const results = await Promise.all(
+      ORACLE_USERS.map((user) => queryViewDataForUser(user, perViewOptions))
+    );
+
+    // Aggregate results
+    const allRows: ImpegnoRecord[] = [];
+    const errors: string[] = [];
+
+    for (const result of results) {
+      if (result.error) {
+        errors.push(`${result.user}: ${result.error}`);
+      }
+      // Add sourceUser to each row for traceability
+      for (const row of result.rows) {
+        allRows.push({
+          ...row,
+          _sourceUser: result.user,
+        });
+      }
+    }
+
+    if (errors.length > 0) {
+      console.warn(
+        `[Oracle] Some views had errors during aggregated query: ${errors.length}/${ORACLE_USERS.length}`
+      );
+    }
+
+    console.log(
+      `[Oracle] Total raw records retrieved from all views: ${allRows.length}`
+    );
+
+    // Apply global limit if needed
+    const finalRows =
+      allRows.length > totalLimit ? allRows.slice(0, totalLimit) : allRows;
+
+    return {
+      success: errors.length < ORACLE_USERS.length, // Success if at least one view worked
+      user: "all",
+      view: SIBAC_VIEW_NAME,
+      limit: totalLimit,
+      offset: options.offset ?? 0,
+      rows: finalRows,
+      error:
+        errors.length > 0 ? `Errors in ${errors.length} views` : undefined,
+    };
+  });
 }

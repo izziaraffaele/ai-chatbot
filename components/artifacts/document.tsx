@@ -8,9 +8,10 @@ import {
   CopyIcon,
   DownloadIcon,
   EyeIcon,
+  FileTextIcon,
   HistoryIcon,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { codeArtifact } from "@/artifacts/code/client";
 import { sheetArtifact } from "@/artifacts/sheet/client";
 import { textArtifact } from "@/artifacts/text/client";
@@ -27,6 +28,7 @@ import {
   useArtifactVersion,
 } from "@/components/chat/artifact";
 import { useChatRuntime } from "@/components/chat/context";
+import { toast } from "@/components/toast";
 import { Toolbar } from "@/components/toolbar";
 import { VersionFooter } from "@/components/version-footer";
 import { useArtifact } from "@/hooks/use-artifact";
@@ -38,6 +40,7 @@ import {
 import { useChatDocument } from "@/hooks/use-chat-document";
 import { isPendingDocumentId } from "@/lib/canvas";
 import type { Document } from "@/lib/db/schema";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { cn } from "@/lib/utils";
 import { ArtifactActions } from "../elements/artifact";
 
@@ -171,6 +174,43 @@ export function DocumentArtifact({
   // Set initial index to the latest version (last item in versions array)
   const initialVersionIndex = Math.max(0, versions.length - 1);
 
+  // Auto-save when streaming completes
+  // This ensures newly created documents are persisted to the database for export
+  // Note: We save directly to API without calling chatDocument.mutate() to avoid
+  // disrupting the display state. The content continues to show from tab state.
+  useEffect(() => {
+    const status = tabArtifact?.status;
+    const hasDbEntry = chatDocument.entries && chatDocument.entries.length > 0;
+    const hasContent = currentContent && currentContent.length > 0;
+
+    // If streaming just completed, document has content, but no DB entry exists - save it
+    if (
+      status === "idle" &&
+      hasContent &&
+      !hasDbEntry &&
+      !isPendingDocumentId(documentId)
+    ) {
+      // Save directly to API without triggering mutate to avoid display issues
+      fetch(`/api/document?id=${documentId}`, {
+        method: "POST",
+        body: JSON.stringify({
+          title,
+          content: currentContent,
+          kind,
+        }),
+      }).catch((error) => {
+        console.error("Error auto-saving document:", error);
+      });
+    }
+  }, [
+    tabArtifact?.status,
+    chatDocument.entries,
+    currentContent,
+    documentId,
+    title,
+    kind,
+  ]);
+
   return (
     <ArtifactVersionProvider
       initialIndex={initialVersionIndex}
@@ -245,11 +285,69 @@ function DocumentArtifactContent({
     content: draftContent,
     setContent,
   } = useArtifactDraft<string>();
+  const t = useTranslations();
 
   // Session-scoped version history from tab meta
   const [viewingSessionVersionId, setViewingSessionVersionId] = useState<
     string | null
   >(null);
+
+  // .doc export loading state
+  const [isExportingDoc, setIsExportingDoc] = useState(false);
+
+  // Handle .docx export
+  const handleDownloadDoc = useCallback(async () => {
+    const documentId = activeTab?.artifact.documentId;
+
+    // Don't allow export for pending documents
+    if (!documentId || isPendingDocumentId(documentId)) {
+      toast({
+        type: "error",
+        description: t(
+          "document.saveFirstToExport",
+          "Save the document before exporting"
+        ),
+      });
+      return;
+    }
+
+    setIsExportingDoc(true);
+
+    try {
+      const response = await fetch(
+        `/api/document/export?id=${encodeURIComponent(documentId)}&format=docx`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || t("document.exportError", "Export failed")
+        );
+      }
+
+      // Get the blob and create download link
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${title || "document"}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error exporting document:", error);
+      toast({
+        type: "error",
+        description:
+          error instanceof Error
+            ? error.message
+            : t("document.exportError", "Export failed"),
+      });
+    } finally {
+      setIsExportingDoc(false);
+    }
+  }, [activeTab?.artifact.documentId, title, t]);
 
   // Get session versions from tab meta
   const sessionVersions = useMemo<DocumentVersion[]>(() => {
@@ -319,8 +417,34 @@ function DocumentArtifactContent({
               content={displayContent}
               filename={`${title}.txt`}
               icon={<DownloadIcon className="size-4" />}
-              tooltip="Download"
+              tooltip={t("document.downloadTxt", "Download .txt")}
             />
+            {/* Separator before Word download */}
+            <div className="mx-1 h-4 w-px bg-border" />
+            {/* Word document download - more prominent */}
+            <button
+              className={cn(
+                "flex h-8 items-center gap-1.5 rounded-md px-2.5 font-medium text-sm transition-colors",
+                isExportingDoc ||
+                  isStreaming ||
+                  isPendingDocumentId(activeTab?.artifact.documentId || "")
+                  ? "cursor-not-allowed bg-muted text-muted-foreground opacity-50"
+                  : "bg-primary/10 text-primary hover:bg-primary/20"
+              )}
+              disabled={
+                isExportingDoc ||
+                isStreaming ||
+                isPendingDocumentId(activeTab?.artifact.documentId || "")
+              }
+              onClick={handleDownloadDoc}
+              title={t("document.downloadDoc", "Download .doc")}
+              type="button"
+            >
+              <FileTextIcon className="size-4" />
+              <span className="hidden sm:inline">
+                {t("document.downloadWord", "Word")}
+              </span>
+            </button>
           </ArtifactActions>
         }
         onClose={onClose}

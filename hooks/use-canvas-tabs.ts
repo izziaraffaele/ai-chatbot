@@ -660,6 +660,7 @@ export const ARTIFACT_KIND_TO_TAB_TYPE: Record<string, CanvasTabType> = {
 const ARTIFACT_KIND_TO_WIDGET_KIND: Record<string, WidgetKind> = {
   "document-selector": WIDGET_KINDS.DOCUMENT_SELECTOR,
   "fondazione-browser": WIDGET_KINDS.FONDAZIONE_BROWSER,
+  "sibac-views-explorer": WIDGET_KINDS.SIBAC_VIEWS_EXPLORER,
   text: WIDGET_KINDS.TEXT,
   code: WIDGET_KINDS.CODE,
   sheet: WIDGET_KINDS.SHEET,

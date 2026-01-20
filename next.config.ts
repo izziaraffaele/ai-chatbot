@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@mastra/*"],
+  // Packages with native bindings that should not be bundled by Turbopack
+  serverExternalPackages: ["@mastra/*", "ssh2", "cpu-features", "oracledb"],
   experimental: {
     ppr: true,
   },

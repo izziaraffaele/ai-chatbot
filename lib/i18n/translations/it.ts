@@ -170,6 +170,14 @@ export const it: TranslationDict = {
   "artifact.document.readonlyError":
     "La visualizzazione di file nelle chat condivise non è attualmente supportata.",
 
+  // Document Export
+  "document.downloadDoc": "Scarica .docx",
+  "document.downloadTxt": "Scarica .txt",
+  "document.downloadWord": "Word",
+  "document.exportError": "Esportazione fallita",
+  "document.saveFirstToExport": "Salva il documento prima di esportare",
+  "document.liquidationDocument": "Documento di Liquidazione",
+
   // Console
   "console.title": "Console",
   "console.initializing": "Inizializzazione...",
@@ -362,4 +370,37 @@ export const it: TranslationDict = {
   "message.actions.downvoteError": "Impossibile votare negativamente.",
   "message.copyError": "Non c'è testo da copiare!",
   "message.copySuccess": "Copiato negli appunti!",
+
+  // ============================================================================
+  // SIBAC Views Explorer
+  // ============================================================================
+
+  "sibacViews.title": "Viste SIBAC",
+  "sibacViews.subtitle": "Esplora le viste Oracle SIBAC",
+  "sibacViews.cardTitle": "Esplora Viste SIBAC",
+  "sibacViews.cardDescription": "Visualizza i dati delle viste Oracle",
+  "sibacViews.cardBadge": "Oracle",
+  "sibacViews.status.connected": "Connesso",
+  "sibacViews.status.disconnected": "Disconnesso",
+  "sibacViews.status.checking": "Verifica...",
+  "sibacViews.status.vpnDisconnected": "VPN non connesso. Connettere al VPN per accedere al database.",
+  "sibacViews.status.serverUnreachable": "Server Oracle non raggiungibile. Verificare la configurazione VPN.",
+  "sibacViews.status.portBlocked": "Porta Oracle 1521 non raggiungibile. Il servizio Oracle potrebbe essere spento o bloccato dal firewall.",
+  "sibacViews.userSelector.all": "Tutti (Aggregato)",
+  "sibacViews.search.placeholder": "Cerca CIG...",
+  "sibacViews.search.button": "Cerca",
+  "sibacViews.table.rows": "righe",
+  "sibacViews.table.noData": "Nessun record trovato",
+  "sibacViews.table.noDataCig": "Nessun risultato per CIG:",
+  "sibacViews.pagination.page": "Pagina",
+  "sibacViews.pagination.records": "record",
+  "sibacViews.pagination.filter": "Filtro CIG:",
+  "sibacViews.pagination.previous": "Precedente",
+  "sibacViews.pagination.next": "Successivo",
+  "sibacViews.detail.title": "Vista Record",
+  "sibacViews.detail.subtitle": "Dettaglio record",
+  "sibacViews.detail.close": "Chiudi",
+  "sibacViews.loading.data": "Caricamento dati...",
+  "sibacViews.loading.connection": "Verifica connessione...",
+  "sibacViews.error.invalidUser": "Utente non valido: {user}. Utenti consentiti: cp_ia01 - cp_ia08",
 };

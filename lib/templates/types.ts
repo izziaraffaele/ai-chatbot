@@ -2,7 +2,7 @@
  * Document Template System Types
  *
  * Provides type definitions for the template-based document generation system.
- * Templates allow generating structured documents (like "Comunicazione di Liquidazione")
+ * Templates allow generating structured documents (like "Documento di Liquidazione")
  * using data extracted from loaded invoices.
  */
 

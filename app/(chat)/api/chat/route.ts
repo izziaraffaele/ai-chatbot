@@ -301,6 +301,7 @@ export async function POST(request: Request) {
       tools,
       agentId,
       canvasContext,
+      invoiceContext,
     } = requestBody;
 
     // 2. Authenticate session
@@ -327,6 +328,7 @@ export async function POST(request: Request) {
       geoHints: { longitude, latitude, city, country },
       config: runtimeConfig,
       canvasContext, // Pass active canvas tab info for document-aware responses
+      invoiceContext, // Pass selected invoice for deterministic document generation
     });
 
     // 5. Handle message based on type

@@ -56,3 +56,11 @@ export {
   // Visible content store
   type VisibleContent,
 } from "./visible-content-store";
+export {
+  clearSelectedInvoice,
+  getSelectedInvoice,
+  getSelectedInvoiceState,
+  setSelectedInvoice,
+  // Selected invoice store
+  subscribeToSelectedInvoice,
+} from "./selected-invoice-store";

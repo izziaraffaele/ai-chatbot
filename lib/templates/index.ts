@@ -11,7 +11,7 @@
  * import { templateRegistry, renderTemplate } from "@/lib/templates";
  *
  * // Find a matching template
- * const template = templateRegistry.findTemplate("Comunicazione di Liquidazione", invoiceContext);
+ * const template = templateRegistry.findTemplate("Documento di Liquidazione", invoiceContext);
  *
  * // Render the template
  * if (template) {

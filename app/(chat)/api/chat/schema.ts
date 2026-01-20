@@ -60,6 +60,18 @@ export const canvasContextSchema = z
 
 export type CanvasContext = z.infer<typeof canvasContextSchema>;
 
+/**
+ * Invoice context schema for deterministic invoice selection.
+ * This allows the agent to know which invoice is currently selected
+ * without relying on LLM memory.
+ */
+const invoiceContextSchema = z.object({
+  /** The canonical recordId of the currently selected invoice (e.g., "sibac-shared:path/to/file.xml") */
+  selectedInvoiceRecordId: z.string().optional(),
+});
+
+export type InvoiceContext = z.infer<typeof invoiceContextSchema>;
+
 export const postRequestBodySchema = z.object({
   id: z.uuid(),
   message: z.union([userMessageSchema, assistantMessageSchema]),
@@ -68,6 +80,7 @@ export const postRequestBodySchema = z.object({
   tools: z.record(z.string(), z.any()).optional(),
   agentId: z.string().optional(), // Agent registry ID (e.g., "chatAgent", "sfcAsseAgent")
   canvasContext: canvasContextSchema, // Active canvas tab info for document-aware responses
+  invoiceContext: invoiceContextSchema.optional(), // Selected invoice for deterministic document generation
 });
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

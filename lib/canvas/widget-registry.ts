@@ -19,6 +19,8 @@ export const WIDGET_KINDS = {
   MARKDOWN_VIEWER: "markdown-viewer",
   // Selector widgets (single-instance)
   DOCUMENT_SELECTOR: "document-selector",
+  // Explorer widgets (multi-instance)
+  SIBAC_VIEWS_EXPLORER: "sibac-views-explorer",
 } as const;
 
 export type WidgetKind = (typeof WIDGET_KINDS)[keyof typeof WIDGET_KINDS];
@@ -264,11 +266,18 @@ export function isSelectorKind(kind: WidgetKind): boolean {
 }
 
 /**
+ * Check if a kind is an explorer widget (database browsing)
+ */
+export function isExplorerKind(kind: WidgetKind): boolean {
+  return kind === WIDGET_KINDS.SIBAC_VIEWS_EXPLORER;
+}
+
+/**
  * Get the category of a widget kind
  */
 export function getWidgetCategory(
   kind: WidgetKind
-): "document" | "media" | "viewer" | "selector" {
+): "document" | "media" | "viewer" | "selector" | "explorer" {
   if (isDocumentKind(kind)) {
     return "document";
   }
@@ -277,6 +286,9 @@ export function getWidgetCategory(
   }
   if (isViewerKind(kind)) {
     return "viewer";
+  }
+  if (isExplorerKind(kind)) {
+    return "explorer";
   }
   return "selector";
 }

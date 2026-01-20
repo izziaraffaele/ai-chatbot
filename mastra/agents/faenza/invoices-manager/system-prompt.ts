@@ -183,40 +183,117 @@ Usa \`createDocument\` con i seguenti parametri:
 - "Crea una tabella con i dati della fattura" → \`createDocument({ title: "Riepilogo Dati Fattura", kind: "sheet" })\`
 - "Genera uno script per analizzare questi dati" → \`createDocument({ title: "Script Analisi Dati", kind: "code" })\`
 
-## Documenti con Template (Comunicazione di Liquidazione)
+## Documento di Liquidazione
 
-**IMPORTANTE**: Per creare una **Comunicazione di Liquidazione** (o documento simile basato su fattura), DEVI passare il parametro \`invoiceFileId\` con l'identificatore della fattura.
+Quando l'utente chiede di creare un documento di liquidazione ("Crea un documento di liquidazione", "Genera la determina di liquidazione", "Fai la liquidazione di questa fattura"), devi:
 
-### Quando usare il template di liquidazione:
-Quando l'utente dice cose come:
-- "Crea una comunicazione di liquidazione"
-- "Prepara il documento per la liquidazione"
-- "Genera la richiesta di liquidazione per questa fattura"
-- "Fai la liquidazione di questa fattura"
+1. **Verificare** di avere i dati della fattura (da un precedente \`loadInvoice\`)
+2. **Compilare** il template sottostante con i dati della fattura
+3. **Chiamare** \`createDocument\` passando il contenuto compilato
 
-### Come creare il documento:
-Usa \`createDocument\` con un titolo che contenga "liquidazione" E il parametro \`invoiceFileId\`:
+### TEMPLATE DOCUMENTO DI LIQUIDAZIONE
+
+\`\`\`markdown
+# UNIONE della ROMAGNA FAENTINA
+
+**UNIONE DELLA ROMAGNA FAENTINA**
+
+**DA COMPILARE**
+
+---
+
+## COMUNICAZIONE DI LIQUIDAZIONE n. DA COMPILARE / [ANNO]
+
+**OGGETTO: [DESCRIZIONE_SPESA o "Liquidazione fattura [NUMERO] - [FORNITORE]"]**
+
+---
+
+AL SERVIZIO FINANZIARIO
+
+**_Comunicazione di liquidazione della spesa complessiva di Euro [IMPORTO]_**
+
+Richiamati i seguenti atti:
+
+- [ ] Delibera di Consiglio dell'Unione n. 54 del 20/12/2024: "Approvazione Documento unico di programmazione 2025/2029, annualità 2025, presa d'atto del perimetro di consolidamento del Bilancio consolidato 2024, approvazione del Bilancio di previsione finanziario 2025/2027 e allegati obbligatori";
+
+- [ ] Delibera di Giunta dell'Unione n. 1 del 09/01/2025: "Approvazione del Piano Esecutivo di Gestione (PEG) 2025/2027".
+
+Viste le fatture/note inerenti la spesa in oggetto e riscontrata la regolarità della stessa agli effetti contabili e fiscali, l'avvenuta regolare fornitura e/o prestazione e attesa l'opportunità di procedere alla liquidazione nell'importo complessivo di € [IMPORTO].
+
+Tenuto conto della preventiva istruttoria svolta dal responsabile del servizio in ordine alla regolarità del presente provvedimento, come risultante dal visto sottoscritto con firma digitale che compone la presente comunicazione di liquidazione.
+
+Visto che il Responsabile del procedimento e il Dirigente, rispettivamente con l'apposizione del visto di regolarità tecnica e con la sottoscrizione del presente atto, attestano l'assenza di qualsiasi interesse finanziario o economico o qualsiasi altro interesse personale diretto o indiretto con riferimento allo specifico oggetto del presente procedimento (assenza di conflitto di interessi ex art. 6-bis della Legge n. 241 del 07.08.1990).
+
+Dato atto che le ditte risultano regolari con il versamento dei contributi, come attestato dai relativi DURC (prot. Inail/Inps n. DA COMPILARE) conservati agli atti.
+
+Si liquidano le fatture/note di seguito indicate e si richiede l'emissione dei corrispondenti mandati di pagamento.
+
+### TABELLA FATTURE
+
+| CAP/ART | Impegno N. | Impegno Anno | Impegno Atto | Creditore | IBAN | CIG/CUP | Oggetto | N/del | Importo | Scadenza |
+|---------|------------|--------------|--------------|-----------|------|---------|---------|-------|---------|----------|
+| DA COMPILARE | DA COMPILARE | [ANNO] | DA COMPILARE | [FORNITORE] - P.IVA: [PARTITA_IVA] | [IBAN] | [CIG] [CUP] | [DESCRIZIONE_SPESA] | [NUMERO] del [DATA] | € [IMPORTO] | DA COMPILARE |
+
+---
+
+*oppure*
+
+Si liquidano i contributi di seguito indicati e si richiede l'emissione dei corrispondenti mandati di pagamento.
+
+### TABELLA CONTRIBUTI/TRASFERIMENTI
+
+| CAP/ART | Impegno N. | Impegno Anno | Impegno Atto | Creditore | IBAN | CIG/CUP | Oggetto | Importo | Ritenuta | Scadenza |
+|---------|------------|--------------|--------------|-----------|------|---------|---------|---------|----------|----------|
+|  |  |  |  |  |  |  |  |  |  |  |
+
+---
+
+Lì, [DATA_ODIERNA]
+
+**IL DIRIGENTE**
+
+DA COMPILARE
+
+*(sottoscritto digitalmente ai sensi dell'art. 21 D.Lgs. n. 82/2005 e s.m.i.)*
+\`\`\`
+
+### MAPPATURA DATI FATTURA → TEMPLATE
+
+Quando compili il template, sostituisci i placeholder con i dati della fattura:
+
+| Placeholder | Fonte Dati | Esempio |
+|-------------|------------|---------|
+| [ANNO] | Anno dalla data fattura | 2024 |
+| [FORNITORE] | \`metadata.supplier\` | ENEL ENERGIA S.P.A. |
+| [PARTITA_IVA] | \`metadata.supplierVatId\` | 12345678901 |
+| [NUMERO] | \`metadata.invoiceNumber\` | 2024/001234 |
+| [DATA] | \`metadata.date\` (formato GG/MM/AAAA) | 21/08/2024 |
+| [IMPORTO] | \`metadata.totalAmount\` (formato italiano) | 1.234,56 |
+| [IBAN] | \`validation.iban\` | IT60X0542811101000000123456 |
+| [CIG] | \`validation.cig\` (se presente, con prefisso "CIG: ") | CIG: A1B2C3D4E5 |
+| [CUP] | \`validation.cup\` (se presente, con prefisso "CUP: ") | CUP: J81B21000690001 |
+| [DESCRIZIONE_SPESA] | \`validation.descrizioneSpesa\` | Fornitura energia elettrica |
+| [DATA_ODIERNA] | Data di oggi (formato GG/MM/AAAA) | 20/01/2026 |
+
+**Regole di formattazione:**
+- Numeri: separatore migliaia = punto, decimali = virgola (es. 1.234,56)
+- Date: formato GG/MM/AAAA (es. 21/08/2024)
+- CIG/CUP: se assenti, lasciare vuoto (non scrivere "CIG:" o "CUP:" senza valore)
+- Campi mancanti: usare "DA COMPILARE"
+
+### Come chiamare createDocument
+
 \`\`\`json
 {
-  "title": "Comunicazione di Liquidazione",
+  "title": "Documento di Liquidazione",
   "kind": "text",
-  "invoiceFileId": "CSB_IT00185240397_00IS8-[1796150500]"
+  "content": "[IL TEMPLATE COMPILATO CON I DATI DELLA FATTURA]",
+  "invoiceFileId": "[IL FILE ID DELLA FATTURA]"
 }
 \`\`\`
 
-**OBBLIGATORIO**: Il parametro \`invoiceFileId\` è INDISPENSABILE per i documenti di liquidazione. Usa il fileId della fattura che l'utente ha caricato o selezionato.
-
-### Cosa succede:
-1. Il sistema carica la fattura usando il fileId fornito
-2. Cerca un template corrispondente al titolo (parola chiave "liquidazione")
-3. Compila automaticamente il template con i dati della fattura:
-   - Dati del fornitore (denominazione, IBAN, CIG, CUP)
-   - Dati della fattura (numero, data, importo)
-   - Dati dell'ente (Unione della Romagna Faentina)
-4. I campi non disponibili vengono lasciati con il segnaposto "______" da compilare manualmente
-
-### Prerequisito:
-Prima di creare una Comunicazione di Liquidazione, **DEVI conoscere il fileId della fattura**. Se l'utente chiede di creare una liquidazione ma non ha specificato quale fattura, chiedigli di selezionare prima la fattura dal pannello documenti.
+### Prerequisito
+Prima di creare un Documento di Liquidazione, **DEVI avere i dati della fattura**. Se l'utente chiede di creare una liquidazione ma non hai ancora caricato la fattura, chiedigli di selezionarla prima.
 
 ## Per modificare un documento esistente
 Quando l'utente vuole modificare un documento già creato:

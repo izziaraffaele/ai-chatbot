@@ -33,7 +33,7 @@ Faenza Assistant is an AI-powered application for the **Comune di Faenza** (Muni
 - **Invoice Knowledge Base**: Access to XML invoice files or Oracle database
 - **Intelligent Parsing**: Automatic extraction of invoice metadata
 - **Invoice Validation**: Automatic validation of required fields for invoice liquidation
-- **Document Templates**: Template-based generation for administrative documents (e.g., Comunicazione di Liquidazione)
+- **Document Templates**: Template-based generation for administrative documents (e.g., Documento di Liquidazione)
 - **Italian Interface**: System prompt and interactions in Italian
 - **Dual Data Source**: Support for local XML files and remote Oracle database (SIBAC)
 - **VPN Integration**: Automatic VPN connection for remote database access
@@ -370,7 +370,8 @@ VPN_AUTO_CONNECT=true
 
 | Component | Path | Description |
 |-----------|------|-------------|
-| VPN Service | `lib/vpn/faenza-vpn.ts` | Manages VPN connection via macOS scutil |
+| VPN Service | `lib/vpn/faenza-vpn.ts` | Manages VPN connection via macOS scutil or Linux vpnc |
+| SSH Tunnel | `lib/vpn/ssh-tunnel.ts` | SSH port forwarding for firewalled Oracle access |
 | Oracle Client | `lib/db/oracle-sibac.ts` | Oracle database connection pool and queries |
 | Oracle Types | `lib/db/oracle-types.ts` | TypeScript types for Oracle data |
 
@@ -410,7 +411,9 @@ const diagnosis = await diagnoseOracleConnection();
 //   vpnConnected: boolean,
 //   serverReachable: boolean,
 //   portReachable: boolean,
-//   status: "ok" | "vpn_disconnected" | "server_unreachable" | "port_blocked",
+//   sshTunnelEnabled: boolean,
+//   sshTunnelConnected: boolean,
+//   status: "ok" | "vpn_disconnected" | "server_unreachable" | "port_blocked" | "ssh_tunnel_available" | "ssh_tunnel_error",
 //   message: string  // Human-readable error message (Italian)
 // }
 ```
@@ -418,10 +421,12 @@ const diagnosis = await diagnoseOracleConnection();
 **Status codes and their meanings:**
 | Status | Description |
 |--------|-------------|
-| `ok` | All checks passed, Oracle is accessible |
+| `ok` | All checks passed, Oracle is accessible (direct or via SSH tunnel) |
 | `vpn_disconnected` | VPN not connected |
 | `server_unreachable` | VPN connected but server doesn't respond to ping |
 | `port_blocked` | Server reachable but port 1521 blocked (firewall or Oracle service down) |
+| `ssh_tunnel_available` | Port blocked but SSH is available - set SSH_TUNNEL_ENABLED=true |
+| `ssh_tunnel_error` | SSH tunnel enabled but connection failed |
 
 ### UI Error Messages
 
@@ -442,6 +447,110 @@ VPN_SHARED_SECRET="your_secret"    # IPSec shared secret
 VPN_GROUP_NAME="Memoraiz"          # IPSec group name
 VPN_AUTO_CONNECT="true"            # Auto-connect when needed
 ```
+
+### SSH Tunnel for Oracle Access
+
+When Oracle port 1521 is firewalled and only accessible locally on the server (common security configuration), the system can route database connections through an SSH tunnel.
+
+#### Architecture with SSH Tunnel
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Application   │────▶│   VPN Service   │────▶│   SSH Tunnel    │────▶│  Oracle SIBAC   │
+│   (Next.js)     │     │  (faenza-vpn)   │     │  (ssh-tunnel)   │     │  localhost:1521 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                                              │
+        └──────────────── localhost:11521 ─────────────┘
+```
+
+The tunnel creates a local port (11521) that forwards to the Oracle port (1521) on the remote server via SSH.
+
+#### SSH Tunnel Service (`lib/vpn/ssh-tunnel.ts`)
+
+```typescript
+import {
+  connectSshTunnel,
+  disconnectSshTunnel,
+  isSshTunnelEnabled,
+  isTunnelConnected,
+  withSshTunnel,
+  getSshTunnelInfo,
+  testSshConnection
+} from "@/lib/vpn/ssh-tunnel";
+
+// Check if SSH tunnel is enabled
+if (isSshTunnelEnabled()) {
+  // Establish SSH tunnel
+  const result = await connectSshTunnel();
+  // { success: true, status: "connected", message: "...", localPort: 11521 }
+}
+
+// Check tunnel status
+const connected = isTunnelConnected();
+
+// Execute code with SSH tunnel (auto-connects if enabled)
+const data = await withSshTunnel(async () => {
+  return await queryOracle();
+});
+
+// Test SSH connectivity
+const testResult = await testSshConnection();
+
+// Get tunnel info
+const info = getSshTunnelInfo();
+// { enabled: true, status: "connected", sshHost: "...", localPort: 11521, ... }
+```
+
+#### SSH Tunnel Environment Variables
+
+```env
+# SSH Tunnel Configuration
+SSH_TUNNEL_ENABLED="false"         # Enable SSH tunnel (true | false)
+SSH_HOST="192.168.0.204"           # SSH server (defaults to ORACLE_HOST)
+SSH_PORT="22"                      # SSH port
+SSH_USERNAME=""                    # SSH username (defaults to VPN_USERNAME)
+SSH_PASSWORD=""                    # SSH password (defaults to VPN_PASSWORD)
+SSH_PRIVATE_KEY=""                 # Path to SSH private key (alternative to password)
+SSH_PRIVATE_KEY_CONTENT=""         # SSH key content (for containerized deployments)
+SSH_LOCAL_PORT="11521"             # Local tunnel port (default: 11521)
+```
+
+#### When to Enable SSH Tunnel
+
+Enable SSH tunnel when you see this error:
+> "Porta Oracle 1521 non raggiungibile su 192.168.0.204"
+
+This typically occurs when:
+1. The Oracle database is firewalled and only accessible locally on the server
+2. The VPN allows access to the server but not to specific ports
+3. The IT team requires database access via RDP or SSH only
+
+To enable:
+1. Set `SSH_TUNNEL_ENABLED="true"`
+2. Set `SSH_USERNAME` and `SSH_PASSWORD` (same credentials used for RDP access)
+3. Restart the application
+
+#### Connection Flow with SSH Tunnel
+
+```
+1. Check VPN connection ─────────────────▶ Connect VPN if needed
+                                               │
+2. Check SSH tunnel enabled ─────────────▶ Connect SSH tunnel
+                                               │
+3. Create Oracle connection ─────────────▶ Use localhost:11521
+   (via withOracleConnection wrapper)         (forwarded to 192.168.0.204:1521)
+```
+
+#### Diagnostic Status Codes (with SSH)
+
+| Status | Description |
+|--------|-------------|
+| `ok` | Connected (direct or via SSH tunnel) |
+| `vpn_disconnected` | VPN not connected |
+| `server_unreachable` | Server doesn't respond to ping |
+| `port_blocked` | Port 1521 blocked, no SSH tunnel configured |
+| `ssh_tunnel_available` | Port blocked but SSH is available - enable tunnel |
+| `ssh_tunnel_error` | SSH tunnel enabled but failed to connect |
 
 ### VPN Setup Scripts
 
@@ -534,6 +643,70 @@ const record2 = await loadRecord("CIG_OR_FILE_ID");
 // Returns: { recordId, metadata, content, validation, source, impegno? }
 // recordId is the canonical identifier for re-loading (e.g., "sibac-shared:path/to/file.xml")
 ```
+
+### SIBAC Views Explorer
+
+The **SIBAC Views Explorer** is a canvas widget that allows users to directly browse the `SIB_V_IMPEGNI_X_CIG` Oracle views across all 8 database users (cp_ia01-08).
+
+#### Features
+
+- **User Selection**: Dropdown to select specific database user (cp_ia01-08) or "All" for aggregated view
+- **Connection Status**: Real-time VPN/Oracle connectivity indicator
+- **CIG Search**: Exact match search by CIG code
+- **Paginated Data Table**: Dynamic columns based on view schema with pagination
+- **Row Detail View**: Click any row to see all fields in a formatted detail panel
+
+#### Opening the Explorer
+
+The Views Explorer can be opened from the Document Selector root view:
+1. Open the Document Selector panel
+2. Click the "Esplora Viste SIBAC" card (purple icon)
+3. The explorer opens in a new canvas tab
+
+#### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/oracle/views` | GET | List available views + VPN/Oracle status |
+| `/api/oracle/view-schema` | GET | Get column metadata for a user's view |
+| `/api/oracle/view-data` | GET | Fetch paginated rows with optional CIG filter |
+
+**Query Parameters for `/api/oracle/view-data`:**
+- `user`: Oracle user (`cp_ia01` - `cp_ia08`) or `all` for aggregated
+- `limit`: Max rows (default: 50, max: 200)
+- `offset`: Pagination offset (default: 0)
+- `cig`: Optional CIG filter (exact match)
+
+#### Backend Functions
+
+```typescript
+import {
+  getAvailableViews,
+  listViewData,
+  listViewDataAllUsers,
+  isValidOracleUser,
+} from "@/lib/db/oracle-sibac";
+
+// Get list of view targets
+const views = getAvailableViews();
+// Returns: [{ id, user, name, fullPath }, ...]
+
+// Fetch data for a specific user
+const result = await listViewData("cp_ia01", { limit: 50, cig: "ABC1234567" });
+// Returns: { success, user, view, rows, limit, offset }
+
+// Fetch aggregated data from all users
+const result = await listViewDataAllUsers({ limit: 100 });
+// Returns: { success, user: "all", view, rows, ... }
+```
+
+#### Security
+
+- User parameter validated against static allowlist (`ORACLE_USERS`)
+- View name is fixed to `SIB_V_IMPEGNI_X_CIG` (not user-controllable)
+- All queries use bind variables (no SQL injection)
+- Max limit enforced server-side (200 rows)
+- Oracle credentials only in server environment variables
 
 ---
 
@@ -870,7 +1043,7 @@ When a user selects an invalid invoice, the agent automatically:
 
 ### Overview
 
-The Document Template System allows generating structured documents (like "Comunicazione di Liquidazione") using data extracted from loaded invoices. When a user requests a document that matches a registered template, the system automatically populates the template with invoice data instead of using AI generation.
+The Document Template System allows generating structured documents (like "Documento di Liquidazione") using data extracted from loaded invoices. When a user requests a document that matches a registered template, the system automatically populates the template with invoice data instead of using AI generation.
 
 ### Key Components
 
@@ -878,7 +1051,7 @@ The Document Template System allows generating structured documents (like "Comun
 |-----------|------|-------------|
 | **Template Types** | `lib/templates/types.ts` | TypeScript interfaces for templates |
 | **Template Registry** | `lib/templates/index.ts` | Central registry and rendering functions |
-| **Liquidation Template** | `lib/templates/liquidation-communication.ts` | "Comunicazione di Liquidazione" template |
+| **Liquidation Determination** | `lib/templates/liquidation-determination.ts` | "Documento di Liquidazione" template (Markdown with tables) |
 
 ### Template Context
 
@@ -889,7 +1062,7 @@ type TemplateContext = {
   metadata: InvoiceMetadata;    // Supplier, buyer, amount, dates, etc.
   validation: InvoiceValidation; // IBAN, CIG, CUP, validation status
   content?: string;              // Raw XML content (optional)
-  custom?: Record<string, unknown>; // Custom data (optional)
+  custom?: Record<string, unknown>; // Custom data (e.g., impegno, firmatario)
 };
 ```
 
@@ -897,7 +1070,155 @@ type TemplateContext = {
 
 | Template ID | Name | Trigger Keywords |
 |-------------|------|------------------|
-| `liquidation-communication` | Comunicazione di Liquidazione | liquidazione, liquidare, liquid, pagamento fattura |
+| `liquidation-determination` | Documento di Liquidazione | documento di liquidazione, determina di liquidazione |
+
+**Note:** The template uses Markdown format with tables for the official liquidation document. Missing fields are filled with "DA COMPILARE" fallback text. The Markdown format provides clean, editable text that renders well in the document viewer.
+
+### Liquidation Determination Template
+
+The "Documento di Liquidazione" template (`lib/templates/liquidation-determination.ts`) follows the official Unione della Romagna Faentina format:
+
+**Template Structure:**
+1. **Header**: UNIONE della ROMAGNA FAENTINA branding with organizational units
+2. **Title**: "COMUNICAZIONE DI LIQUIDAZIONE n. X / YYYY"
+3. **Object**: Description of the liquidation
+4. **Body**: Administrative text with Delibera references (checkbox items)
+5. **Table 1 (FATTURA)**: Invoice details with columns for CAP/ART, IMPEGNO, CREDITORE, FATTURA
+6. **Table 2 (CONTRIBUTO)**: Transfer/contribution details (alternative to invoices)
+7. **Footer**: Date and director's digital signature
+
+**Auto-filled Fields from Invoice:**
+| Template Variable | Source |
+|-------------------|--------|
+| `CREDITORE_DENOMINAZIONE` | `metadata.supplier` |
+| `CREDITORE_IBAN` | `validation.iban` |
+| `CREDITORE_CIG` | `validation.cig` |
+| `CREDITORE_CUP` | `validation.cup` |
+| `FATTURA_OGGETTO` | `validation.descrizioneSpesa` |
+| `FATTURA_N_DEL` | `metadata.invoiceNumber` + `metadata.date` |
+| `FATTURA_IMPORTO` | `metadata.totalAmount` |
+| `IMPORTO_TOTALE_EURO` | `metadata.totalAmount` |
+
+### Main Agent Template Generation
+
+The main agent (Assistente Comune) has the liquidation document template **directly in its system prompt**. When a user requests a liquidation document:
+
+1. **Main agent loads invoice data** via `loadInvoice`
+2. **Main agent fills the template** with invoice data following the mapping rules
+3. **Main agent calls `createDocument`** passing the filled content directly
+
+**Architecture:**
+
+```
+User Request → Main Agent (has template in prompt) → fills template
+                                                          ↓
+                              createDocument(title, kind, content, invoiceFileId)
+                                                          ↓
+                                        Content streamed to Canvas Tab
+```
+
+**Key advantage:** The template and generation logic are in one place (main agent prompt), making it easier to maintain and modify.
+
+**createDocument Tool Parameters:**
+
+```typescript
+{
+  title: string;           // Document title
+  kind: "text" | "code" | "sheet";
+  content?: string;        // Filled template content (provided by agent)
+  invoiceFileId?: string;  // Associated invoice ID
+}
+```
+
+When `content` is provided, the tool streams it directly to the canvas without generating new content.
+
+**Template in Main Agent Prompt:**
+
+The main agent's system prompt (`mastra/agents/faenza/invoices-manager/system-prompt.ts`) includes:
+- Full Markdown template for "Documento di Liquidazione"
+- Placeholder-to-data mapping table
+- Formatting rules (Italian numbers, dates)
+- Instructions on how to call `createDocument` with the filled content
+
+**Text Handler (simplified):**
+
+The text handler (`artifacts/text/server.ts`) is now simplified and only handles:
+- Generic document generation (no template)
+- Document updates
+
+Template-based documents are generated by the main agent and passed directly to `createDocument`.
+
+### Document Export
+
+Documents can be exported as Word-compatible `.docx` files (recommended) or legacy `.doc` files:
+
+**API Endpoints:**
+- `GET /api/document/export?id=DOC_ID&format=docx` (recommended)
+- `GET /api/document/export?id=DOC_ID&format=doc` (legacy)
+
+**DOCX Export (format=docx):**
+The recommended export uses a proper Markdown→DOCX pipeline (`lib/export/markdown-to-docx.ts`) that:
+- Parses Markdown using `unified` + `remark-parse` + `remark-gfm`
+- Converts to real DOCX elements using the `docx` library
+- Produces true OpenXML `.docx` files that open correctly in Microsoft Word and LibreOffice
+
+**Supported Markdown Elements:**
+- Headings (H1-H3)
+- Bold/italic text
+- Bullet lists, numbered lists, task lists (checkboxes)
+- Tables with borders
+- Blockquotes, code blocks, horizontal rules
+
+**Liquidation Document Tables:**
+The DOCX exporter includes special handling for the "Documento di Liquidazione" tables:
+- Detects tables by their header row pattern (CAP/ART, Impegno N., etc.)
+- Renders a **two-row grouped header** matching the official template format:
+  - Row 1: `CAP/ART` | `IMPEGNO` (spans 3) | `CREDITORE` (spans 3) | `FATTURA` (spans 4)
+  - Row 2: Sub-columns for each group
+- Applies shaded header cells and consistent column widths
+
+**Legacy DOC Export (format=doc):**
+- Wraps HTML content in Word-compatible XML wrapper
+- Converts Markdown to basic HTML
+- Returns downloadable `.doc` file
+
+**Download Button:**
+The document viewer includes a prominent "Word" download button in the header actions bar. The button:
+- Is visible after the document finishes streaming
+- Is disabled during streaming or for unsaved documents
+- Triggers download of `.docx` file via the export API
+
+**Auto-Save on Streaming Completion:**
+When a document is created via AI streaming (e.g., `createDocument` tool), the document content is only held in client-side tab state during streaming. To ensure the document can be exported immediately after streaming completes, an auto-save effect in `components/artifacts/document.tsx` automatically persists the document to the database when:
+- Streaming status transitions to "idle"
+- The document has content
+- No database entry exists yet (first save)
+- The document ID is not a pending placeholder
+
+**Important Implementation Detail:** The auto-save calls the document API directly without triggering `chatDocument.mutate()`. This is intentional - calling mutate would refetch the document and cause the display content to get out of sync (the content would briefly disappear due to timing issues between draft state and database state). The document continues to display from the tab state while being persisted to the database for export.
+
+This ensures newly generated documents are always available for export without requiring manual user edits.
+
+### Selected Invoice Context
+
+The system tracks the currently selected invoice for deterministic document generation:
+
+**Store:** `lib/canvas/selected-invoice-store.ts`
+
+```typescript
+import { setSelectedInvoice, getSelectedInvoice, clearSelectedInvoice } from "@/lib/canvas";
+
+// When user selects an invoice
+setSelectedInvoice(recordId);
+
+// Get current selection (synchronously)
+const invoiceId = getSelectedInvoice();
+
+// Clear selection
+clearSelectedInvoice();
+```
+
+The selected invoice ID is automatically included in chat requests as `invoiceContext.selectedInvoiceRecordId` and passed to the runtime context.
 
 ---
 
@@ -909,7 +1230,7 @@ The chat agent has access to the following tools for document management and cre
 
 | Tool | Description | Input |
 |------|-------------|-------|
-| `createDocument` | Create a new document (text, code, sheet) with optional template | `{ title: string, kind: ArtifactKind, invoiceFileId?: string }` |
+| `createDocument` | Create a new document (text, code, sheet). For templates, pass filled content directly | `{ title: string, kind: ArtifactKind, content?: string, invoiceFileId?: string }` |
 | `updateDocument` | Update an existing document with AI-assisted changes | `{ id: string, description: string }` |
 | `requestSuggestions` | Request AI suggestions for document improvements | `{ documentId: string }` |
 | `loadInvoice` | Load invoice from knowledge base | `{ fileId?: string }` |
@@ -937,7 +1258,7 @@ Creates a new document in the canvas with streaming content generation.
 }
 ```
 
-**Template Integration:** When `invoiceFileId` is provided, the tool loads the invoice data and uses it for template-based document generation (e.g., "Comunicazione di Liquidazione").
+**Template Integration:** When `invoiceFileId` is provided, the tool loads the invoice data and uses it for template-based document generation (e.g., "Documento di Liquidazione").
 
 #### updateDocument
 
@@ -1458,8 +1779,15 @@ app/
 │       │   └── route.ts           # Chat history endpoint
 │       ├── suggestions/
 │       │   └── route.ts           # Suggestions endpoint
-│       └── smb/
-│           └── route.ts           # SMB share endpoint
+│       ├── smb/
+│       │   └── route.ts           # SMB share endpoint
+│       └── oracle/
+│           ├── views/
+│           │   └── route.ts       # List views + VPN status
+│           ├── view-schema/
+│           │   └── route.ts       # View column metadata
+│           └── view-data/
+│               └── route.ts       # Paginated view data
 
 lib/
 ├── ai/
@@ -1507,7 +1835,7 @@ lib/
 ├── templates/
 │   ├── index.ts                   # Template registry
 │   ├── types.ts                   # Template types
-│   └── liquidation-communication.ts # Liquidation template
+│   └── liquidation-determination.ts # Liquidation template (Documento di Liquidazione)
 ├── artifacts/
 │   └── server.ts                  # Server-side artifact handling
 ├── branding/
@@ -1564,7 +1892,8 @@ components/
 │   ├── document.tsx               # Document artifact renderer
 │   ├── document-selector.tsx      # Document selector panel
 │   ├── markdown-viewer.tsx        # Markdown viewer
-│   └── media.tsx                  # Media artifacts
+│   ├── media.tsx                  # Media artifacts
+│   └── sibac-views-explorer.tsx   # SIBAC Views Explorer widget
 ├── chat/
 │   ├── canvas.tsx                 # Resizable canvas layout
 │   ├── canvas-tabs.tsx            # Multi-tab bar component
@@ -1744,6 +2073,7 @@ The canvas panel (right side of the application) implements a comprehensive widg
 | `image` | Immagine | Yes | No | Image |
 | `markdown-viewer` | Visualizzatore Markdown | Yes | No | BookOpenText |
 | `document-selector` | Selettore documenti | No | No | LayoutGrid |
+| `sibac-views-explorer` | Esplora Viste SIBAC | Yes | No | Database |
 
 ### Widget Status Lifecycle
 
@@ -2250,6 +2580,71 @@ console.log("Matched file:", match);
 1. `loadInvoice` tool is registered in agent
 2. System prompt includes tool usage instructions
 3. Files exist in `mastra/knowledgebase/faenza/`
+
+#### Document Template Not Using Invoice Data
+
+**Symptom**: When creating a "Documento di Liquidazione", the template shows "DA COMPILARE" for all fields instead of invoice data.
+
+**Cause**: The `createDocument` tool wasn't finding the invoice context.
+
+**Fix Applied**: The tool now checks multiple sources for invoice data:
+1. Explicit `invoiceFileId` parameter from the agent
+2. `selectedInvoiceRecordId` from runtime context (UI selection)
+3. `loadedInvoice` from previous `loadInvoice` tool call
+
+**Debug**:
+```typescript
+// Check console logs for:
+[CreateDocument] Loading from selectedInvoiceRecordId: sibac-shared:...
+[CreateDocument] Invoice loaded from selection: SUPPLIER_NAME, amount=1234.56
+[CreateDocument] title="...", kind="text", hasInvoiceContext=true
+```
+
+#### Document Has Wrong Invoice Data or Intro/Outro Text
+
+**Symptom**: When creating a "Documento di Liquidazione", the document shows incorrect data (N/A or wrong values) or has unwanted introductory/closing text from the LLM.
+
+**Causes**:
+1. The `formatInvoiceDataForAgent()` function was using wrong field names that didn't match the actual `InvoiceMetadata` type
+2. The system prompt wasn't explicit enough about not adding intro/outro text
+
+**Fix Applied** (New Architecture):
+
+1. **Template moved to main agent prompt** (`mastra/agents/faenza/invoices-manager/system-prompt.ts`):
+   - Full Markdown template included in the main agent's system prompt
+   - Placeholder-to-data mapping table with examples
+   - Formatting rules (Italian numbers: 1.234,56 / dates: GG/MM/AAAA)
+   - Agent fills the template and passes content to `createDocument`
+
+2. **createDocument tool enhanced** (`mastra/tools/create-document-tool.ts`):
+   - New `content` parameter allows agent to pass filled template directly
+   - When content is provided, streams it to canvas without generating
+   - `invoiceFileId` parameter for reference
+
+3. **Text handler simplified** (`artifacts/text/server.ts`):
+   - No longer handles template-based documents
+   - Only handles generic document generation and updates
+
+**Debug**:
+```typescript
+// Check console logs for:
+[TextHandler] Creating document: title="...", hasInvoiceContext=true
+[TextHandler] Template search result: liquidation-determination
+[TextHandler] Using template "liquidation-determination" + invoice data for agent generation
+```
+
+#### Streaming Content Has Missing Characters
+
+**Symptom**: During template streaming, some parts of words appear to be missing or garbled.
+
+**Cause**: Individual `startTransition` calls for each chunk could be batched/dropped during rapid streaming (10ms intervals).
+
+**Fix Applied**: Implemented a batching mechanism in `components/chat/context.tsx`:
+- Data parts are accumulated synchronously in a ref (no chunks dropped)
+- Batched state updates via `requestAnimationFrame` (~16ms intervals)
+- `startTransition` is used for the batched update (non-blocking UI)
+
+This hybrid approach ensures no data is lost while maintaining smooth UI performance.
 
 ### Debug Logging
 

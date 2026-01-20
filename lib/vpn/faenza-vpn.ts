@@ -513,17 +513,35 @@ export type OracleDiagnosticResult = {
   vpnConnected: boolean;
   serverReachable: boolean;
   portReachable: boolean;
-  status: "ok" | "vpn_disconnected" | "server_unreachable" | "port_blocked";
+  sshTunnelEnabled: boolean;
+  sshTunnelConnected: boolean;
+  status:
+    | "ok"
+    | "vpn_disconnected"
+    | "server_unreachable"
+    | "port_blocked"
+    | "ssh_tunnel_available"
+    | "ssh_tunnel_error";
   message: string;
 };
 
 /**
  * Run full Oracle connectivity diagnostics
- * Returns detailed status about VPN, server, and port accessibility
+ * Returns detailed status about VPN, server, port, and SSH tunnel accessibility
  */
 export async function diagnoseOracleConnection(): Promise<OracleDiagnosticResult> {
+  // Import SSH tunnel functions dynamically to avoid circular dependencies
+  const {
+    isSshTunnelEnabled,
+    isTunnelConnected,
+    connectSshTunnel,
+    testSshConnection,
+  } = await import("./ssh-tunnel");
+
   const host = process.env.ORACLE_HOST ?? "192.168.0.204";
   const port = process.env.ORACLE_PORT ?? "1521";
+  const sshTunnelEnabled = isSshTunnelEnabled();
+  const sshTunnelConnected = isTunnelConnected();
 
   // Check VPN connection
   const vpnConnected = await isVpnConnected();
@@ -532,6 +550,8 @@ export async function diagnoseOracleConnection(): Promise<OracleDiagnosticResult
       vpnConnected: false,
       serverReachable: false,
       portReachable: false,
+      sshTunnelEnabled,
+      sshTunnelConnected: false,
       status: "vpn_disconnected",
       message: "VPN non connesso. Connettere al VPN per accedere al database.",
     };
@@ -544,18 +564,81 @@ export async function diagnoseOracleConnection(): Promise<OracleDiagnosticResult
       vpnConnected: true,
       serverReachable: false,
       portReachable: false,
+      sshTunnelEnabled,
+      sshTunnelConnected: false,
       status: "server_unreachable",
       message: `Server ${host} non raggiungibile. Verificare la configurazione VPN.`,
     };
   }
 
-  // Check Oracle port accessibility
+  // Check Oracle port accessibility (direct connection)
   const portReachable = await isOraclePortReachable();
+
+  // If port is not reachable directly, check SSH tunnel options
   if (!portReachable) {
+    // If SSH tunnel is enabled, try to connect
+    if (sshTunnelEnabled) {
+      if (sshTunnelConnected) {
+        // Tunnel is connected, should be OK
+        return {
+          vpnConnected: true,
+          serverReachable: true,
+          portReachable: false,
+          sshTunnelEnabled: true,
+          sshTunnelConnected: true,
+          status: "ok",
+          message:
+            "Connessione Oracle disponibile tramite tunnel SSH (porta diretta bloccata).",
+        };
+      }
+
+      // Try to establish tunnel
+      const tunnelResult = await connectSshTunnel();
+      if (tunnelResult.success) {
+        return {
+          vpnConnected: true,
+          serverReachable: true,
+          portReachable: false,
+          sshTunnelEnabled: true,
+          sshTunnelConnected: true,
+          status: "ok",
+          message: `Connessione Oracle disponibile tramite tunnel SSH su localhost:${tunnelResult.localPort}.`,
+        };
+      }
+
+      // Tunnel failed
+      return {
+        vpnConnected: true,
+        serverReachable: true,
+        portReachable: false,
+        sshTunnelEnabled: true,
+        sshTunnelConnected: false,
+        status: "ssh_tunnel_error",
+        message: `Porta Oracle ${port} bloccata. Tunnel SSH abilitato ma fallito: ${tunnelResult.message}`,
+      };
+    }
+
+    // Port blocked and no SSH tunnel enabled - test if SSH could work
+    const sshTest = await testSshConnection();
+    if (sshTest.success) {
+      return {
+        vpnConnected: true,
+        serverReachable: true,
+        portReachable: false,
+        sshTunnelEnabled: false,
+        sshTunnelConnected: false,
+        status: "ssh_tunnel_available",
+        message: `Porta Oracle ${port} bloccata su ${host}. SSH disponibile - impostare SSH_TUNNEL_ENABLED=true per abilitare il tunnel.`,
+      };
+    }
+
+    // Port blocked, no tunnel available
     return {
       vpnConnected: true,
       serverReachable: true,
       portReachable: false,
+      sshTunnelEnabled: false,
+      sshTunnelConnected: false,
       status: "port_blocked",
       message: `Porta Oracle ${port} non raggiungibile su ${host}. Il servizio Oracle potrebbe essere spento o bloccato dal firewall.`,
     };
@@ -565,6 +648,8 @@ export async function diagnoseOracleConnection(): Promise<OracleDiagnosticResult
     vpnConnected: true,
     serverReachable: true,
     portReachable: true,
+    sshTunnelEnabled,
+    sshTunnelConnected,
     status: "ok",
     message: "Connessione Oracle disponibile.",
   };

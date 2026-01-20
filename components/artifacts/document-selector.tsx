@@ -35,6 +35,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
+import { setSelectedInvoice } from "@/lib/canvas";
+import { WIDGET_KINDS } from "@/lib/canvas/widget-registry";
 import { cn } from "@/lib/utils";
 import type {
   FileSystemFile,
@@ -96,6 +98,8 @@ type InvoiceValidationResult = {
  * Full invoice data loaded from API
  */
 type InvoiceData = {
+  /** Canonical recordId for reloading the invoice */
+  recordId?: string;
   metadata: InvoiceMetadata;
   content: string;
   validation: InvoiceValidationResult;
@@ -270,7 +274,7 @@ export function DocumentSelectorArtifact({
   className,
 }: DocumentSelectorArtifactProps) {
   const { chat } = useChatRuntime();
-  const { activeTab, closeTab } = useCanvasTabs();
+  const { activeTab, closeTab, openTabWithData } = useCanvasTabs();
 
   // View state
   const [panelViewMode, setPanelViewMode] = useState<ViewMode>("list");
@@ -632,6 +636,12 @@ export function DocumentSelectorArtifact({
         setSelectedDocument(data);
         setPanelViewMode("detail");
 
+        // Store the selected invoice recordId for deterministic document generation
+        // This is used by the chat transport to include invoiceContext in requests
+        if (data.recordId) {
+          setSelectedInvoice(data.recordId);
+        }
+
         // Send message to chat so the AI can analyze the document
         // This triggers the loadInvoice tool and shows the "Analizza Fattura" button for invalid invoices
         chat.sendMessage({
@@ -655,6 +665,17 @@ export function DocumentSelectorArtifact({
     setSelectedDocument(null);
     setLoadError(null);
   }, []);
+
+  // Handle open Views Explorer
+  const handleOpenViewsExplorer = useCallback(() => {
+    openTabWithData({
+      kind: WIDGET_KINDS.SIBAC_VIEWS_EXPLORER,
+      documentId: `sibac-views-${Date.now()}`,
+      title: "Viste SIBAC",
+      content: null,
+      status: "idle",
+    });
+  }, [openTabWithData]);
 
   // Render based on view mode
   if (panelViewMode === "detail" && selectedDocument) {
@@ -795,7 +816,11 @@ export function DocumentSelectorArtifact({
               {/* Card-based Grid View */}
               {isHierarchical && listViewMode === "grid" && (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                  {/* Render folder cards first */}
+                  {/* Views Explorer card at root level */}
+                  {!currentFolder && (
+                    <ViewsExplorerCard onClick={handleOpenViewsExplorer} />
+                  )}
+                  {/* Render folder cards */}
                   {currentFolders.map((folder) => (
                     <FolderCard
                       folder={folder}
@@ -818,7 +843,11 @@ export function DocumentSelectorArtifact({
               {/* Card-based List View */}
               {isHierarchical && listViewMode === "list" && (
                 <div className="flex flex-col gap-2">
-                  {/* Render folder items first */}
+                  {/* Views Explorer item at root level */}
+                  {!currentFolder && (
+                    <ViewsExplorerListItem onClick={handleOpenViewsExplorer} />
+                  )}
+                  {/* Render folder items */}
                   {currentFolders.map((folder) => (
                     <FolderListItem
                       folder={folder}
@@ -1015,6 +1044,74 @@ function FolderListItem({ folder, onClick, isLoading }: FolderListItemProps) {
       {/* File Count Badge */}
       <Badge className="text-xs" variant="secondary">
         {folder.fileCount} file
+      </Badge>
+    </button>
+  );
+}
+
+// ============================================================================
+// VIEWS EXPLORER CARD (Entry point to SIBAC Views Explorer)
+// ============================================================================
+
+type ViewsExplorerCardProps = {
+  onClick: () => void;
+};
+
+function ViewsExplorerCard({ onClick }: ViewsExplorerCardProps) {
+  return (
+    <button
+      className={cn(
+        "group flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-3 text-center transition-all",
+        "hover:border-purple-500/50 hover:bg-purple-50/50 hover:shadow-md dark:hover:bg-purple-950/20",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {/* Icon */}
+      <div className="flex size-12 items-center justify-center rounded-xl bg-purple-100 transition-transform group-hover:scale-110 dark:bg-purple-950">
+        <Database className="size-6 text-purple-600 dark:text-purple-400" />
+      </div>
+
+      {/* Label */}
+      <p className="line-clamp-2 w-full font-medium text-xs leading-tight">
+        Esplora Viste SIBAC
+      </p>
+
+      {/* Badge */}
+      <Badge className="border-purple-200 bg-purple-50 text-purple-700 text-[10px] dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300" variant="outline">
+        SIB_V_IMPEGNI_X_CIG
+      </Badge>
+    </button>
+  );
+}
+
+function ViewsExplorerListItem({ onClick }: ViewsExplorerCardProps) {
+  return (
+    <button
+      className={cn(
+        "flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-all",
+        "hover:border-purple-500/50 hover:bg-purple-50/50 hover:shadow-sm dark:hover:bg-purple-950/20"
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {/* Icon */}
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950">
+        <Database className="size-5 text-purple-600 dark:text-purple-400" />
+      </div>
+
+      {/* Info */}
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium text-sm">Esplora Viste SIBAC</p>
+        <p className="truncate text-muted-foreground text-xs">
+          Visualizza i dati delle viste Oracle
+        </p>
+      </div>
+
+      {/* Badge */}
+      <Badge className="border-purple-200 bg-purple-50 text-purple-700 text-xs dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300" variant="outline">
+        Oracle
       </Badge>
     </button>
   );

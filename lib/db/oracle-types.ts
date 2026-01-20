@@ -225,3 +225,58 @@ export const USER_VIEW_MAPPING: Record<OracleUser, string> = {
  * Default password for all Oracle users
  */
 export const ORACLE_DEFAULT_PASSWORD = "p4ss_ia1";
+
+/**
+ * View name constant - all users access the same view through synonyms
+ */
+export const SIBAC_VIEW_NAME = "SIB_V_IMPEGNI_X_CIG" as const;
+
+/**
+ * Maximum rows per page for view browsing
+ */
+export const VIEW_DATA_MAX_LIMIT = 200;
+
+/**
+ * View target info for the API response
+ */
+export type ViewTarget = {
+  id: string;
+  user: OracleUser;
+  name: typeof SIBAC_VIEW_NAME;
+  fullPath: string;
+};
+
+/**
+ * Query options for view data browsing (raw records)
+ */
+export type ViewDataQueryOptions = {
+  /** Filter by CIG code (exact match) */
+  cig?: string;
+
+  /** Maximum number of records to return (clamped to VIEW_DATA_MAX_LIMIT) */
+  limit?: number;
+
+  /** Offset for pagination */
+  offset?: number;
+
+  /** Order by column (defaults to CIG) */
+  orderBy?: string;
+
+  /** Order direction */
+  orderDir?: "ASC" | "DESC";
+};
+
+/**
+ * Result of view data query
+ */
+export type ViewDataResult = {
+  success: boolean;
+  user: OracleUser | "all";
+  view: typeof SIBAC_VIEW_NAME;
+  limit: number;
+  offset: number;
+  rows: ImpegnoRecord[];
+  totalCount?: number;
+  error?: string;
+  sourceUser?: OracleUser;
+};

@@ -28,7 +28,7 @@ import { useClientTools } from "@/hooks/use-client-tools";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useSelectedAgent } from "@/hooks/use-selected-agent";
 import { getTabsState } from "@/hooks/use-canvas-tabs";
-import { getVisibleContent } from "@/lib/canvas";
+import { getSelectedInvoice, getVisibleContent } from "@/lib/canvas";
 import {
   processClientToolCall,
   serializeClientTools,
@@ -108,6 +108,31 @@ export function useChatController({
   // usage
   const { setUsage } = useChatUsageContext();
 
+  // Batching mechanism for data stream updates
+  // Accumulates parts synchronously and flushes via requestAnimationFrame
+  // This ensures no chunks are dropped while maintaining smooth UI
+  const pendingDataPartsRef = useRef<any[]>([]);
+  const flushScheduledRef = useRef(false);
+
+  const flushDataParts = useMemo(
+    () => () => {
+      flushScheduledRef.current = false;
+      const partsToFlush = pendingDataPartsRef.current;
+      if (partsToFlush.length === 0) {
+        return;
+      }
+
+      // Clear the buffer before updating state
+      pendingDataPartsRef.current = [];
+
+      // Use startTransition for non-blocking update, but batch all parts together
+      startTransition(() => {
+        setDataStream((ds) => (ds ? [...ds, ...partsToFlush] : partsToFlush));
+      });
+    },
+    [setDataStream]
+  );
+
   const transport = useRef(
     createChatTransport({
       api,
@@ -138,6 +163,12 @@ export function useChatController({
             }
           : { activeTab: null };
 
+        // Get selected invoice for deterministic document generation
+        const selectedInvoiceRecordId = getSelectedInvoice();
+        const invoiceContext = selectedInvoiceRecordId
+          ? { selectedInvoiceRecordId }
+          : undefined;
+
         return {
           body: {
             id: request.id,
@@ -147,6 +178,7 @@ export function useChatController({
             tools: serializeClientTools(registry.getTools()),
             agentId: selectedAgentRef.current?.registryId, // Dynamic agent selection via ref
             canvasContext, // Include active canvas tab for document-aware responses
+            invoiceContext, // Include selected invoice for deterministic document generation
             ...request.body,
           },
         };
@@ -161,12 +193,17 @@ export function useChatController({
     generateId: generateUUID,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     onData(dataPart) {
-      // Wrap data stream updates in startTransition for non-blocking streaming
-      // This deprioritizes artifact streaming updates during rapid token delivery
-      startTransition(() => {
-        setDataStream((ds) => (ds ? [...ds, dataPart] : [dataPart]));
-      });
-      // Usage update stays synchronous (important for UI feedback)
+      // Accumulate data parts synchronously (no chunks dropped)
+      pendingDataPartsRef.current.push(dataPart);
+
+      // Schedule a batched flush via requestAnimationFrame
+      // This batches rapid updates while maintaining smooth UI
+      if (!flushScheduledRef.current) {
+        flushScheduledRef.current = true;
+        requestAnimationFrame(flushDataParts);
+      }
+
+      // Usage updates are processed immediately for responsive UI feedback
       if (dataPart.type === "data-usage") {
         setUsage(dataPart.data);
       }

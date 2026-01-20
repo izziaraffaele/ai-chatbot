@@ -176,10 +176,11 @@ export function AssistantChat({
     if (!activeTabData) {
       return false;
     }
-    // For now, use registry for selector widgets only
+    // Use registry for selector and explorer widgets
     // Document and media widgets will continue using their existing renderers
     // until they are fully migrated to the registry pattern
-    return getWidgetCategory(activeTabData.kind) === "selector";
+    const category = getWidgetCategory(activeTabData.kind);
+    return category === "selector" || category === "explorer";
   }, [activeTabData]);
 
   const chatInput = (

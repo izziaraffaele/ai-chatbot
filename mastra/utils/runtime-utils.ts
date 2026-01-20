@@ -87,6 +87,16 @@ export type CanvasContext = {
   activeTab: ActiveTabContext | null;
 };
 
+/**
+ * Invoice context for deterministic invoice selection.
+ * This allows tools to know which invoice is currently selected
+ * without relying on LLM memory.
+ */
+export type InvoiceContext = {
+  /** The canonical recordId of the currently selected invoice */
+  selectedInvoiceRecordId?: string;
+};
+
 // ============================================================================
 // EXTRACTORS: Functions to extract values from RuntimeContext
 // ============================================================================
@@ -157,6 +167,27 @@ export const setCanvasContext = (
   ctx.set("canvasContext", canvasContext);
 };
 
+/**
+ * Get the invoice context (selected invoice) from runtime context.
+ * Returns undefined if no invoice has been selected.
+ */
+export const getInvoiceContext = (
+  ctx: RuntimeContext
+): InvoiceContext | undefined => {
+  return ctx.get("invoiceContext") as InvoiceContext | undefined;
+};
+
+/**
+ * Get the selected invoice recordId from runtime context.
+ * Returns undefined if no invoice has been selected.
+ */
+export const getSelectedInvoiceRecordId = (
+  ctx: RuntimeContext
+): string | undefined => {
+  const invoiceContext = getInvoiceContext(ctx);
+  return invoiceContext?.selectedInvoiceRecordId;
+};
+
 // ============================================================================
 // BUILDERS: Functions to create RuntimeContext with injected values
 // ============================================================================
@@ -168,13 +199,15 @@ export const setCanvasContext = (
  * @param args.geoHints - Geolocation hints from request for system prompt customization
  * @param args.config - Runtime configuration overrides
  * @param args.canvasContext - Active canvas tab information for document-aware responses
- * @returns RuntimeContext configured with session, geo hints, and canvas context
+ * @param args.invoiceContext - Selected invoice context for deterministic document generation
+ * @returns RuntimeContext configured with session, geo hints, canvas context, and invoice context
  *
  * @example
  * ```typescript
  * const runtimeContext = createToolContext(session, {
  *   geoHints: { city: 'Faenza' },
- *   canvasContext: { activeTab: { title: 'Invoice', kind: 'text', content: '...' } }
+ *   canvasContext: { activeTab: { title: 'Invoice', kind: 'text', content: '...' } },
+ *   invoiceContext: { selectedInvoiceRecordId: 'sibac-shared:path/to/file.xml' }
  * });
  *
  * await chatAgent.generate({
@@ -189,10 +222,11 @@ export function createToolContext(
     geoHints?: Partial<Geo>;
     config?: Partial<RuntimeConfig>;
     canvasContext?: CanvasContext;
+    invoiceContext?: InvoiceContext;
   } = {}
 ): RuntimeContext {
   const context = new RuntimeContext();
-  const { geoHints, config = {}, canvasContext } = args;
+  const { geoHints, config = {}, canvasContext, invoiceContext } = args;
 
   // Inject session for tool authentication and user context
   if (session) {
@@ -210,6 +244,11 @@ export function createToolContext(
   // Inject canvas context for document-aware responses
   if (canvasContext) {
     context.set("canvasContext", canvasContext);
+  }
+
+  // Inject invoice context for deterministic document generation
+  if (invoiceContext) {
+    context.set("invoiceContext", invoiceContext);
   }
 
   return context;
