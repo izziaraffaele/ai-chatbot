@@ -11,11 +11,13 @@ import { exec } from "node:child_process";
 import {
   copyFileSync,
   existsSync,
+  lstatSync,
   mkdirSync,
   readdirSync,
   readFileSync,
   rmSync,
   statSync,
+  unlinkSync,
 } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -64,6 +66,16 @@ export type SmbSyncResult = {
   filesFound: number;
   filesSynced: number;
   errors: string[];
+  /**
+   * Relative paths of files that were added or updated
+   * (copied from SMB to local directory)
+   */
+  addedOrUpdatedPaths: string[];
+  /**
+   * Relative paths of files that were removed
+   * (exist locally but not on SMB share)
+   */
+  removedPaths: string[];
 };
 
 /**
@@ -114,24 +126,76 @@ function ensureLocalDirectory(): void {
 }
 
 /**
- * Ensure mount point exists
+ * Ensure mount point exists as a directory
+ *
+ * Handles the case where a broken symlink exists at the mount point
+ * (existsSync returns false for broken symlinks, but the symlink file exists)
  */
 function ensureMountPoint(): void {
-  if (!existsSync(MOUNT_POINT)) {
-    mkdirSync(MOUNT_POINT, { recursive: true });
+  // Check if anything exists at the mount point (including broken symlinks)
+  try {
+    lstatSync(MOUNT_POINT);
+    // Something exists - check if it's usable
+    if (existsSync(MOUNT_POINT)) {
+      // Path exists and is accessible (either dir or working symlink)
+      return;
+    }
+    // It's a broken symlink - remove it
+    console.log("[SMB] Removing broken symlink before creating mount point");
+    unlinkSync(MOUNT_POINT);
+  } catch {
+    // Nothing exists at the path, which is fine
   }
+
+  // Create the directory
+  mkdirSync(MOUNT_POINT, { recursive: true });
 }
 
 /**
- * Check if share is already mounted
+ * Check if share is already mounted and accessible at our mount point.
+ *
+ * This function verifies:
+ * 1. The mount point exists
+ * 2. If it's a symlink, the target exists
+ * 3. The directory is actually readable (can list contents)
  */
-async function isShareMounted(): Promise<boolean> {
+function isShareMounted(): boolean {
   try {
-    const { stdout } = await execAsync("mount");
-    return (
-      stdout.includes(MOUNT_POINT) || stdout.includes(SMB_CONFIG.shareName)
-    );
-  } catch {
+    // First check if mount point exists at all
+    if (!existsSync(MOUNT_POINT)) {
+      return false;
+    }
+
+    // Check if it's a symlink and verify the target exists
+    const lstats = lstatSync(MOUNT_POINT);
+    if (lstats.isSymbolicLink()) {
+      // For symlinks, existsSync follows the link - if false, target is broken
+      // We need to check if the resolved path exists
+      try {
+        const stats = statSync(MOUNT_POINT);
+        if (!stats.isDirectory()) {
+          return false;
+        }
+      } catch {
+        // statSync failed - symlink target doesn't exist
+        console.log("[SMB] Mount point is a broken symlink");
+        return false;
+      }
+    }
+
+    // Try to actually read the directory to confirm it's accessible
+    const entries = readdirSync(MOUNT_POINT);
+
+    // If we can read it and it has content, consider it mounted
+    // An empty mount point likely means the mount failed or was disconnected
+    if (entries.length === 0) {
+      console.log("[SMB] Mount point exists but is empty");
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.log("[SMB] Mount check failed:", error);
     return false;
   }
 }
@@ -201,6 +265,10 @@ async function mountShareMacOS(): Promise<{
         const actualMountPath = finderMount.trim();
 
         if (actualMountPath) {
+          // Remove the empty mount point directory first (ln -sf creates symlink inside dir otherwise)
+          if (existsSync(MOUNT_POINT)) {
+            rmSync(MOUNT_POINT, { recursive: true, force: true });
+          }
           // Create symlink to the Finder mount
           await execAsync(`ln -sf "${actualMountPath}" "${MOUNT_POINT}"`);
           console.log(`[SMB] Mounted via Finder at: ${actualMountPath}`);
@@ -252,7 +320,7 @@ async function mountShareLinux(): Promise<{
  */
 async function unmountShare(): Promise<void> {
   try {
-    if (await isShareMounted()) {
+    if (isShareMounted()) {
       if (PLATFORM === "darwin") {
         await execAsync(`umount "${MOUNT_POINT}"`);
       } else {
@@ -266,14 +334,100 @@ async function unmountShare(): Promise<void> {
 }
 
 /**
+ * Clean up stale mount point (broken symlinks, empty directories, directories with broken symlinks)
+ *
+ * This handles the case where a previous mount attempt left behind:
+ * - A broken symlink (e.g., from Finder mount that was disconnected)
+ * - An empty directory from a failed mount
+ * - A directory containing only broken symlinks (from Finder mount fallback)
+ */
+function cleanupStaleMountPoint(): void {
+  try {
+    if (!existsSync(MOUNT_POINT)) {
+      return; // Nothing to clean up
+    }
+
+    const lstats = lstatSync(MOUNT_POINT);
+
+    if (lstats.isSymbolicLink()) {
+      // Check if the symlink target exists
+      try {
+        statSync(MOUNT_POINT); // This follows the symlink
+      } catch {
+        // Symlink target doesn't exist - it's broken, remove it
+        console.log("[SMB] Removing broken symlink at mount point");
+        unlinkSync(MOUNT_POINT);
+        return;
+      }
+    }
+
+    // If it's a directory, check for broken state
+    if (lstats.isDirectory()) {
+      try {
+        const entries = readdirSync(MOUNT_POINT);
+
+        if (entries.length === 0) {
+          // Empty directory from failed mount
+          console.log("[SMB] Removing empty mount point directory");
+          rmSync(MOUNT_POINT, { recursive: true });
+          return;
+        }
+
+        // Check if directory only contains broken symlinks (Finder mount fallback remnant)
+        // This happens when Finder mount created a directory with a symlink inside
+        let allBroken = true;
+        for (const entry of entries) {
+          const entryPath = join(MOUNT_POINT, entry);
+          try {
+            const entryLstats = lstatSync(entryPath);
+            if (entryLstats.isSymbolicLink()) {
+              // Check if symlink target exists
+              try {
+                statSync(entryPath);
+                allBroken = false; // Found a working symlink
+                break;
+              } catch {
+                // This symlink is broken, continue checking
+              }
+            } else {
+              // Not a symlink, directory has real content
+              allBroken = false;
+              break;
+            }
+          } catch {
+            // Can't stat entry, skip
+          }
+        }
+
+        if (allBroken && entries.length > 0) {
+          console.log(
+            "[SMB] Removing mount point directory with broken symlinks"
+          );
+          rmSync(MOUNT_POINT, { recursive: true });
+        }
+      } catch {
+        // Can't read directory, try to remove it
+        console.log("[SMB] Removing inaccessible mount point");
+        rmSync(MOUNT_POINT, { recursive: true, force: true });
+      }
+    }
+  } catch (error) {
+    console.warn("[SMB] Error cleaning up mount point:", error);
+  }
+}
+
+/**
  * Mount the SMB share (cross-platform)
  */
-async function mountShare(): Promise<{ success: boolean; error?: string }> {
-  // Check if already mounted
-  if (await isShareMounted()) {
+function mountShare(): Promise<{ success: boolean; error?: string }> {
+  // Check if already mounted and accessible
+  if (isShareMounted()) {
     console.log("[SMB] Share already mounted");
-    return { success: true };
+    return Promise.resolve({ success: true });
   }
+
+  // Clean up any stale mount point before attempting to mount
+  cleanupStaleMountPoint();
 
   if (PLATFORM === "darwin") {
     return mountShareMacOS();
@@ -293,10 +447,109 @@ function getSourcePath(): string {
 }
 
 /**
- * Copy files from mounted share to local directory
+ * Result type for internal sync function
  */
-function syncFilesFromMount(): { synced: number; errors: string[] } {
+type SyncFilesResult = {
+  synced: number;
+  totalFound: number;
+  errors: string[];
+  addedOrUpdatedPaths: string[];
+  removedPaths: string[];
+};
+
+/**
+ * Copy files from mounted share to local directory
+ * Also detects files that were removed from SMB share
+ */
+/**
+ * Iteratively walk a directory and collect all files with matching extensions.
+ * Uses a queue-based approach to avoid stack overflow on deeply nested directories.
+ *
+ * @param startDir - Directory to start walking from
+ * @param baseDir - Base directory for relative paths
+ * @returns Array of { absolutePath, relativePath }
+ */
+function walkDirectoryForSync(
+  startDir: string,
+  baseDir: string
+): Array<{ absolutePath: string; relativePath: string }> {
+  const results: Array<{ absolutePath: string; relativePath: string }> = [];
+  const directoryQueue: string[] = [startDir];
+
+  let dir = directoryQueue.shift();
+  while (dir !== undefined) {
+    try {
+      const entries = readdirSync(dir, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const absolutePath = join(dir, entry.name);
+        const relativePath = absolutePath.slice(baseDir.length + 1); // Remove baseDir + separator
+
+        if (entry.isDirectory()) {
+          // Add to queue instead of recursive call
+          directoryQueue.push(absolutePath);
+        } else if (entry.isFile()) {
+          // Check if extension is supported
+          const lowerName = entry.name.toLowerCase();
+          if (SYNC_EXTENSIONS.some((ext) => lowerName.endsWith(ext))) {
+            results.push({ absolutePath, relativePath });
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`[SMB] Error reading directory ${dir}:`, error);
+    }
+    dir = directoryQueue.shift();
+  }
+
+  return results;
+}
+
+/**
+ * Iteratively collect all local files with matching extensions.
+ * Uses a queue-based approach to avoid stack overflow on deeply nested directories.
+ */
+function collectLocalFiles(startDir: string, baseDir: string): string[] {
+  const results: string[] = [];
+
+  if (!existsSync(startDir)) {
+    return results;
+  }
+
+  const directoryQueue: string[] = [startDir];
+
+  let dir = directoryQueue.shift();
+  while (dir !== undefined) {
+    try {
+      const entries = readdirSync(dir, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const absolutePath = join(dir, entry.name);
+        const relativePath = absolutePath.slice(baseDir.length + 1);
+
+        if (entry.isDirectory()) {
+          // Add to queue instead of recursive call
+          directoryQueue.push(absolutePath);
+        } else if (entry.isFile()) {
+          const lowerName = entry.name.toLowerCase();
+          if (SYNC_EXTENSIONS.some((ext) => lowerName.endsWith(ext))) {
+            results.push(relativePath);
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`[SMB] Error reading local directory ${dir}:`, error);
+    }
+    dir = directoryQueue.shift();
+  }
+
+  return results;
+}
+
+function syncFilesFromMount(): SyncFilesResult {
   const errors: string[] = [];
+  const addedOrUpdatedPaths: string[] = [];
+  const removedPaths: string[] = [];
   let synced = 0;
 
   try {
@@ -305,26 +558,37 @@ function syncFilesFromMount(): { synced: number; errors: string[] } {
     if (!existsSync(sourcePath)) {
       return {
         synced: 0,
+        totalFound: 0,
         errors: [
           `Subdirectory "${SMB_CONFIG.subDirectory}" not found in share`,
         ],
+        addedOrUpdatedPaths: [],
+        removedPaths: [],
       };
     }
 
-    const files = readdirSync(sourcePath);
+    // Recursively get list of files on SMB share
+    const smbFiles = walkDirectoryForSync(sourcePath, sourcePath);
+    const totalFound = smbFiles.length;
+    console.log(`[SMB] Found ${totalFound} files on SMB share (recursive)`);
 
-    for (const file of files) {
-      // Check file extension
-      const hasValidExtension = SYNC_EXTENSIONS.some((ext) =>
-        file.toLowerCase().endsWith(ext)
-      );
+    // Create a set for quick lookup
+    const smbFileSet = new Set(smbFiles.map((f) => f.relativePath));
 
-      if (!hasValidExtension) {
-        continue;
+    // Recursively get list of local files
+    const localFiles = collectLocalFiles(LOCAL_SIBAC_PATH, LOCAL_SIBAC_PATH);
+
+    // Find removed files (exist locally but not on SMB)
+    for (const localFile of localFiles) {
+      if (!smbFileSet.has(localFile)) {
+        removedPaths.push(localFile);
+        console.log(`[SMB] Detected removed file: ${localFile}`);
       }
+    }
 
-      const fileSourcePath = join(sourcePath, file);
-      const destPath = join(LOCAL_SIBAC_PATH, file);
+    // Sync files from SMB to local
+    for (const { absolutePath: fileSourcePath, relativePath } of smbFiles) {
+      const destPath = join(LOCAL_SIBAC_PATH, relativePath);
 
       try {
         // Check if file exists and is newer
@@ -332,6 +596,15 @@ function syncFilesFromMount(): { synced: number; errors: string[] } {
 
         if (!sourceStats.isFile()) {
           continue;
+        }
+
+        // Ensure destination directory exists
+        const destDir = join(
+          LOCAL_SIBAC_PATH,
+          relativePath.split("/").slice(0, -1).join("/")
+        );
+        if (destDir !== LOCAL_SIBAC_PATH && !existsSync(destDir)) {
+          mkdirSync(destDir, { recursive: true });
         }
 
         let shouldCopy = true;
@@ -346,20 +619,27 @@ function syncFilesFromMount(): { synced: number; errors: string[] } {
         if (shouldCopy) {
           copyFileSync(fileSourcePath, destPath);
           synced++;
-          console.log(`[SMB] Synced: ${file}`);
+          addedOrUpdatedPaths.push(relativePath);
+          console.log(`[SMB] Synced: ${relativePath}`);
         }
       } catch (fileError) {
-        const msg = `Failed to sync ${file}: ${fileError}`;
+        const msg = `Failed to sync ${relativePath}: ${fileError}`;
         console.error(`[SMB] ${msg}`);
         errors.push(msg);
       }
     }
 
-    return { synced, errors };
+    return { synced, totalFound, errors, addedOrUpdatedPaths, removedPaths };
   } catch (error) {
     const msg = `Failed to read mount point: ${error}`;
     console.error(`[SMB] ${msg}`);
-    return { synced: 0, errors: [msg] };
+    return {
+      synced: 0,
+      totalFound: 0,
+      errors: [msg],
+      addedOrUpdatedPaths: [],
+      removedPaths: [],
+    };
   }
 }
 
@@ -385,6 +665,8 @@ export async function syncSibacFiles(): Promise<SmbSyncResult> {
       filesFound: 0,
       filesSynced: 0,
       errors: [`Missing: ${missing.join(", ")}`],
+      addedOrUpdatedPaths: [],
+      removedPaths: [],
     };
   }
 
@@ -397,6 +679,8 @@ export async function syncSibacFiles(): Promise<SmbSyncResult> {
       filesFound: 0,
       filesSynced: 0,
       errors: ["VPN not connected"],
+      addedOrUpdatedPaths: [],
+      removedPaths: [],
     };
   }
 
@@ -414,6 +698,8 @@ export async function syncSibacFiles(): Promise<SmbSyncResult> {
       filesFound: 0,
       filesSynced: 0,
       errors: [safeError],
+      addedOrUpdatedPaths: [],
+      removedPaths: [],
     };
   }
 
@@ -427,26 +713,17 @@ export async function syncSibacFiles(): Promise<SmbSyncResult> {
         filesFound: 0,
         filesSynced: 0,
         errors: [`Subdirectory "${SMB_CONFIG.subDirectory}" not found`],
+        addedOrUpdatedPaths: [],
+        removedPaths: [],
       };
     }
 
-    const sourceFiles = readdirSync(sourcePath);
-    const relevantFiles = sourceFiles.filter((f) =>
-      SYNC_EXTENSIONS.some((ext) => f.toLowerCase().endsWith(ext))
-    );
-    const filesFound = relevantFiles.length;
+    // Sync files (recursive)
+    const { synced, totalFound, errors, addedOrUpdatedPaths, removedPaths } =
+      syncFilesFromMount();
 
-    console.log(`[SMB] Found ${filesFound} files to sync from ${sourcePath}`);
-
-    // Sync files
-    const { synced, errors } = syncFilesFromMount();
-
-    // Count final local files
-    const localFiles = existsSync(LOCAL_SIBAC_PATH)
-      ? readdirSync(LOCAL_SIBAC_PATH).filter((f) =>
-          SYNC_EXTENSIONS.some((ext) => f.toLowerCase().endsWith(ext))
-        )
-      : [];
+    // Count final local files (recursive)
+    const localFiles = collectLocalFiles(LOCAL_SIBAC_PATH, LOCAL_SIBAC_PATH);
 
     return {
       success: errors.length === 0,
@@ -454,9 +731,11 @@ export async function syncSibacFiles(): Promise<SmbSyncResult> {
         errors.length === 0
           ? `Sincronizzazione completata. ${synced} file aggiornati, ${localFiles.length} file totali.`
           : `Sincronizzazione parziale. ${synced} file aggiornati, ${errors.length} errori.`,
-      filesFound,
+      filesFound: totalFound,
       filesSynced: synced,
       errors,
+      addedOrUpdatedPaths,
+      removedPaths,
     };
   } finally {
     // Always try to unmount

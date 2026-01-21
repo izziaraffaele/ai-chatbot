@@ -1,59 +1,35 @@
-import type { TranslationDict } from "./translations/en";
+import type { TranslationDict } from "./translations/it";
 import type { Locale } from "./types";
 
 const LOCALE_COOKIE_NAME = "locale";
 const LOCALE_COOKIE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year in seconds
 
 /**
- * Get the default locale from environment or fallback to 'en'
+ * Get the default locale - always Italian
  */
 export function getDefaultLocale(): Locale {
-  const envLocale = process.env.NEXT_PUBLIC_DEFAULT_LOCALE;
-  if (envLocale === "it" || envLocale === "en") {
-    return envLocale;
-  }
-  return "en";
+  return "it";
 }
 
 /**
- * Get supported locales from environment or fallback to ['en', 'it']
+ * Get supported locales - Italian only
  */
 export function getSupportedLocales(): Locale[] {
-  const envLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES;
-  if (envLocales) {
-    const locales = envLocales.split(",").map((l) => l.trim());
-    return locales.filter((l): l is Locale => l === "en" || l === "it");
-  }
-  return ["en", "it"];
+  return ["it"];
 }
 
 /**
- * Check if a locale is supported
+ * Check if a locale is supported - only Italian
  */
 export function isSupportedLocale(locale: string): locale is Locale {
-  const supported = getSupportedLocales();
-  return supported.includes(locale as Locale);
+  return locale === "it";
 }
 
 /**
- * Get the locale from cookie
+ * Get the locale from cookie - always returns Italian
  */
-export function getLocaleFromCookie(): Locale | null {
-  if (typeof document === "undefined") {
-    return null;
-  }
-
-  const cookies = document.cookie.split("; ");
-  const localeCookie = cookies.find((cookie) =>
-    cookie.startsWith(`${LOCALE_COOKIE_NAME}=`)
-  );
-
-  if (localeCookie) {
-    const locale = localeCookie.split("=")[1];
-    return isSupportedLocale(locale) ? locale : null;
-  }
-
-  return null;
+export function getLocaleFromCookie(): Locale {
+  return "it";
 }
 
 /**
@@ -68,34 +44,24 @@ export function setLocaleToCookie(locale: Locale): void {
 }
 
 /**
- * Get the current locale (from cookie or default)
+ * Get the current locale - always Italian
  */
 export function getCurrentLocale(): Locale {
-  const cookieLocale = getLocaleFromCookie();
-  if (cookieLocale) {
-    return cookieLocale;
-  }
-  return getDefaultLocale();
+  return "it";
 }
 
 /**
- * Dynamically load translation file for a given locale
+ * Load Italian translations
  */
 export async function loadTranslations(
-  locale: Locale
+  _locale?: Locale
 ): Promise<TranslationDict> {
-  switch (locale) {
-    case "it":
-      return (await import("./translations/it")).it;
-    default:
-      return (await import("./translations/en")).en;
-  }
+  return (await import("./translations/it")).it;
 }
 
 /**
  * Language names for display in UI
  */
 export const LANGUAGE_NAMES: Record<Locale, string> = {
-  en: "English",
   it: "Italiano",
 };

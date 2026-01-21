@@ -3,7 +3,9 @@
 import {
   ArrowLeft,
   Building2,
+  CalendarDays,
   CheckCircle2,
+  ChevronRight,
   CreditCard,
   Database,
   DatabaseZap,
@@ -33,6 +35,11 @@ import {
 import { useChatRuntime } from "@/components/chat/context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { useCanvasTabs } from "@/hooks/use-canvas-tabs";
 import { setSelectedInvoice } from "@/lib/canvas";
@@ -108,7 +115,7 @@ type InvoiceData = {
 /**
  * View mode for the artifact
  */
-type ViewMode = "list" | "detail";
+type ViewMode = "list" | "detail" | "recent-invoices";
 
 /**
  * Status of an extracted field for color coding
@@ -677,6 +684,16 @@ export function DocumentSelectorArtifact({
     });
   }, [openTabWithData]);
 
+  // Handle open Recent Invoices view
+  const handleOpenRecentInvoices = useCallback(() => {
+    setPanelViewMode("recent-invoices");
+  }, []);
+
+  // Handle back from Recent Invoices view
+  const handleBackFromRecentInvoices = useCallback(() => {
+    setPanelViewMode("list");
+  }, []);
+
   // Render based on view mode
   if (panelViewMode === "detail" && selectedDocument) {
     return (
@@ -685,6 +702,18 @@ export function DocumentSelectorArtifact({
         invoiceData={selectedDocument}
         onBack={handleBackToList}
         onClose={handleClose}
+      />
+    );
+  }
+
+  // Render Recent Invoices view
+  if (panelViewMode === "recent-invoices") {
+    return (
+      <RecentInvoicesView
+        className={className}
+        onBack={handleBackFromRecentInvoices}
+        onClose={handleClose}
+        onDocumentSelect={handleDocumentSelect}
       />
     );
   }
@@ -820,6 +849,10 @@ export function DocumentSelectorArtifact({
                   {!currentFolder && (
                     <ViewsExplorerCard onClick={handleOpenViewsExplorer} />
                   )}
+                  {/* Recent Invoices card at root level */}
+                  {!currentFolder && (
+                    <RecentInvoicesCard onClick={handleOpenRecentInvoices} />
+                  )}
                   {/* Render folder cards */}
                   {currentFolders.map((folder) => (
                     <FolderCard
@@ -846,6 +879,10 @@ export function DocumentSelectorArtifact({
                   {/* Views Explorer item at root level */}
                   {!currentFolder && (
                     <ViewsExplorerListItem onClick={handleOpenViewsExplorer} />
+                  )}
+                  {/* Recent Invoices item at root level */}
+                  {!currentFolder && (
+                    <RecentInvoicesListItem onClick={handleOpenRecentInvoices} />
                   )}
                   {/* Render folder items */}
                   {currentFolders.map((folder) => (
@@ -1114,6 +1151,784 @@ function ViewsExplorerListItem({ onClick }: ViewsExplorerCardProps) {
         Oracle
       </Badge>
     </button>
+  );
+}
+
+// ============================================================================
+// RECENT INVOICES CARD (Entry point to Fatture Recenti view)
+// ============================================================================
+
+type RecentInvoicesCardProps = {
+  onClick: () => void;
+};
+
+function RecentInvoicesCard({ onClick }: RecentInvoicesCardProps) {
+  return (
+    <button
+      className={cn(
+        "group flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-3 text-center transition-all",
+        "hover:border-amber-500/50 hover:bg-amber-50/50 hover:shadow-md dark:hover:bg-amber-950/20",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {/* Icon */}
+      <div className="flex size-12 items-center justify-center rounded-xl bg-amber-100 transition-transform group-hover:scale-110 dark:bg-amber-950">
+        <CalendarDays className="size-6 text-amber-600 dark:text-amber-400" />
+      </div>
+
+      {/* Label */}
+      <p className="line-clamp-2 w-full font-medium text-xs leading-tight">
+        Fatture recenti
+      </p>
+
+      {/* Badge */}
+      <Badge className="border-amber-200 bg-amber-50 text-amber-700 text-[10px] dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300" variant="outline">
+        2025/2026
+      </Badge>
+    </button>
+  );
+}
+
+function RecentInvoicesListItem({ onClick }: RecentInvoicesCardProps) {
+  return (
+    <button
+      className={cn(
+        "flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-all",
+        "hover:border-amber-500/50 hover:bg-amber-50/50 hover:shadow-sm dark:hover:bg-amber-950/20"
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {/* Icon */}
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950">
+        <CalendarDays className="size-5 text-amber-600 dark:text-amber-400" />
+      </div>
+
+      {/* Info */}
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium text-sm">Fatture recenti</p>
+        <p className="truncate text-muted-foreground text-xs">
+          Fatture elettroniche 2025/2026
+        </p>
+      </div>
+
+      {/* Badge */}
+      <Badge className="border-amber-200 bg-amber-50 text-amber-700 text-xs dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300" variant="outline">
+        XMLP
+      </Badge>
+    </button>
+  );
+}
+
+// ============================================================================
+// RECENT INVOICES VIEW (Accordion-based file browser)
+// ============================================================================
+
+/** Regex for matching two-digit folder names (months 01-12, days 01-31) */
+const TWO_DIGIT_FOLDER_REGEX = /^\d{2}$/;
+
+/** Month names in Italian */
+const MONTH_NAMES: Record<string, string> = {
+  "01": "Gennaio",
+  "02": "Febbraio",
+  "03": "Marzo",
+  "04": "Aprile",
+  "05": "Maggio",
+  "06": "Giugno",
+  "07": "Luglio",
+  "08": "Agosto",
+  "09": "Settembre",
+  "10": "Ottobre",
+  "11": "Novembre",
+  "12": "Dicembre",
+};
+
+/** Base path for XMLP invoices */
+const XMLP_BASE_PATH = "Faenza/repositoryFE/XMLP";
+
+/** Years to display */
+const XMLP_YEARS = ["2026", "2025"];
+
+type RecentInvoicesViewProps = {
+  className?: string;
+  onBack: () => void;
+  onClose: () => void;
+  onDocumentSelect: (fileId: string) => void;
+};
+
+type YearData = {
+  year: string;
+  months: string[];
+  isLoading: boolean;
+  error?: string;
+};
+
+type MonthData = {
+  month: string;
+  days: string[];
+  isLoading: boolean;
+  error?: string;
+};
+
+type DayData = {
+  day: string;
+  files: Array<{ name: string; path: string }>;
+  isLoading: boolean;
+  error?: string;
+};
+
+function RecentInvoicesView({
+  className,
+  onBack,
+  onClose,
+  onDocumentSelect,
+}: RecentInvoicesViewProps) {
+  // State for expanded years
+  const [expandedYears, setExpandedYears] = useState<Set<string>>(
+    () => new Set([new Date().getFullYear().toString()])
+  );
+  // State for year data (months loaded from API)
+  const [yearData, setYearData] = useState<Record<string, YearData>>({});
+
+  // State for expanded months (key: "year-month")
+  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
+  // State for month data (days loaded from API)
+  const [monthData, setMonthData] = useState<Record<string, MonthData>>({});
+
+  // State for expanded days (key: "year-month-day")
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
+  // State for day data (files loaded from API)
+  const [dayData, setDayData] = useState<Record<string, DayData>>({});
+
+  // Search query
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Fetch months for a year
+  const fetchMonthsForYear = useCallback(async (year: string) => {
+    const path = `${XMLP_BASE_PATH}/${year}`;
+
+    setYearData((prev) => ({
+      ...prev,
+      [year]: { year, months: [], isLoading: true },
+    }));
+
+    try {
+      const response = await fetch(
+        `/api/smb?action=browse&path=${encodeURIComponent(path)}`
+      );
+      const data = await response.json();
+
+      if (!data.success) {
+        setYearData((prev) => ({
+          ...prev,
+          [year]: {
+            year,
+            months: [],
+            isLoading: false,
+            error: data.error ?? "Errore nel caricamento",
+          },
+        }));
+        return;
+      }
+
+      // Filter for folders (months are folders named 01-12)
+      const months = data.entries
+        .filter(
+          (entry: { type: string; name: string }) =>
+            entry.type === "folder" && TWO_DIGIT_FOLDER_REGEX.test(entry.name)
+        )
+        .map((entry: { name: string }) => entry.name)
+        .sort()
+        .reverse(); // Show most recent months first
+
+      setYearData((prev) => ({
+        ...prev,
+        [year]: { year, months, isLoading: false },
+      }));
+    } catch (error) {
+      setYearData((prev) => ({
+        ...prev,
+        [year]: {
+          year,
+          months: [],
+          isLoading: false,
+          error: String(error),
+        },
+      }));
+    }
+  }, []);
+
+  // Fetch days for a month
+  const fetchDaysForMonth = useCallback(async (year: string, month: string) => {
+    const path = `${XMLP_BASE_PATH}/${year}/${month}`;
+    const key = `${year}-${month}`;
+
+    setMonthData((prev) => ({
+      ...prev,
+      [key]: { month, days: [], isLoading: true },
+    }));
+
+    try {
+      const response = await fetch(
+        `/api/smb?action=browse&path=${encodeURIComponent(path)}`
+      );
+      const data = await response.json();
+
+      if (!data.success) {
+        setMonthData((prev) => ({
+          ...prev,
+          [key]: {
+            month,
+            days: [],
+            isLoading: false,
+            error: data.error ?? "Errore nel caricamento",
+          },
+        }));
+        return;
+      }
+
+      // Filter for folders (days are folders named 01-31)
+      const days = data.entries
+        .filter(
+          (entry: { type: string; name: string }) =>
+            entry.type === "folder" && TWO_DIGIT_FOLDER_REGEX.test(entry.name)
+        )
+        .map((entry: { name: string }) => entry.name)
+        .sort()
+        .reverse(); // Show most recent days first
+
+      setMonthData((prev) => ({
+        ...prev,
+        [key]: { month, days, isLoading: false },
+      }));
+    } catch (error) {
+      setMonthData((prev) => ({
+        ...prev,
+        [key]: {
+          month,
+          days: [],
+          isLoading: false,
+          error: String(error),
+        },
+      }));
+    }
+  }, []);
+
+  // Fetch files for a day
+  const fetchFilesForDay = useCallback(
+    async (year: string, month: string, day: string) => {
+      const path = `${XMLP_BASE_PATH}/${year}/${month}/${day}`;
+      const key = `${year}-${month}-${day}`;
+
+      setDayData((prev) => ({
+        ...prev,
+        [key]: { day, files: [], isLoading: true },
+      }));
+
+      try {
+        const response = await fetch(
+          `/api/smb?action=browse&path=${encodeURIComponent(path)}`
+        );
+        const data = await response.json();
+
+        if (!data.success) {
+          setDayData((prev) => ({
+            ...prev,
+            [key]: {
+              day,
+              files: [],
+              isLoading: false,
+              error: data.error ?? "Errore nel caricamento",
+            },
+          }));
+          return;
+        }
+
+        // Filter for XML files
+        const files = data.entries
+          .filter(
+            (entry: { type: string; name: string }) =>
+              entry.type === "file" && entry.name.toLowerCase().endsWith(".xml")
+          )
+          .map((entry: { name: string; path: string }) => ({
+            name: entry.name,
+            path: entry.path,
+          }));
+
+        setDayData((prev) => ({
+          ...prev,
+          [key]: { day, files, isLoading: false },
+        }));
+      } catch (error) {
+        setDayData((prev) => ({
+          ...prev,
+          [key]: {
+            day,
+            files: [],
+            isLoading: false,
+            error: String(error),
+          },
+        }));
+      }
+    },
+    []
+  );
+
+  // Handle year toggle
+  const handleYearToggle = useCallback(
+    (year: string) => {
+      setExpandedYears((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(year)) {
+          newSet.delete(year);
+        } else {
+          newSet.add(year);
+          // Fetch months if not already loaded
+          if (!yearData[year]) {
+            fetchMonthsForYear(year);
+          }
+        }
+        return newSet;
+      });
+    },
+    [yearData, fetchMonthsForYear]
+  );
+
+  // Handle month toggle
+  const handleMonthToggle = useCallback(
+    (year: string, month: string) => {
+      const key = `${year}-${month}`;
+      setExpandedMonths((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(key)) {
+          newSet.delete(key);
+        } else {
+          newSet.add(key);
+          // Fetch days if not already loaded
+          if (!monthData[key]) {
+            fetchDaysForMonth(year, month);
+          }
+        }
+        return newSet;
+      });
+    },
+    [monthData, fetchDaysForMonth]
+  );
+
+  // Handle day toggle
+  const handleDayToggle = useCallback(
+    (year: string, month: string, day: string) => {
+      const key = `${year}-${month}-${day}`;
+      setExpandedDays((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(key)) {
+          newSet.delete(key);
+        } else {
+          newSet.add(key);
+          // Fetch files if not already loaded
+          if (!dayData[key]) {
+            fetchFilesForDay(year, month, day);
+          }
+        }
+        return newSet;
+      });
+    },
+    [dayData, fetchFilesForDay]
+  );
+
+  // Handle file click
+  const handleFileClick = useCallback(
+    (filePath: string) => {
+      // Create the record ID with sibac-shared prefix
+      const recordId = `sibac-shared:${filePath}`;
+      onDocumentSelect(recordId);
+    },
+    [onDocumentSelect]
+  );
+
+  // Filter files by search query
+  const filterFiles = useCallback(
+    (files: Array<{ name: string; path: string }>) => {
+      if (!searchQuery) {
+        return files;
+      }
+      const query = searchQuery.toLowerCase();
+      return files.filter((f) => f.name.toLowerCase().includes(query));
+    },
+    [searchQuery]
+  );
+
+  return (
+    <ChatArtifact className={cn("h-full rounded-none border-none", className)}>
+      <ChatArtifactHeader
+        actions={
+          <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+              <CalendarDays className="size-4" />
+              <span className="font-medium">Fatture XMLP</span>
+            </div>
+          </div>
+        }
+        onClose={onClose}
+        subtitle="Organizzate per anno, mese e giorno"
+        title="Fatture recenti"
+      />
+
+      <ChatArtifactBody>
+        <div className="flex h-full flex-col">
+          {/* Back Navigation Header */}
+          <div className="flex items-center gap-3 border-border border-b bg-muted/30 px-4 py-2">
+            <Button
+              className="gap-2"
+              onClick={onBack}
+              size="sm"
+              variant="ghost"
+            >
+              <ArrowLeft className="size-4" />
+              Indietro
+            </Button>
+            <span className="font-medium text-sm">Fatture recenti</span>
+          </div>
+
+          {/* Search */}
+          <div className="border-border border-b px-6 py-4">
+            <div className="relative max-w-md">
+              <Search className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cerca fatture..."
+                value={searchQuery}
+              />
+            </div>
+          </div>
+
+          {/* Accordion Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="space-y-2">
+              {XMLP_YEARS.map((year) => (
+                <YearAccordion
+                  dayData={dayData}
+                  expandedDays={expandedDays}
+                  expandedMonths={expandedMonths}
+                  filterFiles={filterFiles}
+                  isExpanded={expandedYears.has(year)}
+                  key={year}
+                  monthData={monthData}
+                  onDayToggle={handleDayToggle}
+                  onFileClick={handleFileClick}
+                  onMonthToggle={handleMonthToggle}
+                  onToggle={handleYearToggle}
+                  year={year}
+                  yearData={yearData[year]}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </ChatArtifactBody>
+    </ChatArtifact>
+  );
+}
+
+// ============================================================================
+// YEAR ACCORDION
+// ============================================================================
+
+type YearAccordionProps = {
+  year: string;
+  isExpanded: boolean;
+  onToggle: (year: string) => void;
+  yearData?: YearData;
+  expandedMonths: Set<string>;
+  onMonthToggle: (year: string, month: string) => void;
+  monthData: Record<string, MonthData>;
+  expandedDays: Set<string>;
+  onDayToggle: (year: string, month: string, day: string) => void;
+  dayData: Record<string, DayData>;
+  onFileClick: (filePath: string) => void;
+  filterFiles: (
+    files: Array<{ name: string; path: string }>
+  ) => Array<{ name: string; path: string }>;
+};
+
+function YearAccordion({
+  year,
+  isExpanded,
+  onToggle,
+  yearData,
+  expandedMonths,
+  onMonthToggle,
+  monthData,
+  expandedDays,
+  onDayToggle,
+  dayData,
+  onFileClick,
+  filterFiles,
+}: YearAccordionProps) {
+  return (
+    <Collapsible onOpenChange={() => onToggle(year)} open={isExpanded}>
+      <CollapsibleTrigger asChild>
+        <button
+          className={cn(
+            "flex w-full items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-all",
+            "hover:border-amber-500/50 hover:bg-amber-50/50 dark:hover:bg-amber-950/20",
+            isExpanded && "border-amber-500/50 bg-amber-50/30 dark:bg-amber-950/10"
+          )}
+          type="button"
+        >
+          <ChevronRight
+            className={cn(
+              "size-4 text-muted-foreground transition-transform",
+              isExpanded && "rotate-90"
+            )}
+          />
+          <div className="flex size-8 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950">
+            <CalendarDays className="size-4 text-amber-600 dark:text-amber-400" />
+          </div>
+          <span className="flex-1 font-semibold">{year}</span>
+          {yearData?.months && yearData.months.length > 0 && (
+            <Badge variant="secondary">{yearData.months.length} mesi</Badge>
+          )}
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="mt-2 space-y-2 pl-6">
+          {yearData?.isLoading && (
+            <div className="flex items-center gap-2 p-3 text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" />
+              <span className="text-sm">Caricamento mesi...</span>
+            </div>
+          )}
+          {yearData?.error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-700 text-sm dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+              {yearData.error}
+            </div>
+          )}
+          {yearData?.months.map((month) => (
+            <MonthAccordion
+              dayData={dayData}
+              expandedDays={expandedDays}
+              filterFiles={filterFiles}
+              isExpanded={expandedMonths.has(`${year}-${month}`)}
+              key={`${year}-${month}`}
+              month={month}
+              monthData={monthData[`${year}-${month}`]}
+              onDayToggle={onDayToggle}
+              onFileClick={onFileClick}
+              onToggle={onMonthToggle}
+              year={year}
+            />
+          ))}
+          {yearData && !yearData.isLoading && yearData.months.length === 0 && !yearData.error && (
+            <div className="p-3 text-muted-foreground text-sm">
+              Nessun mese disponibile
+            </div>
+          )}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+// ============================================================================
+// MONTH ACCORDION
+// ============================================================================
+
+type MonthAccordionProps = {
+  year: string;
+  month: string;
+  isExpanded: boolean;
+  onToggle: (year: string, month: string) => void;
+  monthData?: MonthData;
+  expandedDays: Set<string>;
+  onDayToggle: (year: string, month: string, day: string) => void;
+  dayData: Record<string, DayData>;
+  onFileClick: (filePath: string) => void;
+  filterFiles: (
+    files: Array<{ name: string; path: string }>
+  ) => Array<{ name: string; path: string }>;
+};
+
+function MonthAccordion({
+  year,
+  month,
+  isExpanded,
+  onToggle,
+  monthData,
+  expandedDays,
+  onDayToggle,
+  dayData,
+  onFileClick,
+  filterFiles,
+}: MonthAccordionProps) {
+  const monthName = MONTH_NAMES[month] ?? month;
+
+  return (
+    <Collapsible onOpenChange={() => onToggle(year, month)} open={isExpanded}>
+      <CollapsibleTrigger asChild>
+        <button
+          className={cn(
+            "flex w-full items-center gap-3 rounded-lg border border-border bg-card p-2.5 text-left transition-all",
+            "hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-950/20",
+            isExpanded && "border-blue-500/50 bg-blue-50/30 dark:bg-blue-950/10"
+          )}
+          type="button"
+        >
+          <ChevronRight
+            className={cn(
+              "size-4 text-muted-foreground transition-transform",
+              isExpanded && "rotate-90"
+            )}
+          />
+          <div className="flex size-7 items-center justify-center rounded-md bg-blue-100 dark:bg-blue-950">
+            <span className="font-medium text-blue-600 text-xs dark:text-blue-400">
+              {month}
+            </span>
+          </div>
+          <span className="flex-1 font-medium text-sm">{monthName}</span>
+          {monthData?.days && monthData.days.length > 0 && (
+            <Badge className="text-xs" variant="secondary">
+              {monthData.days.length} giorni
+            </Badge>
+          )}
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="mt-2 space-y-1.5 pl-5">
+          {monthData?.isLoading && (
+            <div className="flex items-center gap-2 p-2 text-muted-foreground">
+              <Loader2 className="size-3 animate-spin" />
+              <span className="text-xs">Caricamento giorni...</span>
+            </div>
+          )}
+          {monthData?.error && (
+            <div className="rounded-md border border-red-200 bg-red-50 p-2 text-red-700 text-xs dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+              {monthData.error}
+            </div>
+          )}
+          {monthData?.days.map((day) => (
+            <DayAccordion
+              day={day}
+              dayData={dayData[`${year}-${month}-${day}`]}
+              filterFiles={filterFiles}
+              isExpanded={expandedDays.has(`${year}-${month}-${day}`)}
+              key={`${year}-${month}-${day}`}
+              month={month}
+              onFileClick={onFileClick}
+              onToggle={onDayToggle}
+              year={year}
+            />
+          ))}
+          {monthData && !monthData.isLoading && monthData.days.length === 0 && !monthData.error && (
+            <div className="p-2 text-muted-foreground text-xs">
+              Nessun giorno disponibile
+            </div>
+          )}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+// ============================================================================
+// DAY ACCORDION
+// ============================================================================
+
+type DayAccordionProps = {
+  year: string;
+  month: string;
+  day: string;
+  isExpanded: boolean;
+  onToggle: (year: string, month: string, day: string) => void;
+  dayData?: DayData;
+  onFileClick: (filePath: string) => void;
+  filterFiles: (
+    files: Array<{ name: string; path: string }>
+  ) => Array<{ name: string; path: string }>;
+};
+
+function DayAccordion({
+  year,
+  month,
+  day,
+  isExpanded,
+  onToggle,
+  dayData,
+  onFileClick,
+  filterFiles,
+}: DayAccordionProps) {
+  const filteredFiles = dayData?.files ? filterFiles(dayData.files) : [];
+
+  return (
+    <Collapsible onOpenChange={() => onToggle(year, month, day)} open={isExpanded}>
+      <CollapsibleTrigger asChild>
+        <button
+          className={cn(
+            "flex w-full items-center gap-2 rounded-md border border-border bg-card p-2 text-left transition-all",
+            "hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20",
+            isExpanded && "border-emerald-500/50 bg-emerald-50/30 dark:bg-emerald-950/10"
+          )}
+          type="button"
+        >
+          <ChevronRight
+            className={cn(
+              "size-3 text-muted-foreground transition-transform",
+              isExpanded && "rotate-90"
+            )}
+          />
+          <div className="flex size-6 items-center justify-center rounded bg-emerald-100 dark:bg-emerald-950">
+            <span className="font-medium text-emerald-600 text-[10px] dark:text-emerald-400">
+              {day}
+            </span>
+          </div>
+          <span className="flex-1 text-sm">
+            {day} {MONTH_NAMES[month]?.substring(0, 3)}
+          </span>
+          {dayData?.files && dayData.files.length > 0 && (
+            <Badge className="text-[10px]" variant="secondary">
+              {dayData.files.length} file
+            </Badge>
+          )}
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="mt-1 space-y-1 pl-4">
+          {dayData?.isLoading && (
+            <div className="flex items-center gap-2 p-1.5 text-muted-foreground">
+              <Loader2 className="size-3 animate-spin" />
+              <span className="text-xs">Caricamento file...</span>
+            </div>
+          )}
+          {dayData?.error && (
+            <div className="rounded border border-red-200 bg-red-50 p-1.5 text-red-700 text-xs dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+              {dayData.error}
+            </div>
+          )}
+          {filteredFiles.map((file) => (
+            <button
+              className={cn(
+                "flex w-full items-center gap-2 rounded border border-transparent p-1.5 text-left transition-all",
+                "hover:border-primary/30 hover:bg-accent/50"
+              )}
+              key={file.path}
+              onClick={() => onFileClick(file.path)}
+              type="button"
+            >
+              <FileText className="size-4 text-blue-500" />
+              <span className="flex-1 truncate text-xs">{file.name}</span>
+            </button>
+          ))}
+          {dayData && !dayData.isLoading && filteredFiles.length === 0 && !dayData.error && (
+            <div className="p-1.5 text-muted-foreground text-xs">
+              Nessun file XML trovato
+            </div>
+          )}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

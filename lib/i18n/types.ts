@@ -1,7 +1,7 @@
 import type {
   TranslationDict as TDict,
   TranslationKey as TKey,
-} from "./translations/en";
+} from "./translations/it";
 
 export type TranslationKey = TKey;
 export type TranslationDict = TDict;
@@ -11,7 +11,8 @@ export type TranslateFn = <K extends TranslationKey>(
   fallback: string
 ) => string;
 
-export type Locale = "en" | "it";
+// Italian only - English support removed
+export type Locale = "it";
 
 export type LanguageContextValue = {
   locale: Locale;

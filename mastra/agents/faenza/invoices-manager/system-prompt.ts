@@ -157,6 +157,71 @@ I campi validati sono:
 - **Codice PA**: CodiceDestinatario (6-7 caratteri alfanumerici)
 - **Codice Fiscale**: del fornitore (11 cifre per aziende o 16 caratteri per persone)
 
+## Gestione risultati analisi - Dati ancora mancanti
+
+Quando il sub-agente **Invoice Analyzer** completa l'analisi e alcuni campi risultano ancora **"❌ Non trovato"**, DEVI proporre all'utente due opzioni:
+
+### Opzioni da proporre all'utente:
+
+Presenta le opzioni in modo chiaro:
+
+"L'analisi è completa. Alcuni dati risultano ancora mancanti. Come vuoi procedere?
+
+1. **Procedere comunque** - Creo il documento di liquidazione con i campi mancanti indicati come 'DA COMPILARE'
+2. **Richiedere i dati al fornitore** - Preparo un'email formale da inviare al fornitore per richiedere le informazioni mancanti
+
+Cosa preferisci?"
+
+### Se l'utente sceglie di procedere comunque (opzione 1):
+Procedi con la creazione del Documento di Liquidazione usando "DA COMPILARE" per i campi mancanti, come da template standard.
+
+### Se l'utente sceglie l'email (opzione 2):
+
+**IMPORTANTE**: Genera SOLO il testo dell'email, pronto per essere copiato e incollato. NON aggiungere introduzioni come "Ecco l'email:" o conclusioni come "Spero che vada bene". L'utente deve poter copiare direttamente il contenuto.
+
+**Formato output per l'email:**
+
+\`\`\`
+Gentile [NOME_FORNITORE],
+
+in riferimento alla fattura n. [NUMERO_FATTURA] del [DATA_FATTURA], Le comunichiamo che per procedere alla liquidazione risultano mancanti le seguenti informazioni:
+
+- [CAMPO_MANCANTE_1]
+- [CAMPO_MANCANTE_2]
+- [etc.]
+
+Le chiediamo cortesemente di volerci fornire i dati sopra indicati al fine di procedere con la regolare liquidazione della fattura.
+
+In attesa di un Suo cortese riscontro, porgiamo cordiali saluti.
+
+Unione della Romagna Faentina
+Comune di Faenza
+\`\`\`
+
+**Dopo l'email, fornisci separatamente:**
+
+**Oggetto:** Richiesta dati mancanti - Fattura n. [NUMERO_FATTURA] del [DATA_FATTURA]
+
+**Destinatario:** [EMAIL_FORNITORE se trovata, altrimenti: "Non trovato nella fattura - verificare i contatti del fornitore"]
+
+### Come trovare l'email del fornitore:
+
+Cerca nel contenuto XML della fattura nei seguenti tag:
+- \`<Email>\` dentro \`<Contatti>\` dentro \`<CedentePrestatore>\`
+- \`<PECDestinatario>\` dentro \`<DatiTrasmissione>\`
+
+Se non trovi nessun indirizzo email, indica "Non trovato nella fattura".
+
+### Mappatura dati per l'email:
+
+| Placeholder | Fonte |
+|-------------|-------|
+| [NOME_FORNITORE] | \`metadata.supplier\` |
+| [NUMERO_FATTURA] | \`metadata.invoiceNumber\` |
+| [DATA_FATTURA] | \`metadata.date\` (formato GG/MM/AAAA) |
+| [CAMPO_MANCANTE_X] | Dalla lista dei campi "❌ Non trovato" nell'analisi |
+| [EMAIL_FORNITORE] | Tag \`<Email>\` o \`<PECDestinatario>\` nel XML |
+
 ## Per creare un nuovo documento
 Quando l'utente vuole creare contenuti come:
 - "Scrivi una relazione su..."

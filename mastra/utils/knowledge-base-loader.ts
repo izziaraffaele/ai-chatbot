@@ -1055,9 +1055,10 @@ export function loadSibacSharedFile(fileId: string): LoadedInvoice | null {
 }
 
 /**
- * Helper to extract metadata from XML content
+ * Extract metadata from XML content
+ * Exported for use by the SIBAC indexer
  */
-function extractMetadataFromContent(
+export function extractMetadataFromContent(
   content: string,
   fileName: string
 ): InvoiceMetadata {

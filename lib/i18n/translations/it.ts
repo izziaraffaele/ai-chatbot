@@ -1,11 +1,10 @@
 /**
  * Italian translations (it)
- * Must match all keys from en.ts
+ * This is the source of truth for all translation keys.
+ * English support has been removed - Italian only.
  */
 
-import type { TranslationDict } from "./en";
-
-export const it: TranslationDict = {
+export const it = {
   // ============================================================================
   // Authentication
   // ============================================================================
@@ -54,6 +53,10 @@ export const it: TranslationDict = {
   // Greeting
   "chat.greeting.title": "Ciao!",
   "chat.greeting.subtitle": "Come posso aiutarti oggi?",
+
+  // Welcome Message
+  "chat.welcome.message":
+    "Benvenuto! Sono l'assistente del Comune di Faenza. Posso aiutarti a:\n\n- Visualizzare e cercare fatture\n- Esplorare il database SIBAC\n- Creare documenti di liquidazione\n\nCome posso assisterti oggi?",
 
   // Suggestions
   "chat.suggestions.prompt1": "Quali sono i vantaggi di utilizzare Next.js?",
@@ -403,4 +406,42 @@ export const it: TranslationDict = {
   "sibacViews.loading.data": "Caricamento dati...",
   "sibacViews.loading.connection": "Verifica connessione...",
   "sibacViews.error.invalidUser": "Utente non valido: {user}. Utenti consentiti: cp_ia01 - cp_ia08",
-};
+
+  // ============================================================================
+  // Recent Invoices (Fatture Recenti)
+  // ============================================================================
+
+  "recentInvoices.title": "Fatture recenti",
+  "recentInvoices.subtitle": "Organizzate per anno, mese e giorno",
+  "recentInvoices.cardTitle": "Fatture recenti",
+  "recentInvoices.cardDescription": "Fatture elettroniche 2025/2026",
+  "recentInvoices.cardBadge": "XMLP",
+  "recentInvoices.yearsBadge": "2025/2026",
+  "recentInvoices.header.title": "Fatture XMLP",
+  "recentInvoices.search.placeholder": "Cerca fatture...",
+  "recentInvoices.back": "Indietro",
+  "recentInvoices.loading.months": "Caricamento mesi...",
+  "recentInvoices.loading.days": "Caricamento giorni...",
+  "recentInvoices.loading.files": "Caricamento file...",
+  "recentInvoices.empty.months": "Nessun mese disponibile",
+  "recentInvoices.empty.days": "Nessun giorno disponibile",
+  "recentInvoices.empty.files": "Nessun file XML trovato",
+  "recentInvoices.count.months": "mesi",
+  "recentInvoices.count.days": "giorni",
+  "recentInvoices.count.files": "file",
+  "recentInvoices.month.01": "Gennaio",
+  "recentInvoices.month.02": "Febbraio",
+  "recentInvoices.month.03": "Marzo",
+  "recentInvoices.month.04": "Aprile",
+  "recentInvoices.month.05": "Maggio",
+  "recentInvoices.month.06": "Giugno",
+  "recentInvoices.month.07": "Luglio",
+  "recentInvoices.month.08": "Agosto",
+  "recentInvoices.month.09": "Settembre",
+  "recentInvoices.month.10": "Ottobre",
+  "recentInvoices.month.11": "Novembre",
+  "recentInvoices.month.12": "Dicembre",
+} as const;
+
+export type TranslationKey = keyof typeof it;
+export type TranslationDict = Record<TranslationKey, string>;

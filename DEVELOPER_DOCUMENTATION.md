@@ -18,8 +18,9 @@
 14. [Hooks Reference](#hooks-reference)
 15. [Data Flow](#data-flow)
 16. [File Structure](#file-structure)
-17. [Adding New Features](#adding-new-features)
-18. [Troubleshooting](#troubleshooting)
+17. [Chat UI Configuration](#chat-ui-configuration)
+18. [Adding New Features](#adding-new-features)
+19. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -234,6 +235,38 @@ const customAnalyzer = createInvoiceAnalyzerAgent(["CUP", "IBAN"]);
 2. **Analyze XML**: Search for missing fields in returned content
 3. **Validate findings**: Use validation tools to verify extracted values
 4. **Report results**: Stream findings back to chat
+
+**Post-Analysis Decision Flow:**
+
+After the Invoice Analyzer sub-agent completes analysis, if some fields are still marked as "Non trovato" (not found), the main agent presents two options to the user:
+
+1. **Proceed anyway** - Create the liquidation document with missing fields marked as "DA COMPILARE"
+2. **Request data from supplier** - Generate a formal email to send to the supplier requesting the missing information
+
+If the user chooses the email option, the agent generates:
+- A ready-to-copy formal Italian business email (no intro/outro text from the agent)
+- Subject line suggestion
+- Recipient email (extracted from `<Email>` in `<Contatti>` or `<PECDestinatario>` in the XML, if available)
+
+**Email Template Structure:**
+```
+Gentile [SUPPLIER_NAME],
+
+in riferimento alla fattura n. [INVOICE_NUMBER] del [INVOICE_DATE], Le comunichiamo che 
+per procedere alla liquidazione risultano mancanti le seguenti informazioni:
+
+- [MISSING_FIELD_1]
+- [MISSING_FIELD_2]
+- [etc.]
+
+Le chiediamo cortesemente di volerci fornire i dati sopra indicati al fine di procedere 
+con la regolare liquidazione della fattura.
+
+In attesa di un Suo cortese riscontro, porgiamo cordiali saluti.
+
+Unione della Romagna Faentina
+Comune di Faenza
+```
 
 **Note:** The legacy API endpoint `POST /api/analyze-invoice` still exists but is no longer used by the UI. The sub-agent approach is preferred as it keeps the conversation context intact.
 
@@ -558,6 +591,7 @@ To enable:
 |--------|----------|-------------|
 | `scripts/setup-vpn-macos.sh` | macOS | Guides macOS VPN profile creation |
 | `scripts/setup-vpn-linux.sh` | Linux | Installs vpnc and creates config |
+| `scripts/map-sibac-filesystem.sh` | macOS/Linux | Maps SIBAC SMB share folder structure to markdown (uses smbclient for 10-50x faster native SMB listing) |
 
 See `lib/vpn/README.md` for detailed setup instructions.
 
@@ -723,6 +757,11 @@ When VPN is connected, the system automatically:
 2. Copies new/updated files to the local directory
 3. Unmounts after sync
 
+**Mount Detection:** The system verifies mounts are actually usable by:
+- Checking the mount point exists and is accessible
+- Detecting broken symlinks (from Finder mounts) and cleaning them up
+- Ensuring the mount point directory has content (not empty from failed mounts)
+
 **Key module:** `lib/smb/sibac-share.ts`
 
 ```typescript
@@ -813,6 +852,204 @@ The folder displays specific error messages based on status:
 - **VPN disconnected**: "VPN non connesso. Connettere al VPN per sincronizzare i file."
 - **SMB error**: "Impossibile accedere alla cartella condivisa Windows. Verificare le credenziali SMB."
 - **Sync pending**: "Sincronizzazione in corso..."
+
+---
+
+## SIBAC File Index System
+
+### Overview
+
+The SIBAC File Index provides fast search over SIBAC shared folder files without filesystem traversal. Files are indexed into PostgreSQL for instant search and filtering.
+
+**Key Features:**
+- **Database Index**: Stores file metadata in PostgreSQL
+- **Privacy**: Only stores file metadata (name, path, size, mtime), NOT invoice content
+- **Fast Search**: Uses pg_trgm extension for fast ILIKE queries on filenames
+- **Caching**: L1 in-memory LRU + L2 Redis caching with version-based invalidation
+- **Incremental Updates**: Index updates automatically after SMB sync
+- **Overnight Reindex**: CLI script for full index rebuild
+
+### Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   SMB Sync      │────▶│   Indexer       │────▶│   PostgreSQL    │
+│   (sibac-share) │     │   (lib/sibac)   │     │   + pg_trgm     │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                                                        ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Search API    │◀────│   Cache Layer   │◀────│   Redis L2 +    │
+│   /api/sibac/   │     │   (lib/cache)   │     │   LRU L1        │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+### Database Schema
+
+**Table: `SibacFileIndex`**
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | uuid | Primary key |
+| `path` | text | Unique relative path from sibac-shared root |
+| `parentPath` | text | Parent directory path (for folder queries) |
+| `name` | text | File name |
+| `ext` | text | File extension (xml, pdf, doc, docx) |
+| `size` | integer | File size in bytes |
+| `mtime` | timestamp | File modification time |
+| `hash` | text | Optional checksum for change detection |
+| `searchText` | text | Normalized name + path for pg_trgm search |
+
+**Note:** Invoice content (supplier, amounts, validation) is NOT stored in the database for privacy reasons. Invoice data is extracted on-demand when a file is opened.
+
+**Table: `SibacIndexMeta`** - Stores index version for cache invalidation
+
+### Key Components
+
+| Component | Path | Description |
+|-----------|------|-------------|
+| **Schema** | `lib/db/schema.ts` | Drizzle schema for index tables |
+| **Indexer** | `lib/sibac/indexer.ts` | Index operations (full scan, incremental) |
+| **Cache** | `lib/cache/sibac-search-cache.ts` | L1 LRU + L2 Redis cache |
+| **Search API** | `app/(chat)/api/sibac/search/route.ts` | Search endpoint |
+| **Reindex Script** | `scripts/reindex-sibac.ts` | CLI for overnight reindex |
+
+### Search API
+
+**Endpoint:** `GET /api/sibac/search`
+
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `q` | string | - | Search text (searches filename and path) |
+| `ext` | string | "all" | File extension filter ("xml", "pdf", "all") |
+| `limit` | number | 50 | Max results (capped at 200) |
+| `cursor` | string | - | Pagination cursor (base64 encoded) |
+
+**Response:**
+
+```typescript
+{
+  items: Array<{
+    path: string;
+    recordId: string;  // "sibac-shared:" + path
+    name: string;
+    ext: string;
+    size: number | null;
+    mtime: string | null;
+  }>;
+  nextCursor: string | null;
+}
+```
+
+### SMB Sync with Index Update
+
+The SMB sync endpoint (`POST /api/smb?action=sync`) automatically updates the index:
+
+```typescript
+// Sync returns changed paths
+const result = await syncSibacFiles();
+// result.addedOrUpdatedPaths - files that were synced
+// result.removedPaths - files that were deleted from SMB
+
+// Index is updated incrementally
+await indexSibacChanges({
+  addedOrUpdatedPaths: result.addedOrUpdatedPaths,
+  removedPaths: result.removedPaths,
+});
+```
+
+### Indexer Functions
+
+```typescript
+import {
+  indexFullScanSibacShared,
+  indexSibacChanges,
+  buildSearchText,
+  getIndexVersion,
+  incrementIndexVersion,
+} from "@/lib/sibac";
+
+// Full scan reindex
+await indexFullScanSibacShared({
+  baseDir: "mastra/knowledgebase/sibac-shared",
+  onlyExt: "xml",
+  batchSize: 500,
+  dryRun: false,
+});
+
+// Incremental update
+await indexSibacChanges({
+  addedOrUpdatedPaths: ["path/to/new.xml"],
+  removedPaths: ["path/to/deleted.xml"],
+});
+
+// Build normalized search text (name + path only for privacy)
+const searchText = buildSearchText({
+  name: "invoice.xml",
+  path: "2024/01/invoice.xml",
+});
+// Result: "invoice.xml 2024/01/invoice.xml"
+```
+
+### Reindex Script
+
+Run the reindex script to rebuild the entire index:
+
+```bash
+# Basic usage
+pnpm tsx scripts/reindex-sibac.ts
+
+# With options
+pnpm tsx scripts/reindex-sibac.ts --onlyExt=xml --batchSize=500
+
+# Dry run (no DB writes)
+pnpm tsx scripts/reindex-sibac.ts --dryRun
+
+# Alternative using npx
+npx tsx scripts/reindex-sibac.ts --onlyExt=xml --batchSize=500 --concurrency=4
+```
+
+**CLI Options:**
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--baseDir=<path>` | `mastra/knowledgebase/sibac-shared` | Base directory |
+| `--onlyExt=<ext>` | all | Only index files with this extension |
+| `--batchSize=<n>` | 500 | Batch size for DB operations |
+| `--dryRun` | false | Don't write to DB |
+| `--skipHash` | true | Skip hash calculation |
+| `--concurrency=<n>` | 1 | Parallel processing |
+
+### Cache Configuration
+
+The cache uses two levels:
+
+1. **L1 (In-Memory LRU)**: 100 entries max, process-local
+2. **L2 (Redis)**: 120 second TTL, shared across instances
+
+Cache keys include the index version, so caches are automatically invalidated when the index updates.
+
+**Environment Variables:**
+
+```env
+REDIS_URL=redis://localhost:6379  # Optional, L2 cache disabled if not set
+```
+
+### Prerequisites
+
+Before using the index system, enable the pg_trgm extension on your PostgreSQL database:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+```
+
+Then run the migration:
+
+```bash
+pnpm db:migrate
+```
 
 ---
 
@@ -1036,6 +1273,69 @@ When a user selects an invalid invoice, the agent automatically:
 2. Explains which fields are missing
 3. Explains which fields have invalid format
 4. Suggests the user verify the data with the supplier
+
+### Fatture Recenti (Recent Invoices)
+
+The "Fatture recenti" feature provides a specialized view for browsing XML invoices organized by date hierarchy from the SIBAC shared folder.
+
+**Location**: `components/artifacts/document-selector.tsx`
+
+**SMB Paths**:
+- `Faenza/repositoryFE/XMLP/2025` - 2025 invoices
+- `Faenza/repositoryFE/XMLP/2026` - 2026 invoices
+
+**Accordion Structure**:
+```
+Year (2025, 2026)
+└── Month (01 Gennaio, 02 Febbraio, ...)
+    └── Day (01, 02, 03, ...)
+        └── XML Files
+```
+
+**Components**:
+
+| Component | Description |
+|-----------|-------------|
+| `RecentInvoicesCard` | Grid card displayed at document selector root |
+| `RecentInvoicesListItem` | List item for list view mode |
+| `RecentInvoicesView` | Full accordion-based browser view |
+| `YearAccordion` | Collapsible year section |
+| `MonthAccordion` | Collapsible month section |
+| `DayAccordion` | Collapsible day section with file list |
+
+**Lazy Loading**:
+- Year folders: Loaded when RecentInvoicesView mounts
+- Month folders: Loaded when year accordion expands
+- Day folders: Loaded when month accordion expands
+- Files: Loaded when day accordion expands
+
+**State Management**:
+```typescript
+// Expanded state for each level
+const [expandedYears, setExpandedYears] = useState<Set<string>>();
+const [expandedMonths, setExpandedMonths] = useState<Set<string>>();
+const [expandedDays, setExpandedDays] = useState<Set<string>>();
+
+// Data loaded from API
+const [yearData, setYearData] = useState<Record<string, YearData>>();
+const [monthData, setMonthData] = useState<Record<string, MonthData>>();
+const [dayData, setDayData] = useState<Record<string, DayData>>();
+```
+
+**View Mode Integration**:
+```typescript
+type ViewMode = "list" | "detail" | "recent-invoices";
+
+// Switching to recent invoices view
+const handleOpenRecentInvoices = () => {
+  setPanelViewMode("recent-invoices");
+};
+```
+
+**Translations**: `lib/i18n/translations/it.ts`
+- Keys prefixed with `recentInvoices.*`
+- Includes month names, loading states, and UI labels
+- Application is Italian-only
 
 ---
 
@@ -1818,14 +2118,13 @@ lib/
 │   ├── oracle-sibac.ts            # Oracle SIBAC client
 │   ├── oracle-types.ts            # Oracle type definitions
 │   └── migrations/                # Drizzle migrations
-├── i18n/                          # Internationalization
+├── i18n/                          # Internationalization (Italian only)
 │   ├── context.tsx                # Translation context
 │   ├── use-translations.ts        # Translation hook
 │   ├── types.ts                   # i18n types
 │   ├── utils.ts                   # i18n utilities
 │   └── translations/
-│       ├── en.ts                  # English translations
-│       └── it.ts                  # Italian translations
+│       └── it.ts                  # Italian translations (source of truth)
 ├── smb/
 │   └── sibac-share.ts             # SMB share integration
 ├── vpn/
@@ -1934,10 +2233,17 @@ components/
 │   └── ...
 └── ... (other top-level components)
 
+config/
+├── demo.ts                        # Chat suggestions, features config
+├── demo.schema.ts                 # Demo config Zod schema
+├── runtime.ts                     # Runtime configuration
+└── runtime.schema.ts              # Runtime config schema
+
 scripts/
 ├── setup-vpn-macos.sh             # macOS VPN setup script
 ├── setup-vpn-linux.sh             # Linux/AWS VPN setup script
-└── diagnose-typescript.sh         # TypeScript diagnostics
+├── diagnose-typescript.sh         # TypeScript diagnostics
+└── map-sibac-filesystem.sh        # Maps SIBAC SMB folder structure (optimized)
 
 tests/
 ├── e2e/                           # End-to-end tests
@@ -1956,6 +2262,60 @@ tests/
 ├── fixtures.ts                    # Test fixtures
 └── helpers.ts                     # Test helpers
 ```
+
+---
+
+## Chat UI Configuration
+
+### Initial Suggestions
+
+Initial chat suggestions are configured in `config/demo.ts` under the `chat.suggestions` array:
+
+```typescript
+chat: {
+  suggestions: [
+    "Mostrami le fatture",
+  ],
+  // ...
+}
+```
+
+These appear as clickable suggestion buttons when the chat is empty or when only the initial welcome message is present. The logic in `components/assistant-chat.tsx` shows suggestions when:
+- `messages.length === 0` (empty chat)
+- `messages.length === 1 && messages[0].role === "assistant"` (only welcome message)
+
+### Default Theme
+
+The default theme is set in `app/layout.tsx` via the `ThemeProvider`:
+
+```typescript
+<ThemeProvider
+  attribute="class"
+  defaultTheme="light"  // Options: "light", "dark", "system"
+  enableSystem
+>
+```
+
+### Welcome Message
+
+When a user opens a new chat, an initial assistant welcome message is automatically injected. This is configured in `app/(chat)/page.tsx`:
+
+```typescript
+const welcomeMessage: ChatMessage = {
+  id: generateUUID(),
+  role: "assistant",
+  parts: [{ type: "text", text: translations["chat.welcome.message"] }],
+  createdAt: new Date(),
+};
+
+// Passed to ChatProvider
+<ChatProvider initialMessages={[welcomeMessage]} ... />
+```
+
+The welcome message uses the Italian translation:
+- **Italian**: `lib/i18n/translations/it.ts` → `chat.welcome.message`
+
+Note: The application is Italian-only. English support has been removed.
 
 ---
 

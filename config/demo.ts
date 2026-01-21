@@ -139,11 +139,8 @@ const schemaDefaults: DemoConfig = {
       // "Create a comprehensive testing strategy for a web app",
       // "Optimize this SQL query for better performance",
 
-      // Educational Content
-      "Explain how neural networks work",
-      "Teach me about design patterns in software engineering",
-      "What are the key principles of clean code?",
-      "Introduction to machine learning algorithms",
+      // Invoice-related
+      "Mostrami le fatture",
     ],
     features: {
       webSearch: true,

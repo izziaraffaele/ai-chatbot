@@ -350,7 +350,12 @@ export function AssistantChat({
 
           {!isReadonly && (
             <ChatThreadComposer>
-              {messages.length === 0 && <ChatSuggestions mode="default" />}
+              {/* Show suggestions when empty OR when only welcome message exists */}
+              {(messages.length === 0 ||
+                (messages.length === 1 &&
+                  messages[0]?.role === "assistant")) && (
+                <ChatSuggestions mode="default" />
+              )}
               {chatInput}
               <div className="absolute top-4 right-4">
                 <ChatContextUsage />

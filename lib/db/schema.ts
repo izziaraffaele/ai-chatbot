@@ -2,6 +2,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import {
   boolean,
   foreignKey,
+  integer,
   json,
   jsonb,
   pgTable,
@@ -150,3 +151,58 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+// ============================================================================
+// SIBAC FILE INDEX TABLES
+// ============================================================================
+
+/**
+ * SIBAC File Index - stores metadata for files in the SIBAC shared folder
+ * Used for fast search without filesystem traversal
+ *
+ * NOTE: Never stores file content (privacy requirement)
+ */
+export const sibacFileIndex = pgTable("SibacFileIndex", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  /** Data source identifier (e.g., "sibac-shared") */
+  source: text("source").notNull().default("sibac-shared"),
+  /** Relative path from sibac-shared root (UNIQUE) */
+  path: text("path").notNull().unique(),
+  /** Parent directory path for folder queries */
+  parentPath: text("parentPath").notNull(),
+  /** File name without path */
+  name: text("name").notNull(),
+  /** File extension (e.g., "xml", "pdf") */
+  ext: text("ext").notNull(),
+  /** File size in bytes */
+  size: integer("size"),
+  /** File modification time */
+  mtime: timestamp("mtime"),
+  /** Optional checksum for change detection */
+  hash: text("hash"),
+
+  // Search helper - normalized concatenation of name + path for fast text search
+  /** Normalized search text for pg_trgm ILIKE queries */
+  searchText: text("searchText").notNull(),
+
+  // Timestamps
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type SibacFileIndex = InferSelectModel<typeof sibacFileIndex>;
+
+/**
+ * SIBAC Index Metadata - stores key-value pairs for index management
+ * Used for tracking index version (cache invalidation)
+ */
+export const sibacIndexMeta = pgTable("SibacIndexMeta", {
+  /** Key identifier (e.g., "indexVersion") */
+  key: text("key").primaryKey().notNull(),
+  /** Value as text (caller parses as needed) */
+  value: text("value").notNull(),
+  /** Last update timestamp */
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type SibacIndexMeta = InferSelectModel<typeof sibacIndexMeta>;

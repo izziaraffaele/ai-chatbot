@@ -147,16 +147,13 @@ The app uses Next.js App Router with two main route groups:
 
 ### Internationalization (i18n)
 
-**7. Client-Side Translation System (`lib/i18n/`)**
+**7. Translation System (`lib/i18n/`)**
 
-The application supports multiple languages through a client-side translation system:
+The application is **Italian-only**. English support has been removed.
 
-- **Translation files:** JSON/TypeScript files in `lib/i18n/translations/`
-  - `en.ts` - English translations (source of truth)
-  - `it.ts` - Italian translations (must match en.ts structure)
+- **Translation file:** `lib/i18n/translations/it.ts` - Italian translations (source of truth)
 - **Translation hook:** `useTranslations()` provides access to translations in components
-- **Language persistence:** Cookie-based (`locale` cookie) with 1-year expiration
-- **Dynamic loading:** Translation files loaded on-demand based on user preference
+- The `Locale` type only supports `"it"`
 
 **Usage in Components:**
 
@@ -168,25 +165,16 @@ function MyComponent() {
 
   return (
     <button>
-      {t("common.save", "Save")} {/* Key with fallback */}
+      {t("common.save", "Salva")} {/* Key with Italian fallback */}
     </button>
   );
 }
 ```
 
-**Language Configuration:**
+**Adding New Translation Keys:**
 
-- `NEXT_PUBLIC_DEFAULT_LOCALE` - Default language (defaults to "en")
-- `NEXT_PUBLIC_SUPPORTED_LOCALES` - Comma-separated supported languages (defaults to "en,it")
-- Language switcher available in settings/user navigation menu
-
-**Adding New Languages:**
-
-1. Create new translation file: `lib/i18n/translations/[locale].ts`
-2. Add locale to `NEXT_PUBLIC_SUPPORTED_LOCALES` environment variable
-3. Update `Locale` type in `lib/i18n/types.ts`
-4. Add language name to `LANGUAGE_NAMES` in `lib/i18n/utils.ts`
-5. Update `loadTranslations()` function in `lib/i18n/utils.ts`
+1. Add the key and Italian text to `lib/i18n/translations/it.ts`
+2. Use the key in components via `useTranslations()` hook
 
 ## Code Quality Standards
 
@@ -230,7 +218,7 @@ This project uses **Ultracite** (Biome-based) for linting and formatting. Key ru
 3. Optional:
    - `REDIS_URL` - Enables resumable streams
    - Branding variables (`NEXT_PUBLIC_*`) - Configure app identity
-   - Internationalization variables (`NEXT_PUBLIC_*_LOCALE`) - Configure language settings
+   - Note: The application is Italian-only, no language configuration needed
 
 ## Common Patterns
 
@@ -330,4 +318,4 @@ It's a library provided by Vercel and it's fully integrated with AI SDK.
 [Documentation](https://ai-sdk.dev/elements) | [Repository](https://github.com/vercel/ai-elements)
 
 - AI Elements components are installed in `@/components/elements/*`. You should use them following the same usage rules you apply to normal shadcn components (do not override them, use it to create more complex compositions).
-- Neveer use hard-coded text. Always use the existing useTranslations hooks and ensure to keep translation files in sync ( @lib/i18n/translations )
+- Never use hard-coded text. Always use the existing useTranslations hooks and add new keys to `lib/i18n/translations/it.ts` (Italian only)

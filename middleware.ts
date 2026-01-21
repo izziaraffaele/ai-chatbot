@@ -46,6 +46,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow SMB endpoints without auth (internal operations)
+  if (pathname === "/api/smb") {
+    return NextResponse.next();
+  }
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
