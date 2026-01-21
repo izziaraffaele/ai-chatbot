@@ -1276,20 +1276,23 @@ When a user selects an invalid invoice, the agent automatically:
 
 ### Fatture Recenti (Recent Invoices)
 
-The "Fatture recenti" feature provides a specialized view for browsing XML invoices organized by date hierarchy from the SIBAC shared folder.
+The "Fatture recenti" feature provides a table-based view for browsing 2026 XML invoices from the SIBAC shared folder, organized by month.
 
 **Location**: `components/artifacts/document-selector.tsx`
 
-**SMB Paths**:
-- `Faenza/repositoryFE/XMLP/2025` - 2025 invoices
-- `Faenza/repositoryFE/XMLP/2026` - 2026 invoices
+**SMB Path**:
+- `Faenza/repositoryFE/XMLP/2026` - 2026 invoices only
 
-**Accordion Structure**:
+**Table Structure**:
 ```
-Year (2025, 2026)
-└── Month (01 Gennaio, 02 Febbraio, ...)
-    └── Day (01, 02, 03, ...)
-        └── XML Files
+Month Section (collapsible)
+├── Gennaio (12 fatture)
+│   └── Table: Data | Nome File | Azione
+│       └── 21 Gen | IT01234567890_XXX.xml | [Apri]
+│       └── 20 Gen | IT01234567890_YYY.xml | [Apri]
+├── Febbraio (8 fatture)
+│   └── Table: ...
+└── ...
 ```
 
 **Components**:
@@ -1298,28 +1301,41 @@ Year (2025, 2026)
 |-----------|-------------|
 | `RecentInvoicesCard` | Grid card displayed at document selector root |
 | `RecentInvoicesListItem` | List item for list view mode |
-| `RecentInvoicesView` | Full accordion-based browser view |
-| `YearAccordion` | Collapsible year section |
-| `MonthAccordion` | Collapsible month section |
-| `DayAccordion` | Collapsible day section with file list |
+| `RecentInvoicesView` | Table-based browser view for 2026 invoices |
+| `MonthTableSection` | Collapsible month section with file table |
 
-**Lazy Loading**:
-- Year folders: Loaded when RecentInvoicesView mounts
-- Month folders: Loaded when year accordion expands
-- Day folders: Loaded when month accordion expands
-- Files: Loaded when day accordion expands
+**Data Loading Strategy**:
+1. On mount: Fetch all months for 2026
+2. For each month (3 concurrent): Fetch days, then files for each day
+3. Aggregate files by month and display in tables
 
 **State Management**:
 ```typescript
-// Expanded state for each level
-const [expandedYears, setExpandedYears] = useState<Set<string>>();
-const [expandedMonths, setExpandedMonths] = useState<Set<string>>();
-const [expandedDays, setExpandedDays] = useState<Set<string>>();
+// Month data with files
+const [monthsData, setMonthsData] = useState<Record<string, MonthFilesData>>();
+// Collapsed months (expanded by default)
+const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>();
+// Initial loading state
+const [isInitialLoading, setIsInitialLoading] = useState(true);
+// Search query
+const [searchQuery, setSearchQuery] = useState("");
+```
 
-// Data loaded from API
-const [yearData, setYearData] = useState<Record<string, YearData>>();
-const [monthData, setMonthData] = useState<Record<string, MonthData>>();
-const [dayData, setDayData] = useState<Record<string, DayData>>();
+**Types**:
+```typescript
+type InvoiceFile = {
+  name: string;
+  path: string;
+  month: string;
+  day: string;
+};
+
+type MonthFilesData = {
+  month: string;
+  files: InvoiceFile[];
+  isLoading: boolean;
+  error?: string;
+};
 ```
 
 **View Mode Integration**:
@@ -1334,7 +1350,7 @@ const handleOpenRecentInvoices = () => {
 
 **Translations**: `lib/i18n/translations/it.ts`
 - Keys prefixed with `recentInvoices.*`
-- Includes month names, loading states, and UI labels
+- Includes month names (full and abbreviated), loading states, and table labels
 - Application is Italian-only
 
 ---
