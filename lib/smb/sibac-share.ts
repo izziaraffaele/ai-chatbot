@@ -258,9 +258,23 @@ async function mountShareMacOS(): Promise<{
           timeout: SMB_TIMEOUT,
         });
 
-        // Find where Finder mounted it and link to our mount point
+        /**
+         * CRITICAL: Extract mount path from `mount` command output.
+         *
+         * The mount output format is:
+         *   //user@host/ShareName on /Volumes/ShareName (smbfs, options...)
+         *
+         * Example with spaces in path:
+         *   //eprocino@sibac01/Akropolis%20-%20FE on /Volumes/Akropolis - FE (smbfs, nodev, nosuid, ...)
+         *
+         * WARNING: DO NOT use `awk '{print $3}'` to extract the path!
+         * awk splits by whitespace, so "/Volumes/Akropolis - FE" becomes just "/Volumes/Akropolis"
+         *
+         * CORRECT: Use sed to extract everything between "on " and " (smbfs"
+         * This correctly handles paths with spaces like "/Volumes/Akropolis - FE"
+         */
         const { stdout: finderMount } = await execAsync(
-          `mount | grep "${SMB_CONFIG.host}" | head -1 | awk '{print $3}'`
+          `mount | grep "${SMB_CONFIG.host}" | head -1 | sed 's/.* on \\(.*\\) (smbfs.*/\\1/'`
         );
         const actualMountPath = finderMount.trim();
 

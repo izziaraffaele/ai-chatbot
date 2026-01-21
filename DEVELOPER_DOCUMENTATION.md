@@ -761,6 +761,30 @@ When VPN is connected, the system automatically:
 - Checking the mount point exists and is accessible
 - Detecting broken symlinks (from Finder mounts) and cleaning them up
 - Ensuring the mount point directory has content (not empty from failed mounts)
+- Extracting mount paths correctly even when they contain spaces
+
+### ⚠️ CRITICAL: Mount Path Extraction (Paths with Spaces)
+
+The SMB share mounts to paths that contain spaces, e.g., `/Volumes/Akropolis - FE`.
+
+**Mount command output format:**
+```
+//user@host/ShareName on /Volumes/Akropolis - FE (smbfs, options...)
+```
+
+**WRONG - DO NOT USE:**
+```bash
+# awk splits by whitespace, truncates "/Volumes/Akropolis - FE" to "/Volumes/Akropolis"
+mount | grep "sibac01" | awk '{print $3}'  # Returns: /Volumes/Akropolis ❌
+```
+
+**CORRECT - USE THIS:**
+```bash
+# sed extracts everything between "on " and " (smbfs" - handles spaces correctly
+mount | grep "sibac01" | sed 's/.* on \(.*\) (smbfs.*/\1/'  # Returns: /Volumes/Akropolis - FE ✓
+```
+
+This is documented in `lib/smb/sibac-share.ts` with detailed comments. If you see "Percorso non trovato" errors for paths that should exist, check that the symlink at `/tmp/sibac-share-mount` points to the correct full path.
 
 **Key module:** `lib/smb/sibac-share.ts`
 
@@ -2949,6 +2973,38 @@ console.log("Available files:", files);
 const match = findMatchingFile("search-term");
 console.log("Matched file:", match);
 ```
+
+#### SMB "Percorso non trovato" Error (Path Not Found)
+
+**Symptom**: Error "Percorso non trovato: Faenza/repositoryFE/XMLP/2026" even though VPN is connected and the path exists on the server.
+
+**Cause**: The symlink at `/tmp/sibac-share-mount` points to a truncated path (e.g., `/Volumes/Akropolis` instead of `/Volumes/Akropolis - FE`).
+
+This happens when mount path extraction uses `awk '{print $3}'` which splits by whitespace and truncates paths containing spaces.
+
+**Diagnosis**:
+```bash
+# Check symlink target
+ls -la /tmp/sibac-share-mount
+# Should show: /tmp/sibac-share-mount -> /Volumes/Akropolis - FE
+
+# Check actual mount point
+mount | grep sibac01
+# Shows: //user@sibac01/... on /Volumes/Akropolis - FE (smbfs, ...)
+
+# Test correct extraction
+mount | grep sibac01 | sed 's/.* on \(.*\) (smbfs.*/\1/'
+# Should output: /Volumes/Akropolis - FE (with the space and "- FE")
+```
+
+**Quick Fix**:
+```bash
+# Recreate symlink manually
+rm -f /tmp/sibac-share-mount
+ln -s "/Volumes/Akropolis - FE" /tmp/sibac-share-mount
+```
+
+**Permanent Fix**: Ensure `lib/smb/sibac-share.ts` uses `sed` (not `awk`) to extract mount paths. See the "CRITICAL: Mount Path Extraction" section above.
 
 #### Agent Not Loading Documents
 
