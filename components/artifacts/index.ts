@@ -29,6 +29,7 @@ export type MarkdownViewerUIArtifact = UIArtifact<MarkdownViewerKind, string>;
 
 // Re-export document selector types
 export type {
+  DocumentSelectorContentWrapper,
   DocumentSelectorUIArtifact,
   FileValidation,
 } from "./document-selector";

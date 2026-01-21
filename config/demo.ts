@@ -141,6 +141,7 @@ const schemaDefaults: DemoConfig = {
 
       // Invoice-related
       "Mostrami le fatture",
+      "Mostrami le fatture recenti",
     ],
     features: {
       webSearch: true,

@@ -48,6 +48,7 @@ import { AssistantMessage } from "./messages/assistant-message";
 import { UserMessage } from "./messages/user-message";
 import { SidebarToggle } from "./sidebar-toggle";
 import { ActivityToolProvider } from "./tools/activity";
+import { RecentInvoicesActionProvider } from "./tools/recent-invoices-action";
 import { Button } from "./ui/button";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector } from "./visibility-selector";
@@ -312,12 +313,13 @@ export function AssistantChat({
 
   return (
     <ActivityToolProvider>
-      <ChatSuggestionProvider
-        autoApply={autoApply}
-        initialSuggestions={initialSuggestions}
-        onApply={onApplySuggestion}
-        suggestions={suggestions}
-      >
+      <RecentInvoicesActionProvider>
+        <ChatSuggestionProvider
+          autoApply={autoApply}
+          initialSuggestions={initialSuggestions}
+          onApply={onApplySuggestion}
+          suggestions={suggestions}
+        >
         <ChatThread className={className} status={status}>
           <ChatThreadHeader>
             <SidebarToggle />
@@ -435,7 +437,8 @@ export function AssistantChat({
         {autoResume && <ChatAutoResume initialMessages={chat.messages} />}
         <ChatRouteParamsHandler />
         <DataStreamDispatcher />
-      </ChatSuggestionProvider>
+        </ChatSuggestionProvider>
+      </RecentInvoicesActionProvider>
     </ActivityToolProvider>
   );
 }

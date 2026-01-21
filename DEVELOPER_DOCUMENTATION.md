@@ -1372,6 +1372,37 @@ const handleOpenRecentInvoices = () => {
 };
 ```
 
+**Initial View Mode Support**:
+
+The document selector supports opening directly to a specific view mode via the `DocumentSelectorContentWrapper` type:
+
+```typescript
+type DocumentSelectorContentWrapper = {
+  data: DocumentSelectorContentData | null;
+  initialViewMode?: ViewMode;  // "list" | "detail" | "recent-invoices"
+};
+```
+
+This is used by the `openRecentInvoices` assistant action to open the canvas directly to the "recent-invoices" view.
+
+**`openRecentInvoices` Assistant Action**:
+
+Location: `components/tools/recent-invoices-action.tsx`
+
+A client-side assistant action that opens the document selector directly to the "Fatture recenti" (recent invoices) view. This is triggered when users say things like:
+- "Mostrami le fatture recenti"
+- "Fatture recenti"
+- "Ultime fatture"
+
+The action:
+1. Creates a `DocumentSelectorContentWrapper` with `initialViewMode: "recent-invoices"`
+2. Opens the document-selector tab with this content
+3. The `DocumentSelector` component reads the `initialViewMode` and navigates directly to the recent invoices view
+
+**Provider Component**: `RecentInvoicesActionProvider`
+- Must wrap the chat content (added in `AssistantChat` component)
+- Registers the `openRecentInvoices` action using `useAssistantAction` hook
+
 **Translations**: `lib/i18n/translations/it.ts`
 - Keys prefixed with `recentInvoices.*`
 - Includes month names (full and abbreviated), loading states, and table labels
@@ -2315,6 +2346,7 @@ Initial chat suggestions are configured in `config/demo.ts` under the `chat.sugg
 chat: {
   suggestions: [
     "Mostrami le fatture",
+    "Mostrami le fatture recenti",  // Opens directly to 2026 invoices view
   ],
   // ...
 }

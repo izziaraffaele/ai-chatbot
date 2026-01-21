@@ -143,9 +143,24 @@ export const isDocumentSelectorArtifact = (
 
 /**
  * Content type for document selector artifact
- * Can be either flat list (legacy) or hierarchical file system
+ * Can be either flat list (legacy), hierarchical file system, or wrapped with metadata
  */
-export type DocumentSelectorContent = FileValidation[] | FileSystemRoot;
+export type DocumentSelectorContentData = FileValidation[] | FileSystemRoot;
+
+/**
+ * Wrapped content with metadata (e.g., initial view mode)
+ */
+export type DocumentSelectorContentWrapper = {
+  data: DocumentSelectorContentData | null;
+  initialViewMode?: ViewMode;
+};
+
+/**
+ * Full content type - supports legacy formats and new wrapped format
+ */
+export type DocumentSelectorContent =
+  | DocumentSelectorContentData
+  | DocumentSelectorContentWrapper;
 
 export type DocumentSelectorUIArtifact = {
   title: string;
@@ -163,10 +178,53 @@ export type DocumentSelectorUIArtifact = {
 };
 
 /**
- * Check if content is hierarchical file system
+ * Check if content is wrapped with metadata
+ */
+function isWrappedContent(
+  content: DocumentSelectorContent
+): content is DocumentSelectorContentWrapper {
+  return (
+    content !== null &&
+    typeof content === "object" &&
+    "data" in content &&
+    (content.data === null ||
+      Array.isArray(content.data) ||
+      (typeof content.data === "object" && "items" in content.data))
+  );
+}
+
+/**
+ * Extract the actual data from content (handles wrapped and unwrapped formats)
+ */
+function extractContentData(
+  content: DocumentSelectorContent | undefined
+): DocumentSelectorContentData | null {
+  if (!content) {
+    return null;
+  }
+  if (isWrappedContent(content)) {
+    return content.data;
+  }
+  return content;
+}
+
+/**
+ * Extract initial view mode from content (if wrapped)
+ */
+function extractInitialViewMode(
+  content: DocumentSelectorContent | undefined
+): ViewMode | undefined {
+  if (content && isWrappedContent(content)) {
+    return content.initialViewMode;
+  }
+  return;
+}
+
+/**
+ * Check if content data is hierarchical file system
  */
 function isFileSystemRoot(
-  content: DocumentSelectorContent
+  content: DocumentSelectorContentData | null
 ): content is FileSystemRoot {
   return (
     content !== null &&
@@ -287,10 +345,33 @@ export function DocumentSelectorArtifact({
   const { chat } = useChatRuntime();
   const { activeTab, closeTab, openTabWithData } = useCanvasTabs();
 
-  // View state
-  const [panelViewMode, setPanelViewMode] = useState<ViewMode>("list");
+  // Get content from active tab
+  const rawContent = activeTab?.artifact.content as
+    | DocumentSelectorContent
+    | undefined;
+
+  // Extract content data and initial view mode from raw content
+  const contentData = extractContentData(rawContent);
+  const initialViewMode = extractInitialViewMode(rawContent);
+
+  // View state - initialize with initial view mode if provided
+  const [panelViewMode, setPanelViewMode] = useState<ViewMode>(
+    initialViewMode ?? "list"
+  );
   const [listViewMode, setListViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Track if we've applied the initial view mode to avoid re-applying on content changes
+  const [hasAppliedInitialViewMode, setHasAppliedInitialViewMode] =
+    useState(false);
+
+  // Apply initial view mode when it changes (e.g., when tab content is updated)
+  useEffect(() => {
+    if (initialViewMode && !hasAppliedInitialViewMode) {
+      setPanelViewMode(initialViewMode);
+      setHasAppliedInitialViewMode(true);
+    }
+  }, [initialViewMode, hasAppliedInitialViewMode]);
 
   // Folder navigation state (page-based navigation)
   const [currentFolder, setCurrentFolder] = useState<FileSystemFolder | null>(
@@ -314,22 +395,17 @@ export function DocumentSelectorArtifact({
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Get content from active tab
-  const content = activeTab?.artifact.content as
-    | DocumentSelectorContent
-    | undefined;
-
   // Determine if we have hierarchical content
-  const isHierarchical = content ? isFileSystemRoot(content) : false;
+  const isHierarchical = contentData ? isFileSystemRoot(contentData) : false;
 
   // Get files from active tab artifact content (supports both formats)
   const filesWithValidation = useMemo((): FileValidation[] => {
-    if (!content) {
+    if (!contentData) {
       return [];
     }
 
     // Hierarchical format - flatten for search/stats
-    if (isFileSystemRoot(content)) {
+    if (isFileSystemRoot(contentData)) {
       const flattenItems = (items: FileSystemItem[]): FileValidation[] => {
         const files: FileValidation[] = [];
         for (const item of items) {
@@ -346,20 +422,20 @@ export function DocumentSelectorArtifact({
         }
         return files;
       };
-      return flattenItems(content.items);
+      return flattenItems(contentData.items);
     }
 
     // Legacy flat format
-    if (Array.isArray(content)) {
-      return content as FileValidation[];
+    if (Array.isArray(contentData)) {
+      return contentData as FileValidation[];
     }
 
     return [];
-  }, [content]);
+  }, [contentData]);
 
   // Get file system items (for hierarchical view) with lazy loaded children merged
   const fileSystemItems = useMemo((): FileSystemItem[] => {
-    if (!content || !isFileSystemRoot(content)) {
+    if (!contentData || !isFileSystemRoot(contentData)) {
       return [];
     }
 
@@ -399,8 +475,8 @@ export function DocumentSelectorArtifact({
       });
     };
 
-    return mergeChildren(content.items);
-  }, [content, lazyLoadedChildren, lazyLoadErrors, loadingFolders]);
+    return mergeChildren(contentData.items);
+  }, [contentData, lazyLoadedChildren, lazyLoadErrors, loadingFolders]);
 
   // Filter files by search query
   const filteredFiles = useMemo(() => {

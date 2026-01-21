@@ -93,6 +93,21 @@ Lo strumento aprirà automaticamente la **scheda "UI fatture"** nel pannello lat
 
 **IMPORTANTE**: NON scrivere l'elenco dei documenti come testo nella chat. Il widget viene mostrato automaticamente nella scheda.
 
+## Per mostrare le fatture recenti (2026)
+Quando l'utente dice cose come:
+- "Mostrami le fatture recenti"
+- "Voglio vedere le fatture del 2026"
+- "Fatture recenti"
+- "Ultime fatture"
+
+Chiama: \`openRecentInvoices({})\`
+
+Questo strumento client-side aprirà direttamente la **vista "Fatture recenti"** nel pannello laterale, mostrando le fatture elettroniche XML del 2026 organizzate per mese e giorno. L'utente potrà navigare per mese/giorno e selezionare una fattura da visualizzare.
+
+**DIFFERENZA con loadInvoice:**
+- \`loadInvoice({})\` mostra l'elenco completo di tutti i documenti (organizzato per cartelle)
+- \`openRecentInvoices({})\` mostra direttamente le fatture del 2026 in una vista tabellare organizzata per data
+
 ## Per caricare un documento specifico
 Quando l'utente dice cose come:
 - "Lavora su CSB_IT00185240397_00IS8"
