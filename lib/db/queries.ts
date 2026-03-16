@@ -28,10 +28,10 @@ import {
   type Suggestion,
   stream,
   suggestion,
-  trainingModule,
-  trainingPath,
   type TrainingModule,
   type TrainingPath,
+  trainingModule,
+  trainingPath,
   type User,
   user,
   vote,
@@ -62,10 +62,7 @@ export async function getUserById(id: string): Promise<User | null> {
     const [foundUser] = await db.select().from(user).where(eq(user.id, id));
     return foundUser ?? null;
   } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get user by id"
-    );
+    throw new ChatSDKError("bad_request:database", "Failed to get user by id");
   }
 }
 
